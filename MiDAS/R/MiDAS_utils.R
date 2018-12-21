@@ -39,16 +39,27 @@ getAlleleResolution <- function(allele) {
 #' Reduce HLA allele number
 #'
 #' @param allele Character vector containing HLA allele numbers.
-#' @param resolution Integer vector of length one specifiying desired
+#' @param resolution Numeric vector of length one specifiying desired
 #' resolution. Cannot be greater than \code{allele} resolution.
 #'
 #' @return Character vector containing reduced HLA allele numbers.
+#'
+#' @example
+#' reduceAlleleResolution(c("A*01", "A*01:24", "C*05:24:55:54"), 2)
 reduceAlleleResolution <- function(allele,
                                    resolution=4) {
-  input_resolution <- getAlleleResolution(allele)
-  if (any(input_resolution < resolution)) {
+  if (! is.numeric(resolution) && length(resolution) == 1) {
+    stop("Error: Resolution have to be of type numeric with length one.")
+  }
+  if (any(getAlleleResolution(allele) < resolution)) {
     stop("Error: Input resolution can't be lower than requested resolution.")
   }
-
+  resolution <- floor(resolution) / 2
+  reduced_allele <- vapply(X = stringi::stri_split_fixed(allele, ":"),
+                           FUN = function(a) {
+                             paste(a[1:resolution], collapse = ":")
+                           },
+                           FUN.VALUE = character(length = 1)
+                          )
   return(reduced_allele)
 }
