@@ -19,10 +19,9 @@ library("readr")
 This document stands as a part of report for HTSEQ-193 task.
 
 # Puropse of this document
-This document aims to describe key concept and challanges of the project. 
-Morover it's intended to provide minimal theoretical background required to 
-understand the data handled in project and data analysis process. In future it 
-will be modified to describe creted R package and its content.
+This document aims to describe key concept and challenges of the project. 
+Moreover it's intended to provide minimal theoretical background required to 
+understand the data handled in project and data analysis process.
 
 # Project description
 The goal of the project is to create R package for immunogenomics data handling 
@@ -31,7 +30,7 @@ cover:
 
 + data import, transformation and integration
 + statistical analysis framework
-+ data visualisation
++ data visualization
 
 ## Import of HLA alleles
 Package should provide functions for importing data from outputs of HLA allele 
@@ -40,11 +39,11 @@ nomenclature and format.
 
 ### HLA allels nomenclature
 This work base on 2010 naming convention for HLA alleles.
-Every HLA allele has a unique number cosisting of up to four sets of digits 
-separated by colons describing thier position in HLA allele classification. 
-Classification is done on basis of similarity between different allels, such 
-that similar allels differ in digits at futher positions. All allels recieve at 
-least two sets of digits and futher digits are assigned only when necessary.
+Every HLA allele has a unique number consisting of up to four sets of digits 
+separated by colons describing their position in HLA allele classification. 
+Classification is done on basis of similarity between different alleles, such 
+that similar alleles differ in digits at further positions. All alleles receive at 
+least two sets of digits and further digits are assigned only when necessary.
 
 Basic HLA number example: A*24:02
 
@@ -52,42 +51,40 @@ Basic HLA number example: A*24:02
 + 24 - first set of digits describes allele type.
 + 02 - second set of digits describes allele subtype.
 
-Difference in the first two sets of digits between allels, means that allels 
+Difference in the first two sets of digits between alleles, means that alleles 
 must differ in one or more nucleotide substitutions that change the amino acid 
 sequence of the encoded protein. This two digits sets form of HLA number, which 
-will be futher refered simply as HLA number, is the main structure that will be 
+will be further refereed simply as HLA number, is the main structure that will be 
 used in this R package.
 
-For the purpose of completnes here follows the explanation of additional HLA 
+For the purpose of completes here follows the explanation of additional HLA 
 number digits.  
-Third set of numbers distinguish allels that differ by synonymous nucleotide 
+Third set of numbers distinguish alleles that differ by synonymous nucleotide 
 substitutions located withing the coding sequence regions. Fourth set of digits 
-distinguish allels that differes by sequence polymorphism located in introns, or 
-in the 5' or 3' untranslated regions (UTR). Aditionally allele numbers can be 
-suplemented with optional suffixes describing thier expression status (eg. *N* - 
+distinguish alleles that differs by sequence polymorphism located in introns, or 
+in the 5' or 3' untranslated regions (UTR). Additionally allele numbers can be 
+supplemented with optional suffixes describing their expression status (eg. *N* - 
 allele is not expressed).
 
 #### P Codes for reporting of ambiguous allele typings
 The HLA Sequences having the same antigen binding domains (exons 2 and 3 for 
-HLA Class I allels) and (exon 2 only) can be designated as a groups by an upper
+HLA Class I alleles) and (exon 2 only) can be designated as a groups by an upper
 case 'P' which follows the 2 filed allele designation of the lowest numbered 
 allele in the group (eg. A*01:03P designates alleles:
 A*01:03:01:01 and 
 A*01:03:01:02).
 
-Futher explenations and examples can be found on 
+Further explanations and examples can be found on 
 [HLA nomenclature](http://hla.alleles.org) website which was the source for 
-those informations.
+those information's.
 
-### HLA-HD output
-**TODO** obtain HLA-HD documentation for more precise output description
-
-HLA-HD is HLA allele inference tool from NGS data, with up to 6-digit precision.
-The output of the program has form of data table in tsv format, with rows 
+### Package input
+The input file with allele calls has form of data table in tsv format, with rows 
 corresponding to samples and columns to HLA locus and copy number. Each cell 
-is a string HLA number describing infered allele version.
+is a string HLA number describing inferred allele version.
 
-Examplary HLA-HD output in 4-digit resolution can be found in `inst/data/HLAHD_output_example.txt` file.
+Exemplary input in 4-digit resolution can be found in 
+`inst/data/HLAHD_output_example.txt` file.
 
 ```{r HLAHD_example, echo=FALSE}
 HLA_data <- read.table("inst/extdata/HLAHD_output_example.txt",
@@ -103,7 +100,7 @@ Package should provide functions for inference of amino acid variation from HLA
 allele numbers, based on publicly available alignments.
 
 ### HLA allels amio acid alignments
-Amino acid alignments of HLA allels can be most easly found at 
+Amino acid alignments of HLA alleles can be most easily found at 
 [IMGT/HLA database FTP server](ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/alignments/).
 Protein level alignments are stored in files designated X_prot.txt, where X is a
 locus or gene. Alignments in MSF format (readable by seqinr package) are stored
@@ -112,14 +109,14 @@ in X_prot.msf files.
 Alignment file specification and conventions:
 
 + The alignment files use HLA nomenclature.
-+ Only alleles offically recognised by the WHO HLA Nomenclature Committee for 
-Factors of the HLA System are included in the sequnce alignments.
++ Only alleles officially recognized by the WHO HLA Nomenclature Committee for 
+Factors of the HLA System are included in the sequence alignments.
 + Each entry is displayed in respect to the corresponding reference sequence.
 + Amino acids numbering is based on the reference sequence.
 + Start codon of the mature protein is labeled codon 1 and codon 5' to it is
 numbered -1.
 + Single letter amino acid code is used in all protein alignments
-+ Identity to the reference sequence is denoted as a hypen (-).
++ Identity to the reference sequence is denoted as a hyphen (-).
 + Non-identity to the reference sequence is shown by displaying the appropriate
 base at that position.
 + Insertions or deletions are represented by a period (.).
@@ -127,13 +124,14 @@ base at that position.
 an asterisk (*).
 + In protein alignments for null alleles, the 'Stop' codons are represented by a
 hash (X).
-+ Sequence following the termination codon are notmarked and appear blank.
++ Sequences following the termination codon are not marked and appear blank.
 
 MSF alignment files specification:
 
 + MSF file starts with header which won't be described here.
 + Aligned nucleotides are specified explicitly.
-+ Gapps are designated with dash (-).
++ Gaps are designated with dash (-).
++ Start codon of the mature protein is **not** labeled in any way.
 
 More details and information about format specifications and conventions can be
 found in 
@@ -142,10 +140,12 @@ at IMGT/HLA database.
 MSF file format specification can be found in 
 [T-Coffe documentation](http://www.tcoffee.org/Documentation/misc/Format%20Documentation.htm).
 
-#### usefulness of  "hlaConvSequence" function from HIBAG package
-The function accepts 4-digit or 2-filed (P-coded) HLA allels numbers as an 
-input. It than return amino acid alignemts of the allels, that can be conviently 
-futher accessed by base R methods. Each allele has to be accessed separately.
+# Potentialy usefull functions
+
+## usefulness of  "hlaConvSequence" function from HIBAG package
+The function accepts 4-digit or 2-filed (P-coded) HLA alleles numbers as an 
+input. It than return amino acid alignments of the alleles, that can be conveniently 
+further accessed by base R methods. Each allele has to be accessed separately.
 
 ```{r hlaConvSequence_usefulness}
 library("HIBAG")
@@ -158,28 +158,31 @@ hla <- hlaAllele(HLA_data$ID[1:10],
                  ),
                  locus="A")
 aa <- hlaConvSequence(hla, code="P.code.merge")
+head(c(aa$value$allele1, aa$value$allele2))
 ```
-hlaConvSequence implements mapping between HLA allels numbers and thier 
-corresponding sequences in the text file. Additionally it reduce the allels 
-numbers to four digit precission dealing with allelic ambiguity. Returned object 
+hlaConvSequence implements mapping between HLA alleles numbers and their 
+corresponding sequences in the text file. Additionally it reduce the alleles 
+numbers to four digit precision dealing with allelic ambiguity. Returned object 
 gives easy access to sequences alignments and nucleotide freq. at each position. 
 
 hlaConvSequence function from HIBAG package uses local version of alignment 
-files shipped together with the pacgage. Current realease of IPD-IMGT/HLA 
+files shipped together with the package. Current release of IPD-IMGT/HLA 
 (3.34 2018-10) 4637 entries for HLA-A gene sequences. The newest HIBAG version 
-is shipped together older data base realease (3.22 2015-10) holding 3284 entries
+is shipped together older data base release (3.22 2015-10) holding 3284 entries
 for the same locus.
 
-In summary the function doesn't provide the exact functionality we are after. 
-Moreover it base on old database file. Similar functionality should be easyli 
-obtained by means of seqinr and biostrings which are also more
+In summary the function does provide the functionality we are looking for, but
+is based on the old version of the database. Additionally the format of returned
+alignments would require further processing. Thus `hlaConvSequence` will not be
+used in MiDAS package.
 
+## read.alignment from "seqinr" package
 ```{r seqinr_test}
 library('seqinr')
 aln <- read.alignment("inst/extdata/A_prot.msf.txt", format = "msf")
 aln$nam[1000]
 aln$seq[[1000]]
-aln <- .Call("read_msf_align", "inst/extdata/A_prot.msf.txt", PACKAGE = "seqinr")
-aln <- lapply(aln, function(x) gsub("\r", "", as.character(x)))
-names(aln) <- c("nb", "ali", "seq")
+aln <- read.alignment(file = "inst/extdata/A_prot.msf.txt", format = "msf")
+aln <- as.matrix(aln)
+aln[1000:1010, 20:30]
 ```
