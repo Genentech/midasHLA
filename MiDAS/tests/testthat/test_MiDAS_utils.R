@@ -9,7 +9,7 @@ test_that("HLA allele numbers have proper format", {
   expect_equal(checkAlleleFormat(c("01", "01:24", "01:25:22",
                                    "05:24:55:54")
                ),
-               c(TRUE, TRUE, TRUE, TRUE)
+               c(FALSE, FALSE, FALSE, FALSE)
   )
   expect_equal(checkAlleleFormat(c("*01", "A*:22", "C*05:24:55:54:89")
                ),

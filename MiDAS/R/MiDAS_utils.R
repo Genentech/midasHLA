@@ -14,7 +14,7 @@ checkAlleleFormat <- function(allele) {
   if (! typeof(allele) == "character") {
     stop("Error: Allele have to be of type character.")
   }
-  pattern <- "^(.+[*]){0,1}[0-9][0-9](:[0-9][0-9]){0,3}[NLSCAQ]{0,1}$"
+  pattern <- "^[A-Z]+[*][0-9][0-9](:[0-9][0-9]){0,3}[NLSCAQ]{0,1}$"
   is_correct <- stringi::stri_detect_regex(allele, pattern)
   return(is_correct)
 }
