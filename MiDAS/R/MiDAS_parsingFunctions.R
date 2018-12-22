@@ -58,9 +58,6 @@ readHlaCalls <- function(file,
   return(hla_calls)
 }
 
-file <- system.file("extdata/HLAHD_output_example.txt", package = "MiDAS")
-hla_calls <- readHlaCalls(file)
-
 #' Reads HLA allele alignments
 #'
 #' Reads HLA allele alignments from file in msf format.
