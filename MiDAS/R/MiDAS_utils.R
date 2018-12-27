@@ -7,12 +7,13 @@
 #' @return Logical vector of length specifying if \code{allele} follows HLA
 #' alleles naming conventions and have desired resolution.
 #'
-#' @example
+#' @examples
 #' allele <- c("A*01:01", "A*01:02")
 #' checkAlleleFormat(allele)
 #'
 #' @importFrom assertthat assert_that
 #' @importFrom stringi stri_detect_regex
+#' @export
 checkAlleleFormat <- function(allele) {
   assert_that(is.character(allele))
   pattern <- "^[A-Z]+[*][0-9]+(:[0-9]+){0,3}[NLSCAQ]{0,1}$"
@@ -26,12 +27,13 @@ checkAlleleFormat <- function(allele) {
 #'
 #' @return Integer vector specifiying alleles resolutions.
 #'
-#' @example
+#' @examples
 #' allele <- c("A*01:01", "A*01:02")
 #' getAlleleResolution(allele)
 #'
 #' @importFrom assertthat assert_that see_if
 #' @importFrom stringi stri_count_fixed
+#' @export
 getAlleleResolution <- function(allele) {
   assert_that(
     see_if(all(checkAlleleFormat(allele)),
@@ -50,11 +52,12 @@ getAlleleResolution <- function(allele) {
 #'
 #' @return Character vector containing reduced HLA allele numbers.
 #'
-#' @example
+#' @examples
 #' reduceAlleleResolution(c("A*01", "A*01:24", "C*05:24:55:54"), 2)
 #'
 #' @importFrom assertthat assert_that is.count see_if
 #' @importFrom stringi stri_split_fixed
+#' @export
 reduceAlleleResolution <- function(allele,
                                    resolution=4) {
   assert_that(

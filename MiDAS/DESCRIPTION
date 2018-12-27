@@ -1,14 +1,16 @@
 Package: MiDAS
 Title: R package for immunogenomics data handling and association analysis
-Version: 0.0.0.0
+Version: 0.0.0.1
 Authors@R: c(
   person("First", "Last", email = "first.last@example.com", role = c("aut", "cre")))
 Description: What the package does (one paragraph).
-Depends: R (>= 3.5.1)
+Depends: R (>= 3.4.3)
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
 Imports:
-    seqinr, stringi
-Suggests: 
+    seqinr, stringi,
+    assertthat
+Suggests:
     testthat
+RoxygenNote: 6.1.0
