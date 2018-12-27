@@ -33,6 +33,6 @@ test_that("Reduced HLA allele have desired resoulution", {
                ),
                c("A*01", "A*01", "B*01", "C*05")
   )
-  expect_error(reduceAlleleResolution("C*05:24:55:54", resolution = "four"))
+  expect_error(reduceAlleleResolution("C*05:24:55:54", resolution = "four"),"resolution is not a count \\(a single positive integer\\)")
   expect_error(reduceAlleleResolution("word", resolution = 4))
 })
