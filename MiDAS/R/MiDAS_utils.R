@@ -11,11 +11,10 @@
 #' allele <- c("A*01:01", "A*01:02")
 #' checkAlleleFormat(allele)
 #'
+#' @importFrom assertthat assert_that
 #' @importFrom stringi stri_detect_regex
 checkAlleleFormat <- function(allele) {
-  if (! typeof(allele) == "character") {
-    stop("Error: Allele have to be of type character.")
-  }
+  assert_that(is.character(allele))
   pattern <- "^[A-Z]+[*][0-9]+(:[0-9]+){0,3}[NLSCAQ]{0,1}$"
   is_correct <- stri_detect_regex(allele, pattern)
   return(is_correct)
@@ -31,11 +30,14 @@ checkAlleleFormat <- function(allele) {
 #' allele <- c("A*01:01", "A*01:02")
 #' getAlleleResolution(allele)
 #'
+#' @importFrom assertthat assert_that see_if
 #' @importFrom stringi stri_count_fixed
 getAlleleResolution <- function(allele) {
-  if (! all(checkAlleleFormat(allele))) {
-    stop("Error: Allele have to be a valid HLA allele number.")
-  }
+  assert_that(
+    see_if(all(checkAlleleFormat(allele)),
+         msg = "Error: Allele have to be a valid HLA allele number."
+    )
+  )
   allele_resolution <- 2 * (stri_count_fixed(allele, ":") + 1)
   return(allele_resolution)
 }
@@ -51,15 +53,17 @@ getAlleleResolution <- function(allele) {
 #' @example
 #' reduceAlleleResolution(c("A*01", "A*01:24", "C*05:24:55:54"), 2)
 #'
+#' @importFrom assertthat assert_that is.count see_if
 #' @importFrom stringi stri_split_fixed
 reduceAlleleResolution <- function(allele,
                                    resolution=4) {
-  if (! is.numeric(resolution) && length(resolution) == 1) {
-    stop("Error: Resolution have to be of type numeric with length one.")
-  }
-  if (any(getAlleleResolution(allele) < resolution)) {
-    stop("Error: Input resolution can't be lower than requested resolution.")
-  }
+  assert_that(
+    is.count(resolution),
+    see_if(all(getAlleleResolution(allele) >= resolution),
+           msg = "Error: Input resolution can't be lower than requested
+                  resolution."
+    )
+  )
   resolution <- floor(resolution) / 2
   reduced_allele <- vapply(X = stri_split_fixed(allele, ":"),
                            FUN = function(a) {
