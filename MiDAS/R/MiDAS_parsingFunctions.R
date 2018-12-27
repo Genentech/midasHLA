@@ -65,7 +65,78 @@ readHlaCalls <- function(file,
 #' @param file Path to the file containing HLA allele alignments.
 #'
 #' @return Matrix containing HLA allele alignments.
-#'
-readHlaAlignments <- function(file) {
+readHlaAlignments <- function(file,
+                              trim = TRUE) {
+  if (! file.exists(file)) {
+    stop("Error: File ", file, "doesn't exist.")
+  }
+  aln_raw <- stringi::stri_read_lines(file)
+
+  #TODO check if file follows alignment format
+  # header <- stringi::stri_subset_regex(aln_raw, "^#")
+  # !!!!!!!!!!!
+  # instead check various semi products
+
+
+  # extract lines containing alignments
+  aln_split <- stringi::stri_split_regex(aln_raw, "\\s+")
+  allele_lines <- vapply(X = aln_split,
+                         FUN = function(x) any(checkAlleleFormat(x)),
+                         FUN.VALUE = logical(length = 1)
+  )
+  aln_split <- aln_split[allele_lines]
+
+  # locate index of start codon of the mature protein
+  first_codon_idx <- nchar(stringi::stri_subset_fixed(aln_raw, "Prot")[1])
+  first_codon_idx <- substr(aln_raw[allele_lines][1], 1, first_codon_idx)
+  first_codon_idx <- unlist(stringi::stri_split_regex(first_codon_idx,
+                                                      "\\s+"
+  )
+  )[-c(1, 2)]
+  first_codon_idx <- nchar(paste(first_codon_idx, collapse = ""))
+
+  #
+  allele_numbers <- vapply(X = aln_split,
+                           FUN = function(x) x[2],
+                           FUN.VALUE = character(length = 1)
+  )
+  aln_split <- vapply(X = aln_split,
+                      FUN = function(x) stringi::stri_flatten(x[-c(1, 2)]),
+                      FUN.VALUE = character(length = 1)
+  )
+  aln_split <- vapply(X = unique(allele_numbers),
+                      FUN = function(x) {
+                        stringi::stri_flatten(aln_split[allele_numbers == x])
+                      },
+                      FUN.VALUE = character(length = 1)
+  )
+
+  # convert to matrix
+  aln_split <- do.call(rbind,
+                       lapply(aln_split,
+                              function(a) {
+                                stringi::stri_sub(a,
+                                                  seq(1, nchar(aln_split[1]), 1),
+                                                  seq(1, nchar(aln_split[1]), 1)
+                                )
+                              }
+                       )
+  )
+
+  # substitute - for corresponding AA in reference sequnce
+  hla_alignments <- t(apply(X = aln_split,
+                            MARGIN = 1,
+                            FUN = function(a) {
+                              a[a == "-"] <- aln_split[1, ][a == "-"]
+                              return(a)
+                            }
+  )
+  ) # mby this could be better solved by extracting ref seq beforehand. Test it after wrapping on function
+
+  # discard aa '5 to start codon of mature protein
+  if (trim) {
+    hla_alignments <- hla_alignments[, first_codon_idx:ncol(hla_alignments)]
+  }
+
   return(hla_alignments)
 }
