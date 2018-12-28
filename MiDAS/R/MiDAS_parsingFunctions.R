@@ -70,13 +70,18 @@ readHlaCalls <- function(file,
 #'
 #' @param file Path to the file containing HLA allele alignments.
 #'
-#' @return Matrix containing HLA allele alignments.
+#' @return Matrix containing HLA allele alignments. Rownames corresponds to
+#' allele numbers, columns corresponds to positions in the alignment. Seqences
+#' following the termination codon are marked as empty character. Unknown
+#' sequences are marked with a chracter of choice, with default empty character
+#' (""). Stop codons are represented by hash (X).
 #'
 #' @importFrom assertthat assert_that is.readable
 #' @importFrom stringi stri_flatten stri_split_regex stri_sub
 #' @importFrom stringi stri_subset_fixed stri_read_lines
 readHlaAlignments <- function(file,
-                              trim = TRUE) {
+                              trim = TRUE,
+                              unkchar = "") {
   assert_that(is.readable(file)) # TODO check if file follows alignment format
   aln_raw <- stri_read_lines(file)
   aln <- stri_split_regex(aln_raw, "\\s+")
@@ -124,7 +129,7 @@ readHlaAlignments <- function(file,
                                         seq(1, length(ref_seq), 1)
                           )
                           a[a == "-"] <- ref_seq[a == "-"]
-                          a[a == "*"] <- ""
+                          a[a == "*"] <- unkchar
                           return(a)
                         }
                  )
