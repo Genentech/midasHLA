@@ -37,7 +37,7 @@ checkAlleleFormat <- function(allele) {
 getAlleleResolution <- function(allele) {
   assert_that(
     see_if(all(checkAlleleFormat(allele)),
-         msg = "allele have to be a valid HLA allele number."
+         msg = "allele have to be a valid HLA allele number"
     )
   )
   allele_resolution <- 2 * (stri_count_fixed(allele, ":") + 1)
@@ -64,7 +64,7 @@ reduceAlleleResolution <- function(allele,
     is.count(resolution),
     see_if(all(getAlleleResolution(allele) >= resolution),
            msg = "input resolution can't be lower than requested
-                  resolution."
+                  resolution"
     )
   )
   resolution <- floor(resolution) / 2
