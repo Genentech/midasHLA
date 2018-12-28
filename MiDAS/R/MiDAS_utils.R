@@ -1,8 +1,6 @@
 #' Checks allele format
 #'
 #' @param allele Character vector containing HLA allele numbers.
-#' @param resolution Integer vector of length one specifiying desired
-#' resolution.
 #'
 #' @return Logical vector of length specifying if \code{allele} follows HLA
 #' alleles naming conventions and have desired resolution.
