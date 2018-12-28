@@ -121,7 +121,10 @@ readHlaAlignments <- function(file,
                       },
                       FUN.VALUE = character(length = 1)
   )
-  ref_seq <- stri_sub(aln[1], seq(1, nchar(aln[1]), 1), seq(1, nchar(aln[1]), 1))
+  ref_seq <- stri_sub(aln[1],
+                      seq(1, nchar(aln[1]), 1),
+                      seq(1, nchar(aln[1]), 1)
+  )
   aln <- do.call(rbind,
                  lapply(aln,
                         function(a) {
