@@ -8,9 +8,6 @@ checkAlleleFormat(allele)
 }
 \arguments{
 \item{allele}{Character vector containing HLA allele numbers.}
-
-\item{resolution}{Integer vector of length one specifiying desired
-resolution.}
 }
 \value{
 Logical vector of length specifying if \code{allele} follows HLA
