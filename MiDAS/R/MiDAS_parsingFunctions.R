@@ -9,40 +9,46 @@
 #' @examples
 #' file <- system.file("extdata/HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(file)
+#'
+#' @importFrom assertthat assert_that is.readable see_if
+#' @importFrom stringi stri_split_fixed
 readHlaCalls <- function(file,
                          sep = "\t",
                          header = TRUE,
                          verbose = TRUE) {
-  if (! file.exists(file)) {
-    stop("Error: File ", file, "doesn't exist.")
-  }
+  assert_that(is.readable(file))
   hla_calls <- read.table(file,
                           header = header,
                           sep = sep,
                           stringsAsFactors = FALSE
   )
-  if (all(checkAlleleFormat(hla_calls[, 1]), na.rm = TRUE)) {
-    stop("Error: First column of input file should specify samples id.")
-  }
-  if (! all(checkAlleleFormat(unlist(hla_calls[, -1])), na.rm = TRUE)) {
-    stop("Error: Values in input file doesn't follow HLA numbers specification.")
-  }
+  assert_that(
+    see_if(! all(checkAlleleFormat(hla_calls[, 1]), na.rm = TRUE),
+           msg = "Error: First column of input file should specify samples id."),
+    see_if(all(checkAlleleFormat(unlist(hla_calls[, -1])), na.rm = TRUE),
+           msg = "Error: Values in input file doesn't follow HLA numbers
+                  specification.")
+  )
 
   # set colnames based on allele numbers
   gene_names <- vapply(X = 2:ncol(hla_calls),
                        FUN = function(i) {
-                         names <- stringi::stri_split_fixed(hla_calls[, i], "*")
+                         names <- stri_split_fixed(hla_calls[, i], "*")
                          names <- vapply(X = names,
                                 FUN = function(x) x[1],
                                 FUN.VALUE = character(length = 1)
                          )
                          names <- unique(na.omit(names))
-                         if (length(names) > 1) {
-                           stop("Error: Gene names in columns are not identical.")
-                         }
-                         if (length(names) == 0) {
-                           stop("Error: One of the columns contains only NA.")
-                         }
+                         assert_that(
+                           see_if(length(names) <= 1,
+                                   msg = "Error: Gene names in columns are not
+                                          identical."
+                                  ),
+                           see_if(length(names) != 0,
+                                  msg = "Error: One of the columns contains only
+                                  NA."
+                                  )
+                         )
                          return(names)
                        },
                        FUN.VALUE = character(length = 1)
