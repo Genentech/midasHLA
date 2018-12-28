@@ -74,7 +74,8 @@ readHlaCalls <- function(file,
 #' allele numbers, columns corresponds to positions in the alignment. Seqences
 #' following the termination codon are marked as empty character. Unknown
 #' sequences are marked with a chracter of choice, with default empty character
-#' (""). Stop codons are represented by hash (X).
+#' (""). Stop codons are represented by hash (X). Insertion and deletions are
+#' marked with period (.).
 #'
 #' @importFrom assertthat assert_that is.readable
 #' @importFrom stringi stri_flatten stri_split_regex stri_sub
