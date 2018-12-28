@@ -63,8 +63,7 @@ reduceAlleleResolution <- function(allele,
   assert_that(
     is.count(resolution),
     see_if(all(getAlleleResolution(allele) >= resolution),
-           msg = "input resolution can't be lower than requested
-                  resolution"
+           msg = "input resolution can't be lower than requested resolution"
     )
   )
   resolution <- floor(resolution) / 2
