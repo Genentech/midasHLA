@@ -73,7 +73,7 @@ readHlaCalls <- function(file) {
 #' @return Matrix containing HLA allele alignments. Rownames corresponds to
 #' allele numbers, columns corresponds to positions in the alignment. Sequences
 #' following the termination codon are marked as empty character. Unknown
-#' sequences are marked with a chracter of choice, with default empty character
+#' sequences are marked with a character of choice, with default empty character
 #' (""). Stop codons are represented by hash (X). Insertion and deletions are
 #' marked with period (.).
 #'
