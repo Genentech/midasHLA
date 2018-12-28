@@ -12,14 +12,11 @@
 #'
 #' @importFrom assertthat assert_that is.readable see_if
 #' @importFrom stringi stri_split_fixed
-readHlaCalls <- function(file,
-                         sep = "\t",
-                         header = TRUE,
-                         verbose = TRUE) {
+readHlaCalls <- function(file) {
   assert_that(is.readable(file))
   hla_calls <- read.table(file,
-                          header = header,
-                          sep = sep,
+                          header = TRUE,
+                          sep = "\t",
                           stringsAsFactors = FALSE
   )
   assert_that(
@@ -68,6 +65,10 @@ readHlaCalls <- function(file,
 #' Reads HLA allele alignments from file in msf format.
 #'
 #' @param file Path to the file containing HLA allele alignments.
+#' @param trim Logical indicating if alignment should be trimmed to start codon
+#' of the mature protein.
+#' @param unkchar Character to be used for representing positions for which
+#' sequence is unknown.
 #'
 #' @return Matrix containing HLA allele alignments. Rownames corresponds to
 #' allele numbers, columns corresponds to positions in the alignment. Sequences
