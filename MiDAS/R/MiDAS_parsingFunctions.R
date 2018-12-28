@@ -24,10 +24,11 @@ readHlaCalls <- function(file,
   )
   assert_that(
     see_if(! all(checkAlleleFormat(hla_calls[, 1]), na.rm = TRUE),
-           msg = "Error: First column of input file should specify samples id."),
+           msg = "First column of input file should specify samples id"
+    ),
     see_if(all(checkAlleleFormat(unlist(hla_calls[, -1])), na.rm = TRUE),
-           msg = "Error: Values in input file doesn't follow HLA numbers
-                  specification.")
+           msg = "Values in input file doesn't follow HLA numbers specification"
+    )
   )
 
   # set colnames based on allele numbers
@@ -41,13 +42,11 @@ readHlaCalls <- function(file,
                          names <- unique(na.omit(names))
                          assert_that(
                            see_if(length(names) <= 1,
-                                   msg = "Error: Gene names in columns are not
-                                          identical."
-                                  ),
+                                  msg = "Gene names in columns are not identical"
+                           ),
                            see_if(length(names) != 0,
-                                  msg = "Error: One of the columns contains only
-                                  NA."
-                                  )
+                                  msg = "One of the columns contains only NA"
+                           )
                          )
                          return(names)
                        },
@@ -71,7 +70,7 @@ readHlaCalls <- function(file,
 #' @param file Path to the file containing HLA allele alignments.
 #'
 #' @return Matrix containing HLA allele alignments. Rownames corresponds to
-#' allele numbers, columns corresponds to positions in the alignment. Seqences
+#' allele numbers, columns corresponds to positions in the alignment. Sequences
 #' following the termination codon are marked as empty character. Unknown
 #' sequences are marked with a chracter of choice, with default empty character
 #' (""). Stop codons are represented by hash (X). Insertion and deletions are
