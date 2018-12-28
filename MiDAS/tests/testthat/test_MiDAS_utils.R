@@ -15,7 +15,7 @@ test_that("HLA allele numbers have proper format", {
                ),
                c(FALSE, FALSE, FALSE)
   )
-  expect_error(checkAlleleFormat(1))
+  expect_error(checkAlleleFormat(1), "allele is not a character vector")
 })
 
 test_that("HLA allele resolution is number of sets of digits * 2", {
@@ -24,7 +24,9 @@ test_that("HLA allele resolution is number of sets of digits * 2", {
                ),
                c(2, 4, 6, 8)
   )
-  expect_error(getAlleleResolution("word"))
+  expect_error(getAlleleResolution("word"),
+               "allele have to be a valid HLA allele number"
+  )
 })
 
 test_that("Reduced HLA allele have desired resoulution", {
@@ -33,6 +35,10 @@ test_that("Reduced HLA allele have desired resoulution", {
                ),
                c("A*01", "A*01", "B*01", "C*05")
   )
-  expect_error(reduceAlleleResolution("C*05:24:55:54", resolution = "four"),"resolution is not a count \\(a single positive integer\\)")
-  expect_error(reduceAlleleResolution("word", resolution = 4))
+  expect_error(reduceAlleleResolution("C*05:24:55:54", resolution = "four"),
+               "resolution is not a count \\(a single positive integer\\)"
+  )
+  expect_error(reduceAlleleResolution("word", resolution = 4),
+               "input resolution can't be lower than requested resolution"
+  )
 })
