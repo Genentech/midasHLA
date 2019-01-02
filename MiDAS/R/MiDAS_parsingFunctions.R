@@ -67,23 +67,27 @@ readHlaCalls <- function(file) {
 #' @param file Path to the file containing HLA allele alignments.
 #' @param trim Logical indicating if alignment should be trimmed to start codon
 #' of the mature protein.
-#' @param unkchar Character to be used for representing positions for which
-#' sequence is unknown.
+#' @param unkchar Character to be used to represent positions with unknown
+#' sequence.
 #'
 #' @return Matrix containing HLA allele alignments. Rownames corresponds to
-#' allele numbers, columns corresponds to positions in the alignment. Sequences
+#' allele numbers and columns to positions in the alignment. Sequences
 #' following the termination codon are marked as empty character. Unknown
-#' sequences are marked with a character of choice, with default empty character
-#' (""). Stop codons are represented by hash (X). Insertion and deletions are
-#' marked with period (.).
+#' sequences are marked with a character of choice, that defaults to empty
+#' character (""). Stop codons are represented by a hash (X). Insertion and
+#' deletions are marked with period (.).
+#'
+#' @examples
+#' file <- system.file("extdata/A_prot.txt", package = "MiDAS")
+#' hla_alignments <- readHlaAlignments(file)
 #'
 #' @importFrom assertthat assert_that is.readable
 #' @importFrom stringi stri_flatten stri_split_regex stri_sub
-#' @importFrom stringi stri_subset_fixed stri_read_lines
+#' @importFrom stringi stri_subset_fixed stri_read_lines stri_detect_regex
 readHlaAlignments <- function(file,
                               trim = TRUE,
                               unkchar = "") {
-  assert_that(is.readable(file)) # TODO check if file follows alignment format
+  assert_that(is.readable(file))
   aln_raw <- stri_read_lines(file)
   aln <- stri_split_regex(aln_raw, "\\s+")
 
@@ -92,19 +96,18 @@ readHlaAlignments <- function(file,
                          FUN = function(x) any(checkAlleleFormat(x)),
                          FUN.VALUE = logical(length = 1)
   )
-  aln <- aln[allele_lines]
-
-  # locate index of start codon of the mature protein
-  raw_first_codon_idx <- nchar(stri_subset_fixed(aln_raw, "Prot")[1])
-  raw_alignment_line <- stri_sub(aln_raw[allele_lines][1],
-                                 1,
-                                 raw_first_codon_idx
+  assert_that(
+    see_if(length(allele_lines) != 0,
+           msg = "input file contains no correct HLA allignments"
+    )
   )
-  raw_alignment_seq <- unlist(stri_split_regex(raw_alignment_line,
-                                               "\\s+"
-                              )
-  )[-c(1, 2)]
-  first_codon_idx <- nchar(stri_flatten(raw_alignment_seq))
+  aln <- aln[allele_lines]
+  assert_that(
+    see_if(all(stri_detect_regex(unlist(aln), "^[A-Z0-9:*.-]*$")),
+                             msg = "alignments lines contain nonstandard characters"
+    )
+  )
+
 
   # convert aln into matrix and substitute for corresponding aa in ref
   allele_numbers <- vapply(X = aln,
@@ -141,8 +144,31 @@ readHlaAlignments <- function(file,
 
   # discard aa '5 to start codon of mature protein
   if (trim) {
+    raw_first_codon_idx <- nchar(stri_subset_fixed(aln_raw, "Prot")[1])
+    raw_alignment_line <- stri_sub(aln_raw[allele_lines][1],
+                                   1,
+                                   raw_first_codon_idx
+    )
+    raw_alignment_seq <- stri_split_regex(raw_alignment_line, "\\s+")
+    raw_alignment_seq <- unlist(raw_alignment_seq)[-c(1, 2)]
+    first_codon_idx <- nchar(stri_flatten(raw_alignment_seq))
+    assert_that(is.count(first_codon_idx))
     aln <- aln[, first_codon_idx:ncol(aln)]
   }
+
+  aa_code_table <- system.file("extdata/aa_code.tsv", package = "MiDAS")
+  aa_code_table <- read.table(aa_code_table,
+                              stringsAsFactors = FALSE,
+                              header = TRUE
+  )$V3
+  aa_code_table <- paste(aa_code_table, collapse = "")
+  assert_that(
+    see_if(all(stri_detect_regex(aln, sprintf("[*%s]*", aa_code_table),
+                                 msg = "alignments contain symbols out of amino acid alfabet"
+               )
+           )
+    )
+  )
 
   return(aln)
 }
