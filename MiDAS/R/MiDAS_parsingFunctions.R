@@ -98,13 +98,13 @@ readHlaAlignments <- function(file,
   )
   assert_that(
     see_if(length(allele_lines) != 0,
-           msg = "input file contains no correct HLA allignments"
+           msg = "input file contains no correct HLA alignments"
     )
   )
   aln <- aln[allele_lines]
   assert_that(
     see_if(all(stri_detect_regex(unlist(aln), "^[A-Z0-9:*.-]*$")),
-                             msg = "alignments lines contain nonstandard characters"
+                             msg = "alignments lines contain non standard characters"
     )
   )
 
@@ -164,7 +164,7 @@ readHlaAlignments <- function(file,
   aa_code_table <- paste(aa_code_table, collapse = "")
   assert_that(
     see_if(all(stri_detect_regex(aln, sprintf("[*%s]*", aa_code_table),
-                                 msg = "alignments contain symbols out of amino acid alfabet"
+                                 msg = "alignments contain symbols out of amino acid alphabet"
                )
            )
     )
