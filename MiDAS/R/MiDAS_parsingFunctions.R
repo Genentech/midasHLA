@@ -163,7 +163,7 @@ readHlaAlignments <- function(file,
   )$V3
   aa_code_table <- paste(aa_code_table, collapse = "")
   assert_that(
-    see_if(all(stri_detect_regex(aln, sprintf("[*%s]*", aa_code_table),
+    see_if(all(stri_detect_regex(aln, sprintf("[%s%s]*", unkchar, aa_code_table),
                                  msg = "alignments contain symbols out of amino acid alphabet"
                )
            )
