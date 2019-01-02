@@ -81,7 +81,7 @@ readHlaCalls <- function(file) {
 #' file <- system.file("extdata/A_prot.txt", package = "MiDAS")
 #' hla_alignments <- readHlaAlignments(file)
 #'
-#' @importFrom assertthat assert_that is.readable
+#' @importFrom assertthat assert_that is.count is.readable
 #' @importFrom stringi stri_flatten stri_split_regex stri_sub
 #' @importFrom stringi stri_subset_fixed stri_read_lines stri_detect_regex
 readHlaAlignments <- function(file,
@@ -160,13 +160,11 @@ readHlaAlignments <- function(file,
   aa_code_table <- read.table(aa_code_table,
                               stringsAsFactors = FALSE,
                               header = TRUE
-  )$V3
+  )$One.letter.code
   aa_code_table <- paste(aa_code_table, collapse = "")
   assert_that(
-    see_if(all(stri_detect_regex(aln, sprintf("[%s%s]*", unkchar, aa_code_table),
+    see_if(all(stri_detect_regex(aln, sprintf("[%s%s]*", unkchar, aa_code_table))),
                                  msg = "alignments contain symbols out of amino acid alphabet"
-               )
-           )
     )
   )
 
