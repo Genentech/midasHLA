@@ -11,7 +11,9 @@
 #' hla_calls <- readHlaCalls(file)
 #'
 #' @importFrom assertthat assert_that is.readable see_if
+#' @importFrom stats na.omit
 #' @importFrom stringi stri_split_fixed
+#' @importFrom utils read.table
 #' @export
 readHlaCalls <- function(file) {
   assert_that(is.readable(file))
