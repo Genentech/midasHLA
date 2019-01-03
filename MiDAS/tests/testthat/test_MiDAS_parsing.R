@@ -101,7 +101,7 @@ test_that("HLA allele alignments are read properly", {
   fake_aln <- vapply(X = fake_aln,
                      FUN = function(x) {
                        number <- stri_split_regex(x, "\\s+")[[1]]
-                       if(any(checkAlleleFormat(number))) {
+                       if (any(checkAlleleFormat(number))) {
                          li <- length(number) - 1
                          number[li] <- paste(sample(c("?", ">", "<", "#", "@", "!"),
                                                     nchar(number[li]),
