@@ -17,7 +17,5 @@ for (aln in hla_alignmnets_db) {
   }
 }
 
-aa_code_url <- "http://www.fao.org/docrep/004/y2775e/y2775e0e.htm"
-aa_code_table <- html(aa_code_url) %>%
-  html_table(fill=TRUE)
-write.table(aa_code_table[[1]], file = "inst/extdata/aa_code.tsv", sep = "\t", col.names = FALSE, row.names = FALSE)
+aprot_fasta <- "ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/fasta/A_prot.fasta"
+download.file(aprot_fasta, destfile = paste0(extdata_dir, "A_prot.fasta"))
