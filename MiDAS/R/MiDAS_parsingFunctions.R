@@ -97,7 +97,7 @@ readHlaAlignments <- function(file,
                          FUN.VALUE = logical(length = 1)
   )
   assert_that(
-    see_if(length(allele_lines) != 0,
+    see_if(any(allele_lines),
            msg = "input file contains no correct HLA alignments"
     )
   )
@@ -155,18 +155,6 @@ readHlaAlignments <- function(file,
     assert_that(is.count(first_codon_idx))
     aln <- aln[, first_codon_idx:ncol(aln)]
   }
-
-  aa_code_table <- system.file("extdata/aa_code.tsv", package = "MiDAS")
-  aa_code_table <- read.table(aa_code_table,
-                              stringsAsFactors = FALSE,
-                              header = TRUE
-  )$One.letter.code
-  aa_code_table <- paste(aa_code_table, collapse = "")
-  assert_that(
-    see_if(all(stri_detect_regex(aln, sprintf("[%s%s]*", unkchar, aa_code_table))),
-                                 msg = "alignments contain symbols out of amino acid alphabet"
-    )
-  )
 
   return(aln)
 }
