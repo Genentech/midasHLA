@@ -14,7 +14,7 @@
 #' @export
 checkAlleleFormat <- function(allele) {
   assert_that(is.character(allele))
-  pattern <- "^[A-Z]+[*][0-9]+(:[0-9]+){0,3}[NLSCAQ]{0,1}$"
+  pattern <- "^[A-Z0-9]+[*][0-9]+(:[0-9]+){0,3}[NLSCAQ]{0,1}$"
   is_correct <- stri_detect_regex(allele, pattern)
   return(is_correct)
 }
