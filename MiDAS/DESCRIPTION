@@ -9,8 +9,7 @@ License: What license is it under?
 Encoding: UTF-8
 LazyData: true
 Imports:
-    seqinr, stringi,
-    assertthat
+    stringi, assertthat
 Suggests:
-    testthat
+    testthat, seqinr
 RoxygenNote: 6.1.1
