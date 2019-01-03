@@ -12,6 +12,7 @@
 #'
 #' @importFrom assertthat assert_that is.readable see_if
 #' @importFrom stringi stri_split_fixed
+#' @export
 readHlaCalls <- function(file) {
   assert_that(is.readable(file))
   hla_calls <- read.table(file,
@@ -84,6 +85,7 @@ readHlaCalls <- function(file) {
 #' @importFrom assertthat assert_that is.count is.readable
 #' @importFrom stringi stri_flatten stri_split_regex stri_sub
 #' @importFrom stringi stri_subset_fixed stri_read_lines stri_detect_regex
+#' @export
 readHlaAlignments <- function(file,
                               trim = TRUE,
                               unkchar = "") {
