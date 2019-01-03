@@ -4,14 +4,30 @@
 \alias{readHlaAlignments}
 \title{Reads HLA allele alignments}
 \usage{
-readHlaAlignments(file)
+readHlaAlignments(file, trim = TRUE, unkchar = "")
 }
 \arguments{
 \item{file}{Path to the file containing HLA allele alignments.}
+
+\item{trim}{Logical indicating if alignment should be trimmed to start codon
+of the mature protein.}
+
+\item{unkchar}{Character to be used to represent positions with unknown
+sequence.}
 }
 \value{
-Matrix containing HLA allele alignments.
+Matrix containing HLA allele alignments. Rownames corresponds to
+allele numbers and columns to positions in the alignment. Sequences
+following the termination codon are marked as empty character. Unknown
+sequences are marked with a character of choice, that defaults to empty
+character (""). Stop codons are represented by a hash (X). Insertion and
+deletions are marked with period (.).
 }
 \description{
 Reads HLA allele alignments from file in msf format.
+}
+\examples{
+file <- system.file("extdata/A_prot.txt", package = "MiDAS")
+hla_alignments <- readHlaAlignments(file)
+
 }
