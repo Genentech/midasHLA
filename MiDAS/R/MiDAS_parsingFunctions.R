@@ -91,7 +91,11 @@ readHlaCalls <- function(file) {
 readHlaAlignments <- function(file,
                               trim = TRUE,
                               unkchar = "") {
-  assert_that(is.readable(file))
+  assert_that(
+    is.readable(file),
+    is.flag(trim),
+    is.string(unkchar)
+  )
   aln_raw <- stri_read_lines(file)
   aln <- stri_split_regex(aln_raw, "\\s+")
 
