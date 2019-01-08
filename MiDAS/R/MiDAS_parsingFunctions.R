@@ -7,7 +7,7 @@
 #' @return Data frame containing HLA allele calls.
 #'
 #' @examples
-#' file <- system.file("extdata/HLAHD_output_example.txt", package = "MiDAS")
+#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(file)
 #'
 #' @importFrom assertthat assert_that is.readable see_if
@@ -81,7 +81,7 @@ readHlaCalls <- function(file) {
 #' deletions are marked with period (.).
 #'
 #' @examples
-#' file <- system.file("extdata/A_prot.txt", package = "MiDAS")
+#' file <- system.file("extdata", "A_prot.txt", package = "MiDAS")
 #' hla_alignments <- readHlaAlignments(file)
 #'
 #' @importFrom assertthat assert_that is.count is.readable

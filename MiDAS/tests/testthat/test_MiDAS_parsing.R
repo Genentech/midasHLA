@@ -5,9 +5,9 @@ context("HLA allele information parsing")
 
 
 test_that("HLA allele calls are read properly", {
-  file <- system.file("extdata/HLAHD_output_example.txt", package = "MiDAS")
+  file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(file)
-  load(system.file("extdata/test_hla_calls.Rdata", package = "MiDAS"))
+  load(system.file("extdata", "test_hla_calls.Rdata", package = "MiDAS"))
   expect_equal(hla_calls, test_hla_calls)
 
   expect_error(readHlaCalls("/path/to/non/existing/file"),
@@ -69,18 +69,18 @@ test_that("HLA allele calls are read properly", {
 })
 
 test_that("HLA allele alignments are read properly", {
-  file <- system.file("extdata/TAP1_prot.txt", package = "MiDAS")
+  file <- system.file("extdata", "TAP1_prot.txt", package = "MiDAS")
   hla_alignments <- readHlaAlignments(file)
-  load(system.file("extdata/test_hla_alignments.Rdata", package = "MiDAS"))
+  load(system.file("extdata", "test_hla_alignments.Rdata", package = "MiDAS"))
   expect_equal(hla_alignments, test_hla_alignments)
 
   expect_error(readHlaAlignments("/path/to/non/existing/file"),
                "Path '/path/to/non/existing/file' does not exist"
   )
 
-  aln_file <- system.file("extdata/A_prot.txt", package = "MiDAS")
+  aln_file <- system.file("extdata", "A_prot.txt", package = "MiDAS")
   hla_alignments <- readHlaAlignments(aln_file, trim = FALSE)
-  fasta_file <- system.file("extdata/A_prot.fasta", package = "MiDAS")
+  fasta_file <- system.file("extdata", "A_prot.fasta", package = "MiDAS")
   fasta <- seqinr::read.alignment(fasta_file, format = "fasta")
   fasta <- fasta$seq[[1]]
   expect_equal(paste(hla_alignments[1, ], collapse = ""),

@@ -16,7 +16,7 @@ Data frame containing HLA allele calls.
 Reads data table with HLA allele calls from file in tsv format.
 }
 \examples{
-file <- system.file("extdata/HLAHD_output_example.txt", package = "MiDAS")
+file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 hla_calls <- readHlaCalls(file)
 
 }
