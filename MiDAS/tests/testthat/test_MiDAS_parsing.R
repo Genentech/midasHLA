@@ -155,7 +155,7 @@ test_that("HLA allele alignments are read properly", {
   fake_aln_tmp <- tempfile()
   writeLines(text = fake_aln, con = fake_aln_tmp)
   expect_error(readHlaAlignments(fake_aln_tmp),
-               "first_codon_idx is not a count \\(a single positive integer\\)"
+               "start codon is not marked properly in the input file"
   )
   unlink(fake_aln_tmp)
 })

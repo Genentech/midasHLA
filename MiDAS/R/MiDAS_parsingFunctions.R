@@ -160,7 +160,11 @@ readHlaAlignments <- function(file,
     raw_alignment_seq <- stri_split_regex(raw_alignment_line, "\\s+")
     raw_alignment_seq <- unlist(raw_alignment_seq)[-c(1, 2)]
     first_codon_idx <- nchar(stri_flatten(raw_alignment_seq))
-    assert_that(is.count(first_codon_idx))
+    assert_that(
+      see_if(is.count(first_codon_idx),
+             msg = "start codon is not marked properly in the input file"
+      )
+    )
     aln <- aln[, first_codon_idx:ncol(aln)]
   }
 
