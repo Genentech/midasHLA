@@ -80,7 +80,7 @@ test_that("HLA allele alignments are read properly", {
 
   expect_error(
     readHlaAlignments(system.file("extdata", "A_prot.txt", package = "MiDAS"),
-                      trim = c(T,T),
+                      trim = c(T, T),
                       unkchar = ""
     ),
     "trim is not a flag \\(a length one logical vector\\)."
