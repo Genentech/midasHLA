@@ -10,7 +10,7 @@ checkAlleleFormat(allele)
 \item{allele}{Character vector containing HLA allele numbers.}
 }
 \value{
-Logical vector of length specifying if \code{allele} follows HLA
+Logical vector of length 1 specifying if \code{allele} follows HLA
 alleles naming conventions and have desired resolution.
 }
 \description{
