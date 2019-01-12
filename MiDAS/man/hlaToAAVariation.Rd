@@ -10,7 +10,7 @@ hlaToAAVariation(hla_calls)
 \item{hla_calls}{Data frame containing HLA allele calls.}
 }
 \value{
-Data frame with all variable amino acid positions.
+Matrix containing all variable amino acid positions.
 }
 \description{
 Converts HLA allele numbers data frame to a data frame holding information on

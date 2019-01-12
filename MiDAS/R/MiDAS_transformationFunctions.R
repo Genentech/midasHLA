@@ -5,7 +5,7 @@
 #'
 #' @param hla_calls Data frame containing HLA allele calls.
 #'
-#' @return Data frame with all variable amino acid positions.
+#' @return Matrix containing all variable amino acid positions.
 #'
 #' @importFrom stringi stri_split_fixed
 #' @export

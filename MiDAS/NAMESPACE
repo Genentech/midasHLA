@@ -2,6 +2,8 @@
 
 export(checkAlleleFormat)
 export(getAlleleResolution)
+export(getVariableAAPos)
+export(hlaToAAVariation)
 export(readHlaAlignments)
 export(readHlaCalls)
 export(reduceAlleleResolution)
