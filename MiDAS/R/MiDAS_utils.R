@@ -2,7 +2,7 @@
 #'
 #' @param allele Character vector containing HLA allele numbers.
 #'
-#' @return Logical vector of length specifying if \code{allele} follows HLA
+#' @return Logical vector of length 1 specifying if \code{allele} follows HLA
 #' alleles naming conventions and have desired resolution.
 #'
 #' @examples
@@ -72,4 +72,33 @@ reduceAlleleResolution <- function(allele,
                            FUN.VALUE = character(length = 1)
                           )
   return(reduced_allele)
+}
+
+#' Returns positions of variable aa in the alignment.
+#'
+#' @param alignment Matrix containing aa level alignment.
+#'
+#' @return Integer vector specifying which alignment columns are variable.
+#'
+#' @examples
+#' file <- system.file("extdata", "A_prot.txt", package = "MiDAS")
+#' alignment <- readHlaAlignments(file)
+#' getVariableAAPos(alignment)
+#'
+#' @importFrom assertthat assert_that is.count see_if
+#' @export
+getVariableAAPos <- function(alignment) {
+  assert_that(is.matrix(alignment))
+  var_cols <- apply(alignment,
+        2,
+        function(col) {
+          col <- col[grepl("^[A-Z]$", col)]
+          assert_that(see_if(length(col) != 0,
+                             msg = "alignment contains columns with out any amino acid letter"
+                      )
+          )
+          return(any(col != col[1]))
+        }
+  )
+  return(which(var_cols))
 }
