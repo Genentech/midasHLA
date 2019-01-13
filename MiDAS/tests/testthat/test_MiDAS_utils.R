@@ -60,10 +60,4 @@ test_that("Variable amino acids positions are detected properly", {
   expect_equal(getVariableAAPos(hlaa_aln), c(9, 17))
 
   expect_error(getVariableAAPos(hlaa_calls), "alignment is not a matrix")
-
-  hlaa_aln_empty_col <- hlaa_aln
-  hlaa_aln_empty_col[, 2] <- rep(".", nrow(hlaa_aln_empty_col))
-  expect_error(getVariableAAPos(hlaa_aln_empty_col),
-               "alignment contains columns with out any amino acid letter"
-  )
 })

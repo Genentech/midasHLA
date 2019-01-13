@@ -93,11 +93,13 @@ getVariableAAPos <- function(alignment) {
         2,
         function(col) {
           col <- col[grepl("^[A-Z]$", col)]
-          assert_that(see_if(length(col) != 0,
-                             msg = "alignment contains columns without any amino acid letter"
-                      )
-          )
-          return(any(col != col[1]))
+          is.variable <- logical(length = 1)
+          if (length(col) == 0) {
+            is.variable <- FALSE
+          } else {
+            is.variable <- any(col != col[1])
+          }
+          return(is.variable)
         }
   )
   return(which(var_cols))
