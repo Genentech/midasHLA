@@ -16,6 +16,7 @@
 #' hla_calls <- readHlaCalls(hla_calls)
 #' aa_variation <- hlaToAAVariation(hla_calls)
 #'
+#' @importFrom assertthat assert_that see_if
 #' @importFrom stringi stri_split_fixed
 #' @export
 hlaToAAVariation <- function(hla_calls){
