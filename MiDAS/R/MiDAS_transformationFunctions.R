@@ -23,10 +23,10 @@ hlaToAAVariation <- function(hla_calls){
   assert_that(
     is.data.frame(hla_calls),
     see_if(! all(checkAlleleFormat(hla_calls[, 1]), na.rm = TRUE),
-           msg = "First column of input data frame should specify samples id"
+           msg = "first column of input data frame should specify samples id"
     ),
     see_if(all(checkAlleleFormat(unlist(hla_calls[, -1])), na.rm = TRUE),
-           msg = "Values in input data frame doesn't follow HLA numbers specification"
+           msg = "values in input data frame doesn't follow HLA numbers specification"
     )
   )
   ids <- hla_calls[, 1]
