@@ -1,16 +1,33 @@
 #' Converts HLA allele numbers to amino acid variation
 #'
-#' Converts HLA allele numbers data frame to a data frame holding information on
+#' Converts HLA allele numbers data frame to a matrix holding information on
 #' amino acid level varation.
 #'
-#' @param hla_calls Data frame containing HLA allele calls.
+#' @param hla_calls Data frame containing HLA allele calls, in a format as
+#'                  return by `readHlaCalls` function.
 #'
-#' @return Matrix containing all variable amino acid positions.
+#' @return Matrix containing variable amino acid positions. Rownames corresponds
+#'         to ID column of input data frame, and colnames to alignment positions
+#'         for given genes. If no variation in amino acids alignments is found
+#'         function return one column matrix filled with `NA`.
+#'
+#' @examples
+#' hla_calls <- system.file("extdata/HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(hla_calls)
+#' aa_variation <- hlaToAAVariation(hla_calls)
 #'
 #' @importFrom stringi stri_split_fixed
 #' @export
 hlaToAAVariation <- function(hla_calls){
-  # check if hla_calls is hla_calls
+  assert_that(
+    is.data.frame(hla_calls),
+    see_if(! all(checkAlleleFormat(hla_calls[, 1]), na.rm = TRUE),
+           msg = "First column of input data frame should specify samples id"
+    ),
+    see_if(all(checkAlleleFormat(unlist(hla_calls[, -1])), na.rm = TRUE),
+           msg = "Values in input data frame doesn't follow HLA numbers specification"
+    )
+  )
   ids <- hla_calls[, 1]
   hla_calls <- hla_calls[, -1]
 
@@ -19,7 +36,8 @@ hlaToAAVariation <- function(hla_calls){
                        FUN = function(x) stri_split_fixed(x, "_")[[1]][1],
                        FUN.VALUE = character(length = 1)
   )
-  hla_resolution <- vapply(X = unique(gene_names),
+  gene_names_uniq <- unique(gene_names)
+  hla_resolution <- vapply(X = gene_names_uniq,
                            FUN = function(x) {
                              x_numbers <- unlist(hla_calls[, gene_names == x])
                              x_res <- getAlleleResolution(na.omit(x_numbers))
@@ -29,8 +47,9 @@ hlaToAAVariation <- function(hla_calls){
                            USE.NAMES = TRUE
   )
 
-  # read alignment matrices and convert to desired resolution -- if we will switch to SQL db this could be the only chunk changed
-  hla_aln <- lapply(X = unique(gene_names),
+  # read alignment matrices and convert to desired resolution
+  # TODO check if alignment files are available for given gene?
+  hla_aln <- lapply(X = gene_names_uniq,
                     FUN = function(x) {
                       path <- system.file("extdata/",
                                           paste0(x, "_prot.txt"),
@@ -39,7 +58,7 @@ hlaToAAVariation <- function(hla_calls){
                       aln <- readHlaAlignments(path)
                       alleles <- rownames(aln)
                       alleles <- reduceAlleleResolution(alleles,
-                                                  resolution = hla_resolution[x] # How to format it nicely
+                                                        resolution = hla_resolution[x]
                       )
                       unique_idx <- ! duplicated(alleles)
                       aln <- aln[unique_idx, ]
@@ -50,7 +69,6 @@ hlaToAAVariation <- function(hla_calls){
 
   # get aa variations for each gene
   aa_variation <- list()
-  gene_names_uniq <- unique(gene_names)
   for (i in 1:length(gene_names_uniq)) {
     x_calls <- hla_calls[, gene_names == gene_names_uniq[i]]
 
@@ -60,25 +78,33 @@ hlaToAAVariation <- function(hla_calls){
 
     # get variable aa positions
     hla_aln[[i]] <- hla_aln[[i]][x_calls_uniq, ]
-    aa_var_pos <- getVariableAAPos(hla_aln[[i]])
-    aa_var <- lapply(colnames(x_calls), function(allele) {
-      x <- hla_aln[[i]][x_calls[, allele], aa_var_pos, drop = FALSE]
-      colnames(x) <- paste0(allele, "_", "AA_", aa_var_pos)
+    var_pos <- getVariableAAPos(hla_aln[[i]])
+    var_aln <- lapply(colnames(x_calls), function(allele) {
+      x <- hla_aln[[i]][x_calls[, allele], var_pos, drop = FALSE]
+      colnames(x) <- paste0(allele, "_", "AA_", var_pos)
       return(x)
     })
-    aa_var <- do.call(cbind, aa_var)
-    ord <- as.vector(vapply(1:length(aa_var_pos),
+    var_aln <- do.call(cbind, var_aln)
+    ord <- as.vector(vapply(1:length(var_pos),
                   function(j) {
-                    c(j, j+length(aa_var_pos))
+                    c(j, j+length(var_pos))
                   },
                   FUN.VALUE = numeric(length = 2)
     ))
-    aa_var <- aa_var[, ord]
+    var_aln <- var_aln[, ord]
 
-    aa_variation[[length(aa_variation) + 1]] <- aa_var
+    aa_variation[[length(aa_variation) + 1]] <- var_aln
   }
-  aa_variation <- do.call(cbind, aa_variation)
-  rownames(aa_variation) <- ids
+  if (length(aa_variation) > 1) {
+    aa_variation <- do.call(cbind, aa_variation)
+    rownames(aa_variation) <- ids
+  } else if (length(aa_variation) == 1) {
+    aa_variation <- aa_variation[[1]]
+    rownames(aa_variation) <- ids
+  } else {
+    aa_variation <- matrix(nrow = length(ids))
+    rownames(aa_variation) <- ids
+  }
 
   return(aa_variation)
 }
