@@ -74,9 +74,9 @@ reduceAlleleResolution <- function(allele,
   return(reduced_allele)
 }
 
-#' Returns positions of variable aa in the alignment.
+#' Returns positions of variable amino acids in the alignment.
 #'
-#' @param alignment Matrix containing aa level alignment.
+#' @param alignment Matrix containing amino acids level alignment.
 #'
 #' @return Integer vector specifying which alignment columns are variable.
 #'
@@ -94,7 +94,7 @@ getVariableAAPos <- function(alignment) {
         function(col) {
           col <- col[grepl("^[A-Z]$", col)]
           assert_that(see_if(length(col) != 0,
-                             msg = "alignment contains columns with out any amino acid letter"
+                             msg = "alignment contains columns without any amino acid letter"
                       )
           )
           return(any(col != col[1]))
