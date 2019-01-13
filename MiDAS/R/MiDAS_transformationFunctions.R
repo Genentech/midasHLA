@@ -88,7 +88,7 @@ hlaToAAVariation <- function(hla_calls){
     var_aln <- do.call(cbind, var_aln)
     ord <- as.vector(vapply(1:length(var_pos),
                   function(j) {
-                    c(j, j+length(var_pos))
+                    c(j, j + length(var_pos))
                   },
                   FUN.VALUE = numeric(length = 2)
     ))
