@@ -2,18 +2,18 @@
 % Please edit documentation in R/MiDAS_utils.R
 \name{getVariableAAPos}
 \alias{getVariableAAPos}
-\title{Returns positions of variable aa in the alignment.}
+\title{Returns positions of variable amino acids in the alignment.}
 \usage{
 getVariableAAPos(alignment)
 }
 \arguments{
-\item{alignment}{Matrix containing aa level alignment.}
+\item{alignment}{Matrix containing amino acids level alignment.}
 }
 \value{
 Integer vector specifying which alignment columns are variable.
 }
 \description{
-Returns positions of variable aa in the alignment.
+Returns positions of variable amino acids in the alignment.
 }
 \examples{
 file <- system.file("extdata", "A_prot.txt", package = "MiDAS")
