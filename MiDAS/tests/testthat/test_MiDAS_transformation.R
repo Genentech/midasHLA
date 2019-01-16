@@ -9,6 +9,8 @@ test_that("Amino acids variability is infered correctly", {
 
   expect_error(hlaToAAVariation(aa_variation), "hla_calls is not a data frame")
 
+  expect_error(hlaToAAVariation(data.frame()), "input data frame have to have at least 1 rows and 2 columns")
+
   expect_error(hlaToAAVariation(hla_calls[, -1],
                                 "first column of input data frame should specify samples id"
                )
