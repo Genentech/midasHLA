@@ -3,11 +3,9 @@
 #' Reads data table with HLA allele calls from file in tsv format.
 #'
 #' @param file Path to the file containing HLA allele calls.
-#'
 #' @param resolution Integer specifying the resoultion to which the HLA allele
 #'        calls should be reduced to. Valid values should be one of
 #'        `2, 4, 6, 8`. To disable this functionality see `reduce` parameter.
-#'
 #' @param reduce Logical flag specifying wheater HLA numbers should be reduced
 #'        to provided resolution.
 #'
@@ -43,13 +41,6 @@ readHlaCalls <- function(file,
     )
   )
 
-  if (reduce) {
-    hla_calls[, -1] <- as.data.frame(
-      lapply(hla_calls[, -1], reduceAlleleResolution, resolution = resolution)
-    )
-    # Here could be a check if the resolution is correct ?
-  }
-
   # set colnames based on allele numbers
   gene_names <- vapply(X = 2:ncol(hla_calls),
                        FUN = function(i) {
@@ -79,6 +70,12 @@ readHlaCalls <- function(file,
   hla_calls <- hla_calls[, c(1, ord + 1)]
   colnames(hla_calls) <- c("ID", gene_names)
 
+  if (reduce) {
+    hla_calls[, -1] <- as.data.frame(
+      lapply(hla_calls[, -1], reduceAlleleResolution, resolution = resolution)
+    )
+  }
+
   return(hla_calls)
 }
 
@@ -91,6 +88,8 @@ readHlaCalls <- function(file,
 #' of the mature protein.
 #' @param unkchar Character to be used to represent positions with unknown
 #' sequence.
+#' @param resolution Integer specifying the resoultion with which alignment
+#'        matrix should be returned.
 #'
 #' @return Matrix containing HLA allele alignments. Rownames corresponds to
 #' allele numbers and columns to positions in the alignment. Sequences
@@ -170,6 +169,14 @@ readHlaAlignments <- function(file,
                         }
                  )
   )
+
+  # reduce alignment matrix to selected resolution
+  allele_numbers <- reduceAlleleResolution(allele_numbers,
+                                           resolution = resolution
+  )
+  unique_numbers <- ! duplicated(allele_numbers)
+  aln <- aln[unique_numbers, ]
+  rownames(aln) <- allele_numbers[unique_numbers]
 
   # discard aa '5 to start codon of mature protein
   if (trim) {
