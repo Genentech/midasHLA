@@ -105,8 +105,7 @@ readHlaCalls <- function(file,
 #' deletions are marked with period (.).
 #'
 #' @examples
-#' file <- system.file("extdata", "A_prot.txt", package = "MiDAS")
-#' hla_alignments <- readHlaAlignments(file)
+#' hla_alignments <- readHlaAlignments(gene = "A")
 #'
 #' @importFrom assertthat assert_that is.count is.flag is.readable is.string
 #' @importFrom stringi stri_flatten stri_split_regex stri_sub
