@@ -9,8 +9,9 @@ reduceAlleleResolution(allele, resolution = 4)
 \arguments{
 \item{allele}{Character vector containing HLA allele numbers.}
 
-\item{resolution}{Numeric vector of length one specifiying desired
-resolution. Cannot be greater than \code{allele} resolution.}
+\item{resolution}{Numeric vector of length one specifying desired
+resolution. Note if `resolution` is greater than resolution of any
+\code{allele} elements, those elements will be returned unchanged.}
 }
 \value{
 Character vector containing reduced HLA allele numbers.

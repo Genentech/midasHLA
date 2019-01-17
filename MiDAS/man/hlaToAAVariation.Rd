@@ -18,7 +18,7 @@ Matrix containing variable amino acid positions. Rownames corresponds
 }
 \description{
 Converts HLA allele numbers data frame to a matrix holding information on
-amino acid level varation.
+amino acid level variation.
 }
 \examples{
 hla_calls <- system.file("extdata/HLAHD_output_example.txt", package = "MiDAS")

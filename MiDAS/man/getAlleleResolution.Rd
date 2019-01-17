@@ -10,7 +10,7 @@ getAlleleResolution(allele)
 \item{allele}{Character vector containing HLA allele numbers.}
 }
 \value{
-Integer vector specifiying alleles resolutions.
+Integer vector specifying alleles resolutions.
 }
 \description{
 Infers HLA allele resolution
