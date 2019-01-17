@@ -19,7 +19,7 @@ test_that("HLA allele calls are read properly", {
   )
 
   expect_error(readHlaCalls(file, resolution = 4, reduce = 1),
-               "reduce is not a flag (a length one logical vector)."
+               "reduce is not a flag \\(a length one logical vector\\)."
   )
 
   fake_calls <- data.frame(ID = c("Sample1", "Sample2", "Sample3"),
@@ -34,7 +34,7 @@ test_that("HLA allele calls are read properly", {
               row.names = FALSE,
               col.names = TRUE
   )
-  expect_error(readHlaCalls(fake_calls_no_id),
+  expect_error(readHlaCalls(fake_calls_no_id, resolution = 2),
                "First column of input file should specify samples id"
   )
   unlink(fake_calls_no_id)
@@ -46,7 +46,7 @@ test_that("HLA allele calls are read properly", {
               row.names = FALSE,
               col.names = TRUE
   )
-  expect_error(readHlaCalls(fake_calls_non_hla_numbers),
+  expect_error(readHlaCalls(fake_calls_non_hla_numbers, resolution = 2),
                "Values in input file doesn't follow HLA numbers specification"
   )
   unlink(fake_calls_non_hla_numbers)
@@ -58,7 +58,7 @@ test_that("HLA allele calls are read properly", {
               row.names = FALSE,
               col.names = TRUE
   )
-  expect_error(readHlaCalls(fake_calls_non_uniq_genes),
+  expect_error(readHlaCalls(fake_calls_non_uniq_genes, resolution = 2),
                "Gene names in columns are not identical"
   )
   unlink(fake_calls_non_uniq_genes)
@@ -71,7 +71,7 @@ test_that("HLA allele calls are read properly", {
               row.names = FALSE,
               col.names = TRUE
   )
-  expect_error(readHlaCalls(fake_calls_NA_col),
+  expect_error(readHlaCalls(fake_calls_NA_col, resolution = 2),
                "One of the columns contains only NA")
   unlink(fake_calls_NA_col)
 })
