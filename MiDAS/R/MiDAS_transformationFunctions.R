@@ -69,14 +69,9 @@ hlaToAAVariation <- function(hla_calls){
                                           paste0(x, "_prot.txt"),
                                           package = "MiDAS"
                       )
-                      aln <- readHlaAlignments(path)
-                      alleles <- rownames(aln)
-                      alleles <- reduceAlleleResolution(alleles,
-                                                        resolution = hla_resolution[x]
+                      aln <- readHlaAlignments(path,
+                                               resolution = hla_resolution[x]
                       )
-                      unique_idx <- ! duplicated(alleles)
-                      aln <- aln[unique_idx, ]
-                      rownames(aln) <- alleles[unique_idx]
                       return(aln)
                     }
   )
