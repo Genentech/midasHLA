@@ -46,7 +46,8 @@ getAlleleResolution <- function(allele) {
 #'
 #' @param allele Character vector containing HLA allele numbers.
 #' @param resolution Numeric vector of length one specifiying desired
-#' resolution. Cannot be greater than \code{allele} resolution.
+#' resolution. Note if `resolution` is greater than resolution of any
+#' \code{allele} elements, those elements will be returned unchanged.
 #'
 #' @return Character vector containing reduced HLA allele numbers.
 #'
