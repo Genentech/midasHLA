@@ -34,7 +34,7 @@ checkAlleleFormat <- function(allele) {
 #' @export
 getAlleleResolution <- function(allele) {
   assert_that(
-    see_if(all(checkAlleleFormat(allele)),
+    see_if(all(checkAlleleFormat(allele), na.rm = TRUE),
          msg = "allele have to be a valid HLA allele number"
     )
   )
@@ -60,10 +60,11 @@ reduceAlleleResolution <- function(allele,
                                    resolution=4) {
   assert_that(
     is.count(resolution),
-    see_if(all(getAlleleResolution(allele) >= resolution),
+    see_if(all(getAlleleResolution(allele) >= resolution, na.rm = TRUE),
            msg = "input resolution can't be lower than requested resolution"
     )
   )
+  na_idx <- is.na(allele)
   resolution <- floor(resolution) / 2
   reduced_allele <- vapply(X = stri_split_fixed(allele, ":"),
                            FUN = function(a) {
@@ -71,6 +72,7 @@ reduceAlleleResolution <- function(allele,
                            },
                            FUN.VALUE = character(length = 1)
                           )
+  reduced_allele[na_idx] <- NA
   return(reduced_allele)
 }
 
