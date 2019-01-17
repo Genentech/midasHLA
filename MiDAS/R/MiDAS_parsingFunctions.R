@@ -99,7 +99,7 @@ readHlaAlignments <- function(file,
   aln_raw <- stri_read_lines(file)
   aln <- stri_split_regex(aln_raw, "\\s+")
 
-  # extract lines containing alignments
+  # extract lines containing alignments and omit empty alignment lines
   allele_lines <- vapply(X = aln,
                          FUN = function(x) any(checkAlleleFormat(x)),
                          FUN.VALUE = logical(length = 1)
@@ -110,6 +110,7 @@ readHlaAlignments <- function(file,
     )
   )
   aln <- aln[allele_lines]
+  aln <- aln[vapply(aln, length, integer(length = 1)) > 2]
   assert_that(
     see_if(all(stri_detect_regex(unlist(aln), "^[A-Z0-9:*.-]*$")),
                              msg = "alignments lines contain non standard characters"

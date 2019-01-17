@@ -7,12 +7,22 @@
 hlaToAAVariation(hla_calls)
 }
 \arguments{
-\item{hla_calls}{Data frame containing HLA allele calls.}
+\item{hla_calls}{Data frame containing HLA allele calls, in a format as
+return by `readHlaCalls` function.}
 }
 \value{
-Data frame with all variable amino acid positions.
+Matrix containing variable amino acid positions. Rownames corresponds
+        to ID column of input data frame, and colnames to alignment positions
+        for given genes. If no variation in amino acids alignments is found
+        function return one column matrix filled with `NA`.
 }
 \description{
-Converts HLA allele numbers data frame to a data frame holding information on
+Converts HLA allele numbers data frame to a matrix holding information on
 amino acid level varation.
+}
+\examples{
+hla_calls <- system.file("extdata/HLAHD_output_example.txt", package = "MiDAS")
+hla_calls <- readHlaCalls(hla_calls)
+aa_variation <- hlaToAAVariation(hla_calls)
+
 }
