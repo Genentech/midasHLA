@@ -65,12 +65,9 @@ hlaToAAVariation <- function(hla_calls){
   # read alignment matrices and convert to desired resolution
   hla_aln <- lapply(X = gene_names_uniq,
                     FUN = function(x) {
-                      path <- system.file("extdata/",
-                                          paste0(x, "_prot.txt"),
-                                          package = "MiDAS"
-                      )
-                      aln <- readHlaAlignments(path,
-                                               resolution = hla_resolution[x]
+                      aln <- readHlaAlignments(
+                        gene = x,
+                        resolution = hla_resolution[x]
                       )
                       return(aln)
                     }
