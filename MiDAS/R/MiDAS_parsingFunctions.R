@@ -6,8 +6,6 @@
 #' @param resolution Integer specifying the resolution to which the HLA allele
 #'        calls should be reduced to. Valid values should be one of
 #'        `2, 4, 6, 8`. To disable this functionality see `reduce` parameter.
-#' @param reduce Logical flag specifying whether HLA numbers should be reduced
-#'        to provided resolution.
 #'
 #' @return Data frame containing HLA allele calls.
 #'
@@ -21,11 +19,9 @@
 #' @importFrom utils read.table
 #' @export
 readHlaCalls <- function(file,
-                         resolution = 4,
-                         reduce = TRUE) {
+                         resolution = 4) {
   assert_that(is.readable(file),
-              is.count(resolution),
-              is.flag(reduce)
+              is.count(resolution)
   )
   hla_calls <- read.table(file,
                           header = TRUE,
@@ -70,12 +66,11 @@ readHlaCalls <- function(file,
   hla_calls <- hla_calls[, c(1, ord + 1)]
   colnames(hla_calls) <- c("ID", gene_names)
 
-  if (reduce) {
-    hla_calls[, -1] <- as.data.frame(
-      lapply(hla_calls[, -1], reduceAlleleResolution, resolution = resolution),
-      stringsAsFactors = FALSE
-    )
-  }
+
+  hla_calls[, -1] <- as.data.frame(
+    lapply(hla_calls[, -1], reduceAlleleResolution, resolution = resolution),
+    stringsAsFactors = FALSE
+  )
 
   return(hla_calls)
 }
