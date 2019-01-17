@@ -109,7 +109,8 @@ readHlaCalls <- function(file,
 #' @export
 readHlaAlignments <- function(file,
                               trim = TRUE,
-                              unkchar = "") {
+                              unkchar = "",
+                              resolution = 8) {
   assert_that(
     is.readable(file),
     is.string(unkchar),
@@ -170,13 +171,13 @@ readHlaAlignments <- function(file,
                  )
   )
 
-  # # reduce alignment matrix to selected resolution
-  # allele_numbers <- reduceAlleleResolution(rownames(aln),
-  #                                          resolution = resolution
-  # )
-  # unique_numbers <- ! duplicated(allele_numbers)
-  # aln <- aln[unique_numbers, ]
-  # rownames(aln) <- allele_numbers[unique_numbers]
+  # reduce alignment matrix to selected resolution
+  allele_numbers <- reduceAlleleResolution(rownames(aln),
+                                           resolution = resolution
+  )
+  unique_numbers <- ! duplicated(allele_numbers)
+  aln <- aln[unique_numbers, ]
+  rownames(aln) <- allele_numbers[unique_numbers]
 
   # discard aa '5 to start codon of mature protein
   if (trim) {
