@@ -4,6 +4,13 @@
 #'
 #' @param file Path to the file containing HLA allele calls.
 #'
+#' @param resolution Integer specifying the resoultion to which the HLA allele
+#'        calls should be reduced to. Valid values should be one of
+#'        `2, 4, 6, 8`. To disable this functionality see `reduce` parameter.
+#'
+#' @param reduce Logical flag specifying wheater HLA numbers should be reduced
+#'        to provided resolution.
+#'
 #' @return Data frame containing HLA allele calls.
 #'
 #' @examples
@@ -15,8 +22,13 @@
 #' @importFrom stringi stri_split_fixed
 #' @importFrom utils read.table
 #' @export
-readHlaCalls <- function(file) {
-  assert_that(is.readable(file))
+readHlaCalls <- function(file,
+                         resolution = 4,
+                         reduce = TRUE) {
+  assert_that(is.readable(file),
+              is.count(resolution),
+              is.flag(reduce)
+  )
   hla_calls <- read.table(file,
                           header = TRUE,
                           sep = "\t",
@@ -30,6 +42,13 @@ readHlaCalls <- function(file) {
            msg = "Values in input file doesn't follow HLA numbers specification"
     )
   )
+
+  if (reduce) {
+    hla_calls[, -1] <- as.data.frame(
+      lapply(hla_calls[, -1], reduceAlleleResolution, resolution = resolution)
+    )
+    # Here could be a check if the resolution is correct ?
+  }
 
   # set colnames based on allele numbers
   gene_names <- vapply(X = 2:ncol(hla_calls),
@@ -90,11 +109,12 @@ readHlaCalls <- function(file) {
 #' @export
 readHlaAlignments <- function(file,
                               trim = TRUE,
-                              unkchar = "") {
+                              unkchar = "",
+                              resolution = 4) {
   assert_that(
     is.readable(file),
-    is.flag(trim),
-    is.string(unkchar)
+    is.string(unkchar),
+    is.count(resolution)
   )
   aln_raw <- stri_read_lines(file)
   aln <- stri_split_regex(aln_raw, "\\s+")

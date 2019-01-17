@@ -14,6 +14,14 @@ test_that("HLA allele calls are read properly", {
                "Path '/path/to/non/existing/file' does not exist"
   )
 
+  expect_error(readHlaCalls(file, resolution = "foo"),
+               "resolution is not a count \\(a single positive integer\\)"
+  )
+
+  expect_error(readHlaCalls(file, resolution = 4, reduce = 1),
+               "reduce is not a flag (a length one logical vector)."
+  )
+
   fake_calls <- data.frame(ID = c("Sample1", "Sample2", "Sample3"),
                            A_1 = c("A*01", "A*02", "A*03"),
                            A_2 = c("A*01", "B*02", "C*03")
