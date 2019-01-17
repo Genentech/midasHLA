@@ -85,6 +85,11 @@ readHlaCalls <- function(file,
 #' Reads HLA allele alignments from file in msf format.
 #'
 #' @param file Path to the file containing HLA allele alignments.
+#' @param gene Character vector of length one specifying the name of a gene for
+#' which alignment is required. All the protein alignment files from EBI
+#' database are shipped with the package and this parameter can be used to
+#' provide simpler access to those files. If it's set to \code{NULL} file
+#' parameter is used insted.
 #' @param trim Logical indicating if alignment should be trimmed to start codon
 #' of the mature protein.
 #' @param unkchar Character to be used to represent positions with unknown
@@ -108,14 +113,38 @@ readHlaCalls <- function(file,
 #' @importFrom stringi stri_subset_fixed stri_read_lines stri_detect_regex
 #' @export
 readHlaAlignments <- function(file,
+                              gene = NULL,
                               trim = TRUE,
                               unkchar = "",
                               resolution = 8) {
+  if (is.null(gene)) {
+    assert_that(is.readable(file))
+  } else {
+    assert_that(is.string(gene))
+    gene <- toupper(gene)
+    file <- paste0(system.file("extdata", package = "MiDAS"),
+                   "/",
+                   gene,
+                   "_prot.txt"
+    )
+    available_genes <- list.files(
+      path = system.file("extdata", package = "MiDAS"),
+      pattern = "_prot.txt$",
+      full.names = TRUE
+    )
+    assert_that(
+      see_if(file %in% available_genes,
+             msg = sprintf("alignment for %s is not available", gene)
+      ),
+      is.readable(file)
+    )
+  }
   assert_that(
-    is.readable(file),
+    is.flag(trim),
     is.string(unkchar),
     is.count(resolution)
   )
+
   aln_raw <- stri_read_lines(file)
   aln <- stri_split_regex(aln_raw, "\\s+")
 

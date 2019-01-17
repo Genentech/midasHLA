@@ -110,7 +110,11 @@ test_that("HLA allele alignments are read properly", {
     "unkchar is not a string \\(a length one character vector\\)."
   )
 
-  aln_file <- system.file("extdata", "A_prot.txt", package = "MiDAS")
+  expect_error(readHlaAlignments(gene = "foo"),
+               "alignment for FOO is not available"
+  )
+
+  aln_file <- system.file("extdata/A_prot.txt", package = "MiDAS")
   hla_alignments <- readHlaAlignments(aln_file, trim = FALSE)
   fasta_file <- system.file("extdata", "A_prot.fasta", package = "MiDAS")
   fasta <- seqinr::read.alignment(fasta_file, format = "fasta")
