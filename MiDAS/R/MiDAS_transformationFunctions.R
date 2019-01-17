@@ -1,7 +1,7 @@
 #' Converts HLA allele numbers to amino acid variation
 #'
 #' Converts HLA allele numbers data frame to a matrix holding information on
-#' amino acid level varation.
+#' amino acid level variation.
 #'
 #' @param hla_calls Data frame containing HLA allele calls, in a format as
 #'                  return by `readHlaCalls` function.
@@ -78,7 +78,7 @@ hlaToAAVariation <- function(hla_calls){
   for (i in 1:length(gene_names_uniq)) {
     x_calls <- hla_calls[, gene_names == gene_names_uniq[i]]
 
-    # check if there is possiblity for variability
+    # check if there is possibility for variability
     x_calls_uniq <- na.omit(unique(unlist(x_calls)))
     if (length(x_calls_uniq) <= 1) next()
 

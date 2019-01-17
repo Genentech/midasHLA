@@ -3,10 +3,10 @@
 #' Reads data table with HLA allele calls from file in tsv format.
 #'
 #' @param file Path to the file containing HLA allele calls.
-#' @param resolution Integer specifying the resoultion to which the HLA allele
+#' @param resolution Integer specifying the resolution to which the HLA allele
 #'        calls should be reduced to. Valid values should be one of
 #'        `2, 4, 6, 8`. To disable this functionality see `reduce` parameter.
-#' @param reduce Logical flag specifying wheater HLA numbers should be reduced
+#' @param reduce Logical flag specifying whether HLA numbers should be reduced
 #'        to provided resolution.
 #'
 #' @return Data frame containing HLA allele calls.
@@ -89,7 +89,7 @@ readHlaCalls <- function(file,
 #' which alignment is required. All the protein alignment files from EBI
 #' database are shipped with the package and this parameter can be used to
 #' provide simpler access to those files. If it's set to \code{NULL} file
-#' parameter is used insted.
+#' parameter is used instead.
 #' @param trim Logical indicating if alignment should be trimmed to start codon
 #' of the mature protein.
 #' @param unkchar Character to be used to represent positions with unknown
