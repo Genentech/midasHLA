@@ -59,21 +59,20 @@ getAlleleResolution <- function(allele) {
 reduceAlleleResolution <- function(allele,
                                    resolution=4) {
   assert_that(
-    is.count(resolution),
-    see_if(all(getAlleleResolution(allele) >= resolution, na.rm = TRUE),
-           msg = "input resolution can't be lower than requested resolution"
-    )
+    is.count(resolution)
   )
   na_idx <- is.na(allele)
+  allele_res <- getAlleleResolution(allele)
   resolution <- floor(resolution) / 2
-  reduced_allele <- vapply(X = stri_split_fixed(allele, ":"),
-                           FUN = function(a) {
-                             paste(a[1:resolution], collapse = ":")
-                           },
-                           FUN.VALUE = character(length = 1)
-                          )
-  reduced_allele[na_idx] <- NA
-  return(reduced_allele)
+  allele[allele_res >= resolution * 2] <- vapply(
+    X = stri_split_fixed(allele[allele_res >= resolution * 2], ":"),
+    FUN = function(a) {
+      paste(a[1:resolution], collapse = ":")
+    },
+    FUN.VALUE = character(length = 1)
+  )
+  allele[na_idx] <- NA
+  return(allele)
 }
 
 #' Returns positions of variable amino acids in the alignment.

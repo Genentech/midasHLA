@@ -38,9 +38,6 @@ test_that("Reduced HLA allele have desired resoulution", {
   expect_error(reduceAlleleResolution("C*05:24:55:54", resolution = "four"),
                "resolution is not a count \\(a single positive integer\\)"
   )
-  expect_error(reduceAlleleResolution("word", resolution = 4),
-               "input resolution can't be lower than requested resolution"
-  )
 })
 
 context("HLA allele alignments")
