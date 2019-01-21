@@ -5,9 +5,9 @@
 #'
 #' @param hla_calls Data frame containing HLA allele calls, in a format as
 #'                  return by `readHlaCalls` function.
-#' @param indels Logical indicating wheater indels should be considered as
-#'               variablity.
-#' @param unkchar Logical indicating wheater unknown characters in the alignment
+#' @param indels Logical indicating whether indels should be considered as
+#'               variability.
+#' @param unkchar Logical indicating whether unknown characters in the alignment
 #'                should be treated as variability.
 #' @param alnpath String providing optional path to directory containing
 #'                HLA alignment files. Each alignment file have to be named

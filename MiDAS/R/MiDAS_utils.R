@@ -50,7 +50,7 @@ getAlleleResolution <- function(allele) {
 #' \code{allele} elements, those elements will be returned unchanged.
 #'
 #' @return Character vector containing reduced HLA allele numbers, importantly
-#' alleles containing optional suffixes are omited and returned unchanged.
+#' alleles containing optional suffixes are omitted and returned unchanged.
 #'
 #' @examples
 #' reduceAlleleResolution(c("A*01", "A*01:24", "C*05:24:55:54"), 2)
@@ -84,8 +84,8 @@ reduceAlleleResolution <- function(allele,
 #' @param alignment Matrix containing amino acids level alignment.
 #' @param varchar Regex matching characters that should be considered when
 #' looking for variable amino acids positions. Eg. when varchar = "[A-Z]"
-#' occurence of deletion/insertion (".") will not be treated as variablity. In
-#' order to detect this kind of variablity varchar = "[A-Z\\.]" should be used.
+#' occurence of deletion/insertion (".") will not be treated as variability. In
+#' order to detect this kind of variability varchar = "[A-Z\\.]" should be used.
 #'
 #' @return Integer vector specifying which alignment columns are variable.
 #'
