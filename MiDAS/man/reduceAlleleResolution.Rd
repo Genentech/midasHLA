@@ -14,7 +14,8 @@ resolution. Note if `resolution` is greater than resolution of any
 \code{allele} elements, those elements will be returned unchanged.}
 }
 \value{
-Character vector containing reduced HLA allele numbers.
+Character vector containing reduced HLA allele numbers, importantly
+alleles containing optional suffixes are omitted and returned unchanged.
 }
 \description{
 Reduce HLA allele number
