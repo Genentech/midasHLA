@@ -11,8 +11,9 @@ test_that("HLA allele calls are read properly", {
   expect_equal(hla_calls, test_hla_calls)
 
   hla_calls_res2 <- readHlaCalls(file, resolution = 2)
-  res2 <- unique(getAlleleResolution(unlist(hla_calls_res2[, -1])))
-  expect_equal(res2, 2)
+  res2 <- getAlleleResolution(unlist(hla_calls_res2[, -1]))
+  load(system.file("extdata", "test_hla_calls_res.Rdata", package = "MiDAS"))
+  expect_equal(res2, test_res2)
 
   expect_error(readHlaCalls("/path/to/non/existing/file"),
                "Path '/path/to/non/existing/file' does not exist"
@@ -83,8 +84,9 @@ test_that("HLA allele alignments are read properly", {
   expect_equal(hla_alignments, test_hla_alignments)
 
   hla_alignments_res2 <- readHlaAlignments(file, resolution = 2)
-  res2 <- unique(getAlleleResolution(rownames(hla_alignments_res2)))
-  expect_equal(res2, 2)
+  res2 <- getAlleleResolution(rownames(hla_alignments_res2))
+  test_res2 <- c(2, 4, 2, 2, 2, 2, 2)
+  expect_equal(res2, test_res2)
 
   expect_error(readHlaAlignments("/path/to/non/existing/file"),
                "Path '/path/to/non/existing/file' does not exist"

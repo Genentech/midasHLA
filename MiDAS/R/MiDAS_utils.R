@@ -49,13 +49,14 @@ getAlleleResolution <- function(allele) {
 #' resolution. Note if `resolution` is greater than resolution of any
 #' \code{allele} elements, those elements will be returned unchanged.
 #'
-#' @return Character vector containing reduced HLA allele numbers.
+#' @return Character vector containing reduced HLA allele numbers, importantly
+#' alleles containing optional suffixes are omited and returned unchanged.
 #'
 #' @examples
 #' reduceAlleleResolution(c("A*01", "A*01:24", "C*05:24:55:54"), 2)
 #'
 #' @importFrom assertthat assert_that is.count see_if
-#' @importFrom stringi stri_split_fixed
+#' @importFrom stringi stri_split_fixed stri_detect_regex
 #' @export
 reduceAlleleResolution <- function(allele,
                                    resolution=4) {
@@ -63,10 +64,12 @@ reduceAlleleResolution <- function(allele,
     is.count(resolution)
   )
   na_idx <- is.na(allele)
+  letter_alleles <- stri_detect_regex(allele, pattern = "[A-Z]{1}$")
   allele_res <- getAlleleResolution(allele)
+  to_reduce <- allele_res >= resolution & ! letter_alleles
   resolution <- floor(resolution) / 2
-  allele[allele_res >= resolution * 2] <- vapply(
-    X = stri_split_fixed(allele[allele_res >= resolution * 2], ":"),
+  allele[to_reduce] <- vapply(
+    X = stri_split_fixed(allele[to_reduce], ":"),
     FUN = function(a) {
       paste(a[1:resolution], collapse = ":")
     },
