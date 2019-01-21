@@ -20,4 +20,16 @@ test_that("Amino acids variability is infered correctly", {
                                 "values in input data frame doesn't follow HLA numbers specification"
                )
   )
+
+  expect_error(hlaToAAVariation(hla_calls, indels = "foo"),
+               "indels is not a flag \\(a length one logical vector\\)."
+  )
+
+  expect_error(hlaToAAVariation(hla_calls, unkchar = "foo"),
+               "unkchar is not a flag \\(a length one logical vector\\)."
+  )
+
+  expect_error(hlaToAAVariation(hla_calls, alnpath = "foo/bar/foo/bar"),
+               "Path 'foo/bar/foo/bar' does not exist"
+  )
 })

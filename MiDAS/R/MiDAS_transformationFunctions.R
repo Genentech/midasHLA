@@ -9,6 +9,11 @@
 #'               variablity.
 #' @param unkchar Logical indicating wheater unknown characters in the alignment
 #'                should be treated as variability.
+#' @param alnpath String providing optional path to directory containing
+#'                HLA alignment files. Each alignment file have to be named
+#'                following EBI database convention GENENAME_prot.txt. If
+#'                \code{alnpath} is provided alignment files shipped with the
+#'                package are ignored.
 #'
 #' @return Matrix containing variable amino acid positions. Rownames corresponds
 #'         to ID column of input data frame, and colnames to alignment positions
@@ -20,12 +25,13 @@
 #' hla_calls <- readHlaCalls(hla_calls)
 #' aa_variation <- hlaToAAVariation(hla_calls)
 #'
-#' @importFrom assertthat assert_that see_if
+#' @importFrom assertthat assert_that see_if is.dir is.flag
 #' @importFrom stringi stri_split_fixed
 #' @export
 hlaToAAVariation <- function(hla_calls,
                              indels = TRUE,
-                             unkchar = FALSE){
+                             unkchar = FALSE,
+                             alnpath = system.file("extdata", package = "MiDAS")){
   assert_that(
     is.data.frame(hla_calls),
     see_if(nrow(hla_calls) >= 1 & ncol(hla_calls) >= 2,
@@ -36,7 +42,10 @@ hlaToAAVariation <- function(hla_calls,
     ),
     see_if(all(checkAlleleFormat(unlist(hla_calls[, -1])), na.rm = TRUE),
            msg = "values in input data frame doesn't follow HLA numbers specification"
-    )
+    ),
+    is.flag(indels),
+    is.flag(unkchar),
+    is.dir(alnpath)
   )
   ids <- hla_calls[, 1]
   hla_calls <- hla_calls[, -1]
@@ -73,8 +82,9 @@ hlaToAAVariation <- function(hla_calls,
   # read alignment matrices and convert to desired resolution
   hla_aln <- lapply(X = gene_names_uniq,
                     FUN = function(x) {
+                      aln_file <- file.path(alnpath, paste0(x, "_prot.txt"))
                       aln <- readHlaAlignments(
-                        gene = x,
+                        file = aln_file,
                         resolution = hla_resolution[x],
                         unkchar = "*"
                       )
