@@ -82,6 +82,10 @@ reduceAlleleResolution <- function(allele,
 #' Returns positions of variable amino acids in the alignment.
 #'
 #' @param alignment Matrix containing amino acids level alignment.
+#' @param varchar Regex matching characters that should be considered when
+#' looking for variable amino acids positions. Eg. when varchar = "[A-Z]"
+#' occurence of deletion/insertion (".") will not be treated as variablity. In
+#' order to detect this kind of variablity varchar = "[A-Z\\.]" should be used.
 #'
 #' @return Integer vector specifying which alignment columns are variable.
 #'
@@ -92,12 +96,13 @@ reduceAlleleResolution <- function(allele,
 #'
 #' @importFrom assertthat assert_that is.count see_if
 #' @export
-getVariableAAPos <- function(alignment) {
+getVariableAAPos <- function(alignment,
+                             varchar = "[A-Z]") {
   assert_that(is.matrix(alignment))
   var_cols <- apply(alignment,
         2,
         function(col) {
-          col <- col[grepl("^[A-Z]$", col)]
+          col <- col[grepl(sprintf("^%s$", varchar), col)]
           is.variable <- logical(length = 1)
           if (length(col) == 0) {
             is.variable <- FALSE
