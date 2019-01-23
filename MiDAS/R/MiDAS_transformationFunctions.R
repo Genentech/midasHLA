@@ -41,6 +41,17 @@ hlaToAAVariation <- function(hla_calls){
                        FUN.VALUE = character(length = 1)
   )
   gene_names_uniq <- unique(gene_names)
+  # discard genes for which no alignment files are available
+  availbable_genes <- list.files(
+    path = system.file("extdata", package = "MiDAS"),
+    pattern = "_prot.txt$"
+  )
+  availbable_genes <- vapply(
+    X = stri_split_fixed(availbable_genes, "_prot.txt"),
+    `[[`, 1,
+    FUN.VALUE = character(length = 1)
+  )
+  gene_names_uniq <- gene_names_uniq[gene_names_uniq %in% availbable_genes]
   hla_resolution <- vapply(X = gene_names_uniq,
                            FUN = function(x) {
                              x_numbers <- unlist(hla_calls[, gene_names == x])
@@ -52,7 +63,6 @@ hlaToAAVariation <- function(hla_calls){
   )
 
   # read alignment matrices and convert to desired resolution
-  # TODO check if alignment files are available for given gene?
   hla_aln <- lapply(X = gene_names_uniq,
                     FUN = function(x) {
                       path <- system.file("extdata/",
@@ -84,7 +94,9 @@ hlaToAAVariation <- function(hla_calls){
     hla_aln[[i]] <- hla_aln[[i]][x_calls_uniq, ]
     var_pos <- getVariableAAPos(hla_aln[[i]])
     var_aln <- lapply(colnames(x_calls), function(allele) {
-      x <- hla_aln[[i]][x_calls[, allele], var_pos, drop = FALSE]
+      mask <- 1:nrow(hla_aln[[i]]) # This is tmp solution as NAs in character index gives oob error
+      names(mask) <- rownames(hla_aln[[i]])
+      x <- hla_aln[[i]][mask[x_calls[, allele]], var_pos, drop = FALSE]
       colnames(x) <- paste0(allele, "_", "AA_", var_pos)
       return(x)
     })
