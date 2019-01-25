@@ -56,19 +56,28 @@ hlaToAAVariation <- function(hla_calls,
                        FUN.VALUE = character(length = 1)
   )
   gene_names_uniq <- unique(gene_names)
-
   # discard genes for which no alignment files are available
-  availbable_genes <- list.files(
-    path = system.file("extdata", package = "MiDAS"),
+  available_genes <- list.files(
+    path = alnpath,
     pattern = "_prot.txt$"
   )
-  availbable_genes <- vapply(
-    X = stri_split_fixed(availbable_genes, "_prot.txt"),
+  alnfiles_readable <- vapply(
+    X = file.path(alnpath, available_genes),
+    FUN = is.readable,
+    FUN.VALUE = logical(length = 1)
+  )
+  assert_that(
+    all(alnfiles_readable),
+    msg = sprintf("files: %s are not readable",
+                  paste(available_genes[!alnfiles_readable], collapse = ", ")
+    )
+  )
+  available_genes <- vapply(
+    X = stri_split_fixed(available_genes, "_prot.txt"),
     `[[`, 1,
     FUN.VALUE = character(length = 1)
   )
-  gene_names_uniq <- gene_names_uniq[gene_names_uniq %in% availbable_genes]
-
+  gene_names_uniq <- gene_names_uniq[gene_names_uniq %in% available_genes]
   hla_resolution <- vapply(X = gene_names_uniq,
                            FUN = function(x) {
                              x_numbers <- unlist(hla_calls[, gene_names == x])

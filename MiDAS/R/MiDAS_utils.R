@@ -66,7 +66,7 @@ reduceAlleleResolution <- function(allele,
   na_idx <- is.na(allele)
   letter_alleles <- stri_detect_regex(allele, pattern = "[A-Z]{1}$")
   allele_res <- getAlleleResolution(allele)
-  to_reduce <- allele_res >= resolution & ! letter_alleles
+  to_reduce <- allele_res >= resolution & ! letter_alleles & ! na_idx
   resolution <- floor(resolution) / 2
   allele[to_reduce] <- vapply(
     X = stri_split_fixed(allele[to_reduce], ":"),
