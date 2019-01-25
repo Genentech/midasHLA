@@ -32,4 +32,8 @@ test_that("Amino acids variability is infered correctly", {
   expect_error(hlaToAAVariation(hla_calls, alnpath = "foo/bar/foo/bar"),
                "Path 'foo/bar/foo/bar' does not exist"
   )
+
+  expect_error(hlaToAAVariation(hla_calls, alnpath = system.file(package = "MiDAS")),
+               sprintf("no alignment files was found in path %s", system.file("inst", package = "MiDAS"))
+  )
 })

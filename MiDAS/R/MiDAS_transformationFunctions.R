@@ -61,6 +61,10 @@ hlaToAAVariation <- function(hla_calls,
     path = alnpath,
     pattern = "_prot.txt$"
   )
+  assert_that(
+    length(available_genes) >= 1,
+    msg = sprintf("no alignment files was found in path %s", alnpath)
+  )
   alnfiles_readable <- vapply(
     X = file.path(alnpath, available_genes),
     FUN = is.readable,
