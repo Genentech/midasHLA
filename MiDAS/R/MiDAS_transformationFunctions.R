@@ -153,3 +153,68 @@ hlaToAAVariation <- function(hla_calls,
 
   return(aa_variation)
 }
+
+#' Converts hla calls data frame accoriding to match table
+#'
+#' @param hla_calls data frame containing HLA allele calls, in a format as
+#'                  return by `readHlaCalls` function.
+#' @param dictionary table containing allele numbers matchings, this can be
+#'                   either path to tsv file or a data frame. Fist column
+#'                   should contain alleles and second corresponding
+#'                   assignments. Optionaly matchings files shipped with the
+#'                   package can be refered to by using one of following
+#'                   strings: "2digit_A-allele_expression",
+#'                   "2digit_C-allele_expression", "4digit_allele_Ggroup",
+#'                   "4digit_B-allele_Bw", "4digit_C-allele_C1-2",
+#'                   "4digit_supertype".
+#' @param nacol.rm logical indicating if result columns that contain only
+#'                 \code{NA} should be removed.
+#'
+#' @return Data frame of hla numbers converted to additional variables according
+#'         to match table.
+#'
+#' @examples
+#' hla_calls <- system.file("extdata/HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(hla_calls)
+#' hlaToVariable(hla_calls, dictionary = "4digit_supertype")
+#'
+#' @importFrom assertthat assert_that is.string is.flag see_if
+#' @export
+hlaToVariable <- function(hla_calls,
+                          dictionary,
+                          nacols.rm = TRUE) {
+  assert_that(
+    is.data.frame(hla_calls),
+    see_if(! all(checkAlleleFormat(hla_calls[, 1]), na.rm = TRUE),
+           msg = "first column of input data frame should specify samples id"
+    ),
+    see_if(all(checkAlleleFormat(unlist(hla_calls[, -1])), na.rm = TRUE),
+           msg = "values in input data frame doesn't follow HLA numbers specification"
+    ),
+    is.flag(nacols.rm)
+  )
+  if (is.string(dictionary)) {
+    lib = list.files(
+      path = system.file("extdata", package = "MiDAS"),
+      pattern = "^Match_.*txt$"
+    )
+    lib = gsub("^Match_", "", gsub(".txt$", "", lib))
+    if (dictionary %in% lib) {
+      dictionary <- system.file(
+        "extdata",
+        paste0("Match_", dictionary, ".txt"),
+        package = "MiDAS"
+      )
+    }
+  }
+  variable <- as.data.frame(
+    lapply(hla_calls[, -1], convertAlleleToVariable, dictionary = dictionary),
+    stringsAsFactors = FALSE
+  )
+  if (nacols.rm) {
+    variable <- Filter(function(x) ! all(is.na(x)), variable)
+  }
+  variable <- cbind(hla_calls[, 1], variable)
+  colnames(variable) <- c("ID", colnames(variable[, -1]))
+  return(variable)
+}
