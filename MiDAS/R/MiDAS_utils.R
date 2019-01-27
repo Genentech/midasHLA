@@ -114,3 +114,56 @@ getVariableAAPos <- function(alignment,
   )
   return(which(var_cols))
 }
+
+#' Converts allele numbers to additional variables based on match file.
+#'
+#' @param allele Character vector containing HLA allele numbers.
+#' @param path Path to the file containing HLA allele numbers matchings. The file
+#' should be in tsv format with header and two columns. First column should hold
+#' allele numbers and second corresponding additional variables. Function also
+#' accepts match table in form of data frame.
+#'
+#' @return Vector containing allele numbers converted to additional variables
+#' according to matching file.
+#'
+#' @examples
+#' dictionary <- system.file("extdata", "Match_4digit_supertype.txt", package = "MiDAS")
+#' convertAlleleToVariable(c("A*01:01", "A*02:01"), dictionary = dictionary)
+#'
+#' @importFrom assertthat assert_that is.readble see_if
+#' @export
+convertAlleleToVariable <- function(allele,
+                                    dictionary) {
+  assert_that(
+    see_if(all(checkAlleleFormat(allele), na.rm = TRUE),
+           msg = "allele have to be a valid HLA allele number"
+    ),
+    see_if(is.string(dictionary) | is.data.frame(dictionary),
+           msg = "dictionary have to be either path or data.frame"
+    )
+  )
+  if (is.character(dictionary)) {
+    assert_that(
+      is.readable(dictionary)
+    )
+    dictionary <- read.table(
+      file = dictionary,
+      header = TRUE,
+      stringsAsFactors = FALSE
+    )
+  }
+  assert_that(
+    see_if(ncol(dictionary) == 2,
+           msg = "match table have to consist out of two columns"
+    ),
+    see_if(all(checkAlleleFormat(dictionary[, 1]), na.rm = TRUE),
+           msg = "first column of match table must contain valid HLA allele numbers"
+    ),
+    see_if(! any(duplicated(dictionary[, 1]), na.rm = TRUE),
+           msg = "match table contains duplicated allele numbers")
+  )
+  dictionary <- setNames(dictionary[, 2], dictionary[, 1])
+  variable <- dictionary[allele]
+  variable <- type.convert(variable, as.is = TRUE)
+  return(variable)
+}
