@@ -130,7 +130,7 @@ getVariableAAPos <- function(alignment,
 #' dictionary <- system.file("extdata", "Match_4digit_supertype.txt", package = "MiDAS")
 #' convertAlleleToVariable(c("A*01:01", "A*02:01"), dictionary = dictionary)
 #'
-#' @importFrom assertthat assert_that is.readble see_if
+#' @importFrom assertthat assert_that is.readable see_if
 #' @export
 convertAlleleToVariable <- function(allele,
                                     dictionary) {
