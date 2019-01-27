@@ -154,15 +154,15 @@ hlaToAAVariation <- function(hla_calls,
   return(aa_variation)
 }
 
-#' Converts hla calls data frame accoriding to match table
+#' Converts hla calls data frame according to match table
 #'
 #' @param hla_calls data frame containing HLA allele calls, in a format as
 #'                  return by `readHlaCalls` function.
 #' @param dictionary table containing allele numbers matchings, this can be
 #'                   either path to tsv file or a data frame. Fist column
 #'                   should contain alleles and second corresponding
-#'                   assignments. Optionaly matchings files shipped with the
-#'                   package can be refered to by using one of following
+#'                   assignments. Optionally matchings files shipped with the
+#'                   package can be referred to by using one of following
 #'                   strings: "2digit_A-allele_expression",
 #'                   "2digit_C-allele_expression", "4digit_allele_Ggroup",
 #'                   "4digit_B-allele_Bw", "4digit_C-allele_C1-2",
