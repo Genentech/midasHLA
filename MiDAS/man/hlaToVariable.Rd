@@ -20,7 +20,7 @@ strings: "2digit_A-allele_expression",
 "4digit_B-allele_Bw", "4digit_C-allele_C1-2",
 "4digit_supertype".}
 
-\item{nacol.rm}{logical indicating if result columns that contain only
+\item{nacols.rm}{logical indicating if result columns that contain only
 \code{NA} should be removed.}
 }
 \value{

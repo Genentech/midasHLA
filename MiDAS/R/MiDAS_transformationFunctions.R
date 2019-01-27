@@ -167,7 +167,7 @@ hlaToAAVariation <- function(hla_calls,
 #'                   "2digit_C-allele_expression", "4digit_allele_Ggroup",
 #'                   "4digit_B-allele_Bw", "4digit_C-allele_C1-2",
 #'                   "4digit_supertype".
-#' @param nacol.rm logical indicating if result columns that contain only
+#' @param nacols.rm logical indicating if result columns that contain only
 #'                 \code{NA} should be removed.
 #'
 #' @return Data frame of hla numbers converted to additional variables according

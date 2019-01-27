@@ -9,10 +9,10 @@ convertAlleleToVariable(allele, dictionary)
 \arguments{
 \item{allele}{Character vector containing HLA allele numbers.}
 
-\item{path}{Path to the file containing HLA allele numbers matchings. The file
-should be in tsv format with header and two columns. First column should hold
-allele numbers and second corresponding additional variables. Function also
-accepts match table in form of data frame.}
+\item{dictionary}{Path to the file containing HLA allele numbers matchings.
+The file should be in tsv format with header and two columns. First column
+should hold allele numbers and second corresponding additional variables.
+Function also accepts match table in form of data frame.}
 }
 \value{
 Vector containing allele numbers converted to additional variables

@@ -118,10 +118,10 @@ getVariableAAPos <- function(alignment,
 #' Converts allele numbers to additional variables based on match file.
 #'
 #' @param allele Character vector containing HLA allele numbers.
-#' @param path Path to the file containing HLA allele numbers matchings. The file
-#' should be in tsv format with header and two columns. First column should hold
-#' allele numbers and second corresponding additional variables. Function also
-#' accepts match table in form of data frame.
+#' @param dictionary Path to the file containing HLA allele numbers matchings.
+#' The file should be in tsv format with header and two columns. First column
+#' should hold allele numbers and second corresponding additional variables.
+#' Function also accepts match table in form of data frame.
 #'
 #' @return Vector containing allele numbers converted to additional variables
 #' according to matching file.
@@ -131,6 +131,8 @@ getVariableAAPos <- function(alignment,
 #' convertAlleleToVariable(c("A*01:01", "A*02:01"), dictionary = dictionary)
 #'
 #' @importFrom assertthat assert_that is.readable see_if
+#' @importFrom stats setNames
+#' @importFrom utils type.convert
 #' @export
 convertAlleleToVariable <- function(allele,
                                     dictionary) {
