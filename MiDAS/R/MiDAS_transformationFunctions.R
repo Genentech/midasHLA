@@ -194,11 +194,11 @@ hlaToVariable <- function(hla_calls,
     is.flag(nacols.rm)
   )
   if (is.string(dictionary)) {
-    lib = list.files(
+    lib <- list.files(
       path = system.file("extdata", package = "MiDAS"),
       pattern = "^Match_.*txt$"
     )
-    lib = gsub("^Match_", "", gsub(".txt$", "", lib))
+    lib <- gsub("^Match_", "", gsub(".txt$", "", lib))
     if (dictionary %in% lib) {
       dictionary <- system.file(
         "extdata",
