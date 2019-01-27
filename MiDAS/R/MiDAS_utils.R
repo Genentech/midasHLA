@@ -22,9 +22,6 @@ checkAlleleFormat <- function(allele) {
 #' Infers HLA allele resolution
 #'
 #' @param allele Character vector containing HLA allele numbers.
-#' @param na.pass Logical indicating if \code{NA} values should be accepted. If
-#'                set to \code{FALSE} function will rise an error when
-#'                \code{allele} will contain \code{NA} values.
 #'
 #' @return Integer vector specifying alleles resolutions.
 #'
@@ -35,10 +32,9 @@ checkAlleleFormat <- function(allele) {
 #' @importFrom assertthat assert_that see_if
 #' @importFrom stringi stri_count_fixed
 #' @export
-getAlleleResolution <- function(allele,
-                                na.pass = TRUE) {
+getAlleleResolution <- function(allele) {
   assert_that(
-    see_if(all(checkAlleleFormat(allele), na.rm = na.pass),
+    see_if(all(checkAlleleFormat(allele), na.rm = TRUE),
          msg = "allele have to be a valid HLA allele number"
     )
   )

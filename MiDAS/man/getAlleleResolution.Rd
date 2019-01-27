@@ -4,14 +4,10 @@
 \alias{getAlleleResolution}
 \title{Infers HLA allele resolution}
 \usage{
-getAlleleResolution(allele, na.pass = TRUE)
+getAlleleResolution(allele)
 }
 \arguments{
 \item{allele}{Character vector containing HLA allele numbers.}
-
-\item{na.pass}{Logical indicating if \code{NA} values should be accepted. If
-set to \code{FALSE} function will rise an error when
-\code{allele} will contain \code{NA} values.}
 }
 \value{
 Integer vector specifying alleles resolutions.
