@@ -28,30 +28,6 @@ test_that("HLA allele calls are read properly", {
                            A_2 = c("A*01", "B*02", "C*03")
   )
 
-  fake_calls_no_id <- tempfile()
-  write.table(fake_calls[, c(2, 1, 3)],
-              file = fake_calls_no_id,
-              sep = "\t",
-              row.names = FALSE,
-              col.names = TRUE
-  )
-  expect_error(readHlaCalls(fake_calls_no_id, resolution = 2),
-               "first column of input should specify samples id"
-  )
-  unlink(fake_calls_no_id)
-
-  fake_calls_non_hla_numbers <- tempfile()
-  write.table(fake_calls[, c(1, 1, 3)],
-              file = fake_calls_non_hla_numbers,
-              sep = "\t",
-              row.names = FALSE,
-              col.names = TRUE
-  )
-  expect_error(readHlaCalls(fake_calls_non_hla_numbers, resolution = 2),
-               "values in input doesn't follow HLA numbers specification"
-  )
-  unlink(fake_calls_non_hla_numbers)
-
   fake_calls_non_uniq_genes <- tempfile()
   write.table(fake_calls,
               file = fake_calls_non_uniq_genes,
