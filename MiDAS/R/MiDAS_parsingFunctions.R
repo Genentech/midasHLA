@@ -59,10 +59,7 @@ readHlaCalls <- function(file,
   hla_calls <- hla_calls[, c(1, ord + 1)]
   colnames(hla_calls) <- c("ID", gene_names)
 
-  hla_calls[, -1] <- as.data.frame(
-    lapply(hla_calls[, -1], reduceAlleleResolution, resolution = resolution),
-    stringsAsFactors = FALSE
-  )
+  hla_calls <- reduceHlaCalls(hla_calls, resolution = resolution)
 
   return(hla_calls)
 }
