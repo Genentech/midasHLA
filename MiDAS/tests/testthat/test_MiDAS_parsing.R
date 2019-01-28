@@ -36,7 +36,7 @@ test_that("HLA allele calls are read properly", {
               col.names = TRUE
   )
   expect_error(readHlaCalls(fake_calls_no_id, resolution = 2),
-               "First column of input file should specify samples id"
+               "first column of input should specify samples id"
   )
   unlink(fake_calls_no_id)
 
@@ -48,7 +48,7 @@ test_that("HLA allele calls are read properly", {
               col.names = TRUE
   )
   expect_error(readHlaCalls(fake_calls_non_hla_numbers, resolution = 2),
-               "Values in input file doesn't follow HLA numbers specification"
+               "values in input doesn't follow HLA numbers specification"
   )
   unlink(fake_calls_non_hla_numbers)
 

@@ -28,14 +28,7 @@ readHlaCalls <- function(file,
                           sep = "\t",
                           stringsAsFactors = FALSE
   )
-  assert_that(
-    see_if(! all(checkAlleleFormat(hla_calls[, 1]), na.rm = TRUE),
-           msg = "First column of input file should specify samples id"
-    ),
-    see_if(all(checkAlleleFormat(unlist(hla_calls[, -1])), na.rm = TRUE),
-           msg = "Values in input file doesn't follow HLA numbers specification"
-    )
-  )
+  assert_that(checkHlaCallsFormat(hla_calls))
 
   # set colnames based on allele numbers
   gene_names <- vapply(X = 2:ncol(hla_calls),
@@ -65,7 +58,6 @@ readHlaCalls <- function(file,
   gene_names <- paste(gene_names, gene_names_id, sep = "_")
   hla_calls <- hla_calls[, c(1, ord + 1)]
   colnames(hla_calls) <- c("ID", gene_names)
-
 
   hla_calls[, -1] <- as.data.frame(
     lapply(hla_calls[, -1], reduceAlleleResolution, resolution = resolution),

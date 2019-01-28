@@ -79,6 +79,29 @@ test_that("HLA allels are converted to additional variables", {
   )
 })
 
+test_that("HLA calls data frame have proper format", {
+  file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(file)
+  expect_equal(checkHlaCallsFormat(hla_calls), TRUE)
+
+  hla_calls[, 1] <- as.factor(hla_calls[, 1])
+  expect_error(checkHlaCallsFormat(hla_calls),
+               "input can't contain factors"
+  )
+  fake_calls <- data.frame(ID = c("Sample1", "Sample2", "Sample3"),
+                           A_1 = c("A*01", "A*02", "A*03"),
+                           A_2 = c("A*01", "B*02", "C*03"),
+                           stringsAsFactors = FALSE
+  )
+  expect_error(checkHlaCallsFormat(fake_calls[, c(2, 1, 3)]),
+               "first column of input should specify samples id"
+  )
+
+  expect_error(checkHlaCallsFormat(fake_calls[, c(1, 1, 3)]),
+               "values in input doesn't follow HLA numbers specification"
+  )
+})
+
 context("HLA allele alignments")
 
 test_that("Variable amino acids positions are detected properly", {

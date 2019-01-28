@@ -169,3 +169,33 @@ convertAlleleToVariable <- function(allele,
   variable <- type.convert(variable, as.is = TRUE)
   return(variable)
 }
+
+#' Assert hla calls data frame format
+#'
+#' @param hla_calls data frame containing HLA allele calls, in a format as
+#'                  return by `readHlaCalls` function.
+#'
+#' @return Logical indicating if hla_calls follows hla calls data frame format.
+#'         Otherwise raise error.
+#'
+#' @examples
+#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(file)
+#' checkHlaCallsFormat(hla_calls)
+#'
+#' @export
+checkHlaCallsFormat <- function(hla_calls) {
+  assert_that(
+    see_if(! any(vapply(hla_calls, is.factor, logical(length = 1))),
+           msg = "input can't contain factors"
+    ),
+    see_if(! all(checkAlleleFormat(hla_calls[, 1]), na.rm = TRUE),
+           msg = "first column of input should specify samples id"
+    ),
+    see_if(all(checkAlleleFormat(unlist(hla_calls[, -1])), na.rm = TRUE),
+           msg = "values in input doesn't follow HLA numbers specification"
+    )
+  )
+
+  return(TRUE)
+}
