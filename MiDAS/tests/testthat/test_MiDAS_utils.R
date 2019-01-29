@@ -53,27 +53,30 @@ test_that("HLA allels are converted to additional variables", {
   )
   )
 
-  expect_error(convertAlleleToVariable(c("a", "b", "c"), dictionary = c("foo", "bar"),
+  expect_error(convertAlleleToVariable(c("A*01", "A*02", "A*03"), dictionary = c("foo", "bar"),
                                        "dictionary have to be either path or data.frame"
   )
   )
 
-  expect_error(convertAlleleToVariable(c("a", "b", "c"), dictionary = "/foo/bar",
-                                       "Path '/foo/bar' does not exist"
-  )
+  expect_error(
+    convertAlleleToVariable(
+      allele = c("A*01", "A*02", "A*03"),
+      dictionary = file.path("foo", "bar")
+    ),
+    sprintf("Path '%s' does not exist", file.path("foo", "bar"))
   )
 
-  expect_error(convertAlleleToVariable(c("a", "b", "c"), dictionary = dictionary[, 1],
+  expect_error(convertAlleleToVariable(c("A*01", "A*02", "A*03"), dictionary = dictionary[, 1],
                                        "match table have to consist out of two columns"
   )
   )
 
-  expect_error(convertAlleleToVariable(c("a", "b", "c"), dictionary = dictionary[, c(2, 2)],
+  expect_error(convertAlleleToVariable(c("A*01", "A*02", "A*03"), dictionary = dictionary[, c(2, 2)],
                                        "first column of match table must contain valid HLA allele numbers"
   )
   )
 
-  expect_error(convertAlleleToVariable(c("a", "b", "c"), dictionary = dictionary[c(1, 1), ],
+  expect_error(convertAlleleToVariable(c("A*01", "A*02", "A*03"), dictionary = dictionary[c(1, 1), ],
                                        "match table contains duplicated allele numbers"
   )
   )
