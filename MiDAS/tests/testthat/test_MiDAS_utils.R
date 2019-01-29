@@ -40,6 +40,45 @@ test_that("Reduced HLA allele have desired resoulution", {
   )
 })
 
+test_that("HLA allels are converted to additional variables", {
+  path <- system.file("extdata", "Match_4digit_supertype.txt", package = "MiDAS")
+  addvar <- convertAlleleToVariable(c("A*01:01", "A*02:01", "B*01", NA), dictionary = path)
+  expect_equal(addvar, c("A01", "A02", NA, NA))
+  dictionary <- read.table(path, header = TRUE, stringsAsFactors = FALSE)
+  addvar <- convertAlleleToVariable(c("A*01:01", "A*02:01", "B*01", NA), dictionary = dictionary)
+  expect_equal(addvar, c("A01", "A02", NA, NA))
+
+  expect_error(convertAlleleToVariable(c("a", "b", "c"), dictionary = path,
+                                       "allele have to be a valid HLA allele number"
+  )
+  )
+
+  expect_error(convertAlleleToVariable(c("a", "b", "c"), dictionary = c("foo", "bar"),
+                                       "dictionary have to be either path or data.frame"
+  )
+  )
+
+  expect_error(convertAlleleToVariable(c("a", "b", "c"), dictionary = "/foo/bar",
+                                       "Path '/foo/bar' does not exist"
+  )
+  )
+
+  expect_error(convertAlleleToVariable(c("a", "b", "c"), dictionary = dictionary[, 1],
+                                       "match table have to consist out of two columns"
+  )
+  )
+
+  expect_error(convertAlleleToVariable(c("a", "b", "c"), dictionary = dictionary[, c(2, 2)],
+                                       "first column of match table must contain valid HLA allele numbers"
+  )
+  )
+
+  expect_error(convertAlleleToVariable(c("a", "b", "c"), dictionary = dictionary[c(1, 1), ],
+                                       "match table contains duplicated allele numbers"
+  )
+  )
+})
+
 context("HLA allele alignments")
 
 test_that("Variable amino acids positions are detected properly", {

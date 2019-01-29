@@ -72,8 +72,10 @@ table and return matrix holding all variable aa positions.
 The example:
 ```{r aa_var_inference}
 # readHlaAlignments reads alignment files
-alignment_file <- system.file("extdata", "A_prot.txt", package = "MiDAS")
-alignment <- readHlaAlignments(alignment_file, trim = TRUE, unkchar = "")
+# alignment_file <- system.file("extdata", "A_prot.txt", package = "MiDAS")
+# alignment <- readHlaAlignments(alignment_file, trim = TRUE, unkchar = "")
+# now we can also just specify gene name
+alignment <- readHlaAlignments(gene = "A", trim = TRUE, unkchar = "")
 
 kable(alignment[, 1:20]) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
@@ -85,7 +87,8 @@ print(alleles)
 reduceAlleleResolution(alleles, resolution = 4)
 
 # hlaToAAVariation can be used to get variable amino acids positions
-aa_variation <- hlaToAAVariation(hla_calls)
+# We can choose if indels and unkchar should be taken into account or not
+aa_variation <- hlaToAAVariation(hla_calls, indels = TRUE, unkchar = FALSE)
 
 kable(aa_variation[, 1:50]) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
@@ -107,13 +110,28 @@ table(alignment[, 5])
 > The same holds true for supertypes, which group 4-digit alleles (but only for HLA-A and HLA-B) into these supertypes by their binding specificity to antigens. There are 12 supertypes (6 each for HLA-A and HLA-B), and not all 4-digit alleles can be matched to a supertype.
 
 Conversion of 4-digit alleles in 2-digit level can be done with help of 
-`reduceAlleleResolution`. The functionality that will allow conversion to 
-supertypes is still not ready though.
+`reduceAlleleResolution`. 
+
+The conversion to supertypes and other additional variables can be achived using
+`hlaToVariable` function. It converts the hla calls data frame based on the 
+supplied match table. It can be a tsv file or data frame. For the files provided
+by Chris, I've made it that you can refere them by passing one of the strings:
+2digit_A-allele_expression, 2digit_C-allele_expression, 4digit_allele_Ggroup,
+4digit_B-allele_Bw, 4digit_C-allele_C1-2, 4digit_supertype. As you can see
+I've added the resolution parameter thier names so it obvius which conversions
+they code.
 ```{r hla_numbers_coversion}
 # 4-digit alleles in supertypes, and to 2-digit level
 alleles <- c("A*01:01:01:01", "A*01:01:01:02N", "A*01:01:01:03", "A*01:01:01:04", "A*01:01:01:05")
 print(alleles)
 reduceAlleleResolution(alleles, resolution = 2)
+
+hla_calls <- system.file("extdata/HLAHD_output_example.txt", package = "MiDAS")
+hla_calls <- readHlaCalls(hla_calls, resolution = 4)
+supertypes <- hlaToVariable(hla_calls, dictionary = "4digit_supertype")
+kable(supertypes) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  scroll_box(width = "100%", height = "200px")
 ```
 
 ###Calculation of allelic distance per gene
