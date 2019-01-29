@@ -78,7 +78,7 @@ readHlaCalls <- function(file,
 #' of the mature protein.
 #' @param unkchar Character to be used to represent positions with unknown
 #' sequence.
-#' @param resolution Integer specifying the resoultion with which alignment
+#' @param resolution Integer specifying the resolution with which alignment
 #'        matrix should be returned.
 #'
 #' @return Matrix containing HLA allele alignments. Rownames corresponds to
