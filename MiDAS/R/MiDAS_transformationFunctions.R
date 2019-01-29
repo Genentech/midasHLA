@@ -208,3 +208,32 @@ hlaToVariable <- function(hla_calls,
   colnames(variable) <- c("ID", colnames(variable[, -1]))
   return(variable)
 }
+
+#' Reduce hla calls data frame resolution
+#'
+#' @param hla_calls data frame containing HLA allele calls, in a format as
+#'                  return by `readHlaCalls` function.
+#' @param resolution Numeric vector of length one specifying desired
+#'        resolution. Note if `resolution` is greater than resolution of
+#'        \code{hla_calls} elements, those elements will be returned unchanged.
+#'        Elements with optional suffixes are not reduced.
+#'
+#' @return Data frame containing HLA allele calls reduced to required
+#'         resolution.
+#'
+#' @examples
+#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(file)
+#' reduceHlaCalls(hla_calls, resolution = 2)
+#'
+#' @export
+reduceHlaCalls <- function(hla_calls,
+                           resolution = 4) {
+  assert_that(checkHlaCallsFormat(hla_calls))
+  hla_calls[, -1] <- as.data.frame(
+    lapply(hla_calls[, -1], reduceAlleleResolution, resolution = resolution),
+    stringsAsFactors = FALSE
+  )
+
+  return(hla_calls)
+}
