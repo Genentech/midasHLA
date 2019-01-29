@@ -1,10 +1,19 @@
 #' Converts HLA allele numbers to amino acid variation
 #'
 #' Converts HLA allele numbers data frame to a matrix holding information on
-#' amino acid level varation.
+#' amino acid level variation.
 #'
 #' @param hla_calls Data frame containing HLA allele calls, in a format as
 #'                  return by `readHlaCalls` function.
+#' @param indels Logical indicating whether indels should be considered as
+#'               variability.
+#' @param unkchar Logical indicating whether unknown characters in the alignment
+#'                should be treated as variability.
+#' @param alnpath String providing optional path to directory containing
+#'                HLA alignment files. Each alignment file have to be named
+#'                following EBI database convention GENENAME_prot.txt. If
+#'                \code{alnpath} is provided alignment files shipped with the
+#'                package are ignored.
 #'
 #' @return Matrix containing variable amino acid positions. Rownames corresponds
 #'         to ID column of input data frame, and colnames to alignment positions
@@ -16,10 +25,13 @@
 #' hla_calls <- readHlaCalls(hla_calls)
 #' aa_variation <- hlaToAAVariation(hla_calls)
 #'
-#' @importFrom assertthat assert_that see_if
+#' @importFrom assertthat assert_that see_if is.dir is.flag
 #' @importFrom stringi stri_split_fixed
 #' @export
-hlaToAAVariation <- function(hla_calls){
+hlaToAAVariation <- function(hla_calls,
+                             indels = TRUE,
+                             unkchar = FALSE,
+                             alnpath = system.file("extdata", package = "MiDAS")){
   assert_that(
     is.data.frame(hla_calls),
     see_if(nrow(hla_calls) >= 1 & ncol(hla_calls) >= 2,
@@ -30,7 +42,10 @@ hlaToAAVariation <- function(hla_calls){
     ),
     see_if(all(checkAlleleFormat(unlist(hla_calls[, -1])), na.rm = TRUE),
            msg = "values in input data frame doesn't follow HLA numbers specification"
-    )
+    ),
+    is.flag(indels),
+    is.flag(unkchar),
+    is.dir(alnpath)
   )
   ids <- hla_calls[, 1]
   hla_calls <- hla_calls[, -1]
@@ -42,16 +57,31 @@ hlaToAAVariation <- function(hla_calls){
   )
   gene_names_uniq <- unique(gene_names)
   # discard genes for which no alignment files are available
-  availbable_genes <- list.files(
-    path = system.file("extdata", package = "MiDAS"),
+  available_genes <- list.files(
+    path = alnpath,
     pattern = "_prot.txt$"
   )
-  availbable_genes <- vapply(
-    X = stri_split_fixed(availbable_genes, "_prot.txt"),
+  assert_that(
+    length(available_genes) >= 1,
+    msg = sprintf("no alignment files was found in path %s", alnpath)
+  )
+  alnfiles_readable <- vapply(
+    X = file.path(alnpath, available_genes),
+    FUN = is.readable,
+    FUN.VALUE = logical(length = 1)
+  )
+  assert_that(
+    all(alnfiles_readable),
+    msg = sprintf("files: %s are not readable",
+                  paste(available_genes[!alnfiles_readable], collapse = ", ")
+    )
+  )
+  available_genes <- vapply(
+    X = stri_split_fixed(available_genes, "_prot.txt"),
     `[[`, 1,
     FUN.VALUE = character(length = 1)
   )
-  gene_names_uniq <- gene_names_uniq[gene_names_uniq %in% availbable_genes]
+  gene_names_uniq <- gene_names_uniq[gene_names_uniq %in% available_genes]
   hla_resolution <- vapply(X = gene_names_uniq,
                            FUN = function(x) {
                              x_numbers <- unlist(hla_calls[, gene_names == x])
@@ -65,18 +95,12 @@ hlaToAAVariation <- function(hla_calls){
   # read alignment matrices and convert to desired resolution
   hla_aln <- lapply(X = gene_names_uniq,
                     FUN = function(x) {
-                      path <- system.file("extdata/",
-                                          paste0(x, "_prot.txt"),
-                                          package = "MiDAS"
+                      aln_file <- file.path(alnpath, paste0(x, "_prot.txt"))
+                      aln <- readHlaAlignments(
+                        file = aln_file,
+                        resolution = hla_resolution[x],
+                        unkchar = "*"
                       )
-                      aln <- readHlaAlignments(path)
-                      alleles <- rownames(aln)
-                      alleles <- reduceAlleleResolution(alleles,
-                                                        resolution = hla_resolution[x]
-                      )
-                      unique_idx <- ! duplicated(alleles)
-                      aln <- aln[unique_idx, ]
-                      rownames(aln) <- alleles[unique_idx]
                       return(aln)
                     }
   )
@@ -86,13 +110,18 @@ hlaToAAVariation <- function(hla_calls){
   for (i in 1:length(gene_names_uniq)) {
     x_calls <- hla_calls[, gene_names == gene_names_uniq[i]]
 
-    # check if there is possiblity for variability
+    # check if there is possibility for variability
     x_calls_uniq <- na.omit(unique(unlist(x_calls)))
     if (length(x_calls_uniq) <= 1) next()
 
     # get variable aa positions
     hla_aln[[i]] <- hla_aln[[i]][x_calls_uniq, ]
-    var_pos <- getVariableAAPos(hla_aln[[i]])
+    var_pos <- getVariableAAPos(hla_aln[[i]],
+                                varchar = sprintf("[A-Z%s%s]",
+                                                  ifelse(indels, "\\.", ""),
+                                                  ifelse(unkchar, "\\*", "")
+                                )
+    )
     var_aln <- lapply(colnames(x_calls), function(allele) {
       mask <- 1:nrow(hla_aln[[i]]) # This is tmp solution as NAs in character index gives oob error
       names(mask) <- rownames(hla_aln[[i]])

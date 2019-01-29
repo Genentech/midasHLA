@@ -4,10 +4,14 @@
 \alias{readHlaCalls}
 \title{Reads data table with HLA allele calls}
 \usage{
-readHlaCalls(file)
+readHlaCalls(file, resolution = 4)
 }
 \arguments{
 \item{file}{Path to the file containing HLA allele calls.}
+
+\item{resolution}{Integer specifying the resolution to which the HLA allele
+calls should be reduced to. Valid values should be one of
+`2, 4, 6, 8`. To disable this functionality see `reduce` parameter.}
 }
 \value{
 Data frame containing HLA allele calls.

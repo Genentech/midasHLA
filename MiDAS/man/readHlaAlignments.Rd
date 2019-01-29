@@ -4,16 +4,26 @@
 \alias{readHlaAlignments}
 \title{Reads HLA allele alignments}
 \usage{
-readHlaAlignments(file, trim = TRUE, unkchar = "")
+readHlaAlignments(file, gene = NULL, trim = TRUE, unkchar = "",
+  resolution = 8)
 }
 \arguments{
 \item{file}{Path to the file containing HLA allele alignments.}
+
+\item{gene}{Character vector of length one specifying the name of a gene for
+which alignment is required. All the protein alignment files from EBI
+database are shipped with the package and this parameter can be used to
+provide simpler access to those files. If it's set to \code{NULL} file
+parameter is used instead.}
 
 \item{trim}{Logical indicating if alignment should be trimmed to start codon
 of the mature protein.}
 
 \item{unkchar}{Character to be used to represent positions with unknown
 sequence.}
+
+\item{resolution}{Integer specifying the resoultion with which alignment
+matrix should be returned.}
 }
 \value{
 Matrix containing HLA allele alignments. Rownames corresponds to
@@ -27,7 +37,6 @@ deletions are marked with period (.).
 Reads HLA allele alignments from file in msf format.
 }
 \examples{
-file <- system.file("extdata", "A_prot.txt", package = "MiDAS")
-hla_alignments <- readHlaAlignments(file)
+hla_alignments <- readHlaAlignments(gene = "A")
 
 }

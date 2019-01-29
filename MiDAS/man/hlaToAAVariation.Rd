@@ -4,11 +4,24 @@
 \alias{hlaToAAVariation}
 \title{Converts HLA allele numbers to amino acid variation}
 \usage{
-hlaToAAVariation(hla_calls)
+hlaToAAVariation(hla_calls, indels = TRUE, unkchar = FALSE,
+  alnpath = system.file("extdata", package = "MiDAS"))
 }
 \arguments{
 \item{hla_calls}{Data frame containing HLA allele calls, in a format as
 return by `readHlaCalls` function.}
+
+\item{indels}{Logical indicating whether indels should be considered as
+variability.}
+
+\item{unkchar}{Logical indicating whether unknown characters in the alignment
+should be treated as variability.}
+
+\item{alnpath}{String providing optional path to directory containing
+HLA alignment files. Each alignment file have to be named
+following EBI database convention GENENAME_prot.txt. If
+\code{alnpath} is provided alignment files shipped with the
+package are ignored.}
 }
 \value{
 Matrix containing variable amino acid positions. Rownames corresponds
@@ -18,7 +31,7 @@ Matrix containing variable amino acid positions. Rownames corresponds
 }
 \description{
 Converts HLA allele numbers data frame to a matrix holding information on
-amino acid level varation.
+amino acid level variation.
 }
 \examples{
 hla_calls <- system.file("extdata/HLAHD_output_example.txt", package = "MiDAS")

@@ -23,7 +23,7 @@ checkAlleleFormat <- function(allele) {
 #'
 #' @param allele Character vector containing HLA allele numbers.
 #'
-#' @return Integer vector specifiying alleles resolutions.
+#' @return Integer vector specifying alleles resolutions.
 #'
 #' @examples
 #' allele <- c("A*01:01", "A*01:02")
@@ -34,7 +34,7 @@ checkAlleleFormat <- function(allele) {
 #' @export
 getAlleleResolution <- function(allele) {
   assert_that(
-    see_if(all(checkAlleleFormat(allele)),
+    see_if(all(checkAlleleFormat(allele), na.rm = TRUE),
          msg = "allele have to be a valid HLA allele number"
     )
   )
@@ -45,38 +45,47 @@ getAlleleResolution <- function(allele) {
 #' Reduce HLA allele number
 #'
 #' @param allele Character vector containing HLA allele numbers.
-#' @param resolution Numeric vector of length one specifiying desired
-#' resolution. Cannot be greater than \code{allele} resolution.
+#' @param resolution Numeric vector of length one specifying desired
+#' resolution. Note if `resolution` is greater than resolution of any
+#' \code{allele} elements, those elements will be returned unchanged.
 #'
-#' @return Character vector containing reduced HLA allele numbers.
+#' @return Character vector containing reduced HLA allele numbers, importantly
+#' alleles containing optional suffixes are omitted and returned unchanged.
 #'
 #' @examples
 #' reduceAlleleResolution(c("A*01", "A*01:24", "C*05:24:55:54"), 2)
 #'
 #' @importFrom assertthat assert_that is.count see_if
-#' @importFrom stringi stri_split_fixed
+#' @importFrom stringi stri_split_fixed stri_detect_regex
 #' @export
 reduceAlleleResolution <- function(allele,
                                    resolution=4) {
   assert_that(
-    is.count(resolution),
-    see_if(all(getAlleleResolution(allele) >= resolution),
-           msg = "input resolution can't be lower than requested resolution"
-    )
+    is.count(resolution)
   )
+  na_idx <- is.na(allele)
+  letter_alleles <- stri_detect_regex(allele, pattern = "[A-Z]{1}$")
+  allele_res <- getAlleleResolution(allele)
+  to_reduce <- allele_res >= resolution & ! letter_alleles & ! na_idx
   resolution <- floor(resolution) / 2
-  reduced_allele <- vapply(X = stri_split_fixed(allele, ":"),
-                           FUN = function(a) {
-                             paste(a[1:resolution], collapse = ":")
-                           },
-                           FUN.VALUE = character(length = 1)
-                          )
-  return(reduced_allele)
+  allele[to_reduce] <- vapply(
+    X = stri_split_fixed(allele[to_reduce], ":"),
+    FUN = function(a) {
+      paste(a[1:resolution], collapse = ":")
+    },
+    FUN.VALUE = character(length = 1)
+  )
+  allele[na_idx] <- NA
+  return(allele)
 }
 
 #' Returns positions of variable amino acids in the alignment.
 #'
 #' @param alignment Matrix containing amino acids level alignment.
+#' @param varchar Regex matching characters that should be considered when
+#' looking for variable amino acids positions. Eg. when varchar = "[A-Z]"
+#' occurence of deletion/insertion (".") will not be treated as variability. In
+#' order to detect this kind of variability varchar = "[A-Z\\.]" should be used.
 #'
 #' @return Integer vector specifying which alignment columns are variable.
 #'
@@ -87,12 +96,13 @@ reduceAlleleResolution <- function(allele,
 #'
 #' @importFrom assertthat assert_that is.count see_if
 #' @export
-getVariableAAPos <- function(alignment) {
+getVariableAAPos <- function(alignment,
+                             varchar = "[A-Z]") {
   assert_that(is.matrix(alignment))
   var_cols <- apply(alignment,
         2,
         function(col) {
-          col <- col[grepl("^[A-Z]$", col)]
+          col <- col[grepl(sprintf("^%s$", varchar), col)]
           is.variable <- logical(length = 1)
           if (length(col) == 0) {
             is.variable <- FALSE

@@ -4,10 +4,15 @@
 \alias{getVariableAAPos}
 \title{Returns positions of variable amino acids in the alignment.}
 \usage{
-getVariableAAPos(alignment)
+getVariableAAPos(alignment, varchar = "[A-Z]")
 }
 \arguments{
 \item{alignment}{Matrix containing amino acids level alignment.}
+
+\item{varchar}{Regex matching characters that should be considered when
+looking for variable amino acids positions. Eg. when varchar = "[A-Z]"
+occurence of deletion/insertion (".") will not be treated as variability. In
+order to detect this kind of variability varchar = "[A-Z\\.]" should be used.}
 }
 \value{
 Integer vector specifying which alignment columns are variable.

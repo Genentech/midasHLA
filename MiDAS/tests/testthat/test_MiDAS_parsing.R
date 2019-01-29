@@ -10,8 +10,17 @@ test_that("HLA allele calls are read properly", {
   load(system.file("extdata", "test_hla_calls.Rdata", package = "MiDAS"))
   expect_equal(hla_calls, test_hla_calls)
 
+  hla_calls_res2 <- readHlaCalls(file, resolution = 2)
+  res2 <- getAlleleResolution(unlist(hla_calls_res2[, -1]))
+  load(system.file("extdata", "test_hla_calls_res.Rdata", package = "MiDAS"))
+  expect_equal(res2, test_res2)
+
   expect_error(readHlaCalls("/path/to/non/existing/file"),
                "Path '/path/to/non/existing/file' does not exist"
+  )
+
+  expect_error(readHlaCalls(file, resolution = "foo"),
+               "resolution is not a count \\(a single positive integer\\)"
   )
 
   fake_calls <- data.frame(ID = c("Sample1", "Sample2", "Sample3"),
@@ -26,7 +35,7 @@ test_that("HLA allele calls are read properly", {
               row.names = FALSE,
               col.names = TRUE
   )
-  expect_error(readHlaCalls(fake_calls_no_id),
+  expect_error(readHlaCalls(fake_calls_no_id, resolution = 2),
                "First column of input file should specify samples id"
   )
   unlink(fake_calls_no_id)
@@ -38,7 +47,7 @@ test_that("HLA allele calls are read properly", {
               row.names = FALSE,
               col.names = TRUE
   )
-  expect_error(readHlaCalls(fake_calls_non_hla_numbers),
+  expect_error(readHlaCalls(fake_calls_non_hla_numbers, resolution = 2),
                "Values in input file doesn't follow HLA numbers specification"
   )
   unlink(fake_calls_non_hla_numbers)
@@ -50,7 +59,7 @@ test_that("HLA allele calls are read properly", {
               row.names = FALSE,
               col.names = TRUE
   )
-  expect_error(readHlaCalls(fake_calls_non_uniq_genes),
+  expect_error(readHlaCalls(fake_calls_non_uniq_genes, resolution = 2),
                "Gene names in columns are not identical"
   )
   unlink(fake_calls_non_uniq_genes)
@@ -63,7 +72,7 @@ test_that("HLA allele calls are read properly", {
               row.names = FALSE,
               col.names = TRUE
   )
-  expect_error(readHlaCalls(fake_calls_NA_col),
+  expect_error(readHlaCalls(fake_calls_NA_col, resolution = 2),
                "One of the columns contains only NA")
   unlink(fake_calls_NA_col)
 })
@@ -73,6 +82,11 @@ test_that("HLA allele alignments are read properly", {
   hla_alignments <- readHlaAlignments(file)
   load(system.file("extdata", "test_hla_alignments.Rdata", package = "MiDAS"))
   expect_equal(hla_alignments, test_hla_alignments)
+
+  hla_alignments_res2 <- readHlaAlignments(file, resolution = 2)
+  res2 <- getAlleleResolution(rownames(hla_alignments_res2))
+  test_res2 <- c(2, 4, 2, 2, 2, 2, 2)
+  expect_equal(res2, test_res2)
 
   expect_error(readHlaAlignments("/path/to/non/existing/file"),
                "Path '/path/to/non/existing/file' does not exist"
@@ -94,7 +108,11 @@ test_that("HLA allele alignments are read properly", {
     "unkchar is not a string \\(a length one character vector\\)."
   )
 
-  aln_file <- system.file("extdata", "A_prot.txt", package = "MiDAS")
+  expect_error(readHlaAlignments(gene = "foo"),
+               "alignment for FOO is not available"
+  )
+
+  aln_file <- system.file("extdata/A_prot.txt", package = "MiDAS")
   hla_alignments <- readHlaAlignments(aln_file, trim = FALSE)
   fasta_file <- system.file("extdata", "A_prot.fasta", package = "MiDAS")
   fasta <- seqinr::read.alignment(fasta_file, format = "fasta")
