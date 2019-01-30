@@ -4,8 +4,7 @@
 #'
 #' @param file Path to the file containing HLA allele calls.
 #' @param resolution Integer specifying the resolution to which the HLA allele
-#'        calls should be reduced to. Valid values should be one of
-#'        `2, 4, 6, 8`. To disable this functionality see `reduce` parameter.
+#'   calls should be reduced to. Valid values should be one of `2, 4, 6, 8`.
 #'
 #' @return Data frame containing HLA allele calls.
 #'
@@ -70,23 +69,23 @@ readHlaCalls <- function(file,
 #'
 #' @param file Path to the file containing HLA allele alignments.
 #' @param gene Character vector of length one specifying the name of a gene for
-#' which alignment is required. All the protein alignment files from EBI
-#' database are shipped with the package and this parameter can be used to
-#' provide simpler access to those files. If it's set to \code{NULL} file
-#' parameter is used instead.
+#'   which alignment is required. All the protein alignment files from EBI
+#'   database are shipped with the package and this parameter can be used to
+#'   provide simpler access to those files. If it's set to \code{NULL} file
+#'   parameter is used instead.
 #' @param trim Logical indicating if alignment should be trimmed to start codon
-#' of the mature protein.
+#'   of the mature protein.
 #' @param unkchar Character to be used to represent positions with unknown
-#' sequence.
+#'   sequence.
 #' @param resolution Integer specifying the resolution with which alignment
-#'        matrix should be returned.
+#'   matrix should be returned.
 #'
 #' @return Matrix containing HLA allele alignments. Rownames corresponds to
-#' allele numbers and columns to positions in the alignment. Sequences
-#' following the termination codon are marked as empty character. Unknown
-#' sequences are marked with a character of choice, that defaults to empty
-#' character (""). Stop codons are represented by a hash (X). Insertion and
-#' deletions are marked with period (.).
+#'   allele numbers and columns to positions in the alignment. Sequences
+#'   following the termination codon are marked as empty character. Unknown
+#'   sequences are marked with a character of choice, that defaults to empty
+#'   character (""). Stop codons are represented by a hash (X). Insertion and
+#'   deletions are marked with period (.).
 #'
 #' @examples
 #' hla_alignments <- readHlaAlignments(gene = "A")

@@ -3,7 +3,7 @@
 #' @param allele Character vector containing HLA allele numbers.
 #'
 #' @return Logical vector of length 1 specifying if \code{allele} follows HLA
-#' alleles naming conventions and have desired resolution.
+#'   alleles naming conventions and have desired resolution.
 #'
 #' @examples
 #' allele <- c("A*01:01", "A*01:02")
@@ -21,7 +21,7 @@ checkAlleleFormat <- function(allele) {
 
 #' Infers HLA allele resolution
 #'
-#' @param allele Character vector containing HLA allele numbers.
+#' @inheritParams checkAlleleFormat
 #'
 #' @return Integer vector specifying alleles resolutions.
 #'
@@ -44,13 +44,13 @@ getAlleleResolution <- function(allele) {
 
 #' Reduce HLA allele number
 #'
-#' @param allele Character vector containing HLA allele numbers.
+#' @inheritParams checkAlleleFormat
 #' @param resolution Numeric vector of length one specifying desired
-#' resolution. Note if `resolution` is greater than resolution of any
-#' \code{allele} elements, those elements will be returned unchanged.
+#'   resolution. Note if `resolution` is greater than resolution of any
+#'   \code{allele} elements, those elements will be returned unchanged.
 #'
 #' @return Character vector containing reduced HLA allele numbers, importantly
-#' alleles containing optional suffixes are omitted and returned unchanged.
+#'   alleles containing optional suffixes are omitted and returned unchanged.
 #'
 #' @examples
 #' reduceAlleleResolution(c("A*01", "A*01:24", "C*05:24:55:54"), 2)
@@ -83,9 +83,10 @@ reduceAlleleResolution <- function(allele,
 #'
 #' @param alignment Matrix containing amino acids level alignment.
 #' @param varchar Regex matching characters that should be considered when
-#' looking for variable amino acids positions. Eg. when varchar = "[A-Z]"
-#' occurence of deletion/insertion (".") will not be treated as variability. In
-#' order to detect this kind of variability varchar = "[A-Z\\.]" should be used.
+#'   looking for variable amino acids positions. Eg. when varchar = "[A-Z]"
+#'   occurence of deletion/insertion (".") will not be treated as variability.
+#'   In order to detect this kind of variability \code{varchar = "[A-Z\\.]"}
+#'   should be used.
 #'
 #' @return Integer vector specifying which alignment columns are variable.
 #'
@@ -117,14 +118,14 @@ getVariableAAPos <- function(alignment,
 
 #' Converts allele numbers to additional variables based on match file.
 #'
-#' @param allele Character vector containing HLA allele numbers.
+#' @inheritParams checkAlleleFormat
 #' @param dictionary Path to the file containing HLA allele numbers matchings.
-#' The file should be in tsv format with header and two columns. First column
-#' should hold allele numbers and second corresponding additional variables.
-#' Function also accepts match table in form of data frame.
+#'   The file should be in tsv format with header and two columns. First column
+#'   should hold allele numbers and second corresponding additional variables.
+#'   Function also accepts match table in form of data frame.
 #'
 #' @return Vector containing allele numbers converted to additional variables
-#' according to matching file.
+#'   according to matching file.
 #'
 #' @examples
 #' dictionary <- system.file("extdata", "Match_4digit_supertype.txt", package = "MiDAS")
@@ -172,11 +173,11 @@ convertAlleleToVariable <- function(allele,
 
 #' Assert hla calls data frame format
 #'
-#' @param hla_calls data frame containing HLA allele calls, in a format as
-#'                  return by `readHlaCalls` function.
+#' @param hla_calls Data frame containing HLA allele calls, in a format as
+#'   return by \code{\link{readHlaCalls}} function.
 #'
 #' @return Logical indicating if hla_calls follows hla calls data frame format.
-#'         Otherwise raise error.
+#'   Otherwise raise error.
 #'
 #' @examples
 #' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")

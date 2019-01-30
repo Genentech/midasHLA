@@ -3,22 +3,20 @@
 #' Converts HLA allele numbers data frame to a matrix holding information on
 #' amino acid level variation.
 #'
-#' @param hla_calls Data frame containing HLA allele calls, in a format as
-#'                  return by `readHlaCalls` function.
+#' @inheritParams checkHlaCallsFormat
 #' @param indels Logical indicating whether indels should be considered as
-#'               variability.
+#'   variability.
 #' @param unkchar Logical indicating whether unknown characters in the alignment
-#'                should be treated as variability.
-#' @param alnpath String providing optional path to directory containing
-#'                HLA alignment files. Each alignment file have to be named
-#'                following EBI database convention GENENAME_prot.txt. If
-#'                \code{alnpath} is provided alignment files shipped with the
-#'                package are ignored.
+#'   should be treated as variability.
+#' @param alnpath String providing optional path to directory containing HLA
+#'   alignment files. Each alignment file have to be named following EBI
+#'   database convention GENENAME_prot.txt. If \code{alnpath} is provided
+#'   alignment files shipped with the package are ignored.
 #'
 #' @return Matrix containing variable amino acid positions. Rownames corresponds
-#'         to ID column of input data frame, and colnames to alignment positions
-#'         for given genes. If no variation in amino acids alignments is found
-#'         function return one column matrix filled with `NA`.
+#'   to ID column of input data frame, and colnames to alignment positions for
+#'   given genes. If no variation in amino acids alignments is found function
+#'   return one column matrix filled with `NA`.
 #'
 #' @examples
 #' hla_calls <- system.file("extdata/HLAHD_output_example.txt", package = "MiDAS")
@@ -152,21 +150,19 @@ hlaToAAVariation <- function(hla_calls,
 #' Converts hla calls data frame according to match table
 #'
 #' @param hla_calls data frame containing HLA allele calls, in a format as
-#'                  return by `readHlaCalls` function.
+#'   return by `readHlaCalls` function.
 #' @param dictionary table containing allele numbers matchings, this can be
-#'                   either path to tsv file or a data frame. Fist column
-#'                   should contain alleles and second corresponding
-#'                   assignments. Optionally matchings files shipped with the
-#'                   package can be referred to by using one of following
-#'                   strings: "2digit_A-allele_expression",
-#'                   "2digit_C-allele_expression", "4digit_allele_Ggroup",
-#'                   "4digit_B-allele_Bw", "4digit_C-allele_C1-2",
-#'                   "4digit_supertype".
+#'   either path to tsv file or a data frame. Fist column should contain alleles
+#'   and second corresponding assignments. Optionally matchings files shipped
+#'   with the package can be referred to by using one of following strings:
+#'   "2digit_A-allele_expression", "2digit_C-allele_expression",
+#'   "4digit_allele_Ggroup", "4digit_B-allele_Bw", "4digit_C-allele_C1-2",
+#'   "4digit_supertype".
 #' @param nacols.rm logical indicating if result columns that contain only
-#'                 \code{NA} should be removed.
+#'   \code{NA} should be removed.
 #'
 #' @return Data frame of hla numbers converted to additional variables according
-#'         to match table.
+#'   to match table.
 #'
 #' @examples
 #' hla_calls <- system.file("extdata/HLAHD_output_example.txt", package = "MiDAS")
@@ -211,15 +207,14 @@ hlaToVariable <- function(hla_calls,
 
 #' Reduce hla calls data frame resolution
 #'
-#' @param hla_calls data frame containing HLA allele calls, in a format as
-#'                  return by `readHlaCalls` function.
+#' @inheritParams checkHlaCallsFormat
 #' @param resolution Numeric vector of length one specifying desired
-#'        resolution. Note if `resolution` is greater than resolution of
-#'        \code{hla_calls} elements, those elements will be returned unchanged.
-#'        Elements with optional suffixes are not reduced.
+#'   resolution. Note if `resolution` is greater than resolution of
+#'   \code{hla_calls} elements, those elements will be returned unchanged.
+#'   Elements with optional suffixes are not reduced.
 #'
 #' @return Data frame containing HLA allele calls reduced to required
-#'         resolution.
+#'   resolution.
 #'
 #' @examples
 #' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
