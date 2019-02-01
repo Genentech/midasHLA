@@ -2,23 +2,29 @@
 % Please edit documentation in R/MiDAS_utils.R
 \name{reduceAlleleResolution}
 \alias{reduceAlleleResolution}
-\title{Reduce HLA allele number}
+\title{Reduce HLA allele resolution}
 \usage{
 reduceAlleleResolution(allele, resolution = 4)
 }
 \arguments{
 \item{allele}{Character vector containing HLA allele numbers.}
 
-\item{resolution}{Numeric vector of length one specifying desired
-resolution. Note if `resolution` is greater than resolution of any
-\code{allele} elements, those elements will be returned unchanged.}
+\item{resolution}{Numeric vector of length one specifying output resolution.}
 }
 \value{
-Character vector containing reduced HLA allele numbers, importantly
-alleles containing optional suffixes are omitted and returned unchanged.
+Character vector containing reduced HLA allele numbers.
+
+  \code{NA} values are accepted and returned as \code{NA}.
 }
 \description{
-Reduce HLA allele number
+\code{reduceAlleleResolution} reduces HLA allele numbers vector to specified
+resolution.
+}
+\details{
+In cases when allele numbers contains additional suffix their resolution
+can not be unambiguously reduced. These cases are returned unchanged.
+Function behaves in the same manner if \code{resolution} is higher than
+resolution of input HLA allele numbers.
 }
 \examples{
 reduceAlleleResolution(c("A*01", "A*01:24", "C*05:24:55:54"), 2)

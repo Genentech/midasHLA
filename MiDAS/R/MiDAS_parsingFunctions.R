@@ -3,7 +3,7 @@
 #' \code{readHlaCalls} reads table with HLA allele calls from file.
 #'
 #' Input file have to be a tsv formatted table with header. First column should
-#' contain samples IDs, futher columns should hold corresponding HLA allele
+#' contain samples IDs, further columns should hold corresponding HLA allele
 #' numbers.
 #'
 #' \code{resolution} parameter can be used to reduce HLA allele numbers. If
@@ -83,11 +83,11 @@ readHlaCalls <- function(file,
 #' \url{ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/alignments/README.md}.
 #'
 #' All protein alignment files from EBI database are shipped with the package.
-#' They can be easly accessed using \code{gene} parameter. If \code{gene} is set
-#' to \code{NULL} file parameter is used instead and alignment is read from the
-#' provided file. In EBI database alignments for DRB1, DRB3, DRB4 and DRB5 genes
-#' are provided as a single file, here they are separated into separate files
-#' for accordance with the package functionality.
+#' They can be easily accessed using \code{gene} parameter. If \code{gene} is
+#' set to \code{NULL} file parameter is used instead and alignment is read from
+#' the provided file. In EBI database alignments for DRB1, DRB3, DRB4 and DRB5
+#' genes are provided as a single file, here they are separated into separate
+#' files for accordance with the package functionality.
 #'
 #' @inheritParams readHlaCalls
 #' @inheritParams reduceAlleleResolution

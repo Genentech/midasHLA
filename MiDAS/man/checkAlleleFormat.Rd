@@ -2,7 +2,7 @@
 % Please edit documentation in R/MiDAS_utils.R
 \name{checkAlleleFormat}
 \alias{checkAlleleFormat}
-\title{Checks allele format}
+\title{Check allele format}
 \usage{
 checkAlleleFormat(allele)
 }
@@ -10,11 +10,19 @@ checkAlleleFormat(allele)
 \item{allele}{Character vector containing HLA allele numbers.}
 }
 \value{
-Logical vector of length 1 specifying if \code{allele} follows HLA
-alleles naming conventions and have desired resolution.
+Logical vector specifying if \code{allele} follows HLA alleles naming
+  conventions.
 }
 \description{
-Checks allele format
+\code{checkAlleleFormat} test if the input character follows HLA nomenclature
+specifications.
+}
+\details{
+Correct HLA number should consist of HLA gene name followed by "*" and sets
+of digits separated with ":". Maximum number of sets of digits is 4 which
+is termed 8-digit resolution. Optionally HLA numbers can be supplemented with
+additional suffix indicating its expression status. See
+\url{http://hla.alleles.org/nomenclature/naming.html} for more details.
 }
 \examples{
 allele <- c("A*01:01", "A*01:02")

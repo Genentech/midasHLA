@@ -1,11 +1,11 @@
 #' Check allele format
 #'
-#' \code{checkAlleleFormat} test if the input character folows HLA nomenclature
+#' \code{checkAlleleFormat} test if the input character follows HLA nomenclature
 #' specifications.
 #'
 #' Correct HLA number should consist of HLA gene name followed by "*" and sets
 #' of digits separated with ":". Maximum number of sets of digits is 4 which
-#' is termed 8-digit resolution. Optionally HLA numbers can be suplemented with
+#' is termed 8-digit resolution. Optionally HLA numbers can be supplemented with
 #' additional suffix indicating its expression status. See
 #' \url{http://hla.alleles.org/nomenclature/naming.html} for more details.
 #'
@@ -64,10 +64,10 @@ getAlleleResolution <- function(allele) {
 #' \code{reduceAlleleResolution} reduces HLA allele numbers vector to specified
 #' resolution.
 #'
-#' In cases when allele numbers contains additional suffix thier resolution
-#' can not be unambigously reduced. These cases are returned unchanged. Function
-#' behaves in the same manner if \code{resolution} is higher than resolution of
-#' input HLA allele numbers.
+#' In cases when allele numbers contains additional suffix their resolution
+#' can not be unambiguously reduced. These cases are returned unchanged.
+#' Function behaves in the same manner if \code{resolution} is higher than
+#' resolution of input HLA allele numbers.
 #'
 #' @inheritParams checkAlleleFormat
 #' @param resolution Numeric vector of length one specifying output resolution.
@@ -108,10 +108,10 @@ reduceAlleleResolution <- function(allele,
 #' \code{getVariableAAPos} finds variable amino acids positions in the
 #' alignment.
 #'
-#' The variable amino acid postions in the alignment are those at which
+#' The variable amino acid positions in the alignment are those at which
 #' different amino acids can be found. As the alignments can also contain indels
-#' and unkown characters, the user choice might be to consider those positions
-#' also as variable. This can be achived by passing appropriate regular
+#' and unknown characters, the user choice might be to consider those positions
+#' also as variable. This can be achieved by passing appropriate regular
 #' expression in \code{varchar}. Eg. when \code{varchar = "[A-Z]"} occurence of
 #' deletion/insertion (".") will not be treated as variability. In order to
 #' detect this kind of variability \code{varchar = "[A-Z\\\\.]"} should be used.
@@ -156,12 +156,12 @@ getVariableAAPos <- function(alignment,
 #'
 #' \code{dictionary} file should be a tsv format with header and two columns.
 #' First column should hold allele numbers and second corresponding additional
-#' variables. Optionally a data frame formated in the same manner can be passed
+#' variables. Optionally a data frame formatted in the same manner can be passed
 #' insted.
 #'
 #' @inheritParams checkAlleleFormat
 #' @param dictionary Path to the file containing HLA allele numbers matchings or
-#'   data frame provading this information. See details for further
+#'   data frame providing this information. See details for further
 #'   explanations.
 #'
 #' @return Vector containing HLA allele numbers converted to additional

@@ -14,7 +14,7 @@
 #' @param unkchar Logical indicating whether unknown characters in the alignment
 #'   should be treated as variability.
 #' @param alnpath String providing optional path to directory containing HLA
-#'   alignment files. See deails for futher explanations.
+#'   alignment files. See details for further explanations.
 #'
 #' @return Matrix containing variable amino acid positions.
 #'
@@ -158,7 +158,7 @@ hlaToAAVariation <- function(hla_calls,
 #'
 #' \code{dictionary} file should be a tsv format with header and two columns.
 #' First column should hold allele numbers and second corresponding additional
-#' variables. Optionally a data frame formated in the same manner can be passed
+#' variables. Optionally a data frame formatted in the same manner can be passed
 #' insted.
 #'
 #' \code{dictionary} parameter can be also used to access matchings files
