@@ -53,29 +53,55 @@ test_that("HLA allels are converted to additional variables", {
   )
   )
 
-  expect_error(convertAlleleToVariable(c("a", "b", "c"), dictionary = c("foo", "bar"),
+  expect_error(convertAlleleToVariable(c("A*01", "A*02", "A*03"), dictionary = c("foo", "bar"),
                                        "dictionary have to be either path or data.frame"
   )
   )
 
-  expect_error(convertAlleleToVariable(c("a", "b", "c"), dictionary = "/foo/bar",
-                                       "Path '/foo/bar' does not exist"
-  )
+  expect_error(
+    convertAlleleToVariable(
+      allele = c("A*01", "A*02", "A*03"),
+      dictionary = file.path("foo", "bar")
+    ),
+    sprintf("Path '%s' does not exist", file.path("foo", "bar"))
   )
 
-  expect_error(convertAlleleToVariable(c("a", "b", "c"), dictionary = dictionary[, 1],
+  expect_error(convertAlleleToVariable(c("A*01", "A*02", "A*03"), dictionary = dictionary[, 1],
                                        "match table have to consist out of two columns"
   )
   )
 
-  expect_error(convertAlleleToVariable(c("a", "b", "c"), dictionary = dictionary[, c(2, 2)],
+  expect_error(convertAlleleToVariable(c("A*01", "A*02", "A*03"), dictionary = dictionary[, c(2, 2)],
                                        "first column of match table must contain valid HLA allele numbers"
   )
   )
 
-  expect_error(convertAlleleToVariable(c("a", "b", "c"), dictionary = dictionary[c(1, 1), ],
+  expect_error(convertAlleleToVariable(c("A*01", "A*02", "A*03"), dictionary = dictionary[c(1, 1), ],
                                        "match table contains duplicated allele numbers"
   )
+  )
+})
+
+test_that("HLA calls data frame have proper format", {
+  file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(file)
+  expect_equal(checkHlaCallsFormat(hla_calls), TRUE)
+
+  hla_calls[, 1] <- as.factor(hla_calls[, 1])
+  expect_error(checkHlaCallsFormat(hla_calls),
+               "input can't contain factors"
+  )
+  fake_calls <- data.frame(ID = c("Sample1", "Sample2", "Sample3"),
+                           A_1 = c("A*01", "A*02", "A*03"),
+                           A_2 = c("A*01", "B*02", "C*03"),
+                           stringsAsFactors = FALSE
+  )
+  expect_error(checkHlaCallsFormat(fake_calls[, c(2, 1, 3)]),
+               "first column of input should specify samples id"
+  )
+
+  expect_error(checkHlaCallsFormat(fake_calls[, c(1, 1, 3)]),
+               "values in input doesn't follow HLA numbers specification"
   )
 })
 

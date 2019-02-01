@@ -37,12 +37,7 @@ hlaToAAVariation <- function(hla_calls,
     see_if(nrow(hla_calls) >= 1 & ncol(hla_calls) >= 2,
            msg = "input data frame have to have at least 1 rows and 2 columns"
     ),
-    see_if(! all(checkAlleleFormat(hla_calls[, 1]), na.rm = TRUE),
-           msg = "first column of input data frame should specify samples id"
-    ),
-    see_if(all(checkAlleleFormat(unlist(hla_calls[, -1])), na.rm = TRUE),
-           msg = "values in input data frame doesn't follow HLA numbers specification"
-    ),
+    checkHlaCallsFormat(hla_calls),
     is.flag(indels),
     is.flag(unkchar),
     is.dir(alnpath)
@@ -185,12 +180,7 @@ hlaToVariable <- function(hla_calls,
                           nacols.rm = TRUE) {
   assert_that(
     is.data.frame(hla_calls),
-    see_if(! all(checkAlleleFormat(hla_calls[, 1]), na.rm = TRUE),
-           msg = "first column of input data frame should specify samples id"
-    ),
-    see_if(all(checkAlleleFormat(unlist(hla_calls[, -1])), na.rm = TRUE),
-           msg = "values in input data frame doesn't follow HLA numbers specification"
-    ),
+    checkHlaCallsFormat(hla_calls),
     is.flag(nacols.rm)
   )
   if (is.string(dictionary)) {
@@ -217,4 +207,33 @@ hlaToVariable <- function(hla_calls,
   variable <- cbind(hla_calls[, 1], variable)
   colnames(variable) <- c("ID", colnames(variable[, -1]))
   return(variable)
+}
+
+#' Reduce hla calls data frame resolution
+#'
+#' @param hla_calls data frame containing HLA allele calls, in a format as
+#'                  return by `readHlaCalls` function.
+#' @param resolution Numeric vector of length one specifying desired
+#'        resolution. Note if `resolution` is greater than resolution of
+#'        \code{hla_calls} elements, those elements will be returned unchanged.
+#'        Elements with optional suffixes are not reduced.
+#'
+#' @return Data frame containing HLA allele calls reduced to required
+#'         resolution.
+#'
+#' @examples
+#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(file)
+#' reduceHlaCalls(hla_calls, resolution = 2)
+#'
+#' @export
+reduceHlaCalls <- function(hla_calls,
+                           resolution = 4) {
+  assert_that(checkHlaCallsFormat(hla_calls))
+  hla_calls[, -1] <- as.data.frame(
+    lapply(hla_calls[, -1], reduceAlleleResolution, resolution = resolution),
+    stringsAsFactors = FALSE
+  )
+
+  return(hla_calls)
 }

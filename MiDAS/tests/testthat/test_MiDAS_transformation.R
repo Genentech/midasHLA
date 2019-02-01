@@ -11,16 +11,6 @@ test_that("Amino acids variability is infered correctly", {
 
   expect_error(hlaToAAVariation(data.frame()), "input data frame have to have at least 1 rows and 2 columns")
 
-  expect_error(hlaToAAVariation(hla_calls[, -1],
-                                "first column of input data frame should specify samples id"
-               )
-  )
-
-  expect_error(hlaToAAVariation(hla_calls[, rep(1, 5)],
-                                "values in input data frame doesn't follow HLA numbers specification"
-               )
-  )
-
   expect_error(hlaToAAVariation(hla_calls, indels = "foo"),
                "indels is not a flag \\(a length one logical vector\\)."
   )
@@ -50,16 +40,6 @@ test_that("HLA calls table is converted to additional variables", {
   expect_error(
     hlaToVariable(c("A*01:01", "A*02:01"), dictionary = "4digit_supertype"),
     "hla_calls is not a data frame"
-  )
-
-  expect_error(
-    hlaToVariable(hla_calls[, -1], dictionary = "4digit_supertype"),
-    "first column of input data frame should specify samples id"
-  )
-
-  expect_error(
-    hlaToVariable(hla_calls[, c(1, 1, 2)], dictionary = "4digit_supertype"),
-    "values in input data frame doesn't follow HLA numbers specification"
   )
 
   expect_error(
