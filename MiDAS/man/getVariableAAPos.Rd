@@ -2,7 +2,7 @@
 % Please edit documentation in R/MiDAS_utils.R
 \name{getVariableAAPos}
 \alias{getVariableAAPos}
-\title{Returns positions of variable amino acids in the alignment.}
+\title{Returns positions of variable amino acids in the alignment}
 \usage{
 getVariableAAPos(alignment, varchar = "[A-Z]")
 }
@@ -10,15 +10,24 @@ getVariableAAPos(alignment, varchar = "[A-Z]")
 \item{alignment}{Matrix containing amino acids level alignment.}
 
 \item{varchar}{Regex matching characters that should be considered when
-looking for variable amino acids positions. Eg. when varchar = "[A-Z]"
-occurence of deletion/insertion (".") will not be treated as variability. In
-order to detect this kind of variability varchar = "[A-Z\\.]" should be used.}
+looking for variable amino acids positions. See details for further
+explanations.}
 }
 \value{
 Integer vector specifying which alignment columns are variable.
 }
 \description{
-Returns positions of variable amino acids in the alignment.
+\code{getVariableAAPos} finds variable amino acids positions in the
+alignment.
+}
+\details{
+The variable amino acid positions in the alignment are those at which
+different amino acids can be found. As the alignments can also contain indels
+and unknown characters, the user choice might be to consider those positions
+also as variable. This can be achieved by passing appropriate regular
+expression in \code{varchar}. Eg. when \code{varchar = "[A-Z]"} occurence of
+deletion/insertion (".") will not be treated as variability. In order to
+detect this kind of variability \code{varchar = "[A-Z\\\\.]"} should be used.
 }
 \examples{
 file <- system.file("extdata", "A_prot.txt", package = "MiDAS")

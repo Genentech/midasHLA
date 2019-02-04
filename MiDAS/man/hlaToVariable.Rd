@@ -7,32 +7,39 @@
 hlaToVariable(hla_calls, dictionary, nacols.rm = TRUE)
 }
 \arguments{
-\item{hla_calls}{data frame containing HLA allele calls, in a format as
-return by `readHlaCalls` function.}
+\item{hla_calls}{Data frame containing HLA allele calls, as return by
+\code{\link{readHlaCalls}} function.}
 
-\item{dictionary}{table containing allele numbers matchings, this can be
-either path to tsv file or a data frame. Fist column
-should contain alleles and second corresponding
-assignments. Optionally matchings files shipped with the
-package can be referred to by using one of following
-strings: "2digit_A-allele_expression",
-"2digit_C-allele_expression", "4digit_allele_Ggroup",
-"4digit_B-allele_Bw", "4digit_C-allele_C1-2",
-"4digit_supertype".}
+\item{dictionary}{Path to the file containing HLA allele numbers matchings or
+data frame providing this information. See details for further
+explanations.}
 
 \item{nacols.rm}{logical indicating if result columns that contain only
 \code{NA} should be removed.}
 }
 \value{
 Data frame of hla numbers converted to additional variables according
-        to match table.
+  to match table.
 }
 \description{
-Converts hla calls data frame according to match table
+\code{hlaToVariable} converts hla calls data frame to additional variables
+based on match table (dictionary).
+}
+\details{
+\code{dictionary} file should be a tsv format with header and two columns.
+First column should hold allele numbers and second corresponding additional
+variables. Optionally a data frame formatted in the same manner can be passed
+insted.
+
+\code{dictionary} parameter can be also used to access matchings files
+shipped with the package. They can be referred to by using one of following
+strings: "2digit_A-allele_expression", "2digit_C-allele_expression",
+"4digit_allele_Ggroup", "4digit_B-allele_Bw", "4digit_C-allele_C1-2",
+"4digit_supertype".
 }
 \examples{
-hla_calls <- system.file("extdata/HLAHD_output_example.txt", package = "MiDAS")
-hla_calls <- readHlaCalls(hla_calls)
+file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+hla_calls <- readHlaCalls(file)
 hlaToVariable(hla_calls, dictionary = "4digit_supertype")
 
 }

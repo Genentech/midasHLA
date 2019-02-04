@@ -8,8 +8,8 @@ hlaToAAVariation(hla_calls, indels = TRUE, unkchar = FALSE,
   alnpath = system.file("extdata", package = "MiDAS"))
 }
 \arguments{
-\item{hla_calls}{Data frame containing HLA allele calls, in a format as
-return by `readHlaCalls` function.}
+\item{hla_calls}{Data frame containing HLA allele calls, as return by
+\code{\link{readHlaCalls}} function.}
 
 \item{indels}{Logical indicating whether indels should be considered as
 variability.}
@@ -17,25 +17,29 @@ variability.}
 \item{unkchar}{Logical indicating whether unknown characters in the alignment
 should be treated as variability.}
 
-\item{alnpath}{String providing optional path to directory containing
-HLA alignment files. Each alignment file have to be named
-following EBI database convention GENENAME_prot.txt. If
-\code{alnpath} is provided alignment files shipped with the
-package are ignored.}
+\item{alnpath}{String providing optional path to directory containing HLA
+alignment files. See details for further explanations.}
 }
 \value{
-Matrix containing variable amino acid positions. Rownames corresponds
-        to ID column of input data frame, and colnames to alignment positions
-        for given genes. If no variation in amino acids alignments is found
-        function return one column matrix filled with `NA`.
+Matrix containing variable amino acid positions.
+
+  Rownames corresponds to ID column of input data frame, and colnames to
+  alignment positions for given genes. If no variation in amino acids
+  alignments is found function return one column matrix filled with `NA`.
 }
 \description{
-Converts HLA allele numbers data frame to a matrix holding information on
-amino acid level variation.
+\code{hlaToAAVariation} converts HLA allele numbers data frame to a matrix
+holding information on amino acid level variation.
+}
+\details{
+\code{alnpath} can be used to provide path to directory containing custom
+alignment files. Each alignment file have to be named following EBI database
+convention GENENAME_prot.txt. By default \code{alnpath} points to directory
+containing alignments files shipped with the package.
 }
 \examples{
-hla_calls <- system.file("extdata/HLAHD_output_example.txt", package = "MiDAS")
-hla_calls <- readHlaCalls(hla_calls)
-aa_variation <- hlaToAAVariation(hla_calls)
+file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+hla_calls <- readHlaCalls(file)
+hlaToAAVariation(hla_calls)
 
 }

@@ -1,13 +1,23 @@
 #' Reads data table with HLA allele calls
 #'
-#' Reads data table with HLA allele calls from file in tsv format.
+#' \code{readHlaCalls} reads table with HLA allele calls from file.
 #'
-#' @param file Path to the file containing HLA allele calls.
-#' @param resolution Integer specifying the resolution to which the HLA allele
-#'        calls should be reduced to. Valid values should be one of
-#'        `2, 4, 6, 8`. To disable this functionality see `reduce` parameter.
+#' Input file have to be a tsv formatted table with header. First column should
+#' contain samples IDs, further columns should hold corresponding HLA allele
+#' numbers.
+#'
+#' \code{resolution} parameter can be used to reduce HLA allele numbers. If
+#' reduction is not needed \code{resolution} can be set to 8. \code{resolution}
+#' parameter can take following values: 2, 4, 6, 8. For more details
+#' about HLA allele numbers resolution see
+#' \url{http://hla.alleles.org/nomenclature/naming.html}.
+#'
+#' @inheritParams reduceAlleleResolution
+#' @param file Path to input file.
 #'
 #' @return Data frame containing HLA allele calls.
+#'
+#' \code{NA} values in input file are parsed unchanged.
 #'
 #' @examples
 #' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
@@ -66,27 +76,35 @@ readHlaCalls <- function(file,
 
 #' Reads HLA allele alignments
 #'
-#' Reads HLA allele alignments from file in msf format.
+#' \code{readHlaAlignments} reads HLA allele alignments from file.
 #'
-#' @param file Path to the file containing HLA allele alignments.
+#' HLA allele alignment file should follow format used EBI database, for details
+#' see
+#' \url{ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/alignments/README.md}.
+#'
+#' All protein alignment files from EBI database are shipped with the package.
+#' They can be easily accessed using \code{gene} parameter. If \code{gene} is
+#' set to \code{NULL} file parameter is used instead and alignment is read from
+#' the provided file. In EBI database alignments for DRB1, DRB3, DRB4 and DRB5
+#' genes are provided as a single file, here they are separated into separate
+#' files for accordance with the package functionality.
+#'
+#' @inheritParams readHlaCalls
+#' @inheritParams reduceAlleleResolution
 #' @param gene Character vector of length one specifying the name of a gene for
-#' which alignment is required. All the protein alignment files from EBI
-#' database are shipped with the package and this parameter can be used to
-#' provide simpler access to those files. If it's set to \code{NULL} file
-#' parameter is used instead.
+#'   which alignment is required. See details for further explanations.
 #' @param trim Logical indicating if alignment should be trimmed to start codon
-#' of the mature protein.
+#'   of the mature protein.
 #' @param unkchar Character to be used to represent positions with unknown
-#' sequence.
-#' @param resolution Integer specifying the resolution with which alignment
-#'        matrix should be returned.
+#'   sequence.
 #'
-#' @return Matrix containing HLA allele alignments. Rownames corresponds to
-#' allele numbers and columns to positions in the alignment. Sequences
-#' following the termination codon are marked as empty character. Unknown
-#' sequences are marked with a character of choice, that defaults to empty
-#' character (""). Stop codons are represented by a hash (X). Insertion and
-#' deletions are marked with period (.).
+#' @return Matrix containing HLA allele alignments.
+#'
+#'   Rownames corresponds to allele numbers and columns to positions in the
+#'   alignment. Sequences following the termination codon are marked as empty
+#'   character (\code{""}). Unknown sequences are marked with a character of
+#'   choice, by default \code{""}. Stop codons are represented by a hash (X).
+#'   Insertion and deletions are marked with period (.).
 #'
 #' @examples
 #' hla_alignments <- readHlaAlignments(gene = "A")
