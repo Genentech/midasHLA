@@ -246,3 +246,26 @@ reduceHlaCalls <- function(hla_calls,
 
   return(hla_calls)
 }
+
+#' Transform HLA calls to counts table
+#'
+#' @examples
+#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(file)
+#' hlaCallsToCounts(hla_calls)
+#'
+#' @importFrom qdapTools mtabulate
+#'
+#' @export
+hlaCallsToCounts <- function(hla_calls) {
+  assert_that(
+    checkHlaCallsFormat(hla_calls)
+  )
+  hla_counts <- hla_calls[, -1]
+  hla_counts <- mtabulate(as.data.frame(t(hla_counts)))
+  rownames(hla_counts) <- NULL
+  hla_counts <- hla_counts[, order(names(hla_counts))]
+  hla_counts <- cbind(ID = hla_calls[, 1], hla_counts)
+
+  return(hla_counts)
+}
