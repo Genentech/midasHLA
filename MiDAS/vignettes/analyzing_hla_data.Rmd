@@ -1,0 +1,258 @@
+---
+title: "MiDAS statistics"
+author: "Chris Hammer and Maciek Migdal"
+date: "4/02/2019"
+output:
+  html_document:
+    theme: cerulean
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library("tidyverse")
+library("qdapTools")
+library("knitr")
+library("kableExtra")
+library("MiDAS")
+library("survival")
+library("broom")
+
+data_path <- "/Users/migdalm/Documents/MiDAS/materials/HLA2025/data/"
+```
+## HLA allele statistical analysis
+The most basic statistical analysis that we are interested in is on HLA alleles
+level ie. presence vs. absence of a given allele in a patient. The goal here is
+to look for association of those traits with for example survival.
+
+## The data
+The main data in MiDAS package are HLA allele calls. These are qualitative type
+of variable, for each patient we get set of his alleles. 
+```{r hla_calls}
+HLA_data <- readHlaCalls(paste0(data_path, "HLAexample.txt"))
+kable(HLA_data) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  scroll_box(width = "100%", height = "200px")
+```
+
+
+The response variable that we want to explain via presence vs. absence of allele
+is termed here phenotype, and can be many things that require different models.
+Cox models for the survival data, logistic regression for the case/control 
+phenotype, and linear regression for the quantitative phenotype (those seems to
+be the most standard ones). Chris also had cases were e.g. a negative binomial 
+model was the best choice.
+
+Example of survival phenotype
+```{r phenotype}
+pheno <- read.table(paste0(data_path, "pheno.txt"), header = TRUE)
+kable(pheno[, c(1, 2, 3)]) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  scroll_box(width = "100%", height = "200px")
+```
+
+
+Sex and age are used as covariables in the models
+```{r covar}
+covar <- read.table(paste0(data_path, "covar.txt"), header = TRUE)
+kable(covar) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  scroll_box(width = "100%", height = "200px")
+```
+
+
+## Association analysis of HLA alleles
+Let's check whether any 4-digit HLA allele is associated with overall survival:
+
+```{r 4digit_OS, echo=TRUE, warnings=FALSE}
+tmp <- HLA_data[, -1]
+HLA_toAnalyze <- cbind(tmp[0], mtabulate(as.data.frame(t(tmp))))
+row.names(HLA_toAnalyze) <- NULL
+HLA_toAnalyze <- HLA_toAnalyze[ , order(names(HLA_toAnalyze))]
+HLA_toAnalyze <- cbind(ID=(HLA_data[,1]),HLA_toAnalyze)
+
+tmp <- merge(HLA_toAnalyze, pheno, by="ID")
+dat <- merge(tmp, covar, by="ID")
+
+coxfun <- function(x) {
+    coxph( Surv(OS, OS_DIED) ~ x + AGE + SEX, data=dat)
+}
+firstHLA <- which(names(dat)=="A*01:01")
+lastHLA <- which(names(dat)=="L*01:01")
+suppressWarnings(HLA_4digit_OS_res <- map_dfr(dat[,firstHLA:lastHLA], ~coxfun(.x) %>% tidy(exponentiate=TRUE)))
+HLA_4digit_summary <- HLA_4digit_OS_res %>% filter(term=="x")
+
+HLA_4digit_summary$allele <- names(dat[firstHLA:lastHLA])
+kable(HLA_4digit_summary[c(8,2,3,4,6,7,5)] %>% dplyr::filter(p.value<0.05),digits=3) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+```
+
+
+Chris request is basically to put those operations into function. Because
+different models are used for different phenotype data it should be as much 
+flexible as possible.
+
+Something like:
+```
+assoc(MODEL, GENO, PHENO, COVAR, CORRECTION, OUTPUT)
+
+MODEL: decide whether to run logistic or linear regression, or cox model for survival analysis, respectively, depending on structure of the phenotype of interest
+GENO: can either be defined group (all HLA alleles, all amino acid residues, derived variables,…) or actually single test for specific allele or amino acid
+PHENO: phenotype to analyze, e.g. survival or disease diagnosis, etc.
+COVAR: vector of covariates to include in the model, e.g. sex or age, or genetic principal components
+CORRECTION: how to correct for multiple testing, e.g. Bonferroni or Benjamini-Hochberg corrected p value
+OUTPUT: table in html / pdf format, etc.
+```
+
+
+#### Notes
+In the above example each allele is tested separately and represented for the 
+test as quantitative vector (ranging 0-2). Example for allele `A*01:01`.
+```{r allele_representation}
+kable(HLA_toAnalyze[, 1:2]) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  scroll_box(width = "100%", height = "200px")
+```
+
+
+### Implementation idea
+In order to provide requested flexibility I would propose a function that would 
+be basically collection of predefined arguments for different models.
+```
+function(data, model, ...) {
+  data <- transform(data)
+  case
+    model == "lm") f(data, ...)
+    model == "coxph") g(data, ...)
+    ...
+  res <- format(res)
+  return(res)
+}
+```
+
+
+Ideal alternative would be to guess all the arguments for any model of choice. 
+This however is probably very difficult and error prone, proposed solution seems
+to be quite safe. Downside is that while this function might seem to be flexible
+in fact it is not. To somehow overcome this I would just expose the functions
+used for data transformation and result formatting to the user, so they can 
+easily use them as building blocks for other models implementation.
+
+### Statistically independent associations
+Since there are often statistically independent association signals in the HLA 
+locus for a given phenotype, it would be great if the function did step wise 
+conditional testing, adding the previous top-associated allele as covariate, 
+until there's no more significant alleles (either nominally or after correction, 
+or maybe using a self-defined threshold).
+
+### Models and tests to implement in MiDAS
+Below are short notes on the models
+
+#### Cox model for the survival data
+[Cox proportional hazards regression model](http://www.sthda.com/english/wiki/cox-proportional-hazards-model) 
+is essentially a regression model used
+for investigating the association between the survival time of patients and one 
+or more predictor variables. Works for both quantitative predictor variables and
+for categorical variables. 
+
+The Cox model is expressed by the hazard function denoted by h(t). Briefly, the 
+hazard function can be interpreted as the risk of dying at time t.
+
+$h(t) = h_0 (t) * exp(b_1 x_1 + b_2 x_2 + ... + b_p x_p)$
+
+where:
+
+  + $t$ survival time
+  + $h_0$ baseline hazard
+
+In R:
+
+coxph(formula, data=, weights, subset, 
+      na.action, init, control, 
+      ties=c("efron","breslow","exact"), 
+      singular.ok=TRUE, robust=FALSE, 
+      model=FALSE, x=FALSE, y=TRUE, tt, method, ...)
+
+formula	- response must be a survival object as returned by the Surv function.
+data - data.frame in which to interpret the variables named in the formula.
+
+Value - an object of class coxph representing the fit
+
+#### logistic regression for the case/control phenotype
+logistic regression - nice overview can be found in "An Introduction To 
+Statistical Learning with Applications in R", pdf can be found online.
+
+glm(formula, family = gaussian, data, weights, subset,
+    na.action, start = NULL, etastart, mustart, offset,
+    control = list(...), model = TRUE, method = "glm.fit",
+    x = FALSE, y = TRUE, singular.ok = TRUE, contrasts = NULL, ...)
+
+formula	- an object of class "formula"
+
+Value - object of class inheriting from "glm" which inherits from the class "lm"
+
+#### linear regression for the quantitative phenotype
+lm is used to fit linear models. It can be used to carry out regression. Nice 
+overview on linear regression can be found in "An Introduction ToStatistical 
+Learning with Applications in R", pdf can be found online.
+
+lm(formula, data, subset, weights, na.action,
+   method = "qr", model = TRUE, x = FALSE, y = FALSE, qr = TRUE,
+   singular.ok = TRUE, contrasts = NULL, offset, ...)
+
+formula - object of class "formula".
+
+Value - lm returns an object of class "lm".
+
+#### Comparison of returned values
+```{r values_from_models}
+# Examples are dummy!
+coxfun <- function(x) {
+    coxph(Surv(OS, OS_DIED) ~ x + AGE + SEX, data=dat)
+}
+logistic <- function(x) {
+  glm(OS_DIED ~ x + AGE + SEX, family=binomial(link='logit'), data=dat)
+}
+regres <- function(x) {
+  lm(OS ~ x + AGE + SEX, data=dat)
+}
+firstHLA <- which(names(dat)=="A*01:01")
+lastHLA <- which(names(dat)=="L*01:01")
+
+
+suppressWarnings(coxph_res <- map_dfr(dat[,firstHLA:lastHLA], ~coxfun(.x) %>% tidy(exponentiate=TRUE)))
+kable(coxph_res) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  scroll_box(width = "100%", height = "200px")
+
+suppressWarnings(logistic_res <- map_dfr(dat[,firstHLA:lastHLA], ~logistic(.x) %>% tidy(exponentiate=TRUE)))
+kable(logistic_res) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  scroll_box(width = "100%", height = "200px")
+
+suppressWarnings(regres_res <- map_dfr(dat[,firstHLA:lastHLA], ~regres(.x) %>% tidy(exponentiate=TRUE)))
+kable(regres_res) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  scroll_box(width = "100%", height = "200px")
+```
+
+
+### Association analysis of variable amino acids (AA) - further in the project
+
+Many AA positions are more than bi-allelic and have up to 6 different possible residues. Of course, one could test presence/absence of each AA residue (Leucine vs. non-Leucine/everything else) at each position, but calculating first an overall p value for each position significantly reduces multiple testing burden.
+In the past, I've used the [conditional haplotype test implemented in plink](http://zzz.bwh.harvard.edu/plink/whap.shtml) to do this, but it's not designed to do this. I'll provide an example script in the "plink" subfolder for your reference.
+
+> The default test is an omnibus haplotype test: that is, if there are H haplotypes, then --chap performs an H-1 df test comparing the alternate (each haplotype having a unqiue effect) versus the null (no haplotypes having any different effect). In each case, one haplotype is arbitrarily chosen to be the reference haplotype. The coefficients must be interpreted with respect to that haplotype, but otherwise the coding makes no difference.
+For binary disease traits, the test is based on a likelihood ratio test. For continuous traits, the test is based on an F-test comparing the alternate and null models. For continuous traits, the --chap command also displays the proportion of variance in the outcome explained by the regression model (R-squared) as well as an adjusted R-squared (that takes model complexity into account).
+
+For the top-associated AA position, we would then run posterior analyses for all residues at this position (presence/absence) to get effect estimates.
+These residues would also go in the model for the subsequent stepwise conditional testing to find independently associated AA positions.
+
+This allows us to fine-map the association signals to specific positions in the protein, likely (if we are well powered) concentrating in the peptide binding region.
+
+#### Omnibus test
+> Omnibus tests are a kind of statistical test. They test whether the explained 
+variance in a set of data is significantly greater than the unexplained variance, 
+overall. One example is the F-test in the analysis of variance. [wikipedia](https://en.wikipedia.org/wiki/Omnibus_test)
