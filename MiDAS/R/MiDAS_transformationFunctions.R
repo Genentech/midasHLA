@@ -35,10 +35,6 @@ hlaToAAVariation <- function(hla_calls,
                              unkchar = FALSE,
                              alnpath = system.file("extdata", package = "MiDAS")){
   assert_that(
-    is.data.frame(hla_calls),
-    see_if(nrow(hla_calls) >= 1 & ncol(hla_calls) >= 2,
-           msg = "input data frame have to have at least 1 rows and 2 columns"
-    ),
     checkHlaCallsFormat(hla_calls),
     is.flag(indels),
     is.flag(unkchar),
