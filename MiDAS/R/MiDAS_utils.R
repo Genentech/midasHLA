@@ -234,14 +234,18 @@ convertAlleleToVariable <- function(allele,
 #' @export
 checkHlaCallsFormat <- function(hla_calls) {
   assert_that(
+    is.data.frame(hla_calls),
+    see_if(nrow(hla_calls) >= 1 & ncol(hla_calls) >= 2,
+           msg = "hla_calls have to have at least 1 rows and 2 columns"
+    ),
     see_if(! any(vapply(hla_calls, is.factor, logical(length = 1))),
-           msg = "input can't contain factors"
+           msg = "hla_calls can't contain factors"
     ),
     see_if(! all(checkAlleleFormat(hla_calls[, 1]), na.rm = TRUE),
-           msg = "first column of input should specify samples id"
+           msg = "first column of hla_calls should specify samples id"
     ),
     see_if(all(checkAlleleFormat(unlist(hla_calls[, -1])), na.rm = TRUE),
-           msg = "values in input doesn't follow HLA numbers specification"
+           msg = "values in hla_calls doesn't follow HLA numbers specification"
     )
   )
 
