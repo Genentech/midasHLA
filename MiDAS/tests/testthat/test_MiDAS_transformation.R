@@ -51,3 +51,18 @@ test_that("HLA calls table is converted to additional variables", {
     "nacols.rm is not a flag \\(a length one logical vector\\)."
   )
 })
+
+test_that("HLA calls table is converted to counts table", {
+  hla_calls <- system.file("extdata/HLAHD_output_example.txt",
+                           package = "MiDAS"
+  )
+  hla_calls <- readHlaCalls(hla_calls)
+  hla_counts <- hlaCallsToCounts(hla_calls)
+  load(system.file("extdata", "test_hla_counts.RData", package = "MiDAS"))
+  expect_equal(hla_supertypes, test_hla_counts)
+
+  expect_error(
+    hlaCallsToCounts(c("A*01:01", "A*02:01")),
+    "hla_calls is not a data frame"
+  )
+})

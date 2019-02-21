@@ -249,6 +249,13 @@ reduceHlaCalls <- function(hla_calls,
 
 #' Transform HLA calls to counts table
 #'
+#' \code{hlaCallsToCounts} converts HLA calls data frame into counts table
+#'
+#' @inheritParams checkHlaCallsFormat
+#'
+#' @return Data frame containing counts of HLA alleles found in input data
+#'   frame.
+#'
 #' @examples
 #' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(file)
