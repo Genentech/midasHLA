@@ -109,6 +109,11 @@ test_that("HLA calls data frame have proper format", {
   )
 })
 
+test_that("HLA allele are backquoted properly", {
+  expect_equal(backquote(c("A:01:01", "A:02:01")), c("`A:01:01`", "`A:02:01`"))
+  expect_error(backquote(1), "character is not a character vector")
+})
+
 context("HLA allele alignments")
 
 test_that("Variable amino acids positions are detected properly", {
