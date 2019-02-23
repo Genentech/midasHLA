@@ -226,6 +226,7 @@ convertAlleleToVariable <- function(allele,
 #' @return Logical indicating if \code{hla_calls} follows hla calls data frame
 #'   format. Otherwise raise error.
 #'
+#' @importFrom assertthat assert_that see_if
 #' @examples
 #' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(file)
