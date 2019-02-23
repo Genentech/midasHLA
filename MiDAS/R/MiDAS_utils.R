@@ -252,3 +252,25 @@ checkHlaCallsFormat <- function(hla_calls) {
 
   return(TRUE)
 }
+
+#' Backquote string
+#'
+#' \code{backquote} places backticks around string.
+#'
+#' \code{backquote} is usefull when using HLA allele numbers in fomulas, where
+#' \code{'*'} and \code{':'} characters have special meanings.
+#'
+#' @param character Character vector.
+#'
+#' @return Character vector with its elements backticked.
+#'
+#' @examples
+#' backquote("A*01:01")
+#'
+#' @importFrom assertthat assert_that
+#' @export
+backquote <- function(character) {
+  assert_that(is.character(character))
+  backquted <- paste0("`", character, "`")
+  return(backquted)
+}
