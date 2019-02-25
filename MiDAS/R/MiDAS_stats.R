@@ -15,7 +15,7 @@
 #' @param ... further arguments passed to statistical model function.
 #'
 #' Available choices for \code{model} can be checked in \link{hlaAssocModels}
-#' documentation or by using \code{hlaAssocModels("list")} function.
+#' documentation or by using \code{hlaAssocModels()} function.
 #'
 #' \code{pheno} and \code{covar} should be data frames with first column holding
 #' samples IDs and named \code{ID}. Those should correspond to \code{ID} column
@@ -176,15 +176,18 @@ analyzeHlaAssociations <- function(model = "coxph",
 #'
 #' @importFrom assertthat assert_that see_if
 #' @export
-hlaAssocModels <- function(model,
+hlaAssocModels <- function(model = NULL,
                            response,
                            covariate,
                            data) {
+  if (is.null(model)) {
+    print("Available models: coxph, lm, glm")
+  }
   assert_that(
     is.string(model),
     is.character(response),
     is.character(covariate),
-    is.data.frame(data),
+    is.data.frame(data)
   )
   model_function <- switch(
     model,
