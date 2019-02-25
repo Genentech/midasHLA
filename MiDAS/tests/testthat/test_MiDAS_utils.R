@@ -87,9 +87,13 @@ test_that("HLA calls data frame have proper format", {
   hla_calls <- readHlaCalls(file)
   expect_equal(checkHlaCallsFormat(hla_calls), TRUE)
 
+  expect_error(checkHlaCallsFormat("A"), "hla_calls is not a data frame")
+  expect_error(checkHlaCallsFormat(data.frame()),
+               "hla_calls have to have at least 1 rows and 2 columns"
+  )
   hla_calls[, 1] <- as.factor(hla_calls[, 1])
   expect_error(checkHlaCallsFormat(hla_calls),
-               "input can't contain factors"
+               "hla_calls can't contain factors"
   )
   fake_calls <- data.frame(ID = c("Sample1", "Sample2", "Sample3"),
                            A_1 = c("A*01", "A*02", "A*03"),
@@ -97,11 +101,11 @@ test_that("HLA calls data frame have proper format", {
                            stringsAsFactors = FALSE
   )
   expect_error(checkHlaCallsFormat(fake_calls[, c(2, 1, 3)]),
-               "first column of input should specify samples id"
+               "first column of hla_calls should specify samples id"
   )
 
   expect_error(checkHlaCallsFormat(fake_calls[, c(1, 1, 3)]),
-               "values in input doesn't follow HLA numbers specification"
+               "values in hla_calls doesn't follow HLA numbers specification"
   )
 })
 

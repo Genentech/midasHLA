@@ -35,10 +35,6 @@ hlaToAAVariation <- function(hla_calls,
                              unkchar = FALSE,
                              alnpath = system.file("extdata", package = "MiDAS")){
   assert_that(
-    is.data.frame(hla_calls),
-    see_if(nrow(hla_calls) >= 1 & ncol(hla_calls) >= 2,
-           msg = "input data frame have to have at least 1 rows and 2 columns"
-    ),
     checkHlaCallsFormat(hla_calls),
     is.flag(indels),
     is.flag(unkchar),
@@ -245,4 +241,34 @@ reduceHlaCalls <- function(hla_calls,
   )
 
   return(hla_calls)
+}
+
+#' Transform HLA calls to counts table
+#'
+#' \code{hlaCallsToCounts} converts HLA calls data frame into counts table
+#'
+#' @inheritParams checkHlaCallsFormat
+#'
+#' @return Data frame containing counts of HLA alleles found in input data
+#'   frame.
+#'
+#' @examples
+#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(file)
+#' hlaCallsToCounts(hla_calls)
+#'
+#' @importFrom qdapTools mtabulate
+#'
+#' @export
+hlaCallsToCounts <- function(hla_calls) {
+  assert_that(
+    checkHlaCallsFormat(hla_calls)
+  )
+  hla_counts <- hla_calls[, -1]
+  hla_counts <- mtabulate(as.data.frame(t(hla_counts)))
+  rownames(hla_counts) <- NULL
+  hla_counts <- hla_counts[, order(names(hla_counts))]
+  hla_counts <- cbind(ID = hla_calls[, 1], hla_counts)
+
+  return(hla_counts)
 }
