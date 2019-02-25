@@ -159,3 +159,47 @@ analyzeHlaAssociations <- function(model = "coxph",
   return(results)
 }
 
+#' Association models for analysis of HLA alleles
+#'
+#' \code{hlaAssocModels} is a collection of preconfigured models for use with
+#' HLA alleles count table.
+#'
+#' @inheritParams analyzeHlaAssociations
+#' @param response Character specifying response variables in \code{data}.
+#' @param covariate Chararcter specifying covariates in \code{data}.
+#' @param data Data frame containing variables in the model.
+#'
+#' @return Function for fitting association model of choice, it takes allele
+#'   number as an argument. Additional arguments can be passed as well.
+#'
+#' @examples
+#'
+#' @importFrom assertthat assert_that see_if
+#' @export
+hlaAssocModels <- function(model,
+                           response,
+                           covariate,
+                           data) {
+  assert_that(
+    is.string(model),
+    is.character(response),
+    is.character(covariate),
+    is.data.frame(data),
+  )
+  model_function <- switch(
+    model,
+    coxph = function(allele, ...) {
+      form <- sprintf("Surv(%s) ~ %s + %s", pheno_var, allele, covar_var)
+      coxph(formula = as.formula(form), data = data, ...)
+    },
+    lm = function(allele, ...) {
+      form <- sprintf("%s ~ %s + %s", pheno_var, allele, covar_var)
+      lm(formula = as.formula(form), data = data, ...)
+    },
+    glm = function(allele, ...) {
+      form <- sprintf("%s ~ %s + %s", pheno_var, allele, covar_var)
+      glm(formula = as.formula(form), family = binomial(link = "logit"),  data = data, ...)
+    }
+  )
+  return(model_function)
+}
