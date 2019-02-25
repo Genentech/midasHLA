@@ -140,11 +140,15 @@ analyzeHlaAssociations <- function(model = "coxph",
     alleles_var <- paste(alleles_var, zygo_var, sep = " + ")
   }
 
-  model_function <- hlaAssocModels(model, pheno_var, covar_var, data, ...)
+  model_function <- hlaAssocModels(model = model,
+                                   response = pheno_var,
+                                   covariate = covar_var,
+                                   data = data
+  )
 
   results <- map_dfr(
     .x = alleles_var,
-    .f = ~tidy(model_function(.), exponentiate=TRUE) # this have to be handled somehow
+    .f = ~tidy(model_function(., ...), exponentiate=TRUE) # this have to be handled somehow
   )
 
   results <- mutate(results, term = gsub("`", "", term))
