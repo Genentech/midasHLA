@@ -148,7 +148,7 @@ analyzeHlaAssociations <- function(model = "coxph",
 
   results <- map_dfr(
     .x = alleles_var,
-    .f = ~tidy(model_function(., ...), exponentiate=TRUE) # this have to be handled somehow
+    .f = ~tidy(model_function(., ...), exponentiate=FALSE) # this have to be handled somehow
   )
 
   results <- mutate(results, term = gsub("`", "", term))
