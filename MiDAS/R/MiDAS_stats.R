@@ -40,9 +40,12 @@
 #'   \code{hla_calls}.
 #'
 #' @examples
+#' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls("data/HLAexample.txt")
-#' pheno <- read.table("data/pheno.txt",header=T)
-#' covar <- read.table("data/covar.txt",header=T)
+#' pheno_file <- system.file("extdata", "pheno.txt", package = "MiDAS")
+#' pheno <- read.table(pheno_file, header = TRUE)
+#' covar_file <- system.file("extdata", "covar.txt", package = "MiDAS")
+#' covar <- read.table(covar_file, header = TRUE)
 #'
 #' # Cox proportional hazards regression model
 #' analyzeHlaAssociations <- function(model = "coxph",
@@ -181,7 +184,7 @@ hlaAssocModels <- function(model = NULL,
                            covariate,
                            data) {
   if (is.null(model)) {
-    print("Available models: coxph, lm, glm")
+    return("Available models: coxph, lm, glm.logit")
   }
   assert_that(
     is.string(model),
