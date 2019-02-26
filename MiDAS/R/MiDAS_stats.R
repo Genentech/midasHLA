@@ -83,7 +83,7 @@ analyzeHlaAssociations <- function(model = "coxph",
                                    ...) {
   assert_that(
     is.string(model),
-    see_if(! is.null(hlaAssocModels(model)),
+    see_if(model %in% hlaAssocModels(),
            msg = sprintf("%s model is not implemented.", model)),
     checkHlaCallsFormat(hla_calls),
     is.data.frame(pheno),
@@ -184,7 +184,7 @@ hlaAssocModels <- function(model = NULL,
                            covariate,
                            data) {
   if (is.null(model)) {
-    return("Available models: coxph, lm, glm.logit")
+    return(c("coxph", "lm", "glm.logit"))
   }
   assert_that(
     is.string(model),
