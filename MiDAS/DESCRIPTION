@@ -9,7 +9,7 @@ License: What license is it under?
 Encoding: UTF-8
 LazyData: true
 Imports:
-    stringi (>= 1.2.4), assertthat (>= 0.2.0), stats, utils, qdapTools (>= 1.3.3)
+    stringi (>= 1.2.4), assertthat (>= 0.2.0), stats, utils, qdapTools (>= 1.3.3), survival (>= 2.43-3)
 Suggests:
     testthat (>= 2.0.1), seqinr (>= 3.4-5)
 RoxygenNote: 6.1.1
