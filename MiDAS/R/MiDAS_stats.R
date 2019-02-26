@@ -41,36 +41,37 @@
 #'
 #' @examples
 #' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-#' hla_calls <- readHlaCalls("data/HLAexample.txt")
+#' hla_calls <- readHlaCalls(hla_calls_file)
 #' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
 #' pheno <- read.table(pheno_file, header = TRUE)
 #' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE)
 #'
 #' # Cox proportional hazards regression model
-#' analyzeHlaAssociations <- function(model = "coxph",
-#'                                    hla_calls,
-#'                                    pheno,
-#'                                    covar,
-#'                                    zygo = FALSE,
-#'                                    reduce_counts = FALSE,
-#'                                    correction = "BH"
+#' analyzeHlaAssociations(model = "coxph",
+#'                        hla_calls,
+#'                        pheno,
+#'                        covar,
+#'                        zygo = FALSE,
+#'                        reduce_counts = FALSE,
+#'                        correction = "BH"
 #' )
 #'
 #' # Logistic regression
 #' pheno <- pheno[, c(1, 3)]
-#' analyzeHlaAssociations <- function(model = "glm.logit",
-#'                                    hla_calls,
-#'                                    pheno,
-#'                                    covar,
-#'                                    zygo = FALSE,
-#'                                    reduce_counts = FALSE,
-#'                                    correction = "BH"
+#' analyzeHlaAssociations(model = "glm.logit",
+#'                        hla_calls,
+#'                        pheno,
+#'                        covar,
+#'                        zygo = FALSE,
+#'                        reduce_counts = FALSE,
+#'                        correction = "BH"
 #' )
 #'
 #' @importFrom assertthat assert_that see_if is.flag is.string
 #' @importFrom broom tidy
 #' @importFrom dplyr left_join filter mutate
+#' @importFrom stats p.adjust
 #' @importFrom purrr map_dfr
 #' @export
 analyzeHlaAssociations <- function(model = "coxph",
@@ -115,10 +116,12 @@ analyzeHlaAssociations <- function(model = "coxph",
 
   assert_that(
     see_if(
-    anyDuplicated(c(
-      colnames(hla_counts[, -1]), colnames(pheno[, -1]),
-      colnames(covar[, -1]), paste0(colnames(zygocity[, -1]), "_zygocity")
-    )) == 0,
+    anyDuplicated(
+      c(
+        colnames(hla_counts[, -1]), colnames(pheno[, -1]),
+        colnames(covar[, -1]), paste0(colnames(zygocity[, -1]), "_zygocity")
+      )
+    ) == 0,
     msg = "some colnames in hla_calls and pheno and covar and zygocity are duplicated"
   ))
 
@@ -189,7 +192,7 @@ analyzeHlaAssociations <- function(model = "coxph",
 #'
 #' @examples
 #' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-#' hla_calls <- readHlaCalls("data/HLAexample.txt")
+#' hla_calls <- readHlaCalls(hla_calls_file)
 #' hla_counts <- hlaCallsToCounts(hla_calls)
 #' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
 #' pheno <- read.table(pheno_file, header = TRUE)
@@ -208,7 +211,7 @@ analyzeHlaAssociations <- function(model = "coxph",
 #' func(allele)
 #'
 #' @importFrom assertthat assert_that see_if
-#' @importFrom stats binomial glm lm
+#' @importFrom stats as.formula binomial glm lm
 #' @importFrom survival coxph Surv
 #' @export
 hlaAssocModels <- function(model = NULL,
@@ -249,42 +252,3 @@ hlaAssocModels <- function(model = NULL,
   )
   return(model_function)
 }
-
-
-
-
-hla_calls <- readHlaCalls("inst/extdata/HLAHD_output_example.txt")
-pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-pheno <- read.table(pheno_file, header = TRUE)
-covar <- read.table("inst/extdata/covar_example.txt",header=T)
-res <- analyzeHlaAssociations(hla_calls = hla_calls, pheno = pheno, covar = covar, zygo = F, correction = "none")
-
-HLA_data <- hla_calls
-tmp <- HLA_data[, -1]
-HLA_toAnalyze <- cbind(tmp[0], mtabulate(as.data.frame(t(tmp))))
-row.names(HLA_toAnalyze) <- NULL
-HLA_toAnalyze <- HLA_toAnalyze[ , order(names(HLA_toAnalyze))]
-HLA_toAnalyze <- cbind(ID=(HLA_data[,1]),HLA_toAnalyze)
-tmp <- merge(HLA_toAnalyze, pheno, by="ID")
-dat <- merge(tmp, covar, by="ID")
-coxfun <- function(x) {
-  coxph( Surv(OS, OS_DIED) ~ x + AGE + SEX, data=dat)
-}
-firstHLA <- which(names(dat)=="A*01:01")
-lastHLA <- which(names(dat)=="L*01:01")
-suppressWarnings(HLA_4digit_OS_res <- map_dfr(dat[,firstHLA:lastHLA], ~coxfun(.x) %>% tidy(exponentiate=TRUE)))
-HLA_4digit_summary <- HLA_4digit_OS_res %>% filter(term=="x")
-HLA_4digit_summary$allele <- names(dat[firstHLA:lastHLA])
-
-res %>% filter(p.value<0.05)
-HLA_4digit_summary[c(8,2,3,4,6,7,5)] %>% filter(p.value<0.05)
-
-all(HLA_4digit_summary$p.value == res$p.value, na.rm = T)
-
-
-
-
-
-
-
-
