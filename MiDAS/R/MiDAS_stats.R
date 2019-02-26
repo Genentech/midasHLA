@@ -42,9 +42,9 @@
 #' @examples
 #' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls("data/HLAexample.txt")
-#' pheno_file <- system.file("extdata", "pheno.txt", package = "MiDAS")
+#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
 #' pheno <- read.table(pheno_file, header = TRUE)
-#' covar_file <- system.file("extdata", "covar.txt", package = "MiDAS")
+#' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE)
 #'
 #' # Cox proportional hazards regression model
@@ -79,8 +79,7 @@ analyzeHlaAssociations <- function(model = "coxph",
                                    covar,
                                    zygo = FALSE,
                                    reduce_counts = FALSE,
-                                   correction = "BH",
-                                   ...) {
+                                   correction = "BH") {
   assert_that(
     is.string(model),
     see_if(model %in% hlaAssocModels(),
@@ -153,7 +152,7 @@ analyzeHlaAssociations <- function(model = "coxph",
 
   results <- map_dfr(
     .x = alleles_var,
-    .f = ~tidy(model_function(., ...), exponentiate=FALSE) # TODO exponentiate could be passed somehow
+    .f = ~tidy(model_function(.), exponentiate=FALSE) # TODO exponentiate could be passed somehow
   )
 
   results <- mutate(results, term = gsub("`", "", term))
@@ -192,14 +191,14 @@ analyzeHlaAssociations <- function(model = "coxph",
 #' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls("data/HLAexample.txt")
 #' hla_counts <- hlaCallsToCounts(hla_calls)
-#' pheno_file <- system.file("extdata", "pheno.txt", package = "MiDAS")
+#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
 #' pheno <- read.table(pheno_file, header = TRUE)
-#' covar_file <- system.file("extdata", "covar.txt", package = "MiDAS")
+#' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE)
 #' data <- left_join(hla_counts, pheno, by="ID")
 #' data <- left_join(data, covar, by="ID")
-#' response <- colnames(pheno[, -1])
-#' covariate <- colnames(covar[, -1])
+#' response <- paste(colnames(pheno[, -1]), collapse = ", ")
+#' covariate <- paste(colnames(covar[, -1]), collapse = " + ")
 #' func <- hlaAssocModels(model = "coxph",
 #'                        response = response,
 #'                        covariate = covariate,
@@ -254,16 +253,9 @@ hlaAssocModels <- function(model = NULL,
 
 
 
-
-
-
-
-
-
-
-
 hla_calls <- readHlaCalls("inst/extdata/HLAHD_output_example.txt")
-pheno <- read.table("inst/extdata/pheno_example.txt",header=T)
+pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+pheno <- read.table(pheno_file, header = TRUE)
 covar <- read.table("inst/extdata/covar_example.txt",header=T)
 res <- analyzeHlaAssociations(hla_calls = hla_calls, pheno = pheno, covar = covar, zygo = F, correction = "none")
 
@@ -288,3 +280,11 @@ res %>% filter(p.value<0.05)
 HLA_4digit_summary[c(8,2,3,4,6,7,5)] %>% filter(p.value<0.05)
 
 all(HLA_4digit_summary$p.value == res$p.value, na.rm = T)
+
+
+
+
+
+
+
+
