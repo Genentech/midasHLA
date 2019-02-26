@@ -70,7 +70,7 @@
 #'
 #' @importFrom assertthat assert_that see_if is.flag is.string
 #' @importFrom broom tidy
-#' @importFrom dplyr left_join filter mutate
+#' @importFrom dplyr left_join filter mutate rename
 #' @importFrom stats p.adjust
 #' @importFrom purrr map_dfr
 #' @export
@@ -160,8 +160,11 @@ analyzeHlaAssociations <- function(model = "coxph",
 
   results <- mutate(results, term = gsub("`", "", term))
   results <- filter(results, checkAlleleFormat(term))
+  results <- rename(results, allele = term)
 
   results <- mutate(results, p.adjusted = p.adjust(p.value, correction))
+
+  # results <- as.data.frame(results)
 
   return(results)
 }
@@ -198,8 +201,8 @@ analyzeHlaAssociations <- function(model = "coxph",
 #' pheno <- read.table(pheno_file, header = TRUE)
 #' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE)
-#' data <- left_join(hla_counts, pheno, by="ID")
-#' data <- left_join(data, covar, by="ID")
+#' data <- dplyr::left_join(hla_counts, pheno, by="ID")
+#' data <- dplyr::left_join(data, covar, by="ID")
 #' response <- paste(colnames(pheno[, -1]), collapse = ", ")
 #' covariate <- paste(colnames(covar[, -1]), collapse = " + ")
 #' func <- hlaAssocModels(model = "coxph",
