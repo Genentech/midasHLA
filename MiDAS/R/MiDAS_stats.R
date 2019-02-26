@@ -77,8 +77,8 @@ analyzeHlaAssociations <- function(model = "coxph",
                                    hla_calls,
                                    pheno,
                                    covar,
-                                   zygo = TRUE,
-                                   reduce_counts = TRUE,
+                                   zygo = FALSE,
+                                   reduce_counts = FALSE,
                                    correction = "BH",
                                    ...) {
   assert_that(
