@@ -153,7 +153,7 @@ analyzeHlaAssociations <- function(model = "coxph",
 
   results <- map_dfr(
     .x = alleles_var,
-    .f = ~tidy(model_function(., ...), exponentiate=FALSE) # this have to be handled somehow
+    .f = ~tidy(model_function(., ...), exponentiate=FALSE) # TODO exponentiate could be passed somehow
   )
 
   results <- mutate(results, term = gsub("`", "", term))
@@ -169,6 +169,8 @@ analyzeHlaAssociations <- function(model = "coxph",
 #' \code{hlaAssocModels} is a collection of preconfigured models for use with
 #' HLA alleles count table.
 #'
+#' \code{hlaAssocModels} is not indended to use by basic user.
+#'
 #' @inheritParams analyzeHlaAssociations
 #' @param response Character specifying response variables in \code{data}.
 #' @param covariate Chararcter specifying covariates in \code{data}.
@@ -177,9 +179,38 @@ analyzeHlaAssociations <- function(model = "coxph",
 #' @return Function for fitting association model of choice, it takes allele
 #'   number as an argument. Additional arguments can be passed as well.
 #'
+#'   Returned function takes one required argument: HLA allele number
+#'   (\code{allele}). Additional parameters are passed to statistical model
+#'   function. Due to fact that allele numbers contains characters that have
+#'   special meanings in formulas, they should be backquoted. This can be easly
+#'   done with \link{backquote}. See examples section for general usage case.
+#'
+#'   If model is equal to \code{NULL} names of available models are returned
+#'   instead.
+#'
 #' @examples
+#' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls("data/HLAexample.txt")
+#' hla_counts <- hlaCallsToCounts(hla_calls)
+#' pheno_file <- system.file("extdata", "pheno.txt", package = "MiDAS")
+#' pheno <- read.table(pheno_file, header = TRUE)
+#' covar_file <- system.file("extdata", "covar.txt", package = "MiDAS")
+#' covar <- read.table(covar_file, header = TRUE)
+#' data <- left_join(hla_counts, pheno, by="ID")
+#' data <- left_join(data, covar, by="ID")
+#' response <- colnames(pheno[, -1])
+#' covariate <- colnames(covar[, -1])
+#' func <- hlaAssocModels(model = "coxph",
+#'                        response = response,
+#'                        covariate = covariate,
+#'                        data = data
+#' )
+#' allele <- backquote("A*01:01")
+#' func(allele)
 #'
 #' @importFrom assertthat assert_that see_if
+#' @importFrom stats binomial glm lm
+#' @importFrom survival coxph Surv
 #' @export
 hlaAssocModels <- function(model = NULL,
                            response,
@@ -197,17 +228,63 @@ hlaAssocModels <- function(model = NULL,
   model_function <- switch(
     model,
     coxph = function(allele, ...) {
-      form <- sprintf("Surv(%s) ~ %s + %s", pheno_var, allele, covar_var)
-      coxph(formula = as.formula(form), data = data, ...)
+      form <- sprintf("Surv(%s) ~ %s + %s", response, allele, covariate)
+      result <- coxph(formula = as.formula(form), data = data, ...)
+      return(result)
     },
     lm = function(allele, ...) {
-      form <- sprintf("%s ~ %s + %s", pheno_var, allele, covar_var)
-      lm(formula = as.formula(form), data = data, ...)
+      form <- sprintf("%s ~ %s + %s", response, allele, covariate)
+      result <- lm(formula = as.formula(form), data = data, ...)
+      return(result)
     },
-    glm = function(allele, ...) {
-      form <- sprintf("%s ~ %s + %s", pheno_var, allele, covar_var)
-      glm(formula = as.formula(form), family = binomial(link = "logit"),  data = data, ...)
+    glm.logit = function(allele, ...) {
+      form <- sprintf("%s ~ %s + %s", response, allele, covariate)
+      result <- glm(
+        formula = as.formula(form),
+        family = binomial(link = "logit"),
+        data = data,
+        ...
+      )
+      return(result)
     }
   )
   return(model_function)
 }
+
+
+
+
+
+
+
+
+
+
+
+
+hla_calls <- readHlaCalls("inst/extdata/HLAHD_output_example.txt")
+pheno <- read.table("inst/extdata/pheno_example.txt",header=T)
+covar <- read.table("inst/extdata/covar_example.txt",header=T)
+res <- analyzeHlaAssociations(hla_calls = hla_calls, pheno = pheno, covar = covar, zygo = F, correction = "none")
+
+HLA_data <- hla_calls
+tmp <- HLA_data[, -1]
+HLA_toAnalyze <- cbind(tmp[0], mtabulate(as.data.frame(t(tmp))))
+row.names(HLA_toAnalyze) <- NULL
+HLA_toAnalyze <- HLA_toAnalyze[ , order(names(HLA_toAnalyze))]
+HLA_toAnalyze <- cbind(ID=(HLA_data[,1]),HLA_toAnalyze)
+tmp <- merge(HLA_toAnalyze, pheno, by="ID")
+dat <- merge(tmp, covar, by="ID")
+coxfun <- function(x) {
+  coxph( Surv(OS, OS_DIED) ~ x + AGE + SEX, data=dat)
+}
+firstHLA <- which(names(dat)=="A*01:01")
+lastHLA <- which(names(dat)=="L*01:01")
+suppressWarnings(HLA_4digit_OS_res <- map_dfr(dat[,firstHLA:lastHLA], ~coxfun(.x) %>% tidy(exponentiate=TRUE)))
+HLA_4digit_summary <- HLA_4digit_OS_res %>% filter(term=="x")
+HLA_4digit_summary$allele <- names(dat[firstHLA:lastHLA])
+
+res %>% filter(p.value<0.05)
+HLA_4digit_summary[c(8,2,3,4,6,7,5)] %>% filter(p.value<0.05)
+
+all(HLA_4digit_summary$p.value == res$p.value, na.rm = T)
