@@ -106,20 +106,22 @@ analyzeHlaAssociations <- function(model = "coxph",
     see_if(any(hla_calls[, 1] %in% covar[, 1]),
            msg = "IDs in hla_calls doesn't match IDs in covar"
     ),
-    see_if(
-      anyDuplicated(c(
-        colnames(hla_counts[, -1]), colnames(pheno[, -1]),
-        colnames(covar[, -1]), paste0(colnames(zygocity[, -1]), "_zygocity")
-      )) == 0,
-      msg = "some colnames in hla_calls and pheno and covar and zygocity are duplicated"
-    ),
     is.flag(zygo),
     is.flag(reduce_counts),
-    is.string("BH")
+    is.string(correction)
   )
 
   hla_counts <- hlaCallsToCounts(hla_calls)
   zygocity <- hla_counts
+
+  assert_that(
+    see_if(
+    anyDuplicated(c(
+      colnames(hla_counts[, -1]), colnames(pheno[, -1]),
+      colnames(covar[, -1]), paste0(colnames(zygocity[, -1]), "_zygocity")
+    )) == 0,
+    msg = "some colnames in hla_calls and pheno and covar and zygocity are duplicated"
+  ))
 
   if (reduce_counts) {
     hla_counts[, -1] <- lapply(hla_counts[, -1],
