@@ -2,18 +2,89 @@
 % Please edit documentation in R/MiDAS_stats.R
 \name{analyzeHlaAssociations}
 \alias{analyzeHlaAssociations}
-\title{Association analysis of HLA alleles}
+\title{Association analysis of HLA allele calls}
 \usage{
-analyzeHlaAssociations(model = "coxph", geno, pheno, covar,
-  correction = "BH", output = "html", ...)
+analyzeHlaAssociations(model = "coxph", hla_calls, pheno, covar,
+  zygo = FALSE, reduce_counts = FALSE, correction = "BH")
+}
+\arguments{
+\item{model}{String specifying statistical model to use.}
+
+\item{hla_calls}{Data frame containing HLA allele calls, as return by
+\code{\link{readHlaCalls}} function.}
+
+\item{pheno}{Data frame holding phenotypic response variables.}
+
+\item{covar}{Data frame holding covariates.}
+
+\item{zygo}{Flag indicating whether zygosity should be added to
+covariates. See details for further explanations.}
+
+\item{reduce_counts}{Flag indicating whether allele counts should be reduced
+to presence / absence indicators.}
+
+\item{correction}{String specifying multiple testing correction method.
+
+Available choices for \code{model} include:
+\code{"coxph"} - Cox survival analysis,
+\code{"lm"} - Linear regression,
+\code{"glm.logit"} - Logistic regression,
+\code{"glm.nb"} - Negative binomial regression
+
+\code{pheno} and \code{covar} should be data frames with first column holding
+samples IDs and named \code{ID}. Those should correspond to \code{ID} column
+in \code{hla_calls}.
+
+\code{zygo} indicate if additional covariate, indicating sample zygosity
+status, should be added to covariates. HLA allele counts for each sample
+can take following values \code{0, 1, 2}. To avoid implying ordering on those
+levels and effect size, this information can be split between two variables.
+If \code{zygo} is set to \code{TRUE} zygosity variable is added during model
+fitting, it specifies if sample is homozygous for an allele.
+
+If \code{reduce_counts} is set to \code{TRUE} HLA allele counts are reduced
+to presence / absence indicators. This is done by setting counts for
+homozygotes as \code{1}.
+
+\code{correction} specifies p-value adjustment method to use, common choice
+is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
+\link{p.adjust}. Check there to get more details.}
+}
+\value{
+Tibble containing combined results for all alleles in
+  \code{hla_calls}.
 }
 \description{
-Association analysis of HLA alleles
+\code{analyzeHlaAssociations} performs associations analysis on HLA alleles
+calls using statistical model of choice.
 }
 \examples{
-geno <- readHlaCalls("data/HLAexample.txt")
-pheno <- read.table("data/pheno.txt",header=T)
-covar <- read.table("data/covar.txt",header=T)
-analyzeHlaAssociations(geno = geno, pheno = pheno, covar = covar)
+hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+hla_calls <- readHlaCalls(hla_calls_file)
+pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+pheno <- read.table(pheno_file, header = TRUE)
+covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
+covar <- read.table(covar_file, header = TRUE)
+
+# Cox proportional hazards regression model
+analyzeHlaAssociations(model = "coxph",
+                       hla_calls,
+                       pheno,
+                       covar,
+                       zygo = FALSE,
+                       reduce_counts = FALSE,
+                       correction = "BH"
+)
+
+# Logistic regression
+pheno <- pheno[, c(1, 3)]
+analyzeHlaAssociations(model = "glm.logit",
+                       hla_calls,
+                       pheno,
+                       covar,
+                       zygo = FALSE,
+                       reduce_counts = FALSE,
+                       correction = "BH"
+)
 
 }
