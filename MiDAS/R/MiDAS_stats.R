@@ -133,8 +133,8 @@ analyzeHlaAssociations <- function(model = "coxph",
     )
   }
 
-  data <- left_join(hla_counts, pheno, by="ID")
-  data <- left_join(data, covar, by="ID")
+  data <- left_join(hla_counts, pheno, by = "ID")
+  data <- left_join(data, covar, by = "ID")
 
   pheno_var <- paste(backquote(colnames(pheno)[-1]), collapse = ", ")
   covar_var <- paste(backquote(colnames(covar)[-1]), collapse = " + ")
@@ -157,7 +157,7 @@ analyzeHlaAssociations <- function(model = "coxph",
 
   results <- map_dfr(
     .x = alleles_var,
-    .f = ~tidy(model_function(.), exponentiate=FALSE) # TODO exponentiate could be passed somehow
+    .f = ~tidy(model_function(.), exponentiate = FALSE) # TODO exponentiate could be passed somehow
   )
 
   results <- mutate(results, term = gsub("`", "", term))
@@ -204,8 +204,8 @@ analyzeHlaAssociations <- function(model = "coxph",
 #' pheno <- read.table(pheno_file, header = TRUE)
 #' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE)
-#' data <- dplyr::left_join(hla_counts, pheno, by="ID")
-#' data <- dplyr::left_join(data, covar, by="ID")
+#' data <- dplyr::left_join(hla_counts, pheno, by = "ID")
+#' data <- dplyr::left_join(data, covar, by = "ID")
 #' response <- paste(colnames(pheno[, -1]), collapse = ", ")
 #' covariate <- paste(colnames(covar[, -1]), collapse = " + ")
 #' fun <- hlaAssocModels(model = "coxph",
