@@ -143,7 +143,7 @@ test_that("HLA allele associations are analyzed properly", {
 })
 
 test_that("HLA statistical models are defined properly", {
-  expect_equal(hlaAssocModels(), c("coxph", "lm", "glm.logit, glm.nb"))
+  expect_equal(hlaAssocModels(), c("coxph", "lm", "glm.logit", "glm.nb"))
 
   hla_calls_file <- system.file(
     "extdata", "HLAHD_output_example.txt", package = "MiDAS"
