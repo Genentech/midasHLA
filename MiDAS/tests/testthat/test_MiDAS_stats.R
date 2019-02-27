@@ -1,7 +1,9 @@
 context("HLA allele statistical methods")
 
 test_that("HLA allele associations are analyzed properly", {
-  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls_file <- system.file(
+    "extdata", "HLAHD_output_example.txt", package = "MiDAS"
+  )
   hla_calls <- readHlaCalls(hla_calls_file)
   pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
   pheno <- read.table(pheno_file, header = TRUE)
@@ -143,15 +145,17 @@ test_that("HLA allele associations are analyzed properly", {
 test_that("HLA statistical models are defined properly", {
   expect_equal(hlaAssocModels(), c("coxph", "lm", "glm.logit, glm.nb"))
 
-  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls_file <- system.file(
+    "extdata", "HLAHD_output_example.txt", package = "MiDAS"
+  )
   hla_calls <- readHlaCalls(hla_calls_file)
   hla_counts <- hlaCallsToCounts(hla_calls)
   pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
   pheno <- read.table(pheno_file, header = TRUE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE)
-  data <- dplyr::left_join(hla_counts, pheno, by="ID")
-  data <- dplyr::left_join(data, covar, by="ID")
+  data <- dplyr::left_join(hla_counts, pheno, by = "ID")
+  data <- dplyr::left_join(data, covar, by = "ID")
   response <- paste(colnames(pheno[, -1]), collapse = ", ")
   covariate <- paste(colnames(covar[, -1]), collapse = " + ")
 
