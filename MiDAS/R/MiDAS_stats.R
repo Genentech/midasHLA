@@ -25,10 +25,10 @@
 #' can take following values \code{0, 1, 2}. To avoid implying ordering on those
 #' levels and effect size, this information can be split between two variables.
 #' If \code{zygo} is set to \code{TRUE} zyocity variable is added during model
-#' fitting, it specifies if sample is double homezygote for an allele.
+#' fitting, it specifies if sample is homezygote for an allele.
 #'
 #' If \code{reduce_counts} is set to \code{TRUE} HLA allele counts are reduced
-#' to presence / absence indicators. This is done by setting counts for double
+#' to presence / absence indicators. This is done by setting counts for
 #' homozygotes as \code{1}.
 #'
 #' \code{correction} specifies p-value adjustment method to use, common choice
@@ -83,7 +83,7 @@ analyzeHlaAssociations <- function(model = "coxph",
   assert_that(
     is.string(model),
     see_if(model %in% hlaAssocModels(),
-           msg = sprintf("%s model is not implemented.", model)),
+           msg = sprintf("model %s is not implemented", model)),
     checkHlaCallsFormat(hla_calls),
     is.data.frame(pheno),
     see_if(nrow(pheno) >= 1 & ncol(pheno) >= 2,
@@ -255,6 +255,7 @@ hlaAssocModels <- function(model = NULL,
     glm.nb = function(allele, ...) { # Negative binomial regression
       form <- sprintf("%s ~ %s + %s", response, allele, covariate)
       result <- glm.nb(formula = as.formula(form), data = data, ...)
+      return(result)
     }
   )
   return(model_function)
