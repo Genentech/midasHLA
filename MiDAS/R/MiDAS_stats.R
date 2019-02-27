@@ -12,7 +12,6 @@
 #' @param reduce_counts Flag indicating wheater allele counts should be reduced
 #'   to presence / absence indicators.
 #' @param correction String specifying multiple testing correction method.
-#' @param ... further arguments passed to statistical model function.
 #'
 #' Available choices for \code{model} can be checked in \link{hlaAssocModels}
 #' documentation or by using \code{hlaAssocModels()} function.
@@ -205,15 +204,16 @@ analyzeHlaAssociations <- function(model = "coxph",
 #' data <- dplyr::left_join(data, covar, by="ID")
 #' response <- paste(colnames(pheno[, -1]), collapse = ", ")
 #' covariate <- paste(colnames(covar[, -1]), collapse = " + ")
-#' func <- hlaAssocModels(model = "coxph",
+#' fun <- hlaAssocModels(model = "coxph",
 #'                        response = response,
 #'                        covariate = covariate,
 #'                        data = data
 #' )
 #' allele <- backquote("A*01:01")
-#' func(allele)
+#' fun(allele)
 #'
 #' @importFrom assertthat assert_that see_if
+#' @importFrom MASS glm.nb
 #' @importFrom stats as.formula binomial glm lm
 #' @importFrom survival coxph Surv
 #' @export
@@ -222,7 +222,7 @@ hlaAssocModels <- function(model = NULL,
                            covariate,
                            data) {
   if (is.null(model)) {
-    return(c("coxph", "lm", "glm.logit"))
+    return(c("coxph", "lm", "glm.logit, glm.nb"))
   }
   assert_that(
     is.string(model),
@@ -232,17 +232,17 @@ hlaAssocModels <- function(model = NULL,
   )
   model_function <- switch(
     model,
-    coxph = function(allele, ...) {
+    coxph = function(allele, ...) { # Cox survival analysis
       form <- sprintf("Surv(%s) ~ %s + %s", response, allele, covariate)
       result <- coxph(formula = as.formula(form), data = data, ...)
       return(result)
     },
-    lm = function(allele, ...) {
+    lm = function(allele, ...) { # Linear regression
       form <- sprintf("%s ~ %s + %s", response, allele, covariate)
       result <- lm(formula = as.formula(form), data = data, ...)
       return(result)
     },
-    glm.logit = function(allele, ...) {
+    glm.logit = function(allele, ...) { # Logistic regression
       form <- sprintf("%s ~ %s + %s", response, allele, covariate)
       result <- glm(
         formula = as.formula(form),
@@ -251,6 +251,10 @@ hlaAssocModels <- function(model = NULL,
         ...
       )
       return(result)
+    },
+    glm.nb = function(allele, ...) { # Negative binomial regression
+      form <- sprintf("%s ~ %s + %s", response, allele, covariate)
+      result <- glm.nb(formula = as.formula(form), data = data, ...)
     }
   )
   return(model_function)
