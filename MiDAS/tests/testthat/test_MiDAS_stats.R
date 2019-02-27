@@ -129,14 +129,14 @@ test_that("HLA allele associations are analyzed properly", {
     "correction is not a string \\(a length one character vector\\)."
   )
 
-  covar <- dplyr::rename(covar, AGE_zygocity = AGE, `A*01:01` = SEX)
+  covar <- dplyr::rename(covar, AGE_zygosity = AGE, `A*01:01` = SEX)
   expect_error(
     analyzeHlaAssociations(model = "lm",
                            hla_calls = hla_calls,
                            pheno = pheno,
                            covar = covar
     ),
-    "some colnames in hla_calls and pheno and covar and zygocity are duplicated"
+    "some colnames in hla_calls and pheno and covar and zygosity are duplicated"
   )
 })
 
