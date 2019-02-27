@@ -7,9 +7,9 @@
 #' @param model String specifying statistical model to use.
 #' @param pheno Data frame holding phenotypic response variables.
 #' @param covar Data frame holding covariates.
-#' @param zygo Flag indicating wheater zygocity should be added to
+#' @param zygo Flag indicating whether zygosity should be added to
 #'   covariates. See details for further explanations.
-#' @param reduce_counts Flag indicating wheater allele counts should be reduced
+#' @param reduce_counts Flag indicating whether allele counts should be reduced
 #'   to presence / absence indicators.
 #' @param correction String specifying multiple testing correction method.
 #'
@@ -23,12 +23,12 @@
 #' samples IDs and named \code{ID}. Those should correspond to \code{ID} column
 #' in \code{hla_calls}.
 #'
-#' \code{zygo} indicate if additional covariate, indicating sample zygocity
+#' \code{zygo} indicate if additional covariate, indicating sample zygosity
 #' status, should be added to covariates. HLA allele counts for each sample
 #' can take following values \code{0, 1, 2}. To avoid implying ordering on those
 #' levels and effect size, this information can be split between two variables.
-#' If \code{zygo} is set to \code{TRUE} zyocity variable is added during model
-#' fitting, it specifies if sample is homezygote for an allele.
+#' If \code{zygo} is set to \code{TRUE} zygosity variable is added during model
+#' fitting, it specifies if sample is homozygous for an allele.
 #'
 #' If \code{reduce_counts} is set to \code{TRUE} HLA allele counts are reduced
 #' to presence / absence indicators. This is done by setting counts for
@@ -114,17 +114,17 @@ analyzeHlaAssociations <- function(model = "coxph",
   )
 
   hla_counts <- hlaCallsToCounts(hla_calls)
-  zygocity <- hla_counts
+  zygosity <- hla_counts
 
   assert_that(
     see_if(
     anyDuplicated(
       c(
         colnames(hla_counts[, -1]), colnames(pheno[, -1]),
-        colnames(covar[, -1]), paste0(colnames(zygocity[, -1]), "_zygocity")
+        colnames(covar[, -1]), paste0(colnames(zygosity[, -1]), "_zygosity")
       )
     ) == 0,
-    msg = "some colnames in hla_calls and pheno and covar and zygocity are duplicated"
+    msg = "some colnames in hla_calls and pheno and covar and zygosity are duplicated"
   ))
 
   if (reduce_counts) {
@@ -141,10 +141,10 @@ analyzeHlaAssociations <- function(model = "coxph",
   alleles_var <- backquote(colnames(hla_counts)[-1])
 
   if (zygo) {
-    zygocity[, -1] <- lapply(zygocity[, -1], function(x) ifelse(x == 2, 1, 0))
-    colnames(zygocity) <- c("ID", paste0(colnames(zygocity[, -1]), "_zygocity"))
-    data <- left_join(data, zygocity, by = "ID")
-    zygo_var <- paste0(colnames(hla_counts)[-1], "_zygocity")
+    zygosity[, -1] <- lapply(zygosity[, -1], function(x) ifelse(x == 2, 1, 0))
+    colnames(zygosity) <- c("ID", paste0(colnames(zygosity[, -1]), "_zygosity"))
+    data <- left_join(data, zygosity, by = "ID")
+    zygo_var <- paste0(colnames(hla_counts)[-1], "_zygosity")
     zygo_var <- backquote(zygo_var)
     alleles_var <- paste(alleles_var, zygo_var, sep = " + ")
   }
@@ -180,7 +180,7 @@ analyzeHlaAssociations <- function(model = "coxph",
 #'
 #' @inheritParams analyzeHlaAssociations
 #' @param response Character specifying response variables in \code{data}.
-#' @param covariate Chararcter specifying covariates in \code{data}.
+#' @param covariate Character specifying covariates in \code{data}.
 #' @param data Data frame containing variables in the model.
 #'
 #' @return Function for fitting association model of choice, it takes allele
@@ -189,8 +189,9 @@ analyzeHlaAssociations <- function(model = "coxph",
 #'   Returned function takes one required argument: HLA allele number
 #'   (\code{allele}). Additional parameters are passed to statistical model
 #'   function. Due to fact that allele numbers contains characters that have
-#'   special meanings in formulas, they should be backquoted. This can be easly
-#'   done with \link{backquote}. See examples section for general usage case.
+#'   special meanings in formulas, they should be back quoted. This can be
+#'   easily done with \link{backquote}. See examples section for general usage
+#'   case.
 #'
 #'   If model is equal to \code{NULL} names of available models are returned
 #'   instead.
