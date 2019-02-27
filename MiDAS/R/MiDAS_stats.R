@@ -13,8 +13,11 @@
 #'   to presence / absence indicators.
 #' @param correction String specifying multiple testing correction method.
 #'
-#' Available choices for \code{model} can be checked in \link{hlaAssocModels}
-#' documentation or by using \code{hlaAssocModels()} function.
+#' Available choices for \code{model} include:
+#' \code{"coxph"} - Cox survival analysis,
+#' \code{"lm"} - Linear regression,
+#' \code{"glm.logit"} - Logistic regression,
+#' \code{"glm.nb"} - Negative binomial regression
 #'
 #' \code{pheno} and \code{covar} should be data frames with first column holding
 #' samples IDs and named \code{ID}. Those should correspond to \code{ID} column
