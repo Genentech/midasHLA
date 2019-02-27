@@ -226,7 +226,7 @@ hlaAssocModels <- function(model = NULL,
                            covariate,
                            data) {
   if (is.null(model)) {
-    return(c("coxph", "lm", "glm.logit, glm.nb"))
+    return(c("coxph", "lm", "glm.logit", "glm.nb"))
   }
   assert_that(
     is.string(model),
