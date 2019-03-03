@@ -121,9 +121,11 @@ analyzeHlaAssociations <- function(model = "coxph",
                              reduce_counts = FALSE
   )
   alleles <- backquote(hla_data$alleles)
+  response <- backquote(hla_data$response)
+  covariate <- backquote(hla_data$covariate)
   model_function <- hlaAssocModels(model = model,
-                                   response = hla_data$response,
-                                   covariate = hla_data$covariate,
+                                   response = response,
+                                   covariate = covariate,
                                    data = hla_data$data
   )
 
@@ -206,8 +208,8 @@ hlaAssocModels <- function(model = NULL,
     is.data.frame(data)
   )
 
-  response_var <- paste(backquote(response), collapse = ", ")
-  covariate_var <- paste(backquote(covariate), collapse = " + ")
+  response_var <- paste(response, collapse = ", ")
+  covariate_var <- paste(covariate, collapse = " + ")
 
   model_function <- switch(
     model,
@@ -274,9 +276,11 @@ forwardAllelesSubsetSelection <- function(model,
                              reduce_counts = reduce_counts
   )
   alleles <- backquote(hla_data$alleles)
+  response <- backquote(hla_data$response)
+  covariate <- backquote(hla_data$covariate)
   model_fun <- hlaAssocModels(model = model,
-                              response = hla_data$response,
-                              covariate = hla_data$covariate,
+                              response = response,
+                              covariate = covariate,
                               data = hla_data$data
   )
   best_subset <- character()
