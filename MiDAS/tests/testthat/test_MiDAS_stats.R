@@ -69,7 +69,7 @@ test_that("HLA allele associations are analyzed properly", {
                            pheno = pheno,
                            covar = 1
     ),
-    "covar is not a data frame"
+    "covar have to be a data frame or NULL"
   )
 
   expect_error(
@@ -204,6 +204,18 @@ test_that("HLA statistical models are defined properly", {
     c("glm.nb", "as.formula(form)", "data", "log")
   )
 
+  # check if null covariate is accepted
+  fun <- hlaAssocModels(model = "glm.nb",
+                        response = response,
+                        covariate = NULL,
+                        data = data
+  )
+  res <- fun("`A*01:01`")
+  expect_equal(
+    colnames(res$model),
+    c("OS_DIED", "A*01:01")
+  )
+
   expect_error(hlaAssocModels(model = 1),
                "model is not a string \\(a length one character vector\\)."
   )
@@ -217,7 +229,7 @@ test_that("HLA statistical models are defined properly", {
   )
 
   expect_error(hlaAssocModels(model = "lm", response = response, covariate = 1),
-               "covariate is not a character vector"
+               "covariate have to be a character or NULL"
   )
 
   expect_error(hlaAssocModels(model = "lm",

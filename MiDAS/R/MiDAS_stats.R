@@ -98,14 +98,16 @@ analyzeHlaAssociations <- function(model = "coxph",
     see_if(any(hla_calls[, 1] %in% pheno[, 1]),
            msg = "IDs in hla_calls doesn't match IDs in pheno"
     ),
-    is.data.frame(covar),
-    see_if(nrow(covar) >= 1 & ncol(covar) >= 2,
+    see_if(is.data.frame(covar) | is.null(covar),
+           msg = "covar have to be a data frame or NULL"
+    ),
+    see_if((nrow(covar) >= 1 & ncol(covar) >= 2) | is.null(covar),
            msg = "covar have to have at least 1 rows and 2 columns"
     ),
-    see_if(colnames(covar)[1] == colnames(hla_calls)[1],
+    see_if(colnames(covar)[1] == colnames(hla_calls)[1] | is.null(covar),
            msg = "first column in covar must be named as first column in hla_calls"
     ),
-    see_if(any(hla_calls[, 1] %in% covar[, 1]),
+    see_if(any(hla_calls[, 1] %in% covar[, 1]) | is.null(covar),
            msg = "IDs in hla_calls doesn't match IDs in covar"
     ),
     is.flag(zygo),
@@ -205,12 +207,18 @@ hlaAssocModels <- function(model = NULL,
     is.string(model),
     is.character(response),
     see_if(length(response) != 0, msg = "response can not be empty"),
-    is.character(covariate),
+    see_if(is.character(covariate) | is.null(covariate),
+           msg = "covariate have to be a character or NULL"
+    ),
     is.data.frame(data)
   )
 
   response_var <- paste(response, collapse = ", ")
-  covariate_var <- paste(covariate, collapse = " + ")
+  if (length(covariate) != 0) {
+    covariate_var <- paste(covariate, collapse = " + ")
+  } else {
+    covariate_var <- "0"
+  }
 
   model_function <- switch(
     model,
@@ -342,7 +350,7 @@ forwardAllelesSubsetSelection <- function(model,
 #' @export
 prepareHlaData <- function(hla_calls,
                            pheno,
-                           covar,
+                           covar = NULL,
                            zygo = FALSE,
                            reduce_counts = FALSE) {
   assert_that(
@@ -357,14 +365,16 @@ prepareHlaData <- function(hla_calls,
     see_if(any(hla_calls[, 1] %in% pheno[, 1]),
            msg = "IDs in hla_calls doesn't match IDs in pheno"
     ),
-    is.data.frame(covar),
-    see_if(nrow(covar) >= 1 & ncol(covar) >= 2,
+    see_if(is.data.frame(covar) | is.null(covar),
+           msg = "covar have to be a data frame or NULL"
+    ),
+    see_if((nrow(covar) >= 1 & ncol(covar) >= 2) | is.null(covar),
            msg = "covar have to have at least 1 rows and 2 columns"
     ),
-    see_if(colnames(covar)[1] == colnames(hla_calls)[1],
+    see_if(colnames(covar)[1] == colnames(hla_calls)[1] | is.null(covar),
            msg = "first column in covar must be named as first column in hla_calls"
     ),
-    see_if(any(hla_calls[, 1] %in% covar[, 1]),
+    see_if(any(hla_calls[, 1] %in% covar[, 1]) | is.null(covar),
            msg = "IDs in hla_calls doesn't match IDs in covar"
     ),
     is.flag(zygo),
