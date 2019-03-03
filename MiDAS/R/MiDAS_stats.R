@@ -114,52 +114,23 @@ analyzeHlaAssociations <- function(model = "coxph",
   )
 
   hla_counts <- hlaCallsToCounts(hla_calls)
-  zygosity <- hla_counts
-
-  assert_that(
-    see_if(
-    anyDuplicated(
-      c(
-        colnames(hla_counts[, -1]), colnames(pheno[, -1]),
-        colnames(covar[, -1]), paste0(colnames(zygosity[, -1]), "_zygosity")
-      )
-    ) == 0,
-    msg = "some colnames in hla_calls and pheno and covar and zygosity are duplicated"
-  ))
-
-  if (reduce_counts) {
-    hla_counts[, -1] <- lapply(hla_counts[, -1],
-                               function(x) ifelse(x == 2, 1, x)
-    )
-  }
-
-  data <- left_join(hla_counts, pheno, by = "ID")
-  data <- left_join(data, covar, by = "ID")
-
-  pheno_var <- paste(backquote(colnames(pheno)[-1]), collapse = ", ")
-  covar_var <- paste(backquote(colnames(covar)[-1]), collapse = " + ")
-  alleles_var <- backquote(colnames(hla_counts)[-1])
-
-  if (zygo) {
-    zygosity[, -1] <- lapply(zygosity[, -1], function(x) ifelse(x == 2, 1, 0))
-    colnames(zygosity) <- c("ID", paste0(colnames(zygosity[, -1]), "_zygosity"))
-    data <- left_join(data, zygosity, by = "ID")
-    zygo_var <- paste0(colnames(hla_counts)[-1], "_zygosity")
-    zygo_var <- backquote(zygo_var)
-    alleles_var <- paste(alleles_var, zygo_var, sep = " + ")
-  }
-
+  hla_data <- prepareHlaData(hla_calls,
+                             pheno,
+                             covar,
+                             zygo = FALSE,
+                             reduce_counts = FALSE
+  )
+  alleles <- hla_data$alleles
   model_function <- hlaAssocModels(model = model,
-                                   response = pheno_var,
-                                   covariate = covar_var,
-                                   data = data
+                                   response = hla_data$response,
+                                   covariate = hla_data$covariate,
+                                   data = hla_data$data
   )
 
   results <- map_dfr(
-    .x = alleles_var,
+    .x = alleles,
     .f = ~tidy(model_function(.), exponentiate = FALSE) # TODO exponentiate could be passed somehow
   )
-
   results <- mutate(results, term = gsub("`", "", term))
   results <- filter(results, checkAlleleFormat(term))
   results <- rename(results, allele = term)
