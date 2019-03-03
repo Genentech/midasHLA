@@ -264,3 +264,174 @@ hlaAssocModels <- function(model = NULL,
   )
   return(model_function)
 }
+
+#' Stepwise forward alleles subset selection
+#'
+#' @inheritParams checkHlaCallsFormat
+#' @inheritParams analyzeHlaAssociations
+#' @param th significance threshold for alleles
+#'
+#' @examples
+#' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(hla_calls_file)
+#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+#' pheno <- read.table(pheno_file, header = TRUE)
+#' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
+#' covar <- read.table(covar_file, header = TRUE)
+#' forwardAllelesSubsetSelection(model = "coxph",
+#'                            hla_calls = hla_calls,
+#'                            pheno = pheno,
+#'                            covar = covar,
+#'                            th = 0.05
+#' )
+#' @export
+forwardAllelesSubsetSelection <- function(model,
+                                       hla_calls,
+                                       pheno,
+                                       covar,
+                                       th = 0.05,
+                                       zygo = FALSE,
+                                       reduce_counts = FALSE) {
+  hla_data <- prepareHlaData(hla_calls,
+                             pheno,
+                             covar,
+                             zygo = zygo,
+                             reduce_counts = reduce_counts
+  )
+  best_subset <- c()
+  model_fun <- hlaAssocModels(model = model,
+                              response = hla_data$response,
+                              covariate = hla_data$covariate,
+                              data = hla_data$data
+  )
+
+  res <- map_dfr(
+    .x = hla_data$alleles,
+    .f = ~tidy(model_fun(.), exponentiate = FALSE) # TODO exponentiate could be passed somehow
+  )
+  res <- mutate(res, term = gsub("`", "", term))
+  res <- filter(res, checkAlleleFormat(term))
+  best_idx <- which.min(res$p.value)
+  best_pvalue <- res$p.value[best_idx]
+
+  while (best_pvalue <= th) {
+    best_subset <- append(best_subset, hla_data$alleles[best_idx])
+    hla_data$alleles <- hla_data$alleles[-best_idx]
+    best_alleles_forms <- paste(best_subset, collapse = " + ")
+    best_alleles_forms <- paste(best_alleles_forms, hla_data$alleles, sep = " + ")
+    to_filter <- gsub("`", "", best_subset)
+    res <- map_dfr(
+      .x = best_alleles_forms,
+      .f = ~tidy(model_fun(.), exponentiate = FALSE) # TODO exponentiate could be passed somehow
+    )
+    res <- mutate(res, term = gsub("`", "", term))
+    res <- filter(res, checkAlleleFormat(term))
+    res <- filter(res, ! term %in% to_filter)
+    best_idx <- which.min(res$p.value)
+    best_pvalue <- res$p.value[best_idx]
+  }
+
+  best_alleles_form <- paste(best_subset, collapse = " + ")
+  res <- tidy(model_fun(best_alleles_form), exponentiate = FALSE)
+  res <- mutate(res, term = gsub("`", "", term))
+  res <- filter(res, checkAlleleFormat(term))
+  res <- rename(res, allele = term)
+
+  return(res)
+}
+
+#' Prepare data for statistical analysis
+#'
+#' @inheritParams checkHlaCallsFormat
+#' @inheritParams analyzeHlaAssociations
+#'
+#' @examples
+#' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(hla_calls_file)
+#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+#' pheno <- read.table(pheno_file, header = TRUE)
+#' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
+#' covar <- read.table(covar_file, header = TRUE)
+#' prepareHlaData(hla_calls = hla_calls,
+#'                pheno = pheno,
+#'                covar = covar,
+#'                zygo = FALSE,
+#'                reduce_counts = FALSE
+#' )
+#' @export
+prepareHlaData <- function(hla_calls,
+                           pheno,
+                           covar,
+                           zygo = FALSE,
+                           reduce_counts = FALSE) {
+  assert_that(
+    checkHlaCallsFormat(hla_calls),
+    is.data.frame(pheno),
+    see_if(nrow(pheno) >= 1 & ncol(pheno) >= 2,
+           msg = "pheno have to have at least 1 rows and 2 columns"
+    ),
+    see_if(colnames(pheno)[1] == colnames(hla_calls)[1],
+           msg = "first column in pheno must be named as first column in hla_calls"
+    ),
+    see_if(any(hla_calls[, 1] %in% pheno[, 1]),
+           msg = "IDs in hla_calls doesn't match IDs in pheno"
+    ),
+    is.data.frame(covar),
+    see_if(nrow(covar) >= 1 & ncol(covar) >= 2,
+           msg = "covar have to have at least 1 rows and 2 columns"
+    ),
+    see_if(colnames(covar)[1] == colnames(hla_calls)[1],
+           msg = "first column in covar must be named as first column in hla_calls"
+    ),
+    see_if(any(hla_calls[, 1] %in% covar[, 1]),
+           msg = "IDs in hla_calls doesn't match IDs in covar"
+    ),
+    is.flag(zygo),
+    is.flag(reduce_counts)
+  )
+
+  hla_counts <- hlaCallsToCounts(hla_calls)
+  zygosity <- hla_counts
+
+  assert_that(
+    see_if(
+      anyDuplicated(
+        c(
+          colnames(hla_counts[, -1]), colnames(pheno[, -1]),
+          colnames(covar[, -1]), paste0(colnames(zygosity[, -1]), "_zygosity")
+        )
+      ) == 0,
+      msg = "some colnames in hla_calls and pheno and covar and zygosity are duplicated"
+    ))
+
+  if (reduce_counts) {
+    hla_counts[, -1] <- lapply(hla_counts[, -1],
+                               function(x) ifelse(x == 2, 1, x)
+    )
+  }
+
+  data <- left_join(hla_counts, pheno, by = "ID")
+  data <- left_join(data, covar, by = "ID")
+
+  pheno_var <- paste(backquote(colnames(pheno)[-1]), collapse = ", ") # TODO move all those pastes to prepare model fun
+  covar_var <- paste(backquote(colnames(covar)[-1]), collapse = " + ")
+  alleles_var <- backquote(colnames(hla_counts)[-1])
+
+  if (zygo) {
+    zygosity[, -1] <- lapply(zygosity[, -1], function(x) ifelse(x == 2, 1, 0))
+    colnames(zygosity) <- c("ID", paste0(colnames(zygosity[, -1]), "_zygosity"))
+    data <- left_join(data, zygosity, by = "ID")
+    zygo_var <- paste0(colnames(hla_counts)[-1], "_zygosity")
+    zygo_var <- backquote(zygo_var)
+    covar_var <- paste(covar_var, zygo_var, sep = " + ")
+  }
+
+  hla_data <- list(
+    data = data,
+    response = pheno_var,
+    covariate = covar_var,
+    alleles = alleles_var
+  )
+
+  return(hla_data)
+}
