@@ -204,6 +204,7 @@ hlaAssocModels <- function(model = NULL,
   assert_that(
     is.string(model),
     is.character(response),
+    see_if(length(response) != 0, msg = "response can not be empty"),
     is.character(covariate),
     is.data.frame(data)
   )

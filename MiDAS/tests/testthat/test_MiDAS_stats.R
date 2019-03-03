@@ -212,6 +212,10 @@ test_that("HLA statistical models are defined properly", {
                "response is not a character vector"
   )
 
+  expect_error(hlaAssocModels(model = "lm", response = character()),
+               "response can not be empty"
+  )
+
   expect_error(hlaAssocModels(model = "lm", response = response, covariate = 1),
                "covariate is not a character vector"
   )
