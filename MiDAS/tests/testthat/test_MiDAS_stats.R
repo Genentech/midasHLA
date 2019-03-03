@@ -156,8 +156,8 @@ test_that("HLA statistical models are defined properly", {
   covar <- read.table(covar_file, header = TRUE)
   data <- dplyr::left_join(hla_counts, pheno, by = "ID")
   data <- dplyr::left_join(data, covar, by = "ID")
-  response <- paste(colnames(pheno[, -1]), collapse = ", ")
-  covariate <- paste(colnames(covar[, -1]), collapse = " + ")
+  response <- colnames(pheno[, -1])
+  covariate <- colnames(covar[, -1])
 
   fun <- hlaAssocModels(model = "coxph",
                  response = response,
@@ -170,7 +170,7 @@ test_that("HLA statistical models are defined properly", {
     c("coxph", "as.formula(form)", "data")
   )
 
-  response <- paste(colnames(pheno[, 3, drop = FALSE]), collapse = ", ")
+  response <- colnames(pheno[, 3, drop = FALSE])
   fun <- hlaAssocModels(model = "lm",
                         response = response,
                         covariate = covariate,

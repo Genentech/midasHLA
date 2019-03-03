@@ -120,7 +120,7 @@ analyzeHlaAssociations <- function(model = "coxph",
                              zygo = FALSE,
                              reduce_counts = FALSE
   )
-  alleles <- hla_data$alleles
+  alleles <- backquote(hla_data$alleles)
   model_function <- hlaAssocModels(model = model,
                                    response = hla_data$response,
                                    covariate = hla_data$covariate,
@@ -205,20 +205,24 @@ hlaAssocModels <- function(model = NULL,
     is.character(covariate),
     is.data.frame(data)
   )
+
+  response_var <- paste(backquote(response), collapse = ", ")
+  covariate_var <- paste(backquote(covariate), collapse = " + ")
+
   model_function <- switch(
     model,
     coxph = function(allele, ...) { # Cox survival analysis
-      form <- sprintf("Surv(%s) ~ %s + %s", response, allele, covariate)
+      form <- sprintf("Surv(%s) ~ %s + %s", response_var, allele, covariate_var)
       result <- coxph(formula = as.formula(form), data = data, ...)
       return(result)
     },
     lm = function(allele, ...) { # Linear regression
-      form <- sprintf("%s ~ %s + %s", response, allele, covariate)
+      form <- sprintf("%s ~ %s + %s", response_var, allele, covariate_var)
       result <- lm(formula = as.formula(form), data = data, ...)
       return(result)
     },
     glm.logit = function(allele, ...) { # Logistic regression
-      form <- sprintf("%s ~ %s + %s", response, allele, covariate)
+      form <- sprintf("%s ~ %s + %s", response_var, allele, covariate_var)
       result <- glm(
         formula = as.formula(form),
         family = binomial(link = "logit"),
@@ -228,7 +232,7 @@ hlaAssocModels <- function(model = NULL,
       return(result)
     },
     glm.nb = function(allele, ...) { # Negative binomial regression
-      form <- sprintf("%s ~ %s + %s", response, allele, covariate)
+      form <- sprintf("%s ~ %s + %s", response_var, allele, covariate_var)
       result <- glm.nb(formula = as.formula(form), data = data, ...)
       return(result)
     }
@@ -269,15 +273,16 @@ forwardAllelesSubsetSelection <- function(model,
                              zygo = zygo,
                              reduce_counts = reduce_counts
   )
-  best_subset <- c()
+  alleles <- backquote(hla_data$alleles)
   model_fun <- hlaAssocModels(model = model,
                               response = hla_data$response,
                               covariate = hla_data$covariate,
                               data = hla_data$data
   )
+  best_subset <- character()
 
   res <- map_dfr(
-    .x = hla_data$alleles,
+    .x = alleles,
     .f = ~tidy(model_fun(.), exponentiate = FALSE) # TODO exponentiate could be passed somehow
   )
   res <- mutate(res, term = gsub("`", "", term))
@@ -384,17 +389,16 @@ prepareHlaData <- function(hla_calls,
   data <- left_join(hla_counts, pheno, by = "ID")
   data <- left_join(data, covar, by = "ID")
 
-  pheno_var <- paste(backquote(colnames(pheno)[-1]), collapse = ", ") # TODO move all those pastes to prepare model fun
-  covar_var <- paste(backquote(colnames(covar)[-1]), collapse = " + ")
-  alleles_var <- backquote(colnames(hla_counts)[-1])
+  pheno_var <- colnames(pheno)[-1]
+  covar_var <- colnames(covar)[-1]
+  alleles_var <- colnames(hla_counts)[-1]
 
   if (zygo) {
     zygosity[, -1] <- lapply(zygosity[, -1], function(x) ifelse(x == 2, 1, 0))
     colnames(zygosity) <- c("ID", paste0(colnames(zygosity[, -1]), "_zygosity"))
     data <- left_join(data, zygosity, by = "ID")
     zygo_var <- paste0(colnames(hla_counts)[-1], "_zygosity")
-    zygo_var <- backquote(zygo_var)
-    covar_var <- paste(covar_var, zygo_var, sep = " + ")
+    covar_var <- append(covar_var, zygo_var)
   }
 
   hla_data <- list(
