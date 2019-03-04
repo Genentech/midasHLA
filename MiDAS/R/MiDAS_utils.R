@@ -9,6 +9,11 @@
 #' additional suffix indicating its expression status. See
 #' \url{http://hla.alleles.org/nomenclature/naming.html} for more details.
 #'
+#' HLA alleles with identical sequences across exons encoding the peptide
+#' binding domains might be designated with G group allele numbers. Those
+#' numbers have additional G or GG suffix. See
+#' \url{http://hla.alleles.org/alleles/g_groups.html} for more details.
+#'
 #' @param allele Character vector containing HLA allele numbers.
 #'
 #' @return Logical vector specifying if \code{allele} follows HLA alleles naming
@@ -23,7 +28,7 @@
 #' @export
 checkAlleleFormat <- function(allele) {
   assert_that(is.character(allele))
-  pattern <- "^[A-Z0-9]+[*][0-9]+(:[0-9]+){0,3}[NLSCAQ]{0,1}$"
+  pattern <- "^[A-Z0-9]+[*][0-9]+(:[0-9]+){0,3}((?=G)(G|GG)|([NLSCAQ])){0,1}$"
   is_correct <- stri_detect_regex(allele, pattern)
   return(is_correct)
 }
