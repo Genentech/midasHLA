@@ -271,6 +271,6 @@ checkHlaCallsFormat <- function(hla_calls) {
 #' @export
 backquote <- function(character) {
   assert_that(is.character(character))
-  backquted <- paste0("`", character, "`")
-  return(backquted)
+  backquoted <- paste0("`", character, "`")
+  return(backquoted)
 }
