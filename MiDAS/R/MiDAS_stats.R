@@ -88,28 +88,8 @@ analyzeHlaAssociations <- function(model = "coxph",
     see_if(model %in% hlaAssocModels(),
            msg = sprintf("model %s is not implemented", model)),
     checkHlaCallsFormat(hla_calls),
-    is.data.frame(pheno),
-    see_if(nrow(pheno) >= 1 & ncol(pheno) >= 2,
-           msg = "pheno have to have at least 1 rows and 2 columns"
-    ),
-    see_if(colnames(pheno)[1] == colnames(hla_calls)[1],
-           msg = "first column in pheno must be named as first column in hla_calls"
-    ),
-    see_if(any(hla_calls[, 1] %in% pheno[, 1]),
-           msg = "IDs in hla_calls doesn't match IDs in pheno"
-    ),
-    see_if(is.data.frame(covar) | is.null(covar),
-           msg = "covar have to be a data frame or NULL"
-    ),
-    see_if((nrow(covar) >= 1 & ncol(covar) >= 2) | is.null(covar),
-           msg = "covar have to have at least 1 rows and 2 columns"
-    ),
-    see_if(colnames(covar)[1] == colnames(hla_calls)[1] | is.null(covar),
-           msg = "first column in covar must be named as first column in hla_calls"
-    ),
-    see_if(any(hla_calls[, 1] %in% covar[, 1]) | is.null(covar),
-           msg = "IDs in hla_calls doesn't match IDs in covar"
-    ),
+    checkAdditionalData(pheno, hla_calls),
+    checkAdditionalData(covar, hla_calls, accept.null = TRUE),
     is.flag(zygo),
     is.flag(reduce_counts),
     is.string(correction)
@@ -355,28 +335,8 @@ prepareHlaData <- function(hla_calls,
                            reduce_counts = FALSE) {
   assert_that(
     checkHlaCallsFormat(hla_calls),
-    is.data.frame(pheno),
-    see_if(nrow(pheno) >= 1 & ncol(pheno) >= 2,
-           msg = "pheno have to have at least 1 rows and 2 columns"
-    ),
-    see_if(colnames(pheno)[1] == colnames(hla_calls)[1],
-           msg = "first column in pheno must be named as first column in hla_calls"
-    ),
-    see_if(any(hla_calls[, 1] %in% pheno[, 1]),
-           msg = "IDs in hla_calls doesn't match IDs in pheno"
-    ),
-    see_if(is.data.frame(covar) | is.null(covar),
-           msg = "covar have to be a data frame or NULL"
-    ),
-    see_if((nrow(covar) >= 1 & ncol(covar) >= 2) | is.null(covar),
-           msg = "covar have to have at least 1 rows and 2 columns"
-    ),
-    see_if(colnames(covar)[1] == colnames(hla_calls)[1] | is.null(covar),
-           msg = "first column in covar must be named as first column in hla_calls"
-    ),
-    see_if(any(hla_calls[, 1] %in% covar[, 1]) | is.null(covar),
-           msg = "IDs in hla_calls doesn't match IDs in covar"
-    ),
+    checkAdditionalData(pheno, hla_calls),
+    checkAdditionalData(covar, hla_calls, accept.null = TRUE),
     is.flag(zygo),
     is.flag(reduce_counts)
   )

@@ -274,3 +274,61 @@ backquote <- function(character) {
   backquted <- paste0("`", character, "`")
   return(backquted)
 }
+
+#' Assert additional data
+#'
+#' \code{checkAdditionalData} asserts if pehnotype or covartiate data frame
+#' has proper format.
+#'
+#' @inheritParams checkHlaCallsFormat
+#' @param data_frame Data frame containing phenotype or covariate data
+#'   corresponding to accompanying hla calls data frame.
+#' @param accept.null Logical indicating if NULL data_frame should be accepted.
+#'
+#' @return Logical indicating if \code{data_frame} is properly formated.
+#'   Otherwise raise error.
+#'
+#' @importFrom assertthat assert_that see_if
+#' @examples
+#' hla_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+#' pheno <- read.table(pheno_file, header = TRUE)
+#' hla_calls <- readHlaCalls(file)
+#' checkAdditionalData(pheno, hla_calls)
+#'
+#' @export
+checkAdditionalData <- function(data_frame,
+                                hla_calls,
+                                accept.null = FALSE) {
+  data_frame_name <- deparse(substitute(data_frame))
+  hla_calls_name <- deparse(substitute(hla_calls))
+  if (! (is.null(data_frame) & accept.null)) {
+    assert_that(
+      see_if(is.data.frame(data_frame),
+             msg = sprintf("%s have to be a data frame",
+                           data_frame_name
+             )
+      ),
+      checkHlaCallsFormat(hla_calls),
+      see_if(nrow(data_frame) >= 1 & ncol(data_frame) >= 2,
+             msg = sprintf("%s have to have at least 1 rows and 2 columns",
+                           data_frame_name
+             )
+      ),
+      see_if(colnames(data_frame)[1] == colnames(hla_calls)[1],
+             msg = sprintf(
+               "first column in %s must be named as first column in %s",
+               data_frame_name, hla_calls_name
+             )
+      ),
+      see_if(any(hla_calls[, 1] %in% data_frame[, 1]),
+             msg = sprintf(
+               "IDs in %s doesn't match IDs in %s",
+               data_frame_name, hla_calls_name
+             )
+      )
+    )
+  }
+
+  return(TRUE)
+}
