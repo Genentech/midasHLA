@@ -260,7 +260,7 @@ checkHlaCallsFormat <- function(hla_calls) {
 #' \code{backquote} is usefull when using HLA allele numbers in fomulas, where
 #' \code{'*'} and \code{':'} characters have special meanings.
 #'
-#' @param character Character vector.
+#' @param x Character vector.
 #'
 #' @return Character vector with its elements backticked.
 #'
@@ -269,8 +269,8 @@ checkHlaCallsFormat <- function(hla_calls) {
 #'
 #' @importFrom assertthat assert_that
 #' @export
-backquote <- function(character) {
-  assert_that(is.character(character))
-  backquoted <- paste0("`", character, "`")
+backquote <- function(x) {
+  assert_that(is.character(x))
+  backquoted <- paste0("`", x, "`")
   return(backquoted)
 }
