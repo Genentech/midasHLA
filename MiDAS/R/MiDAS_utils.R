@@ -90,6 +90,9 @@ getAlleleResolution <- function(allele) {
 reduceAlleleResolution <- function(allele,
                                    resolution=4) {
   assert_that(
+    see_if(all(checkAlleleFormat(allele), na.rm = TRUE),
+           msg = "allele have to be a valid HLA allele number"
+    ),
     is.count(resolution)
   )
   na_idx <- is.na(allele)
