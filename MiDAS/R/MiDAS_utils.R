@@ -28,7 +28,7 @@
 #' @export
 checkAlleleFormat <- function(allele) {
   assert_that(is.character(allele))
-  pattern <- "^[A-Z0-9]+[*][0-9]+(:[0-9]+){0,3}((?=G)(G|GG)|([NLSCAQ])){0,1}$"
+  pattern <- "^[A-Z0-9]+[*][0-9]+(:[0-9]+){0,3}((?=G)(G|GG)|(N|L|S|C|A|Q))){0,1}$"
   is_correct <- stri_detect_regex(allele, pattern)
   return(is_correct)
 }
@@ -93,7 +93,11 @@ reduceAlleleResolution <- function(allele,
     is.count(resolution)
   )
   na_idx <- is.na(allele)
-  letter_alleles <- stri_detect_regex(allele, pattern = "[A-Z]{1}$")
+  letter_alleles <- stri_detect_regex(allele, pattern = "(N|L|S|C|A|Q){1}$")
+  is_ggroup <- any(stri_detect_regex(allele, pattern = "(G|GG){1}$"))
+  if (is_ggroup) {
+    warning("Reducing G groups alleles, major allele gene name will be used.")
+  }
   allele_res <- getAlleleResolution(allele)
   to_reduce <- allele_res >= resolution & ! letter_alleles & ! na_idx
   resolution <- floor(resolution) / 2
