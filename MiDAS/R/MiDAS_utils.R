@@ -226,6 +226,7 @@ convertAlleleToVariable <- function(allele,
 #' @return Logical indicating if \code{hla_calls} follows hla calls data frame
 #'   format. Otherwise raise error.
 #'
+#' @importFrom assertthat assert_that see_if
 #' @examples
 #' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(file)
@@ -250,4 +251,26 @@ checkHlaCallsFormat <- function(hla_calls) {
   )
 
   return(TRUE)
+}
+
+#' Backquote string
+#'
+#' \code{backquote} places backticks around string.
+#'
+#' \code{backquote} is usefull when using HLA allele numbers in fomulas, where
+#' \code{'*'} and \code{':'} characters have special meanings.
+#'
+#' @param x Character vector.
+#'
+#' @return Character vector with its elements backticked.
+#'
+#' @examples
+#' backquote("A*01:01")
+#'
+#' @importFrom assertthat assert_that
+#' @export
+backquote <- function(x) {
+  assert_that(is.character(x))
+  backquoted <- paste0("`", x, "`")
+  return(backquoted)
 }
