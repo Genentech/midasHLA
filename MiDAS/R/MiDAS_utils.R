@@ -86,6 +86,7 @@ getAlleleResolution <- function(allele) {
 #'
 #' @importFrom assertthat assert_that is.count see_if
 #' @importFrom stringi stri_split_fixed stri_detect_regex
+#' @importFrom rlang warn
 #' @export
 reduceAlleleResolution <- function(allele,
                                    resolution=4) {
@@ -102,7 +103,7 @@ reduceAlleleResolution <- function(allele,
   to_reduce <- allele_res > resolution & ! letter_alleles & ! na_idx
   resolution <- floor(resolution) / 2
   if (any(is_ggroup & to_reduce)) {
-    warning("Reducing G groups alleles, major allele gene name will be used.")
+    warn("Reducing G groups alleles, major allele gene name will be used.")
   }
   allele[to_reduce] <- vapply(
     X = stri_split_fixed(allele[to_reduce], ":"),
