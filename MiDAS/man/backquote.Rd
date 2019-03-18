@@ -4,10 +4,10 @@
 \alias{backquote}
 \title{Backquote string}
 \usage{
-backquote(character)
+backquote(x)
 }
 \arguments{
-\item{character}{Character vector.}
+\item{x}{Character vector.}
 }
 \value{
 Character vector with its elements backticked.

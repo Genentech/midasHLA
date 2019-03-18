@@ -23,6 +23,11 @@ of digits separated with ":". Maximum number of sets of digits is 4 which
 is termed 8-digit resolution. Optionally HLA numbers can be supplemented with
 additional suffix indicating its expression status. See
 \url{http://hla.alleles.org/nomenclature/naming.html} for more details.
+
+HLA alleles with identical sequences across exons encoding the peptide
+binding domains might be designated with G group allele numbers. Those
+numbers have additional G or GG suffix. See
+\url{http://hla.alleles.org/alleles/g_groups.html} for more details.
 }
 \examples{
 allele <- c("A*01:01", "A*01:02")

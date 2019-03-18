@@ -35,6 +35,9 @@ test_that("Reduced HLA allele have desired resoulution", {
                ),
                c("A*01", "A*01", "B*01", "C*05", "C*05:24:55:54N")
   )
+  expect_error(getAlleleResolution("word"),
+               "allele have to be a valid HLA allele number"
+  )
   expect_error(reduceAlleleResolution("C*05:24:55:54", resolution = "four"),
                "resolution is not a count \\(a single positive integer\\)"
   )
@@ -111,7 +114,7 @@ test_that("HLA calls data frame have proper format", {
 
 test_that("HLA allele are backquoted properly", {
   expect_equal(backquote(c("A:01:01", "A:02:01")), c("`A:01:01`", "`A:02:01`"))
-  expect_error(backquote(1), "character is not a character vector")
+  expect_error(backquote(1), "x is not a character vector")
 })
 
 context("HLA allele alignments")

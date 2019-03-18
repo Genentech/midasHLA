@@ -9,6 +9,11 @@
 #' additional suffix indicating its expression status. See
 #' \url{http://hla.alleles.org/nomenclature/naming.html} for more details.
 #'
+#' HLA alleles with identical sequences across exons encoding the peptide
+#' binding domains might be designated with G group allele numbers. Those
+#' numbers have additional G or GG suffix. See
+#' \url{http://hla.alleles.org/alleles/g_groups.html} for more details.
+#'
 #' @param allele Character vector containing HLA allele numbers.
 #'
 #' @return Logical vector specifying if \code{allele} follows HLA alleles naming
@@ -23,7 +28,7 @@
 #' @export
 checkAlleleFormat <- function(allele) {
   assert_that(is.character(allele))
-  pattern <- "^[A-Z0-9]+[*][0-9]+(:[0-9]+){0,3}[NLSCAQ]{0,1}$"
+  pattern <- "^[A-Z0-9]+[*][0-9]+(:[0-9]+){0,3}((?=G)(G|GG)|(N|L|S|C|A|Q)){0,1}$"
   is_correct <- stri_detect_regex(allele, pattern)
   return(is_correct)
 }
@@ -81,17 +86,25 @@ getAlleleResolution <- function(allele) {
 #'
 #' @importFrom assertthat assert_that is.count see_if
 #' @importFrom stringi stri_split_fixed stri_detect_regex
+#' @importFrom rlang warn
 #' @export
 reduceAlleleResolution <- function(allele,
                                    resolution=4) {
   assert_that(
+    see_if(all(checkAlleleFormat(allele), na.rm = TRUE),
+           msg = "allele have to be a valid HLA allele number"
+    ),
     is.count(resolution)
   )
   na_idx <- is.na(allele)
-  letter_alleles <- stri_detect_regex(allele, pattern = "[A-Z]{1}$")
+  letter_alleles <- stri_detect_regex(allele, pattern = "(N|L|S|C|A|Q){1}$")
+  is_ggroup <- stri_detect_regex(allele, pattern = "(G|GG){1}$")
   allele_res <- getAlleleResolution(allele)
-  to_reduce <- allele_res >= resolution & ! letter_alleles & ! na_idx
+  to_reduce <- allele_res > resolution & ! letter_alleles & ! na_idx
   resolution <- floor(resolution) / 2
+  if (any(is_ggroup & to_reduce)) {
+    warn("Reducing G groups alleles, major allele gene name will be used.")
+  }
   allele[to_reduce] <- vapply(
     X = stri_split_fixed(allele[to_reduce], ":"),
     FUN = function(a) {
@@ -260,7 +273,7 @@ checkHlaCallsFormat <- function(hla_calls) {
 #' \code{backquote} is usefull when using HLA allele numbers in fomulas, where
 #' \code{'*'} and \code{':'} characters have special meanings.
 #'
-#' @param character Character vector.
+#' @param x Character vector.
 #'
 #' @return Character vector with its elements backticked.
 #'
@@ -269,9 +282,9 @@ checkHlaCallsFormat <- function(hla_calls) {
 #'
 #' @importFrom assertthat assert_that
 #' @export
-backquote <- function(character) {
-  assert_that(is.character(character))
-  backquted <- paste0("`", character, "`")
+backquote <- function(x) {
+  assert_that(is.character(x))
+  backquted <- paste0("`", x, "`")
   return(backquted)
 }
 
