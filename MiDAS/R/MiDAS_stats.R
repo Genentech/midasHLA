@@ -271,6 +271,7 @@ hlaAssocModels <- function(model = NULL,
 #'
 #' @importFrom assertthat assert_that is.number is.string see_if
 #' @importFrom MASS addterm
+#' @importFrom stats formula resid update
 #' @importFrom stringi stri_startswith_fixed
 #' @importFrom purrr is_formula
 #' @export
