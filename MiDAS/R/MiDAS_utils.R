@@ -293,7 +293,7 @@ backquote <- function(character) {
 #' hla_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
 #' pheno <- read.table(pheno_file, header = TRUE)
-#' hla_calls <- readHlaCalls(file)
+#' hla_calls <- readHlaCalls(hla_file)
 #' checkAdditionalData(pheno, hla_calls)
 #'
 #' @export
