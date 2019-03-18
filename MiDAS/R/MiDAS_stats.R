@@ -271,9 +271,10 @@ hlaAssocModels <- function(model = NULL,
 #'
 #' @importFrom assertthat assert_that is.number is.string see_if
 #' @importFrom MASS addterm
+#' @importFrom purrr is_formula
+#' @importFrom rlang warn
 #' @importFrom stats formula resid update
 #' @importFrom stringi stri_startswith_fixed
-#' @importFrom purrr is_formula
 #' @export
 forwardAllelesSelection <- function(object,
                                     scope,
@@ -316,7 +317,7 @@ forwardAllelesSelection <- function(object,
     )
     object <- update(object, new_formula)
     if (sum(resid(object) ^ 2) <= rss_th) {
-      warning("Perfect fit was reached attempting further model selection is nonsense.")
+      warn("Perfect fit was reached attempting further model selection is nonsense.")
       break()
     }
     cur_vars <- all.vars(object$call$formula)
