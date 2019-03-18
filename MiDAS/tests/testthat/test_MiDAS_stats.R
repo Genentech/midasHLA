@@ -34,7 +34,7 @@ test_that("HLA allele associations are analyzed properly", {
 
   expect_error(
     analyzeHlaAssociations(model = "lm", hla_calls = hla_calls, pheno = 1),
-    "pheno is not a data frame"
+    "pheno have to be a data frame"
   )
 
   expect_error(
@@ -60,7 +60,7 @@ test_that("HLA allele associations are analyzed properly", {
                            hla_calls = hla_calls,
                            pheno = pheno2
     ),
-    "IDs in hla_calls doesn't match IDs in pheno"
+    "IDs in pheno doesn't match IDs in hla_calls"
   )
 
   expect_error(
@@ -69,7 +69,7 @@ test_that("HLA allele associations are analyzed properly", {
                            pheno = pheno,
                            covar = 1
     ),
-    "covar have to be a data frame or NULL"
+    "covar have to be a data frame"
   )
 
   expect_error(
@@ -98,7 +98,7 @@ test_that("HLA allele associations are analyzed properly", {
                            pheno = pheno,
                            covar = covar2
     ),
-    "IDs in hla_calls doesn't match IDs in covar"
+    "IDs in covar doesn't match IDs in hla_calls"
   )
 
   expect_error(
