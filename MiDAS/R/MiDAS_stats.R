@@ -233,9 +233,32 @@ hlaAssocModels <- function(model = NULL,
 
 #' Stepwise forward alleles subset selection
 #'
-#' @inheritParams checkHlaCallsFormat
-#' @inheritParams analyzeHlaAssociations
-#' @param th significance threshold for alleles
+#' \code{forwardAllelesSelection} does stepwise conditional testing adding the
+#' previous top-associated allele as covariate, until there’s no more
+#' significant alleles using a self-defined threshold.
+#'
+#' @param object object fitted by some model-fitting function.
+#' @param scope formula specifying a maximal model which should include the
+#'   current one. All additional terms in the maximal model with all marginal
+#'   terms in the original model are tried.
+#' @param th number speciyfing p-value threshold for a term to be included into
+#'   model.
+#' @param test string indicating test statistic to use for p-value calculation.
+#'   Can be either "F" or "Chisq".
+#' @param rss_th number speciyfing residual sum of squares threshold at which
+#'   function should stop adding additional terms.
+#'
+#' All the variables in the \code{scope} should be defined in the \code{object}.
+#'
+#' The F test is only appropriate for lm and aov models, and perhaps for some
+#' over-dispersed glm models. The Chisq test can be an exact test (lm models
+#' with known scale) or a likelihood-ratio test depending on the method.
+#'
+#' As the residual sum of squares approaches \code{0} the perfect fit is
+#' obtained making futher attempts at model selection nonsense, thus function
+#' is stoped. This behavoiur can be controled using \code{rss_th}.
+#'
+#' @return selected model of the same class as \code{object} is returned.
 #'
 #' @examples
 #' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
@@ -244,69 +267,64 @@ hlaAssocModels <- function(model = NULL,
 #' pheno <- read.table(pheno_file, header = TRUE)
 #' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE)
-#' forwardAllelesSubsetSelection(model = "coxph",
-#'                            hla_calls = hla_calls,
-#'                            pheno = pheno,
-#'                            covar = covar,
-#'                            th = 0.05
-#' )
+#' hla_data <- prepareHlaData(hla_calls, pheno, covar)
+#' object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = hla_data$data)
+#' scope <- Surv(OS, OS_DIED) ~ AGE + SEX + `B*57:01` + `C*07:02`
+#' forwardAllelesSelection(object, scope, th = 0.05, test = "Chisq")
+#'
+#' @importFrom assertthat assert_that is.number is.string see_if
+#' @importFrom MASS addterm
+#' @importFrom stringi stri_startswith_fixed
+#' @importFrom purrr is_formula
 #' @export
-forwardAllelesSubsetSelection <- function(model,
-                                       hla_calls,
-                                       pheno,
-                                       covar,
-                                       th = 0.05,
-                                       zygo = FALSE,
-                                       reduce_counts = FALSE) {
-  hla_data <- prepareHlaData(hla_calls,
-                             pheno,
-                             covar,
-                             zygo = zygo,
-                             reduce_counts = reduce_counts
+forwardAllelesSelection <- function(object,
+                                    scope,
+                                    th,
+                                    test = c("F", "Chisq"),
+                                    rss_th = 1e-07,
+                                    ...) {
+  assert_that(
+    see_if("formula" %in% attr(object, "names"),
+           msg = "object have to be a model"
+    ),
+    see_if(is_formula(scope), msg = "scope is not a formula"),
+    is.number(th),
+    is.string(test),
+    is.number(rss_th)
   )
-  alleles <- backquote(hla_data$alleles)
-  response <- backquote(hla_data$response)
-  covariate <- backquote(hla_data$covariate)
-  model_fun <- hlaAssocModels(model = model,
-                              response = response,
-                              covariate = covariate,
-                              data = hla_data$data
-  )
-  best_subset <- character()
 
-  res <- map_dfr(
-    .x = alleles,
-    .f = ~tidy(model_fun(.), exponentiate = FALSE) # TODO exponentiate could be passed somehow
-  )
-  res <- mutate(res, term = gsub("`", "", term))
-  res <- filter(res, checkAlleleFormat(term))
-  best_idx <- which.min(res$p.value)
-  best_pvalue <- res$p.value[best_idx]
+  test <- match.arg(test)
 
-  while (best_pvalue <= th) {
-    best_subset <- append(best_subset, hla_data$alleles[best_idx])
-    hla_data$alleles <- hla_data$alleles[-best_idx]
-    best_alleles_forms <- paste(best_subset, collapse = " + ")
-    best_alleles_forms <- paste(best_alleles_forms, hla_data$alleles, sep = " + ")
-    to_filter <- gsub("`", "", best_subset)
-    res <- map_dfr(
-      .x = best_alleles_forms,
-      .f = ~tidy(model_fun(.), exponentiate = FALSE) # TODO exponentiate could be passed somehow
+  criterium_pattern <- "Pr("
+  scope_vars <- all.vars(scope)
+  cur_vars <- all.vars(object$call$formula)
+
+  while (! all(scope_vars %in% cur_vars)) {
+    temp <- addterm(object, scope, test = test, ...)
+    criterium_column <- stri_startswith_fixed(colnames(temp), criterium_pattern)
+    assert_that(
+      see_if(sum(criterium_column) == 1,
+             msg = "Test criterium column couldn't be found..."
+      )
     )
-    res <- mutate(res, term = gsub("`", "", term))
-    res <- filter(res, checkAlleleFormat(term))
-    res <- filter(res, ! term %in% to_filter)
-    best_idx <- which.min(res$p.value)
-    best_pvalue <- res$p.value[best_idx]
+    test_val <- temp[-1, criterium_column]
+    i_min <- which.min(test_val)
+    if (length(i_min) == 0) break()
+    if (test_val[i_min] > th) break()
+    new_var <- rownames(temp)[i_min + 1]
+    new_formula <- formula(object)
+    new_formula <- as.formula(
+      paste(new_formula[2], "~", paste(new_formula[3], new_var, sep = " + "))
+    )
+    object <- update(object, new_formula)
+    if (sum(resid(object)^2) <= rss_th) {
+      warning("Perfect fit was reached attempting futher model selection is nonsense.")
+      break()
+    }
+    cur_vars <- all.vars(object$call$formula)
   }
 
-  best_alleles_form <- paste(best_subset, collapse = " + ")
-  res <- tidy(model_fun(best_alleles_form), exponentiate = FALSE)
-  res <- mutate(res, term = gsub("`", "", term))
-  res <- filter(res, checkAlleleFormat(term))
-  res <- rename(res, allele = term)
-
-  return(res)
+  return(object)
 }
 
 #' Prepare data for statistical analysis

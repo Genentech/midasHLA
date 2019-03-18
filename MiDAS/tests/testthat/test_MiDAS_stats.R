@@ -239,3 +239,42 @@ test_that("HLA statistical models are defined properly", {
                "data is not a data.frame"
   )
 })
+
+test_that("Stepwise forward alleles subset selection", {
+  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(hla_calls_file)
+  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+  pheno <- read.table(pheno_file, header = TRUE)
+  covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
+  covar <- read.table(covar_file, header = TRUE)
+  hla_data <- prepareHlaData(hla_calls, pheno, covar)
+  object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = hla_data$data)
+  scope <- Surv(OS, OS_DIED) ~ AGE + SEX + `B*57:01` + `C*07:02`
+  object <- forwardAllelesSelection(object, scope, th = 0.05, test = "Chisq")
+  test_object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX + `B*57:01` + `C*07:02`,
+                       data = hla_data$data
+  )
+
+  expect_equal(object, test_object)
+
+  expect_error(forwardAllelesSelection("foo", scope, th = 0.05, test = "Chisq"),
+               "object have to be a model"
+  )
+
+  expect_error(forwardAllelesSelection(object, 1:3, th = 0.05, test = "Chisq"),
+               "scope is not a formula"
+  )
+
+  expect_error(forwardAllelesSelection(object, scope, th = "a", test = "Chisq"),
+               "th is not a number \\(a length one numeric vector\\)."
+  )
+
+  expect_error(forwardAllelesSelection(object, scope, th = 0.05, test = 1),
+               "test is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(
+    forwardAllelesSelection(object, scope, th = 0.05, test = "F", rss_th = "a"),
+    "rss_th is not a number \\(a length one numeric vector\\)."
+  )
+})
