@@ -49,8 +49,8 @@ pheno <- read.table(pheno_file, header = TRUE)
 covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 covar <- read.table(covar_file, header = TRUE)
 hla_data <- prepareHlaData(hla_calls, pheno, covar)
-object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = hla_data$data)
-scope <- Surv(OS, OS_DIED) ~ AGE + SEX + `B*57:01` + `C*07:02`
+object <- survival::coxph(survival::Surv(OS, OS_DIED) ~ AGE + SEX, data = hla_data$data)
+scope <- survival::Surv(OS, OS_DIED) ~ AGE + SEX + `B*57:01` + `C*07:02`
 forwardAllelesSelection(object, scope, th = 0.05, test = "Chisq")
 
 }
