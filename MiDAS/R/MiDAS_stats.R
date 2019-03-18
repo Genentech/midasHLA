@@ -95,7 +95,6 @@ analyzeHlaAssociations <- function(model = "coxph",
     is.string(correction)
   )
 
-  hla_counts <- hlaCallsToCounts(hla_calls)
   hla_data <- prepareHlaData(hla_calls,
                              pheno,
                              covar,
@@ -120,8 +119,6 @@ analyzeHlaAssociations <- function(model = "coxph",
   results <- rename(results, allele = term)
 
   results <- mutate(results, p.adjusted = p.adjust(p.value, correction))
-
-  # results <- as.data.frame(results)
 
   return(results)
 }
@@ -317,7 +314,7 @@ forwardAllelesSelection <- function(object,
       paste(new_formula[2], "~", paste(new_formula[3], new_var, sep = " + "))
     )
     object <- update(object, new_formula)
-    if (sum(resid(object)^2) <= rss_th) {
+    if (sum(resid(object) ^ 2) <= rss_th) {
       warning("Perfect fit was reached attempting further model selection is nonsense.")
       break()
     }
