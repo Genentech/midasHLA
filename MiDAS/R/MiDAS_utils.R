@@ -277,7 +277,7 @@ backquote <- function(character) {
 
 #' Assert additional data
 #'
-#' \code{checkAdditionalData} asserts if pehnotype or covartiate data frame
+#' \code{checkAdditionalData} asserts if phenotype or covariate data frame
 #' has proper format.
 #'
 #' @inheritParams checkHlaCallsFormat
@@ -285,7 +285,7 @@ backquote <- function(character) {
 #'   corresponding to accompanying hla calls data frame.
 #' @param accept.null Logical indicating if NULL data_frame should be accepted.
 #'
-#' @return Logical indicating if \code{data_frame} is properly formated.
+#' @return Logical indicating if \code{data_frame} is properly formatted.
 #'   Otherwise raise error.
 #'
 #' @importFrom assertthat assert_that see_if

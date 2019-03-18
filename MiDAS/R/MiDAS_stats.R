@@ -128,10 +128,10 @@ analyzeHlaAssociations <- function(model = "coxph",
 
 #' Association models for analysis of HLA alleles
 #'
-#' \code{hlaAssocModels} is a collection of preconfigured models for use with
+#' \code{hlaAssocModels} is a collection of pre-configured models for use with
 #' HLA alleles count table.
 #'
-#' \code{hlaAssocModels} is not indended to use by basic user.
+#' \code{hlaAssocModels} is not intended to use by basic user.
 #'
 #' @inheritParams analyzeHlaAssociations
 #' @param response Character specifying response variables in \code{data}.
@@ -144,7 +144,7 @@ analyzeHlaAssociations <- function(model = "coxph",
 #'   Returned function takes one required argument: HLA allele number
 #'   (\code{allele}). Additional parameters are passed to statistical model
 #'   function. Due to fact that allele numbers contains characters that have
-#'   special meanings in formulas, they should be back quoted. This can be
+#'   special meanings in formulas, they should be backquoted. This can be
 #'   easily done with \link{backquote}. See examples section for general usage
 #'   case.
 #'
@@ -241,11 +241,11 @@ hlaAssocModels <- function(model = NULL,
 #' @param scope formula specifying a maximal model which should include the
 #'   current one. All additional terms in the maximal model with all marginal
 #'   terms in the original model are tried.
-#' @param th number speciyfing p-value threshold for a term to be included into
+#' @param th number specifying p-value threshold for a term to be included into
 #'   model.
 #' @param test string indicating test statistic to use for p-value calculation.
 #'   Can be either "F" or "Chisq".
-#' @param rss_th number speciyfing residual sum of squares threshold at which
+#' @param rss_th number specifying residual sum of squares threshold at which
 #'   function should stop adding additional terms.
 #'
 #' All the variables in the \code{scope} should be defined in the \code{object}.
@@ -255,8 +255,8 @@ hlaAssocModels <- function(model = NULL,
 #' with known scale) or a likelihood-ratio test depending on the method.
 #'
 #' As the residual sum of squares approaches \code{0} the perfect fit is
-#' obtained making futher attempts at model selection nonsense, thus function
-#' is stoped. This behavoiur can be controled using \code{rss_th}.
+#' obtained making further attempts at model selection nonsense, thus function
+#' is stopped. This behavior can be controlled using \code{rss_th}.
 #'
 #' @return selected model of the same class as \code{object} is returned.
 #'
@@ -318,7 +318,7 @@ forwardAllelesSelection <- function(object,
     )
     object <- update(object, new_formula)
     if (sum(resid(object)^2) <= rss_th) {
-      warning("Perfect fit was reached attempting futher model selection is nonsense.")
+      warning("Perfect fit was reached attempting further model selection is nonsense.")
       break()
     }
     cur_vars <- all.vars(object$call$formula)
