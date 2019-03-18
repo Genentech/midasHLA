@@ -244,6 +244,7 @@ hlaAssocModels <- function(model = NULL,
 #'   Can be either "F" or "Chisq".
 #' @param rss_th number specifying residual sum of squares threshold at which
 #'   function should stop adding additional terms.
+#' @param ... additional parameters passsed to \link[MASS]{addterm} function.
 #'
 #' All the variables in the \code{scope} should be defined in the \code{object}.
 #'
