@@ -278,3 +278,42 @@ test_that("Stepwise forward alleles subset selection", {
     "rss_th is not a number \\(a length one numeric vector\\)."
   )
 })
+
+test_that("Stepwise conditional alleles subset selection", {
+  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(hla_calls_file)
+  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+  pheno <- read.table(pheno_file, header = TRUE)
+  covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
+  covar <- read.table(covar_file, header = TRUE)
+  hla_data <<- prepareHlaData(hla_calls, pheno, covar) # there is an scope error, as this var is not found later on. This is a quick hack to make it work...
+  object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = hla_data$data)
+  scope <- Surv(OS, OS_DIED) ~ AGE + SEX + `B*14:02` + `C*07:02`
+  object <- stepwiseConditionalSelection(object, scope, th = 0.05)
+  test_object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX + `B*14:02`,
+                       data = hla_data$data
+  )
+
+  expect_equal(object, test_object)
+
+  expect_error(stepwiseConditionalSelection("foo", scope, th = 0.05),
+               "object have to be a model with defined formula"
+  )
+
+  expect_error(stepwiseConditionalSelection(object, 1:3, th = 0.05),
+               "scope have to be a formula"
+  )
+
+  expect_error(stepwiseConditionalSelection(object, scope, th = "a"),
+               "th is not a number \\(a length one numeric vector\\)."
+  )
+
+  expect_error(stepwiseConditionalSelection(object, scope, th = 0.05, keep = 1),
+               "keep is not a flag \\(a length one logical vector\\)."
+  )
+
+  expect_error(
+    stepwiseConditionalSelection(object, scope, th = 0.05, rss_th = "a"),
+    "rss_th is not a number \\(a length one numeric vector\\)."
+  )
+})

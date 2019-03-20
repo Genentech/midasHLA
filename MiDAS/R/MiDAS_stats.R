@@ -327,6 +327,121 @@ forwardAllelesSelection <- function(object,
   return(object)
 }
 
+
+#' Stepwise conditional variables selection
+#'
+#' \code{stepwiseConditionalSelection} does stepwise conditional testing adding
+#' the previous top-associated variable as covariate, until there’s no more
+#' significant variables using a self-defined threshold.
+#'
+#' \code{stepwiseConditionalSelection} selection criteria is the p-value from
+#' the test on coefficients values.
+#'
+#' @param object object fitted by some model-fitting function.
+#' @param scope formula specifying a maximal model which should include the
+#'   current one. All additional terms in the maximal model with all marginal
+#'   terms in the original model are tried.
+#' @param th number specifying p-value threshold for a term to be included into
+#'   model.
+#' @param keep logical flag indicating if the output should be a list of models
+#'   resulting from each selection step. Default is to return only the final
+#'   model.
+#' @param rss_th number specifying residual sum of squares threshold at which
+#'   function should stop adding additional terms.
+#'
+#' All the variables in the \code{scope} should be defined in the \code{object}.
+#'
+#' As the residual sum of squares approaches \code{0} the perfect fit is
+#' obtained making further attempts at model selection nonsense, thus function
+#' is stopped. This behavior can be controlled using \code{rss_th}.
+#'
+#' @return selected model of the same class as \code{object} or list of models.
+#'   See \code{keep} parameter.
+#'
+#' @examples
+#' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(hla_calls_file)
+#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+#' pheno <- read.table(pheno_file, header = TRUE)
+#' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
+#' covar <- read.table(covar_file, header = TRUE)
+#' hla_data <- prepareHlaData(hla_calls, pheno, covar)
+#' object <- survival::coxph(survival::Surv(OS, OS_DIED) ~ AGE + SEX, data = hla_data$data)
+#' scope <- survival::Surv(OS, OS_DIED) ~ AGE + SEX + `C*07:02` + `B*14:02`
+#' simpleForwardAllelesSelection(object, scope, th = 0.05, keep = T)
+#'
+#' @importFrom assertthat assert_that is.flag is.number is.string see_if
+#' @importFrom MASS addterm
+#' @importFrom purrr is_formula map_dfr
+#' @importFrom rlang warn
+#' @importFrom stats formula resid update
+#' @export
+stepwiseConditionalSelection <- function(object,
+                                         scope,
+                                         th,
+                                         keep = FALSE,
+                                         rss_th = 1e-07) {
+  addTerm <- function(x) {
+    x <- paste0(". ~ . + ", x)
+    return(x)
+  }
+
+  assert_that(
+    see_if("formula" %in% attr(object, "names"),
+           msg = "object have to be a model with defined formula"
+    ),
+    see_if(is_formula(scope), msg = "scope have to be a formula"),
+    is.number(th),
+    is.flag(keep),
+    is.number(rss_th)
+  )
+
+  vars <- all.vars(scope)
+  prev_formula <- formula(object)
+  prev_vars <- all.vars(prev_formula)
+
+  assert_that(
+    see_if(all(prev_vars %in% vars),
+           msg = "object have variables not defined in scope"
+    )
+  )
+
+  best <- list(object)
+  i <- 2
+
+  while (TRUE) {
+    new_vars <- backquote(vars[! vars %in% prev_vars])
+
+    results <- map_dfr(
+      .x = new_vars,
+      .f = ~tidy(update(object, addTerm(.)))
+    )
+    results <- results[results$term %in% new_vars, ]
+    results <- results[! is.infinite(results$p.value), ]
+
+    i_min <- which.min(results$p.value)
+    if (length(i_min) == 0) break()
+    if (results$p.value[i_min] >= th) break()
+
+    object <- update(object, addTerm(results$term[i_min]))
+
+    if (sum(resid(object) ^ 2) <= rss_th) {
+      warn("Perfect fit was reached attempting further model selection is nonsense.")
+      break()
+    }
+    prev_formula <- formula(object)
+    prev_vars <- all.vars(prev_formula)
+    best[[i]] <- object
+    i <- i + 1
+  }
+
+  if (! keep) {
+    best <- best[[length(best)]]
+  }
+
+  return(best)
+}
+
 #' Prepare data for statistical analysis
 #'
 #' @inheritParams checkHlaCallsFormat
