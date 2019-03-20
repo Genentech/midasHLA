@@ -132,7 +132,7 @@ analyzeHlaAssociations <- function(model = "coxph",
 #'
 #' @inheritParams analyzeHlaAssociations
 #' @param response Character specifying response variables in \code{data}.
-#' @param covariate Character specifying covariates in \code{data}.
+#' @param variable Character specifying variables in \code{data}.
 #' @param data Data frame containing variables in the model.
 #'
 #' @return Function for fitting association model of choice, it takes allele
@@ -159,10 +159,10 @@ analyzeHlaAssociations <- function(model = "coxph",
 #' data <- dplyr::left_join(hla_counts, pheno, by = "ID")
 #' data <- dplyr::left_join(data, covar, by = "ID")
 #' response <- paste(colnames(pheno[, -1]), collapse = ", ")
-#' covariate <- paste(colnames(covar[, -1]), collapse = " + ")
+#' variable <- paste(colnames(covar[, -1]), collapse = " + ")
 #' fun <- hlaAssocModels(model = "coxph",
 #'                        response = response,
-#'                        covariate = covariate,
+#'                        variable = variable,
 #'                        data = data
 #' )
 #' allele <- backquote("A*01:01")
@@ -173,59 +173,43 @@ analyzeHlaAssociations <- function(model = "coxph",
 #' @importFrom stats as.formula binomial glm lm
 #' @importFrom survival coxph Surv
 #' @export
-hlaAssocModels <- function(model = NULL,
-                           response,
-                           covariate,
-                           data) {
-  if (is.null(model)) {
-    return(c("coxph", "lm", "glm.logit", "glm.nb"))
-  }
+hlaAssocModel <- function(model,
+                          response,
+                          variable,
+                          data,
+                          ...) {
   assert_that(
     is.string(model),
-    is.character(response),
-    see_if(length(response) != 0, msg = "response can not be empty"),
-    see_if(is.character(covariate) | is.null(covariate),
-           msg = "covariate have to be a character or NULL"
+    see_if(is.string(response) | is_formula(response),
+           msg = "response have to be a string or formula"
+    ),
+    see_if(is.character(variable) | is_formula(variable),
+           msg = "variable have to be a character or formula"
     ),
     is.data.frame(data)
   )
 
-  response_var <- paste(response, collapse = ", ")
-  if (length(covariate) != 0) {
-    covariate_var <- paste(covariate, collapse = " + ")
-  } else {
-    covariate_var <- "0"
+  if (is.character(response)) {
+    response <- paste0(response, " ~ 1")
+    response <- as.formula(response)
   }
 
-  model_function <- switch(
-    model,
-    coxph = function(allele, ...) { # Cox survival analysis
-      form <- sprintf("Surv(%s) ~ %s + %s", response_var, allele, covariate_var)
-      result <- coxph(formula = as.formula(form), data = data, ...)
-      return(result)
-    },
-    lm = function(allele, ...) { # Linear regression
-      form <- sprintf("%s ~ %s + %s", response_var, allele, covariate_var)
-      result <- lm(formula = as.formula(form), data = data, ...)
-      return(result)
-    },
-    glm.logit = function(allele, ...) { # Logistic regression
-      form <- sprintf("%s ~ %s + %s", response_var, allele, covariate_var)
-      result <- glm(
-        formula = as.formula(form),
-        family = binomial(link = "logit"),
-        data = data,
-        ...
-      )
-      return(result)
-    },
-    glm.nb = function(allele, ...) { # Negative binomial regression
-      form <- sprintf("%s ~ %s + %s", response_var, allele, covariate_var)
-      result <- glm.nb(formula = as.formula(form), data = data, ...)
-      return(result)
-    }
-  )
-  return(model_function)
+  if (is.character(variable)) {
+    variable <- paste(variable, collapse = " + ")
+    variable <- paste(". ~ .", variable, sep = " + ")
+    variable <- as.formula(variable)
+  }
+
+  form <- update(response, variable)
+  model_fun <- match.fun(model)
+  model_object <- model_fun(formula = form, data = data, ...)
+
+  # change values in call for ones that will work in global env
+  model_object$call[[1]] <- as.name(model)
+  model_object$call$formula <- model_object$formula
+  model_object$call$data <- substitute(data)
+
+  return(model_object)
 }
 
 #' Stepwise forward alleles subset selection
