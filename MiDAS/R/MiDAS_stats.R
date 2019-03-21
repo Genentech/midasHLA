@@ -213,7 +213,7 @@ hlaAssocModel <- function(model,
 
   # change values in call for ones that will work in global env
   model_object$call[[1]] <- as.name(model)
-  model_object$call$formula <- model_object$formula
+  model_object$call$formula <- formula(model_object)
   model_object$call$data <- substitute(data)
 
   return(model_object)
@@ -378,7 +378,7 @@ stepwiseConditionalSelection <- function(object,
   }
 
   assert_that(
-    see_if("formula" %in% attr(object, "names"),
+    see_if("formula" %in% attr(object$call, "names"),
            msg = "object have to be a model with defined formula"
     ),
     see_if(is_formula(scope), msg = "scope have to be a formula"),
