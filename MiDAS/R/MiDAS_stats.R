@@ -82,11 +82,15 @@ analyzeHlaAssociations <- function(model = "coxph",
                                    covar,
                                    zygo = FALSE,
                                    reduce_counts = FALSE,
-                                   correction = "BH") {
+                                   correction = "BH",
+                                   exponentiate = FALSE) {
+  addTerm <- function(x) {
+    x <- paste0(". ~ . + ", x)
+    return(x)
+  }
+
   assert_that(
     is.string(model),
-    see_if(model %in% hlaAssocModels(),
-           msg = sprintf("model %s is not implemented", model)),
     checkHlaCallsFormat(hla_calls),
     checkAdditionalData(pheno, hla_calls),
     checkAdditionalData(covar, hla_calls, accept.null = TRUE),
@@ -103,16 +107,19 @@ analyzeHlaAssociations <- function(model = "coxph",
   )
   alleles <- backquote(hla_data$alleles)
   response <- backquote(hla_data$response)
+  if (model %in% c("coxph", "cph")) {
+    response <- paste0("Surv(", paste(response, collapse = ","), ")")
+  }
   covariate <- backquote(hla_data$covariate)
-  model_function <- hlaAssocModels(model = model,
-                                   response = response,
-                                   covariate = covariate,
-                                   data = hla_data$data
+  model_function <- hlaAssocModel(model = model,
+                                  response = response,
+                                  variable = covariate,
+                                  data = hla_data$data
   )
 
   results <- map_dfr(
     .x = alleles,
-    .f = ~tidy(model_function(.), exponentiate = FALSE) # TODO exponentiate could be passed somehow
+    .f = ~tidy(update(model_function, addTerm(.)), exponentiate = exponentiate)
   )
   results <- mutate(results, term = gsub("`", "", term))
   results <- filter(results, checkAlleleFormat(term))
