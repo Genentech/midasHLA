@@ -22,7 +22,7 @@ Function for fitting association model of choice, it takes allele
   Returned function takes one required argument: HLA allele number
   (\code{allele}). Additional parameters are passed to statistical model
   function. Due to fact that allele numbers contains characters that have
-  special meanings in formulas, they should be back quoted. This can be
+  special meanings in formulas, they should be backquoted. This can be
   easily done with \link{backquote}. See examples section for general usage
   case.
 
@@ -30,11 +30,11 @@ Function for fitting association model of choice, it takes allele
   instead.
 }
 \description{
-\code{hlaAssocModels} is a collection of preconfigured models for use with
+\code{hlaAssocModels} is a collection of pre-configured models for use with
 HLA alleles count table.
 }
 \details{
-\code{hlaAssocModels} is not indended to use by basic user.
+\code{hlaAssocModels} is not intended to use by basic user.
 }
 \examples{
 hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")

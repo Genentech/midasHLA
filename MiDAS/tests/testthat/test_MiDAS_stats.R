@@ -34,7 +34,7 @@ test_that("HLA allele associations are analyzed properly", {
 
   expect_error(
     analyzeHlaAssociations(model = "lm", hla_calls = hla_calls, pheno = 1),
-    "pheno is not a data frame"
+    "pheno have to be a data frame"
   )
 
   expect_error(
@@ -60,7 +60,7 @@ test_that("HLA allele associations are analyzed properly", {
                            hla_calls = hla_calls,
                            pheno = pheno2
     ),
-    "IDs in hla_calls doesn't match IDs in pheno"
+    "IDs in pheno doesn't match IDs in hla_calls"
   )
 
   expect_error(
@@ -69,7 +69,7 @@ test_that("HLA allele associations are analyzed properly", {
                            pheno = pheno,
                            covar = 1
     ),
-    "covar is not a data frame"
+    "covar have to be a data frame"
   )
 
   expect_error(
@@ -98,7 +98,7 @@ test_that("HLA allele associations are analyzed properly", {
                            pheno = pheno,
                            covar = covar2
     ),
-    "IDs in hla_calls doesn't match IDs in covar"
+    "IDs in covar doesn't match IDs in hla_calls"
   )
 
   expect_error(
@@ -156,8 +156,8 @@ test_that("HLA statistical models are defined properly", {
   covar <- read.table(covar_file, header = TRUE)
   data <- dplyr::left_join(hla_counts, pheno, by = "ID")
   data <- dplyr::left_join(data, covar, by = "ID")
-  response <- paste(colnames(pheno[, -1]), collapse = ", ")
-  covariate <- paste(colnames(covar[, -1]), collapse = " + ")
+  response <- colnames(pheno[, -1])
+  covariate <- colnames(covar[, -1])
 
   fun <- hlaAssocModels(model = "coxph",
                  response = response,
@@ -170,7 +170,7 @@ test_that("HLA statistical models are defined properly", {
     c("coxph", "as.formula(form)", "data")
   )
 
-  response <- paste(colnames(pheno[, 3, drop = FALSE]), collapse = ", ")
+  response <- colnames(pheno[, 3, drop = FALSE])
   fun <- hlaAssocModels(model = "lm",
                         response = response,
                         covariate = covariate,
@@ -204,6 +204,18 @@ test_that("HLA statistical models are defined properly", {
     c("glm.nb", "as.formula(form)", "data", "log")
   )
 
+  # check if null covariate is accepted
+  fun <- hlaAssocModels(model = "glm.nb",
+                        response = response,
+                        covariate = NULL,
+                        data = data
+  )
+  res <- fun("`A*01:01`")
+  expect_equal(
+    colnames(res$model),
+    c("OS_DIED", "A*01:01")
+  )
+
   expect_error(hlaAssocModels(model = 1),
                "model is not a string \\(a length one character vector\\)."
   )
@@ -212,8 +224,12 @@ test_that("HLA statistical models are defined properly", {
                "response is not a character vector"
   )
 
+  expect_error(hlaAssocModels(model = "lm", response = character()),
+               "response can not be empty"
+  )
+
   expect_error(hlaAssocModels(model = "lm", response = response, covariate = 1),
-               "covariate is not a character vector"
+               "covariate have to be a character or NULL"
   )
 
   expect_error(hlaAssocModels(model = "lm",
@@ -221,5 +237,44 @@ test_that("HLA statistical models are defined properly", {
                               covariate = covariate,
                               data = 1),
                "data is not a data.frame"
+  )
+})
+
+test_that("Stepwise forward alleles subset selection", {
+  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(hla_calls_file)
+  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+  pheno <- read.table(pheno_file, header = TRUE)
+  covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
+  covar <- read.table(covar_file, header = TRUE)
+  hla_data <<- prepareHlaData(hla_calls, pheno, covar) # there is an scope error, as this var is not found later on. This is a quick hack to make it work...
+  object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = hla_data$data)
+  scope <- Surv(OS, OS_DIED) ~ AGE + SEX + `B*57:01` + `C*07:02`
+  object <- forwardAllelesSelection(object, scope, th = 0.05, test = "Chisq")
+  test_object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX + `B*57:01` + `C*07:02`,
+                       data = hla_data$data
+  )
+
+  expect_equal(object, test_object)
+
+  expect_error(forwardAllelesSelection("foo", scope, th = 0.05, test = "Chisq"),
+               "object have to be a model"
+  )
+
+  expect_error(forwardAllelesSelection(object, 1:3, th = 0.05, test = "Chisq"),
+               "scope is not a formula"
+  )
+
+  expect_error(forwardAllelesSelection(object, scope, th = "a", test = "Chisq"),
+               "th is not a number \\(a length one numeric vector\\)."
+  )
+
+  expect_error(forwardAllelesSelection(object, scope, th = 0.05, test = 1),
+               "test is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(
+    forwardAllelesSelection(object, scope, th = 0.05, test = "F", rss_th = "a"),
+    "rss_th is not a number \\(a length one numeric vector\\)."
   )
 })
