@@ -345,3 +345,40 @@ checkAdditionalData <- function(data_frame,
 
   return(TRUE)
 }
+
+#' Add variables to statistical model
+#'
+#' @importFrom assertthat assert_that is_formula
+#' @importFrom stats update
+#'
+#' @export
+updateModel <- function(object, x, collapse = " + ") {
+  assert_that(
+    see_if(is.object(object),
+           msg = "object have to have the internal OBJECT bit set"
+    ),
+    {
+      object_call <- get0("call", envir = as.environment(object))
+      if (! is.null(object_call)) {
+        object_formula <- eval(substitute(formula, env = as.list(object_call)))
+        see_if(is_formula(formula(object_call)),
+               msg = "object have to be a model with defined formula"
+        )
+      } else {
+        structure(FALSE, msg = "object have to have an attribue 'call'")
+      }
+    },
+    see_if(is.character(x) | is_formula(x),
+           msg = "x have to be a string (a length one character vector) or formula"
+    )
+  )
+
+  if (is.character(x)) {
+    alleles <- checkAlleleFormat(x)
+    x[alleles] <- backquote(x[alleles])
+    x <- paste0(". ~ . + ", paste(x, collapse = collapse))
+  }
+  object <- update(object = object, x)
+
+  return(object)
+}
