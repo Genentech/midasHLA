@@ -186,7 +186,14 @@ hlaAssocModel <- function(model,
                           data,
                           ...) {
   assert_that(
-    is.string(model),
+    see_if(is.string(model) | is.function(model),
+           msg = "model have to be a string (a length one character vector) or a function"
+    ),
+    if (is.string(model)) {
+      see_if(exists(model), msg = sprintf("could not find function %s", model))
+    } else {
+      TRUE
+    },
     see_if(is.string(response) | is_formula(response),
            msg = "response have to be a string or formula"
     ),
@@ -195,6 +202,10 @@ hlaAssocModel <- function(model,
     ),
     is.data.frame(data)
   )
+
+  if (is.string(model)) {
+    model <- as.name(model)
+  }
 
   if (is.character(response)) {
     response <- paste0(response, " ~ 1")
@@ -208,15 +219,9 @@ hlaAssocModel <- function(model,
   }
 
   form <- update(response, variable)
-  model_fun <- match.fun(model)
-  model_object <- model_fun(formula = form, data = data, ...)
+  model_fun <- eval.parent(substitute(model(formula = form, data = data, ...)))
 
-  # change values in call for ones that will work in global env
-  model_object$call[[1]] <- as.name(model)
-  model_object$call$formula <- formula(model_object)
-  model_object$call$data <- substitute(data)
-
-  return(model_object)
+  return(model_fun)
 }
 
 #' Stepwise forward alleles subset selection
