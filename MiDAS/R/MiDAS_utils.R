@@ -284,6 +284,7 @@ checkHlaCallsFormat <- function(hla_calls) {
 #' @export
 backquote <- function(x) {
   assert_that(is.character(x))
+  x <- gsub("`", "", x)
   backquted <- paste0("`", x, "`")
   return(backquted)
 }
@@ -352,7 +353,7 @@ checkAdditionalData <- function(data_frame,
 #' @importFrom stats update
 #'
 #' @export
-updateModel <- function(object, x, collapse = " + ") {
+updateModel <- function(object, x, backquote = TRUE, collapse = " + ") {
   assert_that(
     see_if(is.object(object),
            msg = "object have to have the internal OBJECT bit set"
@@ -374,8 +375,7 @@ updateModel <- function(object, x, collapse = " + ") {
   )
 
   if (is.character(x)) {
-    alleles <- checkAlleleFormat(x)
-    x[alleles] <- backquote(x[alleles])
+    x[backquote] <- backquote(x[backquote])
     x <- paste0(". ~ . + ", paste(x, collapse = collapse))
   }
   object <- update(object = object, x)
