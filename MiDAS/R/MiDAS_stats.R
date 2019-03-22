@@ -175,7 +175,7 @@ analyzeHlaAssociations <- function(model = "coxph",
 #' allele <- backquote("A*01:01")
 #' fun(allele)
 #'
-#' @importFrom assertthat assert_that see_if
+#' @importFrom assertthat assert_that is_formula see_if
 #' @importFrom MASS glm.nb
 #' @importFrom stats as.formula binomial glm lm
 #' @importFrom survival coxph Surv
@@ -272,58 +272,76 @@ hlaAssocModel <- function(model,
 #' @importFrom rlang warn
 #' @importFrom stats formula resid update
 #' @export
-stepwiseConditionalSelection <- function(object,
-                                         scope,
-                                         th,
-                                         keep = FALSE,
-                                         rss_th = 1e-07) {
-  addTerm <- function(x) {
-    x <- paste0(". ~ . + ", x)
-    return(x)
-  }
+forwardConditionalSelection <- function(model,
+                                        hla_calls,
+                                        pheno,
+                                        covar,
+                                        th,
+                                        keep = FALSE,
+                                        rss_th = 1e-07) {
+
 
   assert_that(
-    see_if("formula" %in% attr(object$call, "names"),
-           msg = "object have to be a model with defined formula"
-    ),
-    see_if(is_formula(scope), msg = "scope have to be a formula"),
+    is.string(model), # take the checks on the model from hlaAssocModel function here
+    checkHlaCallsFormat(hla_calls),
+    checkAdditionalData(pheno, hla_calls),
+    checkAdditionalData(covar, hla_calls, accept.null = TRUE),
     is.number(th),
     is.flag(keep),
     is.number(rss_th)
   )
 
-  vars <- all.vars(scope)
+  hla_data <- prepareHlaData(hla_calls, # Perhaps it would be beneficial to take this object outside, it has relatively simple structure so if someone needs to hack it it should be easy. Plus checking the data you are putting into functions would be beneficial.
+                             pheno,
+                             covar,
+                             zygo = FALSE,
+                             reduce_counts = FALSE
+  )
+
+  alleles <- hla_data$alleles
+  response <- backquote(hla_data$response)
+  if (model %in% c("coxph", "cph")) {
+    response <- paste0("Surv(", paste(response, collapse = ","), ")")
+  }
+  covariate <- backquote(hla_data$covariate)
+  object <- hlaAssocModel(model = model,
+                          response = response,
+                          variable = covariate,
+                          data = hla_data$data
+  )
+
+  vars <- alleles
   prev_formula <- formula(object)
   prev_vars <- all.vars(prev_formula)
-
-  assert_that(
-    see_if(all(prev_vars %in% vars),
-           msg = "object have variables not defined in scope"
-    )
-  )
 
   best <- list(object)
   i <- 2
 
   while (TRUE) {
-    new_vars <- backquote(vars[! vars %in% prev_vars])
+    new_vars <- vars[! vars %in% prev_vars]
 
     results <- map_dfr(
       .x = new_vars,
-      .f = ~tidy(update(object, addTerm(.)))
+      .f = ~ tidy(updateModel(
+        object = object, x = ., backquote = TRUE, collapse = " + ")
+      )
     )
-    results <- results[results$term %in% new_vars, ]
+    results <- results[results$term %in% backquote(new_vars), ]
     results <- results[! is.infinite(results$p.value), ]
 
     i_min <- which.min(results$p.value)
-    if (length(i_min) == 0) break()
-    if (results$p.value[i_min] >= th) break()
+    if (length(i_min) == 0) break
+    if (results$p.value[i_min] >= th) break
 
-    object <- update(object, addTerm(results$term[i_min]))
+    object <- updateModel(object, # acctually this model was already calculated...
+                          results$term[i_min],
+                          backquote = FALSE,
+                          collapse = " + "
+    )
 
     if (sum(resid(object) ^ 2) <= rss_th) {
       warn("Perfect fit was reached attempting further model selection is nonsense.")
-      break()
+      break
     }
     prev_formula <- formula(object)
     prev_vars <- all.vars(prev_formula)
