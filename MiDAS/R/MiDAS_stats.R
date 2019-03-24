@@ -89,7 +89,9 @@ analyzeHlaAssociations <- function(model = "coxph",
            msg = "model have to be a string (a length one character vector) or a function"
     ),
     if (is.string(model)) { # Here existing non function like data frame could be accepted!!! TODO
-      see_if(exists(model), msg = sprintf("could not find function %s", model))
+      see_if(exists(model) & is.function(get0(model)),
+             msg = sprintf("could not find function %s", model)
+      )
     } else {
       TRUE
     },
@@ -197,7 +199,9 @@ hlaAssocModel <- function(model,
            msg = "model have to be a string (a length one character vector) or a function"
     ),
     if (is.string(model)) {
-      see_if(exists(model), msg = sprintf("could not find function %s", model))
+      see_if(exists(model)  & is.function(get0(model)),
+             msg = sprintf("could not find function %s", model)
+      )
     } else {
       TRUE
     },
@@ -292,7 +296,9 @@ forwardConditionalSelection <- function(model,
            msg = "model have to be a string (a length one character vector) or a function"
     ),
     if (is.string(model)) {
-      see_if(exists(model), msg = sprintf("could not find function %s", model))
+      see_if(exists(model)  & is.function(get0(model)),
+             msg = sprintf("could not find function %s", model)
+      )
     } else {
       TRUE
     },
@@ -346,7 +352,7 @@ forwardConditionalSelection <- function(model,
     if (length(i_min) == 0) break
     if (results$p.value[i_min] >= th) break
 
-    object <- updateModel(object, # acctually this model was already calculated...
+    object <- updateModel(object,
                           results$term[i_min],
                           backquote = FALSE,
                           collapse = " + "
