@@ -9,7 +9,6 @@ test_that("HLA allele associations are analyzed properly", {
   pheno <- read.table(pheno_file, header = TRUE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE)
-  hla_data <<- prepareHlaData(hla_calls, pheno, covar) # TODO there is a scope error
   res <- analyzeHlaAssociations(model = "coxph",
                                 hla_calls,
                                 pheno,
@@ -200,8 +199,8 @@ test_that("Stepwise conditional alleles subset selection", {
   pheno <- read.table(pheno_file, header = TRUE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE)
-  hla_data <<- prepareHlaData(hla_calls, pheno, covar) # TODO there is a scope error
   object <- forwardConditionalSelection("coxph", hla_calls, pheno, covar, th = 0.02)
+  hla_data <- prepareHlaData(hla_calls, pheno, covar)
   test_object <- coxph(
     Surv(OS, OS_DIED) ~ AGE + SEX + `B*14:02` + `DRB1*11:01` + `DRA*01:02`,
     data = hla_data$data

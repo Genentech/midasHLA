@@ -378,7 +378,9 @@ updateModel <- function(object, x, backquote = TRUE, collapse = " + ") {
     x[backquote] <- backquote(x[backquote])
     x <- paste0(". ~ . + ", paste(x, collapse = collapse))
   }
-  object <- update(object = object, x)
 
-  return(object)
+  new_object <- update(object = object, x, evaluate = FALSE)
+  new_object <- eval.parent(new_object)
+
+  return(new_object)
 }
