@@ -9,6 +9,7 @@ test_that("HLA allele associations are analyzed properly", {
   pheno <- read.table(pheno_file, header = TRUE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE)
+  hla_data <<- prepareHlaData(hla_calls, pheno, covar) # TODO there is a scope error
   res <- analyzeHlaAssociations(model = "coxph",
                                 hla_calls,
                                 pheno,
@@ -21,12 +22,14 @@ test_that("HLA allele associations are analyzed properly", {
   expect_equal(as.data.frame(res), as.data.frame(test_hla_analyze)) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
 
   expect_error(analyzeHlaAssociations(model = 1),
-               "model is not a string \\(a length one character vector\\)."
+               "model have to be a string \\(a length one character vector\\) or a function"
   )
 
-  expect_error(analyzeHlaAssociations(model = "lm", hla_calls = hla_calls[, 1]), # other errors for hla_calls format are not checked here
-               "hla_calls is not a data frame"
+  expect_error(analyzeHlaAssociations(model = "foo"),
+               "could not find function foo"
   )
+
+# TODO tests of assest from checkHlaCallsFormat checkAdditionalData are omited here
 
   expect_error(
     analyzeHlaAssociations(model = "lm", hla_calls = hla_calls, pheno = 1),
@@ -206,13 +209,12 @@ test_that("Stepwise conditional alleles subset selection", {
 
   expect_equal(object, test_object)
 
-  expect_error(forwardConditionalSelection(model = 2,
-                                           hla_calls = hla_calls,
-                                           pheno = pheno,
-                                           covar = covar,
-                                           th = 0.05
-               ),
-               "model is not a string \\(a length one character vector\\)."
+  expect_error(forwardConditionalSelection(model = 2),
+               "model have to be a string \\(a length one character vector\\) or a function"
+  )
+
+  expect_error(forwardConditionalSelection(model = "foo"),
+               "could not find function foo"
   )
 
   # assert tests with checkHlaCallsFormat & checkAdditionalData are omited here

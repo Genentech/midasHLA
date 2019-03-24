@@ -84,13 +84,15 @@ analyzeHlaAssociations <- function(model = "coxph",
                                    reduce_counts = FALSE,
                                    correction = "BH",
                                    exponentiate = FALSE) {
-  addTerm <- function(x) {
-    x <- paste0(". ~ . + ", x)
-    return(x)
-  }
-
   assert_that(
-    is.string(model),
+    see_if(is.string(model) | is.function(model),
+           msg = "model have to be a string (a length one character vector) or a function"
+    ),
+    if (is.string(model)) { # Here existing non function like data frame could be accepted!!! TODO
+      see_if(exists(model), msg = sprintf("could not find function %s", model))
+    } else {
+      TRUE
+    },
     checkHlaCallsFormat(hla_calls),
     checkAdditionalData(pheno, hla_calls),
     checkAdditionalData(covar, hla_calls, accept.null = TRUE),
@@ -107,7 +109,7 @@ analyzeHlaAssociations <- function(model = "coxph",
   )
   alleles <- backquote(hla_data$alleles)
   response <- backquote(hla_data$response)
-  if (model %in% c("coxph", "cph")) {
+  if (substitute(model) %in% c("coxph", "cph")) {
     response <- paste0("Surv(", paste(response, collapse = ","), ")")
   }
   covariate <- backquote(hla_data$covariate)
@@ -119,7 +121,12 @@ analyzeHlaAssociations <- function(model = "coxph",
 
   results <- map_dfr(
     .x = alleles,
-    .f = ~tidy(update(model_function, addTerm(.)), exponentiate = exponentiate)
+    .f = ~tidy(updateModel(object = model_function,
+                           x = .,
+                           backquote = FALSE,
+                           collapse = " + "),
+               exponentiate = exponentiate
+    )
   )
   results <- mutate(results, term = gsub("`", "", term))
   results <- filter(results, checkAlleleFormat(term))
@@ -280,9 +287,15 @@ forwardConditionalSelection <- function(model,
                                         keep = FALSE,
                                         rss_th = 1e-07) {
 
-
   assert_that(
-    is.string(model), # take the checks on the model from hlaAssocModel function here
+    see_if(is.string(model) | is.function(model),
+           msg = "model have to be a string (a length one character vector) or a function"
+    ),
+    if (is.string(model)) {
+      see_if(exists(model), msg = sprintf("could not find function %s", model))
+    } else {
+      TRUE
+    },
     checkHlaCallsFormat(hla_calls),
     checkAdditionalData(pheno, hla_calls),
     checkAdditionalData(covar, hla_calls, accept.null = TRUE),
@@ -300,7 +313,7 @@ forwardConditionalSelection <- function(model,
 
   alleles <- hla_data$alleles
   response <- backquote(hla_data$response)
-  if (model %in% c("coxph", "cph")) {
+  if (substitute(model) %in% c("coxph", "cph")) {
     response <- paste0("Surv(", paste(response, collapse = ","), ")")
   }
   covariate <- backquote(hla_data$covariate)
