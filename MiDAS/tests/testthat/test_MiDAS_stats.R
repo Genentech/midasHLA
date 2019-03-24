@@ -18,14 +18,10 @@ test_that("HLA allele associations are analyzed properly", {
                                 correction = "BH"
   )
   load(system.file("extdata", "test_hla_analyze.Rdata", package = "MiDAS"))
-  expect_equal(res, test_hla_analyze)
+  expect_equal(as.data.frame(res), as.data.frame(test_hla_analyze)) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
 
   expect_error(analyzeHlaAssociations(model = 1),
                "model is not a string \\(a length one character vector\\)."
-  )
-
-  expect_error(analyzeHlaAssociations(model = "foo"),
-               "model foo is not implemented"
   )
 
   expect_error(analyzeHlaAssociations(model = "lm", hla_calls = hla_calls[, 1]), # other errors for hla_calls format are not checked here
