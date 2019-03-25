@@ -347,11 +347,38 @@ checkAdditionalData <- function(data_frame,
   return(TRUE)
 }
 
-#' Add variables to statistical model
+#' Add new variables to statistical model
+#'
+#' \code{updateModel} will add new variables to model and re-fit it.
+#'
+#' @param object An existing fit from a model function such as lm, glm and many
+#'   others.
+#' @param x Character vector specifying variables to be added to model or a
+#'   formula giving a template which specifies how to update.
+#' @param backquote Logical indicating if added variables should be quoted.
+#'   Longer than one element vectors are accepted as well, specifying which new
+#'   variables should be backquoted. Only relevant if x is of type character.
+#' @param collapse Character speciyfing how new characters should be added to
+#'   old formula. Only relevant if x is of type character.
+#'
+#' @return Updated fit of input model.
 #'
 #' @importFrom assertthat assert_that
 #' @importFrom stats update
 #' @importFrom purrr is_formula
+#'
+#' @examples
+#' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(hla_calls_file)
+#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+#' pheno <- read.table(pheno_file, header = TRUE)
+#' hla_data <- prepareHlaData(hla_calls, pheno, covar)
+#' coxmod <- hlaAssocModel(model = "coxph",
+#'                         response = "Surv(OS, OS_DIED)"
+#'                         variable = "1",
+#'                         data = hla_data$data
+#' )
+#' updateModel(coxmod, "A*01:01", backquote = TRUE, collapse = " + ")
 #'
 #' @export
 updateModel <- function(object, x, backquote = TRUE, collapse = " + ") {

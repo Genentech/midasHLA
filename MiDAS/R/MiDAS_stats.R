@@ -4,20 +4,16 @@
 #' calls using statistical model of choice.
 #'
 #' @inheritParams checkHlaCallsFormat
-#' @param model String specifying statistical model to use.
+#' @param model String specifying statistical model to use or corresponding
+#'   function.
 #' @param pheno Data frame holding phenotypic response variables.
 #' @param covar Data frame holding covariates.
 #' @param zygo Flag indicating whether zygosity should be added to
 #'   covariates. See details for further explanations.
 #' @param reduce_counts Flag indicating whether allele counts should be reduced
-#'   to presence / absence indicators.
-#' @param correction String specifying multiple testing correction method.
-#'
-#' Available choices for \code{model} include:
-#' \code{"coxph"} - Cox survival analysis,
-#' \code{"lm"} - Linear regression,
-#' \code{"glm.logit"} - Logistic regression,
-#' \code{"glm.nb"} - Negative binomial regression
+#'   to presence / absence indicators. See details for further explanations.
+#' @param correction String specifying multiple testing correction method. See
+#'   details for further information.
 #'
 #' \code{pheno} and \code{covar} should be data frames with first column holding
 #' samples IDs and named \code{ID}. Those should correspond to \code{ID} column
@@ -59,22 +55,12 @@
 #'                        correction = "BH"
 #' )
 #'
-#' # Logistic regression
-#' pheno <- pheno[, c(1, 3)]
-#' analyzeHlaAssociations(model = "glm.logit",
-#'                        hla_calls,
-#'                        pheno,
-#'                        covar,
-#'                        zygo = FALSE,
-#'                        reduce_counts = FALSE,
-#'                        correction = "BH"
-#' )
-#'
 #' @importFrom assertthat assert_that see_if is.flag is.string
 #' @importFrom broom tidy
 #' @importFrom dplyr left_join filter mutate rename
 #' @importFrom stats p.adjust
 #' @importFrom purrr map_dfr
+#'
 #' @export
 analyzeHlaAssociations <- function(model = "coxph",
                                    hla_calls,
@@ -88,7 +74,7 @@ analyzeHlaAssociations <- function(model = "coxph",
     see_if(is.string(model) | is.function(model),
            msg = "model have to be a string (a length one character vector) or a function"
     ),
-    if (is.string(model)) { # Here existing non function like data frame could be accepted!!! TODO
+    if (is.string(model)) {
       see_if(is.function(get0(model)),
              msg = sprintf("could not find function %s", model)
       )
@@ -141,53 +127,34 @@ analyzeHlaAssociations <- function(model = "coxph",
 
 #' Association models for analysis of HLA alleles
 #'
-#' \code{hlaAssocModels} is a collection of pre-configured models for use with
-#' HLA alleles count table.
-#'
-#' \code{hlaAssocModels} is not intended to use by basic user.
+#' \code{hlaAssocModels} make creating statistical models for HLA association
+#' analyses easier.
 #'
 #' @inheritParams analyzeHlaAssociations
-#' @param response Character specifying response variables in \code{data}.
+#' @param response String specifying response variable in \code{data}.
 #' @param variable Character specifying variables in \code{data}.
 #' @param data Data frame containing variables in the model.
 #'
-#' @return Function for fitting association model of choice, it takes allele
-#'   number as an argument. Additional arguments can be passed as well.
-#'
-#'   Returned function takes one required argument: HLA allele number
-#'   (\code{allele}). Additional parameters are passed to statistical model
-#'   function. Due to fact that allele numbers contains characters that have
-#'   special meanings in formulas, they should be backquoted. This can be
-#'   easily done with \link{backquote}. See examples section for general usage
-#'   case.
-#'
-#'   If model is equal to \code{NULL} names of available models are returned
-#'   instead.
+#' @return Fit from specified \code{model} function.
 #'
 #' @examples
 #' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(hla_calls_file)
-#' hla_counts <- hlaCallsToCounts(hla_calls)
 #' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
 #' pheno <- read.table(pheno_file, header = TRUE)
 #' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE)
-#' data <- dplyr::left_join(hla_counts, pheno, by = "ID")
-#' data <- dplyr::left_join(data, covar, by = "ID")
-#' response <- paste(colnames(pheno[, -1]), collapse = ", ")
-#' variable <- paste(colnames(covar[, -1]), collapse = " + ")
-#' fun <- hlaAssocModels(model = "coxph",
-#'                        response = response,
-#'                        variable = variable,
-#'                        data = data
+#' hla_data <- prepareHlaData(hla_calls, pheno, covar)
+#' hlaAssocModel(model = "coxph",
+#'               response = hla_data$response,
+#'               variable = hla_data$covariate,
+#'               data = hla_data$data
 #' )
-#' allele <- backquote("A*01:01")
-#' fun(allele)
 #'
-#' @importFrom assertthat assert_that is_formula see_if
-#' @importFrom MASS glm.nb
-#' @importFrom stats as.formula binomial glm lm
-#' @importFrom survival coxph Surv
+#' @importFrom assertthat assert_that is.string see_if
+#' @importFrom stats as.formula
+#' @importFrom purrr is_formula
+#'
 #' @export
 hlaAssocModel <- function(model,
                           response,
@@ -226,12 +193,12 @@ hlaAssocModel <- function(model,
   if (is.character(variable)) {
     variable <- paste(variable, collapse = " + ")
     variable <- paste(". ~ .", variable, sep = " + ")
-    variable <- as.formula(variable)
   }
 
   form <- update(response, variable)
   model_fun <- eval.parent(substitute(model(formula = form, data = data, ...)))
 
+  # Assert that model_fun is in fact model fit object
   assert_that(
     see_if(is.object(model_fun),
            msg = sprintf("object returned by %s doesn't have OBJECT bit set",
@@ -262,17 +229,14 @@ hlaAssocModel <- function(model,
 
 #' Stepwise conditional variables selection
 #'
-#' \code{stepwiseConditionalSelection} does stepwise conditional testing adding
-#' the previous top-associated variable as covariate, until there’s no more
-#' significant variables using a self-defined threshold.
+#' \code{stepwiseConditionalSelection} performs stepwise conditional testing
+#' adding the previous top-associated variable as covariate, until there’s no
+#' more significant variables based on a self-defined threshold.
 #'
-#' \code{stepwiseConditionalSelection} selection criteria is the p-value from
-#' the test on coefficients values.
+#' Selection criteria is the p-value from the test on coefficients values.
 #'
-#' @param object object fitted by some model-fitting function.
-#' @param scope formula specifying a maximal model which should include the
-#'   current one. All additional terms in the maximal model with all marginal
-#'   terms in the original model are tried.
+#' @inheritParams checkHlaCallsFormat
+#' @inheritParams analyzeHlaAssociations
 #' @param th number specifying p-value threshold for a term to be included into
 #'   model.
 #' @param keep logical flag indicating if the output should be a list of models
@@ -280,8 +244,6 @@ hlaAssocModel <- function(model,
 #'   model.
 #' @param rss_th number specifying residual sum of squares threshold at which
 #'   function should stop adding additional terms.
-#'
-#' All the variables in the \code{scope} should be defined in the \code{object}.
 #'
 #' As the residual sum of squares approaches \code{0} the perfect fit is
 #' obtained making further attempts at model selection nonsense, thus function
@@ -297,10 +259,14 @@ hlaAssocModel <- function(model,
 #' pheno <- read.table(pheno_file, header = TRUE)
 #' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE)
-#' hla_data <- prepareHlaData(hla_calls, pheno, covar)
-#' object <- survival::coxph(survival::Surv(OS, OS_DIED) ~ AGE + SEX, data = hla_data$data)
-#' scope <- survival::Surv(OS, OS_DIED) ~ AGE + SEX + `C*07:02` + `B*14:02`
-#' simpleForwardAllelesSelection(object, scope, th = 0.05, keep = T)
+#' forwardConditionalSelection(model = "coxph",
+#'                             hla_calls = hla_calls,
+#'                             pheno = pheno,
+#'                             covar = covar,
+#'                             th = 0.05,
+#'                             keep = FALSE,
+#'                             rss_th = 1e-07
+#' )
 #'
 #' @importFrom assertthat assert_that is.flag is.number is.string see_if
 #' @importFrom MASS addterm
@@ -377,7 +343,7 @@ forwardConditionalSelection <- function(model,
 
     i_min <- which.min(results$p.value)
     if (length(i_min) == 0) break
-    if (results$p.value[i_min] >= th) break
+    if (results$p.value[i_min] > th) break
 
     object <- updateModel(object,
                           results$term[i_min],
@@ -420,6 +386,9 @@ forwardConditionalSelection <- function(model,
 #'                zygo = FALSE,
 #'                reduce_counts = FALSE
 #' )
+#'
+#' @importFrom assertthat assert_that is.flag see_if
+#'
 #' @export
 prepareHlaData <- function(hla_calls,
                            pheno,
