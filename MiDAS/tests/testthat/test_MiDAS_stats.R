@@ -212,8 +212,8 @@ test_that("Stepwise conditional alleles subset selection", {
                "model have to be a string \\(a length one character vector\\) or a function"
   )
 
-  expect_error(forwardConditionalSelection(model = "foo"),
-               "could not find function foo"
+  expect_error(forwardConditionalSelection(model = "hla_data"),
+               "could not find function hla_data"
   )
 
   # assert tests with checkHlaCallsFormat & checkAdditionalData are omited here

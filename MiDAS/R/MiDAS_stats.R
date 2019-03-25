@@ -89,7 +89,7 @@ analyzeHlaAssociations <- function(model = "coxph",
            msg = "model have to be a string (a length one character vector) or a function"
     ),
     if (is.string(model)) { # Here existing non function like data frame could be accepted!!! TODO
-      see_if(exists(model) & is.function(get0(model)),
+      see_if(is.function(get0(model)),
              msg = sprintf("could not find function %s", model)
       )
     } else {
@@ -123,11 +123,11 @@ analyzeHlaAssociations <- function(model = "coxph",
 
   results <- map_dfr(
     .x = alleles,
-    .f = ~tidy(updateModel(object = model_function,
-                           x = .,
-                           backquote = FALSE,
-                           collapse = " + "),
-               exponentiate = exponentiate
+    .f = ~ tidy(updateModel(object = model_function,
+                            x = .,
+                            backquote = FALSE,
+                            collapse = " + "),
+                exponentiate = exponentiate
     )
   )
   results <- mutate(results, term = gsub("`", "", term))
@@ -199,7 +199,7 @@ hlaAssocModel <- function(model,
            msg = "model have to be a string (a length one character vector) or a function"
     ),
     if (is.string(model)) {
-      see_if(exists(model)  & is.function(get0(model)),
+      see_if(is.function(get0(model)),
              msg = sprintf("could not find function %s", model)
       )
     } else {
@@ -296,7 +296,7 @@ forwardConditionalSelection <- function(model,
            msg = "model have to be a string (a length one character vector) or a function"
     ),
     if (is.string(model)) {
-      see_if(exists(model)  & is.function(get0(model)),
+      see_if(is.function(get0(model)),
              msg = sprintf("could not find function %s", model)
       )
     } else {
@@ -341,9 +341,11 @@ forwardConditionalSelection <- function(model,
 
     results <- map_dfr(
       .x = new_vars,
-      .f = ~ tidy(updateModel(
-        object = object, x = ., backquote = TRUE, collapse = " + ")
-      )
+      .f = ~ tidy(updateModel(object = object,
+                              x = .,
+                              backquote = TRUE,
+                              collapse = " + "
+      ))
     )
     results <- results[results$term %in% backquote(new_vars), ]
     results <- results[! is.infinite(results$p.value), ]
