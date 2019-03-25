@@ -349,8 +349,9 @@ checkAdditionalData <- function(data_frame,
 
 #' Add variables to statistical model
 #'
-#' @importFrom assertthat assert_that is_formula
+#' @importFrom assertthat assert_that
 #' @importFrom stats update
+#' @importFrom purrr is_formula
 #'
 #' @export
 updateModel <- function(object, x, backquote = TRUE, collapse = " + ") {
