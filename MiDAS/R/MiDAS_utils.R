@@ -372,6 +372,8 @@ checkAdditionalData <- function(data_frame,
 #' hla_calls <- readHlaCalls(hla_calls_file)
 #' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
 #' pheno <- read.table(pheno_file, header = TRUE)
+#' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
+#' covar <- read.table(covar_file, header = TRUE)
 #' hla_data <- prepareHlaData(hla_calls, pheno, covar)
 #' coxmod <- hlaAssocModel(model = "coxph",
 #'                         response = "Surv(OS, OS_DIED)",
@@ -382,7 +384,7 @@ checkAdditionalData <- function(data_frame,
 #'
 #' @export
 updateModel <- function(object, x, backquote = TRUE, collapse = " + ") {
-  assert_that(
+  assert_that( # This could be simplified to simple object type is wrong / not supported
     see_if(is.object(object),
            msg = "object have to have the internal OBJECT bit set"
     ),
