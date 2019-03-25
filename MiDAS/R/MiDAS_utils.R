@@ -255,7 +255,7 @@ checkHlaCallsFormat <- function(hla_calls) {
     see_if(! any(vapply(hla_calls, is.factor, logical(length = 1))),
            msg = "hla_calls can't contain factors"
     ),
-    see_if(! all(checkAlleleFormat(hla_calls[, 1]), na.rm = TRUE),
+    see_if(! all(checkAlleleFormat(as.character(hla_calls[, 1])), na.rm = TRUE),
            msg = "first column of hla_calls should specify samples id"
     ),
     see_if(all(checkAlleleFormat(unlist(hla_calls[, -1])), na.rm = TRUE),
