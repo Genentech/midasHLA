@@ -232,6 +232,31 @@ hlaAssocModel <- function(model,
   form <- update(response, variable)
   model_fun <- eval.parent(substitute(model(formula = form, data = data, ...)))
 
+  assert_that(
+    see_if(is.object(model_fun),
+           msg = sprintf("object returned by %s doesn't have OBJECT bit set",
+                         deparse(substitute(model))
+           )
+    ),
+    {
+      object_call <- get0("call", envir = as.environment(model_fun))
+      if (! is.null(object_call)) {
+        object_formula <- eval(substitute(formula, env = as.list(object_call)))
+        see_if(is_formula(formula(object_call)),
+               msg = sprintf("object returned by %s is not a model with defined formula",
+                             deparse(substitute(model))
+               )
+        )
+      } else {
+        structure(FALSE,
+                  msg = sprintf("object returned by %s doesn't have an attribue 'call'",
+                                deparse(substitute(model))
+                  )
+        )
+      }
+    }
+  )
+
   return(model_fun)
 }
 

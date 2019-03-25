@@ -190,6 +190,14 @@ test_that("HLA statistical models are defined properly", {
                               data = 1),
                "data is not a data.frame"
   )
+
+  expect_error(hlaAssocModel(model = "list",
+                             response = hla_data$response[2],
+                             variable = hla_data$covariate,
+                             data = hla_data$data,
+                             family = binomial(link = "logit")),
+               "object returned by list doesn't have OBJECT bit set"
+  )
 })
 
 test_that("Stepwise conditional alleles subset selection", {
