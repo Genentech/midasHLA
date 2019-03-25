@@ -255,3 +255,46 @@ test_that("Stepwise conditional alleles subset selection", {
               "rss_th is not a number \\(a length one numeric vector\\)."
   )
 })
+
+test_that("HLA data are properly formatted", {
+  small_hla_calls <- data.frame(ID = 1:2,
+                                A_1 = c("A*01:01", "A*01:02"),
+                                A_2 = c("A*01:02", "A*01:01"),
+                                stringsAsFactors = FALSE
+  )
+  small_pheno <- data.frame(ID = 1:2, OS = c(123, 321), OS_DIED = c(0, 0))
+  small_covar <- data.frame(ID = 1:2, AGE = c(23, 24))
+  hla_data <- prepareHlaData(small_hla_calls, small_pheno, small_covar)
+  expect_equal(hla_data,
+               list(
+                 data = data.frame(ID = 1:2,
+                                   "A*01:01" = c(1,1),
+                                   "A*01:02" = c(1,1),
+                                   OS = c(123, 321),
+                                   OS_DIED = c(0, 0),
+                                   AGE = c(23, 24),
+                                   stringsAsFactors = FALSE,
+                                   check.names = FALSE
+                 ),
+                 response = c("OS", "OS_DIED"),
+                 covariate = "AGE",
+                 alleles = c("A*01:01", "A*01:02")
+               )
+  )
+
+  # test for checkHlaCallsFormat & checkAdditionalData asserts are omitted here
+
+  expect_error(
+    prepareHlaData(small_hla_calls, small_pheno, small_covar, zygo = "foo"),
+    "zygo is not a flag \\(a length one logical vector\\)."
+  )
+
+  expect_error(
+    prepareHlaData(hla_calls = small_hla_calls,
+                   pheno = small_pheno,
+                   covar = small_covar,
+                   reduce_counts = "foo"
+    ),
+    "reduce_counts is not a flag \\(a length one logical vector\\)."
+  )
+})
