@@ -209,7 +209,7 @@ hlaAssocModel <- function(model,
       object_call <- get0("call", envir = as.environment(model_fun))
       if (! is.null(object_call)) {
         object_formula <- eval(substitute(formula, env = as.list(object_call)))
-        see_if(is_formula(formula(object_call)),
+        see_if(is_formula(object_formula),
                msg = sprintf("object returned by %s is not a model with defined formula",
                              deparse(substitute(model))
                )

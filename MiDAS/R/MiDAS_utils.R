@@ -374,7 +374,7 @@ checkAdditionalData <- function(data_frame,
 #' pheno <- read.table(pheno_file, header = TRUE)
 #' hla_data <- prepareHlaData(hla_calls, pheno, covar)
 #' coxmod <- hlaAssocModel(model = "coxph",
-#'                         response = "Surv(OS, OS_DIED)"
+#'                         response = "Surv(OS, OS_DIED)",
 #'                         variable = "1",
 #'                         data = hla_data$data
 #' )
@@ -390,7 +390,7 @@ updateModel <- function(object, x, backquote = TRUE, collapse = " + ") {
       object_call <- get0("call", envir = as.environment(object))
       if (! is.null(object_call)) {
         object_formula <- eval(substitute(formula, env = as.list(object_call)))
-        see_if(is_formula(formula(object_call)),
+        see_if(is_formula(object_formula),
                msg = "object have to be a model with defined formula"
         )
       } else {
