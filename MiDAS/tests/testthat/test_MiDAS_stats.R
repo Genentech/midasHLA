@@ -161,7 +161,7 @@ test_that("HLA statistical models are defined properly", {
     fun,
     glm(
       OS_DIED ~ AGE + SEX,
-      data = hla_data$data ,
+      data = hla_data$data,
       family = binomial(link = "logit")
     )
   )
@@ -268,8 +268,8 @@ test_that("HLA data are properly formatted", {
   expect_equal(hla_data,
                list(
                  data = data.frame(ID = 1:2,
-                                   "A*01:01" = c(1,1),
-                                   "A*01:02" = c(1,1),
+                                   "A*01:01" = c(1, 1),
+                                   "A*01:02" = c(1, 1),
                                    OS = c(123, 321),
                                    OS_DIED = c(0, 0),
                                    AGE = c(23, 24),
