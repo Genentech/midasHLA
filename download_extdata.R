@@ -1,3 +1,7 @@
+#!/usr/bin/env R
+# By Migdal 2018
+# Downloads HLA alignments files shipped with MiDAS package and A protein fasta
+# checks if alignment files contain mixed records and splits those if needed
 library("dplyr")
 library("RCurl")
 library("XML")
