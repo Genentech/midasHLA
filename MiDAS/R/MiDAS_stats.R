@@ -14,6 +14,10 @@
 #'   to presence / absence indicators. See details for further explanations.
 #' @param correction String specifying multiple testing correction method. See
 #'   details for further information.
+#' @param exponentiate Logical indicating whether or not to exponentiate the the
+#'   coefficient estimates. This is typical for logistic and multinomial
+#'   regressions, but a bad idea if there is no log or logit link. Defaults to
+#'   FALSE.
 #'
 #' \code{pheno} and \code{covar} should be data frames with first column holding
 #' samples IDs and named \code{ID}. Those should correspond to \code{ID} column
@@ -38,6 +42,7 @@
 #'   \code{hla_calls}.
 #'
 #' @examples
+#' library("survival")
 #' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(hla_calls_file)
 #' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
@@ -134,10 +139,12 @@ analyzeHlaAssociations <- function(model = "coxph",
 #' @param response String specifying response variable in \code{data}.
 #' @param variable Character specifying variables in \code{data}.
 #' @param data Data frame containing the variables in the model.
+#' @param ... Further arguments passed to \code{model} function.
 #'
 #' @return Fit from specified \code{model} function.
 #'
 #' @examples
+#' library("survival")
 #' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(hla_calls_file)
 #' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
@@ -146,8 +153,8 @@ analyzeHlaAssociations <- function(model = "coxph",
 #' covar <- read.table(covar_file, header = TRUE)
 #' hla_data <- prepareHlaData(hla_calls, pheno, covar)
 #' hlaAssocModel(model = "coxph",
-#'               response = hla_data$response,
-#'               variable = hla_data$covariate,
+#'               response = "Surv(OS, OS_DIED)",
+#'               variable = c("AGE", "SEX"),
 #'               data = hla_data$data
 #' )
 #'
@@ -253,6 +260,7 @@ hlaAssocModel <- function(model,
 #'   See \code{keep} parameter.
 #'
 #' @examples
+#' library("survival")
 #' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(hla_calls_file)
 #' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")

@@ -161,7 +161,7 @@ test_that("HLA statistical models are updated properly", {
   )
 
   expect_error(updateModel(data.frame(), "A*01:01"),
-               "object have to have an attribue 'call'"
+               "object have to have an attribute 'call'"
   )
 
   fake_model <- list(call = list(formula = "foo"))

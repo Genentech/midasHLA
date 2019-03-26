@@ -368,6 +368,7 @@ checkAdditionalData <- function(data_frame,
 #' @importFrom purrr is_formula
 #'
 #' @examples
+#' library("survival")
 #' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(hla_calls_file)
 #' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
