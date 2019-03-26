@@ -21,7 +21,7 @@
 #'
 #' \code{zygo} indicate if additional covariate, indicating sample zygosity
 #' status, should be added to covariates. HLA allele counts for each sample
-#' can take following values \code{0, 1, 2}. To avoid implying ordering on those
+#' can take the following values \code{0, 1, 2}. To avoid implying ordering on those
 #' levels and effect size, this information can be split between two variables.
 #' If \code{zygo} is set to \code{TRUE} zygosity variable is added during model
 #' fitting, it specifies if sample is homozygous for an allele.
@@ -133,7 +133,7 @@ analyzeHlaAssociations <- function(model = "coxph",
 #' @inheritParams analyzeHlaAssociations
 #' @param response String specifying response variable in \code{data}.
 #' @param variable Character specifying variables in \code{data}.
-#' @param data Data frame containing variables in the model.
+#' @param data Data frame containing the variables in the model.
 #'
 #' @return Fit from specified \code{model} function.
 #'
@@ -216,7 +216,7 @@ hlaAssocModel <- function(model,
         )
       } else {
         structure(FALSE,
-                  msg = sprintf("object returned by %s doesn't have an attribue 'call'",
+                  msg = sprintf("object returned by %s doesn't have an attribute 'call'",
                                 deparse(substitute(model))
                   )
         )

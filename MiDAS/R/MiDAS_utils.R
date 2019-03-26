@@ -358,7 +358,7 @@ checkAdditionalData <- function(data_frame,
 #' @param backquote Logical indicating if added variables should be quoted.
 #'   Longer than one element vectors are accepted as well, specifying which new
 #'   variables should be backquoted. Only relevant if x is of type character.
-#' @param collapse Character speciyfing how new characters should be added to
+#' @param collapse Character specifying how new characters should be added to
 #'   old formula. Only relevant if x is of type character.
 #'
 #' @return Updated fit of input model.
@@ -396,7 +396,7 @@ updateModel <- function(object, x, backquote = TRUE, collapse = " + ") {
                msg = "object have to be a model with defined formula"
         )
       } else {
-        structure(FALSE, msg = "object have to have an attribue 'call'")
+        structure(FALSE, msg = "object have to have an attribute 'call'")
       }
     },
     see_if(is.character(x) | is_formula(x),
