@@ -5,10 +5,12 @@
 \title{Association analysis of HLA allele calls}
 \usage{
 analyzeHlaAssociations(model = "coxph", hla_calls, pheno, covar,
-  zygo = FALSE, reduce_counts = FALSE, correction = "BH")
+  zygo = FALSE, reduce_counts = FALSE, correction = "BH",
+  exponentiate = FALSE)
 }
 \arguments{
-\item{model}{String specifying statistical model to use.}
+\item{model}{String specifying statistical model to use or corresponding
+function.}
 
 \item{hla_calls}{Data frame containing HLA allele calls, as return by
 \code{\link{readHlaCalls}} function.}
@@ -21,15 +23,10 @@ analyzeHlaAssociations(model = "coxph", hla_calls, pheno, covar,
 covariates. See details for further explanations.}
 
 \item{reduce_counts}{Flag indicating whether allele counts should be reduced
-to presence / absence indicators.}
+to presence / absence indicators. See details for further explanations.}
 
-\item{correction}{String specifying multiple testing correction method.
-
-Available choices for \code{model} include:
-\code{"coxph"} - Cox survival analysis,
-\code{"lm"} - Linear regression,
-\code{"glm.logit"} - Logistic regression,
-\code{"glm.nb"} - Negative binomial regression
+\item{correction}{String specifying multiple testing correction method. See
+  details for further information.
 
 \code{pheno} and \code{covar} should be data frames with first column holding
 samples IDs and named \code{ID}. Those should correspond to \code{ID} column
@@ -37,7 +34,7 @@ in \code{hla_calls}.
 
 \code{zygo} indicate if additional covariate, indicating sample zygosity
 status, should be added to covariates. HLA allele counts for each sample
-can take following values \code{0, 1, 2}. To avoid implying ordering on those
+can take the following values \code{0, 1, 2}. To avoid implying ordering on those
 levels and effect size, this information can be split between two variables.
 If \code{zygo} is set to \code{TRUE} zygosity variable is added during model
 fitting, it specifies if sample is homozygous for an allele.
@@ -68,17 +65,6 @@ covar <- read.table(covar_file, header = TRUE)
 
 # Cox proportional hazards regression model
 analyzeHlaAssociations(model = "coxph",
-                       hla_calls,
-                       pheno,
-                       covar,
-                       zygo = FALSE,
-                       reduce_counts = FALSE,
-                       correction = "BH"
-)
-
-# Logistic regression
-pheno <- pheno[, c(1, 3)]
-analyzeHlaAssociations(model = "glm.logit",
                        hla_calls,
                        pheno,
                        covar,

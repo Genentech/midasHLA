@@ -19,7 +19,7 @@ prepareHlaData(hla_calls, pheno, covar = NULL, zygo = FALSE,
 covariates. See details for further explanations.}
 
 \item{reduce_counts}{Flag indicating whether allele counts should be reduced
-to presence / absence indicators.}
+to presence / absence indicators. See details for further explanations.}
 }
 \description{
 Prepare data for statistical analysis
@@ -37,4 +37,5 @@ prepareHlaData(hla_calls = hla_calls,
                zygo = FALSE,
                reduce_counts = FALSE
 )
+
 }
