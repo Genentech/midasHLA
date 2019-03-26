@@ -26,7 +26,12 @@ covariates. See details for further explanations.}
 to presence / absence indicators. See details for further explanations.}
 
 \item{correction}{String specifying multiple testing correction method. See
-  details for further information.
+details for further information.}
+
+\item{exponentiate}{Logical indicating whether or not to exponentiate the the
+  coefficient estimates. This is typical for logistic and multinomial
+  regressions, but a bad idea if there is no log or logit link. Defaults to
+  FALSE.
 
 \code{pheno} and \code{covar} should be data frames with first column holding
 samples IDs and named \code{ID}. Those should correspond to \code{ID} column
@@ -56,6 +61,7 @@ Tibble containing combined results for all alleles in
 calls using statistical model of choice.
 }
 \examples{
+library("survival")
 hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 hla_calls <- readHlaCalls(hla_calls_file)
 pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")

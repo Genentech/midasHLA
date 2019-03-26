@@ -15,6 +15,8 @@ function.}
 \item{variable}{Character specifying variables in \code{data}.}
 
 \item{data}{Data frame containing the variables in the model.}
+
+\item{...}{Further arguments passed to \code{model} function.}
 }
 \value{
 Fit from specified \code{model} function.
@@ -24,6 +26,7 @@ Fit from specified \code{model} function.
 analyses easier.
 }
 \examples{
+library("survival")
 hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 hla_calls <- readHlaCalls(hla_calls_file)
 pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
@@ -32,8 +35,8 @@ covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 covar <- read.table(covar_file, header = TRUE)
 hla_data <- prepareHlaData(hla_calls, pheno, covar)
 hlaAssocModel(model = "coxph",
-              response = hla_data$response,
-              variable = hla_data$covariate,
+              response = "Surv(OS, OS_DIED)",
+              variable = c("AGE", "SEX"),
               data = hla_data$data
 )
 

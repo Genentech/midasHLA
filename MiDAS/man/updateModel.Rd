@@ -27,6 +27,7 @@ Updated fit of input model.
 \code{updateModel} will add new variables to model and re-fit it.
 }
 \examples{
+library("survival")
 hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 hla_calls <- readHlaCalls(hla_calls_file)
 pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
