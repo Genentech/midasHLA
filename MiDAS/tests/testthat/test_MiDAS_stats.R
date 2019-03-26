@@ -1,6 +1,8 @@
 context("HLA allele statistical methods")
 
 test_that("HLA allele associations are analyzed properly", {
+  library("survival")
+
   hla_calls_file <- system.file(
     "extdata", "HLAHD_output_example.txt", package = "MiDAS"
   )
@@ -201,6 +203,8 @@ test_that("HLA statistical models are defined properly", {
 })
 
 test_that("Stepwise conditional alleles subset selection", {
+  library("survival")
+
   hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(hla_calls_file)
   pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")

@@ -139,6 +139,7 @@ test_that("Variable amino acids positions are detected properly", {
 context("HLA statistical models handling")
 
 test_that("HLA statistical models are updated properly", {
+  library("survival")
   hla_calls_file <- system.file("extdata",
                                 "HLAHD_output_example.txt",
                                 package = "MiDAS"
