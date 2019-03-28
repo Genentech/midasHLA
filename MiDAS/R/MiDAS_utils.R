@@ -224,6 +224,7 @@ convertAlleleToVariable <- function(allele,
   )
   dictionary <- setNames(dictionary[, 2], dictionary[, 1])
   variable <- dictionary[allele]
+  names(variable) <- NULL
 
   return(variable)
 }
