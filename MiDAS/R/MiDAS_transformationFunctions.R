@@ -202,7 +202,8 @@ hlaToVariable <- function(hla_calls,
   }
   variable <- as.data.frame(
     lapply(hla_calls[, -1], convertAlleleToVariable, dictionary = dictionary),
-    stringsAsFactors = FALSE
+    stringsAsFactors = FALSE,
+    row.names = 1:nrow(hla_calls)
   )
   if (nacols.rm) {
     variable <- Filter(function(x) ! all(is.na(x)), variable)
