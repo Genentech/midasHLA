@@ -135,3 +135,46 @@ test_that("Variable amino acids positions are detected properly", {
 
   expect_error(getVariableAAPos(hlaa_calls), "alignment is not a matrix")
 })
+
+context("HLA statistical models handling")
+
+test_that("HLA statistical models are updated properly", {
+  library("survival")
+  hla_calls_file <- system.file("extdata",
+                                "HLAHD_output_example.txt",
+                                package = "MiDAS"
+  )
+  hla_calls <- readHlaCalls(hla_calls_file)
+  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+  pheno <- read.table(pheno_file, header = TRUE)
+  covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
+  covar <- read.table(covar_file, header = TRUE)
+  hla_data <- prepareHlaData(hla_calls, pheno, covar)
+  coxmod <- coxph(Surv(OS, OS_DIED) ~ 1, data = hla_data$data)
+
+  expect_equal(updateModel(coxmod, "A*01:01"),
+               coxph(Surv(OS, OS_DIED) ~ `A*01:01`, data = hla_data$data)
+  )
+
+  expect_error(updateModel(list(1), "A*01:01"),
+               "object have to have the internal OBJECT bit set"
+  )
+
+  expect_error(updateModel(data.frame(), "A*01:01"),
+               "object have to have an attribute 'call'"
+  )
+
+  fake_model <- list(call = list(formula = "foo"))
+  class(fake_model) <- "fake"
+  expect_error(updateModel(fake_model, "A*01:01"),
+               "object have to be a model with defined formula"
+  )
+
+  expect_error(updateModel(coxmod, 1),
+               "x have to be a string \\(a length one character vector\\) or formula"
+  )
+
+  # expect_error(updateModel(coxmod, "foo"),
+  #             "variable foo could not be found in object data"
+  # ) TODO
+})

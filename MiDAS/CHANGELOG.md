@@ -1,6 +1,6 @@
 ## 0.0.0.9004 - 18/03/2019
-+ introduce forwardAllelesSelection for stepwise conditional testing, adding the 
-  previous top-associated allele as covariate, until there’s no more significant 
++ introduce forwardConditionalSelection for stepwise conditional testing, adding 
+  the previous top-associated allele as covariate, until there’s no more significant 
   alleles 
 
 ## 0.0.0.9003 - 05/02/2019

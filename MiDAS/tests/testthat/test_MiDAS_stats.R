@@ -1,6 +1,8 @@
 context("HLA allele statistical methods")
 
 test_that("HLA allele associations are analyzed properly", {
+  library("survival")
+
   hla_calls_file <- system.file(
     "extdata", "HLAHD_output_example.txt", package = "MiDAS"
   )
@@ -18,19 +20,17 @@ test_that("HLA allele associations are analyzed properly", {
                                 correction = "BH"
   )
   load(system.file("extdata", "test_hla_analyze.Rdata", package = "MiDAS"))
-  expect_equal(res, test_hla_analyze)
+  expect_equal(as.data.frame(res), as.data.frame(test_hla_analyze)) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
 
   expect_error(analyzeHlaAssociations(model = 1),
-               "model is not a string \\(a length one character vector\\)."
+               "model have to be a string \\(a length one character vector\\) or a function"
   )
 
   expect_error(analyzeHlaAssociations(model = "foo"),
-               "model foo is not implemented"
+               "could not find function foo"
   )
 
-  expect_error(analyzeHlaAssociations(model = "lm", hla_calls = hla_calls[, 1]), # other errors for hla_calls format are not checked here
-               "hla_calls is not a data frame"
-  )
+# TODO tests of assest from checkHlaCallsFormat checkAdditionalData are omited here
 
   expect_error(
     analyzeHlaAssociations(model = "lm", hla_calls = hla_calls, pheno = 1),
@@ -143,138 +143,162 @@ test_that("HLA allele associations are analyzed properly", {
 })
 
 test_that("HLA statistical models are defined properly", {
-  expect_equal(hlaAssocModels(), c("coxph", "lm", "glm.logit", "glm.nb"))
-
   hla_calls_file <- system.file(
     "extdata", "HLAHD_output_example.txt", package = "MiDAS"
   )
   hla_calls <- readHlaCalls(hla_calls_file)
-  hla_counts <- hlaCallsToCounts(hla_calls)
   pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
   pheno <- read.table(pheno_file, header = TRUE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE)
-  data <- dplyr::left_join(hla_counts, pheno, by = "ID")
-  data <- dplyr::left_join(data, covar, by = "ID")
-  response <- colnames(pheno[, -1])
-  covariate <- colnames(covar[, -1])
+  hla_data <- prepareHlaData(hla_calls, pheno, covar)
 
-  fun <- hlaAssocModels(model = "coxph",
-                 response = response,
-                 covariate = covariate,
-                 data = data
+  fun <- hlaAssocModel(model = "glm",
+                       response = hla_data$response[2],
+                       variable = hla_data$covariate,
+                       data = hla_data$data,
+                       family = binomial(link = "logit")
   )
-  res <- fun("`A*01:01`")
   expect_equal(
-    as.character(res$call),
-    c("coxph", "as.formula(form)", "data")
+    fun,
+    glm(
+      OS_DIED ~ AGE + SEX,
+      data = hla_data$data,
+      family = binomial(link = "logit")
+    )
   )
 
-  response <- colnames(pheno[, 3, drop = FALSE])
-  fun <- hlaAssocModels(model = "lm",
-                        response = response,
-                        covariate = covariate,
-                        data = data
-  )
-  res <- fun("`A*01:01`")
-  expect_equal(
-    as.character(res$call),
-    c("lm", "as.formula(form)", "data")
+  expect_error(hlaAssocModel(model = 1),
+               "model have to be a string \\(a length one character vector\\) or a function"
   )
 
-  fun <- hlaAssocModels(model = "glm.logit",
-                        response = response,
-                        covariate = covariate,
-                        data = data
-  )
-  res <- fun("`A*01:01`")
-  expect_equal(
-    as.character(res$call),
-    c("glm", "as.formula(form)", "binomial(link = \"logit\")", "data")
+  expect_error(hlaAssocModel(model = "l"),
+               "could not find function l"
   )
 
-  fun <- hlaAssocModels(model = "glm.nb",
-                        response = response,
-                        covariate = covariate,
-                        data = data
-  )
-  res <- fun("`A*01:01`")
-  expect_equal(
-    as.character(res$call)[-4],
-    c("glm.nb", "as.formula(form)", "data", "log")
+  expect_error(hlaAssocModel(model = "lm", response = 1),
+               "response have to be a string or formula"
   )
 
-  # check if null covariate is accepted
-  fun <- hlaAssocModels(model = "glm.nb",
-                        response = response,
-                        covariate = NULL,
-                        data = data
-  )
-  res <- fun("`A*01:01`")
-  expect_equal(
-    colnames(res$model),
-    c("OS_DIED", "A*01:01")
+  expect_error(hlaAssocModel(model = "lm",
+                             response = hla_data$response[2],
+                             variable = 1),
+               "variable have to be a character or formula"
   )
 
-  expect_error(hlaAssocModels(model = 1),
-               "model is not a string \\(a length one character vector\\)."
-  )
-
-  expect_error(hlaAssocModels(model = "lm", response = 1),
-               "response is not a character vector"
-  )
-
-  expect_error(hlaAssocModels(model = "lm", response = character()),
-               "response can not be empty"
-  )
-
-  expect_error(hlaAssocModels(model = "lm", response = response, covariate = 1),
-               "covariate have to be a character or NULL"
-  )
-
-  expect_error(hlaAssocModels(model = "lm",
-                              response = response,
-                              covariate = covariate,
+  expect_error(hlaAssocModel(model = "lm",
+                              response = hla_data$response[2],
+                              variable = hla_data$covariate,
                               data = 1),
                "data is not a data.frame"
   )
+
+  expect_error(hlaAssocModel(model = "list",
+                             response = hla_data$response[2],
+                             variable = hla_data$covariate,
+                             data = hla_data$data,
+                             family = binomial(link = "logit")),
+               "object returned by list doesn't have OBJECT bit set"
+  )
 })
 
-test_that("Stepwise forward alleles subset selection", {
+test_that("Stepwise conditional alleles subset selection", {
+  library("survival")
+
   hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(hla_calls_file)
   pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
   pheno <- read.table(pheno_file, header = TRUE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE)
-  hla_data <<- prepareHlaData(hla_calls, pheno, covar) # there is an scope error, as this var is not found later on. This is a quick hack to make it work...
-  object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = hla_data$data)
-  scope <- Surv(OS, OS_DIED) ~ AGE + SEX + `B*57:01` + `C*07:02`
-  object <- forwardAllelesSelection(object, scope, th = 0.05, test = "Chisq")
-  test_object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX + `B*57:01` + `C*07:02`,
-                       data = hla_data$data
+  object <- forwardConditionalSelection("coxph", hla_calls, pheno, covar, th = 0.02)
+  hla_data <- prepareHlaData(hla_calls, pheno, covar)
+  test_object <- coxph(
+    Surv(OS, OS_DIED) ~ AGE + SEX + `B*14:02` + `DRB1*11:01` + `DRA*01:02`,
+    data = hla_data$data
   )
 
   expect_equal(object, test_object)
 
-  expect_error(forwardAllelesSelection("foo", scope, th = 0.05, test = "Chisq"),
-               "object have to be a model"
+  expect_error(forwardConditionalSelection(model = 2),
+               "model have to be a string \\(a length one character vector\\) or a function"
   )
 
-  expect_error(forwardAllelesSelection(object, 1:3, th = 0.05, test = "Chisq"),
-               "scope is not a formula"
+  expect_error(forwardConditionalSelection(model = "hla_data"),
+               "could not find function hla_data"
   )
 
-  expect_error(forwardAllelesSelection(object, scope, th = "a", test = "Chisq"),
+  # assert tests with checkHlaCallsFormat & checkAdditionalData are omited here
+
+  expect_error(forwardConditionalSelection(model = "coxph",
+                                           hla_calls = hla_calls,
+                                           pheno = pheno,
+                                           covar = covar,
+                                           th = "foo"
+               ),
                "th is not a number \\(a length one numeric vector\\)."
   )
 
-  expect_error(forwardAllelesSelection(object, scope, th = 0.05, test = 1),
-               "test is not a string \\(a length one character vector\\)."
+  expect_error(forwardConditionalSelection(model = "coxph",
+                                           hla_calls = hla_calls,
+                                           pheno = pheno,
+                                           covar = covar,
+                                           th = 0.05,
+                                           keep = "yes"
+              ),
+              "keep is not a flag \\(a length one logical vector\\)."
+  )
+
+  expect_error(forwardConditionalSelection(model = "coxph",
+                                           hla_calls = hla_calls,
+                                           pheno = pheno,
+                                           covar = covar,
+                                           th = 0.05,
+                                           rss_th = "foo"
+              ),
+              "rss_th is not a number \\(a length one numeric vector\\)."
+  )
+})
+
+test_that("HLA data are properly formatted", {
+  small_hla_calls <- data.frame(ID = 1:2,
+                                A_1 = c("A*01:01", "A*01:02"),
+                                A_2 = c("A*01:02", "A*01:01"),
+                                stringsAsFactors = FALSE
+  )
+  small_pheno <- data.frame(ID = 1:2, OS = c(123, 321), OS_DIED = c(0, 0))
+  small_covar <- data.frame(ID = 1:2, AGE = c(23, 24))
+  hla_data <- prepareHlaData(small_hla_calls, small_pheno, small_covar)
+  expect_equal(hla_data,
+               list(
+                 data = data.frame(ID = 1:2,
+                                   "A*01:01" = c(1, 1),
+                                   "A*01:02" = c(1, 1),
+                                   OS = c(123, 321),
+                                   OS_DIED = c(0, 0),
+                                   AGE = c(23, 24),
+                                   stringsAsFactors = FALSE,
+                                   check.names = FALSE
+                 ),
+                 response = c("OS", "OS_DIED"),
+                 covariate = "AGE",
+                 alleles = c("A*01:01", "A*01:02")
+               )
+  )
+
+  # test for checkHlaCallsFormat & checkAdditionalData asserts are omitted here
+
+  expect_error(
+    prepareHlaData(small_hla_calls, small_pheno, small_covar, zygo = "foo"),
+    "zygo is not a flag \\(a length one logical vector\\)."
   )
 
   expect_error(
-    forwardAllelesSelection(object, scope, th = 0.05, test = "F", rss_th = "a"),
-    "rss_th is not a number \\(a length one numeric vector\\)."
+    prepareHlaData(hla_calls = small_hla_calls,
+                   pheno = small_pheno,
+                   covar = small_covar,
+                   reduce_counts = "foo"
+    ),
+    "reduce_counts is not a flag \\(a length one logical vector\\)."
   )
 })
