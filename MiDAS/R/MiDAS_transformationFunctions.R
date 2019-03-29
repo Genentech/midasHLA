@@ -177,6 +177,7 @@ hlaToAAVariation <- function(hla_calls,
 #' hlaToVariable(hla_calls, dictionary = "4digit_supertype")
 #'
 #' @importFrom assertthat assert_that is.string is.flag see_if
+#' @importFrom rlang warn
 #' @export
 hlaToVariable <- function(hla_calls,
                           dictionary,
@@ -193,6 +194,9 @@ hlaToVariable <- function(hla_calls,
     )
     lib <- gsub("^Match_", "", gsub(".txt$", "", lib))
     if (dictionary %in% lib) {
+      if (dictionary == "4digit_B-allele_Bw") {
+        warn("In ambigious cases Bw4 will be assigned!")
+      }
       dictionary <- system.file(
         "extdata",
         paste0("Match_", dictionary, ".txt"),
