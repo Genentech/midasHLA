@@ -4,8 +4,8 @@
 \alias{forwardConditionalSelection}
 \title{Stepwise conditional variables selection}
 \usage{
-forwardConditionalSelection(model, hla_data, th, keep = FALSE,
-  rss_th = 1e-07)
+forwardConditionalSelection(model, hla_data, response, covariate, th,
+  keep = FALSE, rss_th = 1e-07, ...)
 }
 \arguments{
 \item{model}{String specifying statistical model to use or corresponding
@@ -13,6 +13,13 @@ function.}
 
 \item{hla_data}{hla_data object as returned by \code{\link{prepareHlaData}}
 function.}
+
+\item{response}{Character speciyfing which variables should be treated as
+response variable.}
+
+\item{covariate}{Character speciyfing which variables should be treated as
+covariates. Can \code{NULL}, than no covariates are considered in the
+model.}
 
 \item{th}{number specifying p-value threshold for a term to be included into
 model.}
@@ -22,7 +29,9 @@ resulting from each selection step. Default is to return only the final
 model.}
 
 \item{rss_th}{number specifying residual sum of squares threshold at which
-  function should stop adding additional terms.
+function should stop adding additional terms.}
+
+\item{...}{Further arguments passed to \code{model} function.
 
 As the residual sum of squares approaches \code{0} the perfect fit is
 obtained making further attempts at model selection nonsense, thus function
@@ -55,6 +64,8 @@ hla_data <- prepareHlaData(hla_calls = hla_calls,
 )
 forwardConditionalSelection(model = "coxph",
                             hla_data = hla_data,
+                            response = c("OS", "OS_DIED"),
+                            covariate = c("AGE", "SEX"),
                             th = 0.05,
                             keep = FALSE,
                             rss_th = 1e-07

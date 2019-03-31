@@ -4,8 +4,8 @@
 \alias{analyzeHlaAssociations}
 \title{Association analysis of HLA allele calls}
 \usage{
-analyzeHlaAssociations(model = "coxph", hla_data, correction = "BH",
-  exponentiate = FALSE)
+analyzeHlaAssociations(model = "coxph", hla_data, response, covariate,
+  correction = "BH", exponentiate = FALSE, ...)
 }
 \arguments{
 \item{model}{String specifying statistical model to use or corresponding
@@ -14,13 +14,22 @@ function.}
 \item{hla_data}{hla_data object as returned by \code{\link{prepareHlaData}}
 function.}
 
+\item{response}{Character speciyfing which variables should be treated as
+response variable.}
+
+\item{covariate}{Character speciyfing which variables should be treated as
+covariates. Can \code{NULL}, than no covariates are considered in the
+model.}
+
 \item{correction}{String specifying multiple testing correction method. See
 details for further information.}
 
 \item{exponentiate}{Logical indicating whether or not to exponentiate the the
-  coefficient estimates. This is typical for logistic and multinomial
-  regressions, but a bad idea if there is no log or logit link. Defaults to
-  FALSE.
+coefficient estimates. This is typical for logistic and multinomial
+regressions, but a bad idea if there is no log or logit link. Defaults to
+FALSE.}
+
+\item{...}{Further arguments passed to \code{model} function.
 
 \code{correction} specifies p-value adjustment method to use, common choice
 is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
@@ -51,6 +60,8 @@ hla_data <- prepareHlaData(hla_calls = hla_calls,
 # Cox proportional hazards regression model
 analyzeHlaAssociations(model = "coxph",
                        hla_data = hla_data,
+                       response = c("OS", "OS_DIED"),
+                       covariate = c("AGE", "SEX"),
                        correction = "BH"
 )
 

@@ -20,6 +20,7 @@
 #'   coefficient estimates. This is typical for logistic and multinomial
 #'   regressions, but a bad idea if there is no log or logit link. Defaults to
 #'   FALSE.
+#' @param ... Further arguments passed to \code{model} function.
 #'
 #' \code{correction} specifies p-value adjustment method to use, common choice
 #' is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
@@ -44,9 +45,9 @@
 #'
 #' # Cox proportional hazards regression model
 #' analyzeHlaAssociations(model = "coxph",
+#'                        hla_data = hla_data,
 #'                        response = c("OS", "OS_DIED"),
 #'                        covariate = c("AGE", "SEX"),
-#'                        hla_data = hla_data,
 #'                        correction = "BH"
 #' )
 #'
@@ -62,7 +63,8 @@ analyzeHlaAssociations <- function(model = "coxph",
                                    response,
                                    covariate,
                                    correction = "BH",
-                                   exponentiate = FALSE) {
+                                   exponentiate = FALSE,
+                                   ...) {
   assert_that(
     see_if(is.string(model) | is.function(model),
            msg = "model have to be a string (a length one character vector) or a function"
@@ -121,7 +123,8 @@ analyzeHlaAssociations <- function(model = "coxph",
   model_function <- hlaAssocModel(model = model,
                                   response = response,
                                   variable = covariate,
-                                  data = hla_data
+                                  data = hla_data,
+                                  ...
   )
 
   results <- map_dfr(
@@ -264,6 +267,7 @@ hlaAssocModel <- function(model,
 #'   model.
 #' @param rss_th number specifying residual sum of squares threshold at which
 #'   function should stop adding additional terms.
+#' @param ... Further arguments passed to \code{model} function.
 #'
 #' As the residual sum of squares approaches \code{0} the perfect fit is
 #' obtained making further attempts at model selection nonsense, thus function
@@ -287,6 +291,8 @@ hlaAssocModel <- function(model,
 #' )
 #' forwardConditionalSelection(model = "coxph",
 #'                             hla_data = hla_data,
+#'                             response = c("OS", "OS_DIED"),
+#'                             covariate = c("AGE", "SEX"),
 #'                             th = 0.05,
 #'                             keep = FALSE,
 #'                             rss_th = 1e-07
@@ -304,7 +310,8 @@ forwardConditionalSelection <- function(model,
                                         covariate,
                                         th,
                                         keep = FALSE,
-                                        rss_th = 1e-07) {
+                                        rss_th = 1e-07,
+                                        ...) {
 
   assert_that(
     see_if(is.string(model) | is.function(model),
