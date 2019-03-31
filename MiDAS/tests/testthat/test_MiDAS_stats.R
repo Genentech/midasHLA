@@ -12,12 +12,26 @@ test_that("HLA allele associations are analyzed properly", {
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE)
   hla_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
+
+  load(system.file("extdata", "test_hla_analyze.Rdata", package = "MiDAS"))
+
   res <- analyzeHlaAssociations(model = "coxph",
+                                response = c("OS", "OS_DIED"),
+                                covariate = c("AGE", "SEX"),
                                 hla_data,
                                 correction = "BH"
   )
-  load(system.file("extdata", "test_hla_analyze.Rdata", package = "MiDAS"))
-  expect_equal(as.data.frame(res), as.data.frame(test_hla_analyze)) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
+  expect_equal(as.data.frame(res), as.data.frame(test_hla_analyze[["base"]])) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
+
+  res <- analyzeHlaAssociations(model = "coxph",
+                                response = c("OS", "OS_DIED"),
+                                covariate = NULL,
+                                hla_data,
+                                correction = "BH"
+  )
+  expect_equal(
+    as.data.frame(res), as.data.frame(test_hla_analyze[["null_covar"]])
+  )
 
   expect_error(analyzeHlaAssociations(model = 1),
                "model have to be a string \\(a length one character vector\\) or a function"
@@ -29,8 +43,80 @@ test_that("HLA allele associations are analyzed properly", {
 
   expect_error(
     analyzeHlaAssociations(model = "lm",
+                           response = 1,
+                           covariate = c("AGE", "SEX"),
                            hla_data = hla_data,
                            correction = 12
+    ),
+    "response is not a character vector"
+  )
+
+  expect_error(
+    analyzeHlaAssociations(model = "coxph",
+                           response = "OS",
+                           covariate = c("AGE", "SEX"),
+                           hla_data = hla_data,
+                           correction = 12
+    ),
+    "cox survival analysis requires response to be character vector of length 2"
+  )
+
+  expect_error(
+    analyzeHlaAssociations(model = "lm",
+                           response = c("OS", "OS_DIED"),
+                           covariate = c("AGE", "SEX"),
+                           hla_data = hla_data,
+                           correction = 12
+    ),
+    "response is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(
+    analyzeHlaAssociations(model = "lm",
+                           response = "foo",
+                           covariate = c("AGE", "SEX"),
+                           hla_data = hla_data,
+                           correction = 12
+    ),
+    "response variables can not be found in hla_data"
+  )
+
+  expect_error(
+    analyzeHlaAssociations(model = "lm",
+                           response = "OS",
+                           covariate = 1,
+                           hla_data = hla_data,
+                           correction = 12
+    ),
+    "covariate have to be a character or NULL"
+  )
+
+  expect_error(
+    analyzeHlaAssociations(model = "lm",
+                           response = "OS",
+                           covariate = "foo",
+                           hla_data = hla_data,
+                           correction = 12
+    ),
+    "covariate variables can not be found in hla_data"
+  )
+
+  expect_error(
+    analyzeHlaAssociations(model = "lm",
+                           response = c("OS", "OS_DIED"),
+                           covariate = c("AGE", "SEX"),
+                           hla_data = hla_data,
+                           correction = 12
+    ),
+    "response is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(
+    analyzeHlaAssociations(model = "lm",
+                           hla_data = hla_data,
+                           response = "OS",
+                           covariate = c("AGE", "SEX"),
+                           correction = 1
     ),
     "correction is not a string \\(a length one character vector\\)."
   )
@@ -38,6 +124,8 @@ test_that("HLA allele associations are analyzed properly", {
   expect_error(
     analyzeHlaAssociations(model = "lm",
                            hla_data = hla_data,
+                           response = "OS",
+                           covariate = c("AGE", "SEX"),
                            exponentiate = 1
     ),
     "exponentiate is not a flag \\(a length one logical vector\\)."
@@ -115,38 +203,121 @@ test_that("Stepwise conditional alleles subset selection", {
   covar <- read.table(covar_file, header = TRUE)
   hla_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
 
-  object <- forwardConditionalSelection("coxph", hla_data, th = 0.02)
+  object <- forwardConditionalSelection("coxph",
+                                        hla_data,
+                                        response = c("OS", "OS_DIED"),
+                                        covariate = c("AGE", "SEX"),
+                                        th = 0.02
+  )
+
   test_object <- coxph(
     Surv(OS, OS_DIED) ~ AGE + SEX + `B*14:02` + `DRB1*11:01` + `DRA*01:02`,
     data = hla_data
   )
   expect_equal(object, test_object)
 
+  # test if NULL covariate passes without errors
+  object <- forwardConditionalSelection("coxph",
+                                        hla_data,
+                                        response = c("OS", "OS_DIED"),
+                                        covariate = NULL,
+                                        th = 0.04
+  )
+
+  test_object <- coxph(
+    Surv(OS, OS_DIED) ~ `B*14:02` + `DPB1*14:01` + `B*15:01` + `DRA*01:01` +
+      `DQA1*06:01` + `F*01:01`,
+    data = hla_data
+  )
+  expect_equal(object, test_object)
+
+
   expect_error(forwardConditionalSelection(model = 2),
                "model have to be a string \\(a length one character vector\\) or a function"
   )
 
-  expect_error(forwardConditionalSelection(model = "hla_data", hla_data),
+  expect_error(
+    forwardConditionalSelection(model = "hla_data",
+                                hla_data = hla_data
+    ),
                "could not find function hla_data"
   )
 
-  expect_error(forwardConditionalSelection(model = "coxph",
+  expect_error(
+    forwardConditionalSelection(model = "coxph",
+                                hla_data = hla_data,
+                                response = 1
+    ),
+    "response is not a character vector"
+  )
+
+  expect_error(
+    forwardConditionalSelection(model = "coxph",
+                                hla_data = hla_data,
+                                response = "OS"
+    ),
+    "cox survival analysis requires response to be character vector of length 2"
+  )
+
+  expect_error(
+    forwardConditionalSelection(model = "lm",
+                                hla_data = hla_data,
+                                response = c("OS", "OS_DIED")
+    ),
+    "response is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(
+    forwardConditionalSelection(model = "lm",
+                                hla_data = hla_data,
+                                response = "foo"
+    ),
+    "response variables can not be found in hla_data"
+  )
+
+  expect_error(
+    forwardConditionalSelection(model = "lm",
+                                hla_data = hla_data,
+                                response = "OS",
+                                covariate = 1
+
+    ),
+    "covariate have to be a character or NULL"
+  )
+
+  expect_error(
+    forwardConditionalSelection(model = "lm",
+                                hla_data = hla_data,
+                                response = "OS",
+                                covariate = "foo"
+
+    ),
+    "covariate variables can not be found in hla_data"
+  )
+
+  expect_error(forwardConditionalSelection(model = "lm",
                                            hla_data = hla_data,
+                                           response = "OS",
+                                           covariate = NULL,
                                            th = "foo"
                ),
                "th is not a number \\(a length one numeric vector\\)."
   )
 
-  expect_error(forwardConditionalSelection(model = "coxph",
+  expect_error(forwardConditionalSelection(model = "lm",
                                            hla_data = hla_data,
+                                           response = "OS",
+                                           covariate = NULL,
                                            th = 0.05,
                                            keep = "yes"
               ),
               "keep is not a flag \\(a length one logical vector\\)."
   )
 
-  expect_error(forwardConditionalSelection(model = "coxph",
+  expect_error(forwardConditionalSelection(model = "lm",
                                            hla_data = hla_data,
+                                           response = "OS",
+                                           covariate = NULL,
                                            th = 0.05,
                                            rss_th = "foo"
               ),

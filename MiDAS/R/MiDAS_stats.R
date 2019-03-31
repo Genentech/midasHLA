@@ -9,6 +9,11 @@
 #'   function.
 #' @param hla_data hla_data object as returned by \code{\link{prepareHlaData}}
 #'   function.
+#' @param response Character speciyfing which variables should be treated as
+#'   response variable.
+#' @param covariate Character speciyfing which variables should be treated as
+#'   covariates. Can \code{NULL}, than no covariates are considered in the
+#'   model.
 #' @param correction String specifying multiple testing correction method. See
 #'   details for further information.
 #' @param exponentiate Logical indicating whether or not to exponentiate the the
@@ -39,6 +44,8 @@
 #'
 #' # Cox proportional hazards regression model
 #' analyzeHlaAssociations(model = "coxph",
+#'                        response = c("OS", "OS_DIED"),
+#'                        covariate = c("AGE", "SEX"),
 #'                        hla_data = hla_data,
 #'                        correction = "BH"
 #' )
@@ -52,6 +59,8 @@
 #' @export
 analyzeHlaAssociations <- function(model = "coxph",
                                    hla_data,
+                                   response,
+                                   covariate,
                                    correction = "BH",
                                    exponentiate = FALSE) {
   assert_that(
@@ -65,16 +74,50 @@ analyzeHlaAssociations <- function(model = "coxph",
     } else {
       TRUE
     },
+    is.character(response),
+    {
+      response_len <- length(response)
+      is_cox <- substitute(model) %in% c("coxph", "cph")
+      if (is_cox & response_len != 2) {
+        structure(FALSE, msg = "cox survival analysis requires response to be character vector of length 2")
+      } else if (! is_cox & response_len != 1) {
+        structure(FALSE, msg = "response is not a string (a length one character vector).")
+      } else {
+        TRUE
+      }
+    },
+    see_if(all(response %in% colnames(hla_data)),
+           msg = "response variables can not be found in hla_data"
+    ),
+    see_if(is.character(covariate) | is.null(covariate),
+           msg = "covariate have to be a character or NULL"
+    ),
+    {
+      if (is.character(covariate)) {
+        see_if(all(covariate %in% colnames(hla_data)),
+               msg = "covariate variables can not be found in hla_data"
+        )
+      } else {
+        TRUE
+      }
+    },
     is.string(correction),
     is.flag(exponentiate)
   )
 
   alleles <- backquote(attr(hla_data, "alleles"))
-  response <- backquote(attr(hla_data, "response"))
+
+  response <- backquote(response)
   if (substitute(model) %in% c("coxph", "cph")) {
     response <- paste0("Surv(", paste(response, collapse = ","), ")")
   }
-  covariate <- backquote(attr(hla_data, "covariate"))
+
+  if (is.null(covariate)) {
+    covariate <- . ~ .
+  } else {
+    covariate <- backquote(covariate)
+  }
+
   model_function <- hlaAssocModel(model = model,
                                   response = response,
                                   variable = covariate,
@@ -257,6 +300,8 @@ hlaAssocModel <- function(model,
 #' @export
 forwardConditionalSelection <- function(model,
                                         hla_data,
+                                        response,
+                                        covariate,
                                         th,
                                         keep = FALSE,
                                         rss_th = 1e-07) {
@@ -272,17 +317,51 @@ forwardConditionalSelection <- function(model,
     } else {
       TRUE
     },
+    is.character(response),
+    {
+      response_len <- length(response)
+      is_cox <- substitute(model) %in% c("coxph", "cph")
+      if (is_cox & response_len != 2) {
+        structure(FALSE, msg = "cox survival analysis requires response to be character vector of length 2")
+      } else if (! is_cox & response_len != 1) {
+        structure(FALSE, msg = "response is not a string (a length one character vector).")
+      } else {
+        TRUE
+      }
+    },
+    see_if(all(response %in% colnames(hla_data)),
+           msg = "response variables can not be found in hla_data"
+    ),
+    see_if(is.character(covariate) | is.null(covariate),
+           msg = "covariate have to be a character or NULL"
+    ),
+    {
+      if (is.character(covariate)) {
+        see_if(all(covariate %in% colnames(hla_data)),
+               msg = "covariate variables can not be found in hla_data"
+        )
+      } else {
+        TRUE
+      }
+    },
     is.number(th),
     is.flag(keep),
     is.number(rss_th)
   )
 
   alleles <- attr(hla_data, "alleles")
-  response <- backquote(attr(hla_data, "response"))
+
+  response <- backquote(response)
   if (substitute(model) %in% c("coxph", "cph")) {
     response <- paste0("Surv(", paste(response, collapse = ","), ")")
   }
-  covariate <- backquote(attr(hla_data, "covariate"))
+
+  if (is.null(covariate)) {
+    covariate <- . ~ .
+  } else {
+    covariate <- backquote(covariate)
+  }
+
   object <- hlaAssocModel(model = model,
                           response = response,
                           variable = covariate,
