@@ -7,18 +7,14 @@
 #' @inheritParams hlaCallsToCounts
 #' @param model String specifying statistical model to use or corresponding
 #'   function.
-#' @param pheno Data frame holding phenotypic response variables.
-#' @param covar Data frame holding covariates.
+#' @param hla_data hla_data object as returned by \code{\link{prepareHlaData}}
+#'   function.
 #' @param correction String specifying multiple testing correction method. See
 #'   details for further information.
 #' @param exponentiate Logical indicating whether or not to exponentiate the the
 #'   coefficient estimates. This is typical for logistic and multinomial
 #'   regressions, but a bad idea if there is no log or logit link. Defaults to
 #'   FALSE.
-#'
-#' \code{pheno} and \code{covar} should be data frames with first column holding
-#' samples IDs and named \code{ID}. Those should correspond to \code{ID} column
-#' in \code{hla_calls}.
 #'
 #' \code{correction} specifies p-value adjustment method to use, common choice
 #' is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
@@ -35,12 +31,15 @@
 #' pheno <- read.table(pheno_file, header = TRUE)
 #' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE)
+#' hla_data <- prepareHlaData(hla_calls = hla_calls,
+#'                            pheno = pheno,
+#'                            covar = covar,
+#'                            inheritance_model = "additive"
+#' )
 #'
 #' # Cox proportional hazards regression model
 #' analyzeHlaAssociations(model = "coxph",
-#'                        hla_calls,
-#'                        pheno,
-#'                        covar,
+#'                        hla_data = hla_data,
 #'                        correction = "BH"
 #' )
 #'
@@ -52,9 +51,7 @@
 #'
 #' @export
 analyzeHlaAssociations <- function(model = "coxph",
-                                   hla_calls,
-                                   pheno,
-                                   covar,
+                                   hla_data,
                                    correction = "BH",
                                    exponentiate = FALSE) {
   assert_that(
@@ -68,27 +65,20 @@ analyzeHlaAssociations <- function(model = "coxph",
     } else {
       TRUE
     },
-    checkHlaCallsFormat(hla_calls),
-    checkAdditionalData(pheno, hla_calls),
-    checkAdditionalData(covar, hla_calls, accept.null = TRUE),
-    is.string(correction)
+    is.string(correction),
+    is.flag(exponentiate)
   )
 
-  hla_data <- prepareHlaData(hla_calls,
-                             pheno,
-                             covar,
-                             inheritance_model = "additive" # TODO tmp solution
-  )
-  alleles <- backquote(hla_data$alleles)
-  response <- backquote(hla_data$response)
+  alleles <- backquote(attr(hla_data, "alleles"))
+  response <- backquote(attr(hla_data, "response"))
   if (substitute(model) %in% c("coxph", "cph")) {
     response <- paste0("Surv(", paste(response, collapse = ","), ")")
   }
-  covariate <- backquote(hla_data$covariate)
+  covariate <- backquote(attr(hla_data, "covariate"))
   model_function <- hlaAssocModel(model = model,
                                   response = response,
                                   variable = covariate,
-                                  data = hla_data$data
+                                  data = hla_data
   )
 
   results <- map_dfr(
@@ -134,7 +124,7 @@ analyzeHlaAssociations <- function(model = "coxph",
 #' hlaAssocModel(model = "coxph",
 #'               response = "Surv(OS, OS_DIED)",
 #'               variable = c("AGE", "SEX"),
-#'               data = hla_data$data
+#'               data = hla_data
 #' )
 #'
 #' @importFrom assertthat assert_that is.string see_if
@@ -247,10 +237,13 @@ hlaAssocModel <- function(model,
 #' pheno <- read.table(pheno_file, header = TRUE)
 #' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE)
+#' hla_data <- prepareHlaData(hla_calls = hla_calls,
+#'                            pheno = pheno,
+#'                            covar = covar,
+#'                            inheritance_model = "additive"
+#' )
 #' forwardConditionalSelection(model = "coxph",
-#'                             hla_calls = hla_calls,
-#'                             pheno = pheno,
-#'                             covar = covar,
+#'                             hla_data = hla_data,
 #'                             th = 0.05,
 #'                             keep = FALSE,
 #'                             rss_th = 1e-07
@@ -263,9 +256,7 @@ hlaAssocModel <- function(model,
 #' @importFrom stats formula resid update
 #' @export
 forwardConditionalSelection <- function(model,
-                                        hla_calls,
-                                        pheno,
-                                        covar,
+                                        hla_data,
                                         th,
                                         keep = FALSE,
                                         rss_th = 1e-07) {
@@ -281,30 +272,21 @@ forwardConditionalSelection <- function(model,
     } else {
       TRUE
     },
-    checkHlaCallsFormat(hla_calls),
-    checkAdditionalData(pheno, hla_calls),
-    checkAdditionalData(covar, hla_calls, accept.null = TRUE),
     is.number(th),
     is.flag(keep),
     is.number(rss_th)
   )
 
-  hla_data <- prepareHlaData(hla_calls, # Perhaps it would be beneficial to take this object outside, it has relatively simple structure so if someone needs to hack it it should be easy. Plus checking the data you are putting into functions would be beneficial.
-                             pheno,
-                             covar,
-                             inheritance_model = "additive" # TODO tmp creation of this object will be outside function in future
-  )
-
-  alleles <- hla_data$alleles
-  response <- backquote(hla_data$response)
+  alleles <- attr(hla_data, "alleles")
+  response <- backquote(attr(hla_data, "response"))
   if (substitute(model) %in% c("coxph", "cph")) {
     response <- paste0("Surv(", paste(response, collapse = ","), ")")
   }
-  covariate <- backquote(hla_data$covariate)
+  covariate <- backquote(attr(hla_data, "covariate"))
   object <- hlaAssocModel(model = model,
                           response = response,
                           variable = covariate,
-                          data = hla_data$data
+                          data = hla_data
   )
 
   vars <- alleles
@@ -360,6 +342,14 @@ forwardConditionalSelection <- function(model,
 #' @inheritParams checkHlaCallsFormat
 #' @inheritParams analyzeHlaAssociations
 #' @inheritParams hlaCallsToCounts
+#' @param pheno Data frame holding phenotypic response variables.
+#' @param covar Data frame holding covariates.
+#'
+#' \code{pheno} and \code{covar} should be data frames with first column holding
+#' samples IDs and named \code{ID}. Those should correspond to \code{ID} column
+#' in \code{hla_calls}.
+#'
+#' @return Data frame with hla counts and pheno, covar.
 #'
 #' @examples
 #' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
@@ -380,16 +370,22 @@ forwardConditionalSelection <- function(model,
 prepareHlaData <- function(hla_calls,
                            pheno,
                            covar = NULL,
-                           inheritance_model = c("dominant", "recessive", "additive")) {
+                           inheritance_model = "additive") {
 
   assert_that(
     checkHlaCallsFormat(hla_calls),
     checkAdditionalData(pheno, hla_calls),
     checkAdditionalData(covar, hla_calls, accept.null = TRUE),
-    is.string(inheritance_model)
+    is.string(inheritance_model),
+    see_if(
+      pmatch(inheritance_model,
+             table = c("dominant", "recessive", "additive"),
+             nomatch = 0
+      ) != 0,
+      msg = "inheritance_model should be one of 'dominant', 'recessive', 'additive'"
+    )
   )
 
-  inheritance_model <- match.arg(inheritance_model)
   hla_counts <- hlaCallsToCounts(hla_calls,
                                  inheritance_model = inheritance_model
   )
@@ -401,7 +397,7 @@ prepareHlaData <- function(hla_calls,
           colnames(hla_counts[, -1]), colnames(pheno[, -1]), colnames(covar[, -1])
         )
       ) == 0,
-      msg = "some colnames in hla_calls and pheno and covar and zygosity are duplicated"
+      msg = "some colnames in hla_calls and pheno and covar duplicated"
     ))
 
   data <- left_join(hla_counts, pheno, by = "ID")
@@ -411,8 +407,8 @@ prepareHlaData <- function(hla_calls,
   covar_var <- colnames(covar)[-1]
   alleles_var <- colnames(hla_counts)[-1]
 
-  hla_data <- list(
-    data = data,
+  hla_data <- structure(
+    data,
     response = pheno_var,
     covariate = covar_var,
     alleles = alleles_var

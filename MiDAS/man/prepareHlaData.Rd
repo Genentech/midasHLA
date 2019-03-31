@@ -5,7 +5,7 @@
 \title{Prepare data for statistical analysis}
 \usage{
 prepareHlaData(hla_calls, pheno, covar = NULL,
-  inheritance_model = c("dominant", "recessive", "additive"))
+  inheritance_model = "additive")
 }
 \arguments{
 \item{hla_calls}{Data frame containing HLA allele calls, as return by
@@ -13,7 +13,11 @@ prepareHlaData(hla_calls, pheno, covar = NULL,
 
 \item{pheno}{Data frame holding phenotypic response variables.}
 
-\item{covar}{Data frame holding covariates.}
+\item{covar}{Data frame holding covariates.
+
+\code{pheno} and \code{covar} should be data frames with first column holding
+samples IDs and named \code{ID}. Those should correspond to \code{ID} column
+in \code{hla_calls}.}
 
 \item{inheritance_model}{String specifying inheritance model to use.
 Available choices are \code{"dominant"}, \code{"recessive"},
@@ -23,6 +27,9 @@ dominant heterozygotes are coded as \code{1} and recesive homozygotes as
 \code{1} and all other as \code{0}. In \code{"additive"} model dominant
 homozygotes are coded as \code{2}, dominant heterozygotes as \code{1} and
 recesive homozygotes as \code{0}.}
+}
+\value{
+Data frame with hla counts and pheno, covar.
 }
 \description{
 Prepare data for statistical analysis

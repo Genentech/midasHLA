@@ -379,7 +379,7 @@ checkAdditionalData <- function(data_frame,
 #' coxmod <- hlaAssocModel(model = "coxph",
 #'                         response = "Surv(OS, OS_DIED)",
 #'                         variable = "1",
-#'                         data = hla_data$data
+#'                         data = hla_data
 #' )
 #' updateModel(coxmod, "A*01:01", backquote = TRUE, collapse = " + ")
 #'

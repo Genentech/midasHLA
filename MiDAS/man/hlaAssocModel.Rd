@@ -37,7 +37,7 @@ hla_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additiv
 hlaAssocModel(model = "coxph",
               response = "Surv(OS, OS_DIED)",
               variable = c("AGE", "SEX"),
-              data = hla_data$data
+              data = hla_data
 )
 
 }

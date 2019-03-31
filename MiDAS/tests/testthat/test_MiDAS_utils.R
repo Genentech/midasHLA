@@ -150,10 +150,10 @@ test_that("HLA statistical models are updated properly", {
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE)
   hla_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
-  coxmod <- coxph(Surv(OS, OS_DIED) ~ 1, data = hla_data$data)
+  coxmod <- coxph(Surv(OS, OS_DIED) ~ 1, data = hla_data)
 
   expect_equal(updateModel(coxmod, "A*01:01"),
-               coxph(Surv(OS, OS_DIED) ~ `A*01:01`, data = hla_data$data)
+               coxph(Surv(OS, OS_DIED) ~ `A*01:01`, data = hla_data)
   )
 
   expect_error(updateModel(list(1), "A*01:01"),

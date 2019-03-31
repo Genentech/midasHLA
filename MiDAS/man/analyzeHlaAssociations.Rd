@@ -4,19 +4,15 @@
 \alias{analyzeHlaAssociations}
 \title{Association analysis of HLA allele calls}
 \usage{
-analyzeHlaAssociations(model = "coxph", hla_calls, pheno, covar,
-  correction = "BH", exponentiate = FALSE)
+analyzeHlaAssociations(model = "coxph", hla_data, correction = "BH",
+  exponentiate = FALSE)
 }
 \arguments{
 \item{model}{String specifying statistical model to use or corresponding
 function.}
 
-\item{hla_calls}{Data frame containing HLA allele calls, as return by
-\code{\link{readHlaCalls}} function.}
-
-\item{pheno}{Data frame holding phenotypic response variables.}
-
-\item{covar}{Data frame holding covariates.}
+\item{hla_data}{hla_data object as returned by \code{\link{prepareHlaData}}
+function.}
 
 \item{correction}{String specifying multiple testing correction method. See
 details for further information.}
@@ -25,10 +21,6 @@ details for further information.}
   coefficient estimates. This is typical for logistic and multinomial
   regressions, but a bad idea if there is no log or logit link. Defaults to
   FALSE.
-
-\code{pheno} and \code{covar} should be data frames with first column holding
-samples IDs and named \code{ID}. Those should correspond to \code{ID} column
-in \code{hla_calls}.
 
 \code{correction} specifies p-value adjustment method to use, common choice
 is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
@@ -50,12 +42,15 @@ pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
 pheno <- read.table(pheno_file, header = TRUE)
 covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 covar <- read.table(covar_file, header = TRUE)
+hla_data <- prepareHlaData(hla_calls = hla_calls,
+                           pheno = pheno,
+                           covar = covar,
+                           inheritance_model = "additive"
+)
 
 # Cox proportional hazards regression model
 analyzeHlaAssociations(model = "coxph",
-                       hla_calls,
-                       pheno,
-                       covar,
+                       hla_data = hla_data,
                        correction = "BH"
 )
 

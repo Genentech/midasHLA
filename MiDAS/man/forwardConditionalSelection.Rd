@@ -4,19 +4,15 @@
 \alias{forwardConditionalSelection}
 \title{Stepwise conditional variables selection}
 \usage{
-forwardConditionalSelection(model, hla_calls, pheno, covar, th,
-  keep = FALSE, rss_th = 1e-07)
+forwardConditionalSelection(model, hla_data, th, keep = FALSE,
+  rss_th = 1e-07)
 }
 \arguments{
 \item{model}{String specifying statistical model to use or corresponding
 function.}
 
-\item{hla_calls}{Data frame containing HLA allele calls, as return by
-\code{\link{readHlaCalls}} function.}
-
-\item{pheno}{Data frame holding phenotypic response variables.}
-
-\item{covar}{Data frame holding covariates.}
+\item{hla_data}{hla_data object as returned by \code{\link{prepareHlaData}}
+function.}
 
 \item{th}{number specifying p-value threshold for a term to be included into
 model.}
@@ -52,10 +48,13 @@ pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
 pheno <- read.table(pheno_file, header = TRUE)
 covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 covar <- read.table(covar_file, header = TRUE)
+hla_data <- prepareHlaData(hla_calls = hla_calls,
+                           pheno = pheno,
+                           covar = covar,
+                           inheritance_model = "additive"
+)
 forwardConditionalSelection(model = "coxph",
-                            hla_calls = hla_calls,
-                            pheno = pheno,
-                            covar = covar,
+                            hla_data = hla_data,
                             th = 0.05,
                             keep = FALSE,
                             rss_th = 1e-07
