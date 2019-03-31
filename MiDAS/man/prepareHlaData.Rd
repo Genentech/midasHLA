@@ -4,8 +4,8 @@
 \alias{prepareHlaData}
 \title{Prepare data for statistical analysis}
 \usage{
-prepareHlaData(hla_calls, pheno, covar = NULL, zygo = FALSE,
-  reduce_counts = FALSE)
+prepareHlaData(hla_calls, pheno, covar = NULL,
+  inheritance_model = c("dominant", "recessive", "additive"))
 }
 \arguments{
 \item{hla_calls}{Data frame containing HLA allele calls, as return by
@@ -15,11 +15,14 @@ prepareHlaData(hla_calls, pheno, covar = NULL, zygo = FALSE,
 
 \item{covar}{Data frame holding covariates.}
 
-\item{zygo}{Flag indicating whether zygosity should be added to
-covariates. See details for further explanations.}
-
-\item{reduce_counts}{Flag indicating whether allele counts should be reduced
-to presence / absence indicators. See details for further explanations.}
+\item{inheritance_model}{String specifying inheritance model to use.
+Available choices are \code{"dominant"}, \code{"recessive"},
+\code{"additive"}. In \code{"dominant"} model dominant homozygotes and
+dominant heterozygotes are coded as \code{1} and recesive homozygotes as
+\code{0}. In \code{"recessive"} model dominant homozygotes are coded as
+\code{1} and all other as \code{0}. In \code{"additive"} model dominant
+homozygotes are coded as \code{2}, dominant heterozygotes as \code{1} and
+recesive homozygotes as \code{0}.}
 }
 \description{
 Prepare data for statistical analysis
@@ -34,8 +37,7 @@ covar <- read.table(covar_file, header = TRUE)
 prepareHlaData(hla_calls = hla_calls,
                pheno = pheno,
                covar = covar,
-               zygo = FALSE,
-               reduce_counts = FALSE
+               inheritance_model = "additive"
 )
 
 }

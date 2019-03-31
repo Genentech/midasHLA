@@ -53,12 +53,29 @@ test_that("HLA calls table is converted to counts table", {
                            package = "MiDAS"
   )
   hla_calls <- readHlaCalls(hla_calls)
-  hla_counts <- hlaCallsToCounts(hla_calls)
   load(system.file("extdata", "test_hla_counts.RData", package = "MiDAS"))
-  expect_equal(hla_counts, test_hla_counts)
+
+  hla_counts <- hlaCallsToCounts(hla_calls, inheritance_model = "dominant")
+  expect_equal(hla_counts, test_hla_counts[["dominant"]])
+
+  hla_counts <- hlaCallsToCounts(hla_calls, inheritance_model = "recessive")
+  expect_equal(hla_counts, test_hla_counts[["recessive"]])
+
+  hla_counts <- hlaCallsToCounts(hla_calls, inheritance_model = "additive")
+  expect_equal(hla_counts, test_hla_counts[["additive"]])
 
   expect_error(
-    hlaCallsToCounts(c("A*01:01", "A*02:01")),
+    hlaCallsToCounts(c("A*01:01", "A*02:01"), inheritance_model = "additive"),
     "hla_calls is not a data frame"
+  )
+
+  expect_error(
+    hlaCallsToCounts(hla_calls, inheritance_model = 123),
+    "inheritance_model is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(
+    hlaCallsToCounts(hla_calls, inheritance_model = "foo"),
+    "inheritance_model should be one of 'dominant', 'recessive', 'additive'"
   )
 })

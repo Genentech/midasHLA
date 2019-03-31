@@ -5,8 +5,7 @@
 \title{Association analysis of HLA allele calls}
 \usage{
 analyzeHlaAssociations(model = "coxph", hla_calls, pheno, covar,
-  zygo = FALSE, reduce_counts = FALSE, correction = "BH",
-  exponentiate = FALSE)
+  correction = "BH", exponentiate = FALSE)
 }
 \arguments{
 \item{model}{String specifying statistical model to use or corresponding
@@ -19,12 +18,6 @@ function.}
 
 \item{covar}{Data frame holding covariates.}
 
-\item{zygo}{Flag indicating whether zygosity should be added to
-covariates. See details for further explanations.}
-
-\item{reduce_counts}{Flag indicating whether allele counts should be reduced
-to presence / absence indicators. See details for further explanations.}
-
 \item{correction}{String specifying multiple testing correction method. See
 details for further information.}
 
@@ -36,17 +29,6 @@ details for further information.}
 \code{pheno} and \code{covar} should be data frames with first column holding
 samples IDs and named \code{ID}. Those should correspond to \code{ID} column
 in \code{hla_calls}.
-
-\code{zygo} indicate if additional covariate, indicating sample zygosity
-status, should be added to covariates. HLA allele counts for each sample
-can take the following values \code{0, 1, 2}. To avoid implying ordering on those
-levels and effect size, this information can be split between two variables.
-If \code{zygo} is set to \code{TRUE} zygosity variable is added during model
-fitting, it specifies if sample is homozygous for an allele.
-
-If \code{reduce_counts} is set to \code{TRUE} HLA allele counts are reduced
-to presence / absence indicators. This is done by setting counts for
-homozygotes as \code{1}.
 
 \code{correction} specifies p-value adjustment method to use, common choice
 is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
@@ -74,8 +56,6 @@ analyzeHlaAssociations(model = "coxph",
                        hla_calls,
                        pheno,
                        covar,
-                       zygo = FALSE,
-                       reduce_counts = FALSE,
                        correction = "BH"
 )
 

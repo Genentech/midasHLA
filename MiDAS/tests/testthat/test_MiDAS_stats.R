@@ -15,8 +15,6 @@ test_that("HLA allele associations are analyzed properly", {
                                 hla_calls,
                                 pheno,
                                 covar,
-                                zygo = FALSE,
-                                reduce_counts = FALSE,
                                 correction = "BH"
   )
   load(system.file("extdata", "test_hla_analyze.Rdata", package = "MiDAS"))
@@ -106,32 +104,12 @@ test_that("HLA allele associations are analyzed properly", {
                            hla_calls = hla_calls,
                            pheno = pheno,
                            covar = covar,
-                           zygo = "yes"
-    ),
-    "zygo is not a flag \\(a length one logical vector\\)."
-  )
-
-  expect_error(
-    analyzeHlaAssociations(model = "lm",
-                           hla_calls = hla_calls,
-                           pheno = pheno,
-                           covar = covar,
-                           reduce_counts = "yes"
-    ),
-    "reduce_counts is not a flag \\(a length one logical vector\\)."
-  )
-
-  expect_error(
-    analyzeHlaAssociations(model = "lm",
-                           hla_calls = hla_calls,
-                           pheno = pheno,
-                           covar = covar,
                            correction = 12
     ),
     "correction is not a string \\(a length one character vector\\)."
   )
 
-  covar <- dplyr::rename(covar, AGE_zygosity = AGE, `A*01:01` = SEX)
+  covar <- dplyr::rename(covar, `A*01:01` = SEX)
   expect_error(
     analyzeHlaAssociations(model = "lm",
                            hla_calls = hla_calls,
@@ -151,7 +129,7 @@ test_that("HLA statistical models are defined properly", {
   pheno <- read.table(pheno_file, header = TRUE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE)
-  hla_data <- prepareHlaData(hla_calls, pheno, covar)
+  hla_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
 
   fun <- hlaAssocModel(model = "glm",
                        response = hla_data$response[2],
@@ -212,7 +190,7 @@ test_that("Stepwise conditional alleles subset selection", {
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE)
   object <- forwardConditionalSelection("coxph", hla_calls, pheno, covar, th = 0.02)
-  hla_data <- prepareHlaData(hla_calls, pheno, covar)
+  hla_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
   test_object <- coxph(
     Surv(OS, OS_DIED) ~ AGE + SEX + `B*14:02` + `DRB1*11:01` + `DRA*01:02`,
     data = hla_data$data
@@ -268,7 +246,7 @@ test_that("HLA data are properly formatted", {
   )
   small_pheno <- data.frame(ID = 1:2, OS = c(123, 321), OS_DIED = c(0, 0))
   small_covar <- data.frame(ID = 1:2, AGE = c(23, 24))
-  hla_data <- prepareHlaData(small_hla_calls, small_pheno, small_covar)
+  hla_data <- prepareHlaData(small_hla_calls, small_pheno, small_covar, inheritance_model = "additive")
   expect_equal(hla_data,
                list(
                  data = data.frame(ID = 1:2,
@@ -287,18 +265,4 @@ test_that("HLA data are properly formatted", {
   )
 
   # test for checkHlaCallsFormat & checkAdditionalData asserts are omitted here
-
-  expect_error(
-    prepareHlaData(small_hla_calls, small_pheno, small_covar, zygo = "foo"),
-    "zygo is not a flag \\(a length one logical vector\\)."
-  )
-
-  expect_error(
-    prepareHlaData(hla_calls = small_hla_calls,
-                   pheno = small_pheno,
-                   covar = small_covar,
-                   reduce_counts = "foo"
-    ),
-    "reduce_counts is not a flag \\(a length one logical vector\\)."
-  )
 })

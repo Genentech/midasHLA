@@ -4,14 +4,11 @@
 #' calls using statistical model of choice.
 #'
 #' @inheritParams checkHlaCallsFormat
+#' @inheritParams hlaCallsToCounts
 #' @param model String specifying statistical model to use or corresponding
 #'   function.
 #' @param pheno Data frame holding phenotypic response variables.
 #' @param covar Data frame holding covariates.
-#' @param zygo Flag indicating whether zygosity should be added to
-#'   covariates. See details for further explanations.
-#' @param reduce_counts Flag indicating whether allele counts should be reduced
-#'   to presence / absence indicators. See details for further explanations.
 #' @param correction String specifying multiple testing correction method. See
 #'   details for further information.
 #' @param exponentiate Logical indicating whether or not to exponentiate the the
@@ -22,17 +19,6 @@
 #' \code{pheno} and \code{covar} should be data frames with first column holding
 #' samples IDs and named \code{ID}. Those should correspond to \code{ID} column
 #' in \code{hla_calls}.
-#'
-#' \code{zygo} indicate if additional covariate, indicating sample zygosity
-#' status, should be added to covariates. HLA allele counts for each sample
-#' can take the following values \code{0, 1, 2}. To avoid implying ordering on those
-#' levels and effect size, this information can be split between two variables.
-#' If \code{zygo} is set to \code{TRUE} zygosity variable is added during model
-#' fitting, it specifies if sample is homozygous for an allele.
-#'
-#' If \code{reduce_counts} is set to \code{TRUE} HLA allele counts are reduced
-#' to presence / absence indicators. This is done by setting counts for
-#' homozygotes as \code{1}.
 #'
 #' \code{correction} specifies p-value adjustment method to use, common choice
 #' is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
@@ -55,8 +41,6 @@
 #'                        hla_calls,
 #'                        pheno,
 #'                        covar,
-#'                        zygo = FALSE,
-#'                        reduce_counts = FALSE,
 #'                        correction = "BH"
 #' )
 #'
@@ -71,8 +55,6 @@ analyzeHlaAssociations <- function(model = "coxph",
                                    hla_calls,
                                    pheno,
                                    covar,
-                                   zygo = FALSE,
-                                   reduce_counts = FALSE,
                                    correction = "BH",
                                    exponentiate = FALSE) {
   assert_that(
@@ -89,16 +71,13 @@ analyzeHlaAssociations <- function(model = "coxph",
     checkHlaCallsFormat(hla_calls),
     checkAdditionalData(pheno, hla_calls),
     checkAdditionalData(covar, hla_calls, accept.null = TRUE),
-    is.flag(zygo),
-    is.flag(reduce_counts),
     is.string(correction)
   )
 
   hla_data <- prepareHlaData(hla_calls,
                              pheno,
                              covar,
-                             zygo = FALSE,
-                             reduce_counts = FALSE
+                             inheritance_model = "additive" # TODO tmp solution
   )
   alleles <- backquote(hla_data$alleles)
   response <- backquote(hla_data$response)
@@ -151,7 +130,7 @@ analyzeHlaAssociations <- function(model = "coxph",
 #' pheno <- read.table(pheno_file, header = TRUE)
 #' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE)
-#' hla_data <- prepareHlaData(hla_calls, pheno, covar)
+#' hla_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
 #' hlaAssocModel(model = "coxph",
 #'               response = "Surv(OS, OS_DIED)",
 #'               variable = c("AGE", "SEX"),
@@ -244,6 +223,7 @@ hlaAssocModel <- function(model,
 #'
 #' @inheritParams checkHlaCallsFormat
 #' @inheritParams analyzeHlaAssociations
+#' @inheritParams hlaCallsToCounts
 #' @param th number specifying p-value threshold for a term to be included into
 #'   model.
 #' @param keep logical flag indicating if the output should be a list of models
@@ -312,8 +292,7 @@ forwardConditionalSelection <- function(model,
   hla_data <- prepareHlaData(hla_calls, # Perhaps it would be beneficial to take this object outside, it has relatively simple structure so if someone needs to hack it it should be easy. Plus checking the data you are putting into functions would be beneficial.
                              pheno,
                              covar,
-                             zygo = FALSE,
-                             reduce_counts = FALSE
+                             inheritance_model = "additive" # TODO tmp creation of this object will be outside function in future
   )
 
   alleles <- hla_data$alleles
@@ -380,6 +359,7 @@ forwardConditionalSelection <- function(model,
 #'
 #' @inheritParams checkHlaCallsFormat
 #' @inheritParams analyzeHlaAssociations
+#' @inheritParams hlaCallsToCounts
 #'
 #' @examples
 #' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
@@ -391,45 +371,38 @@ forwardConditionalSelection <- function(model,
 #' prepareHlaData(hla_calls = hla_calls,
 #'                pheno = pheno,
 #'                covar = covar,
-#'                zygo = FALSE,
-#'                reduce_counts = FALSE
+#'                inheritance_model = "additive"
 #' )
 #'
-#' @importFrom assertthat assert_that is.flag see_if
+#' @importFrom assertthat assert_that is.string see_if
 #'
 #' @export
 prepareHlaData <- function(hla_calls,
                            pheno,
                            covar = NULL,
-                           zygo = FALSE,
-                           reduce_counts = FALSE) {
+                           inheritance_model = c("dominant", "recessive", "additive")) {
+
   assert_that(
     checkHlaCallsFormat(hla_calls),
     checkAdditionalData(pheno, hla_calls),
     checkAdditionalData(covar, hla_calls, accept.null = TRUE),
-    is.flag(zygo),
-    is.flag(reduce_counts)
+    is.string(inheritance_model)
   )
 
-  hla_counts <- hlaCallsToCounts(hla_calls)
-  zygosity <- hla_counts
+  inheritance_model <- match.arg(inheritance_model)
+  hla_counts <- hlaCallsToCounts(hla_calls,
+                                 inheritance_model = inheritance_model
+  )
 
   assert_that(
     see_if(
       anyDuplicated(
         c(
-          colnames(hla_counts[, -1]), colnames(pheno[, -1]),
-          colnames(covar[, -1]), paste0(colnames(zygosity[, -1]), "_zygosity")
+          colnames(hla_counts[, -1]), colnames(pheno[, -1]), colnames(covar[, -1])
         )
       ) == 0,
       msg = "some colnames in hla_calls and pheno and covar and zygosity are duplicated"
     ))
-
-  if (reduce_counts) {
-    hla_counts[, -1] <- lapply(hla_counts[, -1],
-                               function(x) ifelse(x == 2, 1, x)
-    )
-  }
 
   data <- left_join(hla_counts, pheno, by = "ID")
   data <- left_join(data, covar, by = "ID")
@@ -437,14 +410,6 @@ prepareHlaData <- function(hla_calls,
   pheno_var <- colnames(pheno)[-1]
   covar_var <- colnames(covar)[-1]
   alleles_var <- colnames(hla_counts)[-1]
-
-  if (zygo) {
-    zygosity[, -1] <- lapply(zygosity[, -1], function(x) ifelse(x == 2, 1, 0))
-    colnames(zygosity) <- c("ID", paste0(colnames(zygosity[, -1]), "_zygosity"))
-    data <- left_join(data, zygosity, by = "ID")
-    zygo_var <- paste0(colnames(hla_counts)[-1], "_zygosity")
-    covar_var <- append(covar_var, zygo_var)
-  }
 
   hla_data <- list(
     data = data,

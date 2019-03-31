@@ -4,11 +4,21 @@
 \alias{hlaCallsToCounts}
 \title{Transform HLA calls to counts table}
 \usage{
-hlaCallsToCounts(hla_calls)
+hlaCallsToCounts(hla_calls, inheritance_model = c("dominant",
+  "recessive", "additive"))
 }
 \arguments{
 \item{hla_calls}{Data frame containing HLA allele calls, as return by
 \code{\link{readHlaCalls}} function.}
+
+\item{inheritance_model}{String specifying inheritance model to use.
+Available choices are \code{"dominant"}, \code{"recessive"},
+\code{"additive"}. In \code{"dominant"} model dominant homozygotes and
+dominant heterozygotes are coded as \code{1} and recesive homozygotes as
+\code{0}. In \code{"recessive"} model dominant homozygotes are coded as
+\code{1} and all other as \code{0}. In \code{"additive"} model dominant
+homozygotes are coded as \code{2}, dominant heterozygotes as \code{1} and
+recesive homozygotes as \code{0}.}
 }
 \value{
 Data frame containing counts of HLA alleles found in input data
@@ -20,6 +30,6 @@ Data frame containing counts of HLA alleles found in input data
 \examples{
 file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 hla_calls <- readHlaCalls(file)
-hlaCallsToCounts(hla_calls)
+hlaCallsToCounts(hla_calls, inheritance_model = "additive")
 
 }
