@@ -13,7 +13,7 @@ prepareHlaData(hla_calls, pheno, covar = NULL,
 
 \item{pheno}{Data frame holding phenotypic response variables.}
 
-\item{covar}{Data frame holding covariates.
+\item{covar}{Data frame holding covariates or NULL.
 
 \code{pheno} and \code{covar} should be data frames with first column holding
 samples IDs and named \code{ID}. Those should correspond to \code{ID} column

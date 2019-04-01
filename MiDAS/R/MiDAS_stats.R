@@ -434,7 +434,7 @@ forwardConditionalSelection <- function(model,
 #' @inheritParams analyzeHlaAssociations
 #' @inheritParams hlaCallsToCounts
 #' @param pheno Data frame holding phenotypic response variables.
-#' @param covar Data frame holding covariates.
+#' @param covar Data frame holding covariates or NULL.
 #'
 #' \code{pheno} and \code{covar} should be data frames with first column holding
 #' samples IDs and named \code{ID}. Those should correspond to \code{ID} column
@@ -493,7 +493,9 @@ prepareHlaData <- function(hla_calls,
     ))
 
   data <- left_join(hla_counts, pheno, by = "ID")
-  data <- left_join(data, covar, by = "ID")
+  if (! is.null(covar)) {
+    data <- left_join(data, covar, by = "ID")
+  }
 
   pheno_var <- colnames(pheno)[-1]
   covar_var <- colnames(covar)[-1]
