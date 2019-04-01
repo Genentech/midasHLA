@@ -13,10 +13,10 @@ analyzeHlaAssociations(model = "coxph", hla_data, response, covariate,
 \item{hla_data}{hla_data object as returned by \code{\link{prepareHlaData}}
 function.}
 
-\item{response}{Character speciyfing which variables should be treated as
+\item{response}{Character specifying which variables should be treated as
 response variable.}
 
-\item{covariate}{Character speciyfing which variables should be treated as
+\item{covariate}{Character specifying which variables should be treated as
 covariates. Can be \code{NULL}, than no covariates are considered in the
 model.}
 

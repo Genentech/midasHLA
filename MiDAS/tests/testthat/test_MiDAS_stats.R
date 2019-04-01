@@ -58,7 +58,7 @@ test_that("HLA allele associations are analyzed properly", {
                            hla_data = hla_data,
                            correction = 12
     ),
-    "cox survival analysis requires response to be character vector of length 2"
+    "cox survival analysis requires response to be a character vector of length 2"
   )
 
   expect_error(
@@ -256,7 +256,7 @@ test_that("Stepwise conditional alleles subset selection", {
                                 hla_data = hla_data,
                                 response = "OS"
     ),
-    "cox survival analysis requires response to be character vector of length 2"
+    "cox survival analysis requires response to be a character vector of length 2"
   )
 
   expect_error(

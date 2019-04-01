@@ -8,9 +8,9 @@
 #' @param model String specifying statistical model to use.
 #' @param hla_data hla_data object as returned by \code{\link{prepareHlaData}}
 #'   function.
-#' @param response Character speciyfing which variables should be treated as
+#' @param response Character specifying which variables should be treated as
 #'   response variable.
-#' @param covariate Character speciyfing which variables should be treated as
+#' @param covariate Character specifying which variables should be treated as
 #'   covariates. Can be \code{NULL}, than no covariates are considered in the
 #'   model.
 #' @param correction String specifying multiple testing correction method. See
@@ -81,7 +81,7 @@ analyzeHlaAssociations <- function(model = "coxph",
       response_len <- length(response)
       is_cox <- as.character(substitute(model)) %in% c("coxph", "cph")
       if (is_cox & response_len != 2) {
-        structure(FALSE, msg = "cox survival analysis requires response to be character vector of length 2")
+        structure(FALSE, msg = "cox survival analysis requires response to be a character vector of length 2")
       } else if (! is_cox & response_len != 1) {
         structure(FALSE, msg = "response is not a string (a length one character vector).")
       } else {
@@ -330,7 +330,7 @@ forwardConditionalSelection <- function(model,
       response_len <- length(response)
       is_cox <- as.character(substitute(model)) %in% c("coxph", "cph")
       if (is_cox & response_len != 2) {
-        structure(FALSE, msg = "cox survival analysis requires response to be character vector of length 2")
+        structure(FALSE, msg = "cox survival analysis requires response to be a character vector of length 2")
       } else if (! is_cox & response_len != 1) {
         structure(FALSE, msg = "response is not a string (a length one character vector).")
       } else {
@@ -427,7 +427,7 @@ forwardConditionalSelection <- function(model,
 #' Prepare data for statistical analysis
 #'
 #' \code{prepareHlaData} binds HLA alleles calls data frame with phenotypic
-#' observations and covariates, creating an input data for futherr statistical
+#' observations and covariates, creating an input data for further statistical
 #' analysis.
 #'
 #' @inheritParams checkHlaCallsFormat

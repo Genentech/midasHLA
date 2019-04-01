@@ -32,7 +32,7 @@ Data frame with hla counts and pheno, covar. It also holds names of
 }
 \description{
 \code{prepareHlaData} binds HLA alleles calls data frame with phenotypic
-observations and covariates, creating an input data for futherr statistical
+observations and covariates, creating an input data for further statistical
 analysis.
 }
 \examples{
