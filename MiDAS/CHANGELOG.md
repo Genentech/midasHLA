@@ -1,3 +1,12 @@
+## 0.0.0.9005 - 18/03/2019
++ now hla calls are merged with phenotypic and covariate data before using 
+  statistical functions, using prepareHlaData. This workflow is going to be
+  further strenghtend in future releases.
++ introduce inheritance models specifying how hla calls should be converted to
+  hla counts.
++ Response and covariate variables in statistical functions now have to be typed 
+  by hand.
+
 ## 0.0.0.9004 - 18/03/2019
 + introduce forwardConditionalSelection for stepwise conditional testing, adding 
   the previous top-associated allele as covariate, until there’s no more significant 
