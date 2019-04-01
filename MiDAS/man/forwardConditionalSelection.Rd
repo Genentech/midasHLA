@@ -8,8 +8,7 @@ forwardConditionalSelection(model, hla_data, response, covariate, th,
   keep = FALSE, rss_th = 1e-07, ...)
 }
 \arguments{
-\item{model}{String specifying statistical model to use or corresponding
-function.}
+\item{model}{String specifying statistical model to use.}
 
 \item{hla_data}{hla_data object as returned by \code{\link{prepareHlaData}}
 function.}
@@ -18,7 +17,7 @@ function.}
 response variable.}
 
 \item{covariate}{Character speciyfing which variables should be treated as
-covariates. Can \code{NULL}, than no covariates are considered in the
+covariates. Can be \code{NULL}, than no covariates are considered in the
 model.}
 
 \item{th}{number specifying p-value threshold for a term to be included into
@@ -38,8 +37,7 @@ obtained making further attempts at model selection nonsense, thus function
 is stopped. This behavior can be controlled using \code{rss_th}.}
 }
 \value{
-selected model of the same class as \code{object} or list of models.
-  See \code{keep} parameter.
+selected model or list of models. See \code{keep} parameter.
 }
 \description{
 \code{stepwiseConditionalSelection} performs stepwise conditional testing
@@ -51,6 +49,7 @@ Selection criteria is the p-value from the test on coefficients values.
 }
 \examples{
 library("survival")
+
 hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 hla_calls <- readHlaCalls(hla_calls_file)
 pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")

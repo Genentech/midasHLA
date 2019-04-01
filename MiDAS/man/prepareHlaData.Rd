@@ -21,18 +21,19 @@ in \code{hla_calls}.}
 
 \item{inheritance_model}{String specifying inheritance model to use.
 Available choices are \code{"dominant"}, \code{"recessive"},
-\code{"additive"}. In \code{"dominant"} model dominant homozygotes and
-dominant heterozygotes are coded as \code{1} and recesive homozygotes as
-\code{0}. In \code{"recessive"} model dominant homozygotes are coded as
-\code{1} and all other as \code{0}. In \code{"additive"} model dominant
-homozygotes are coded as \code{2}, dominant heterozygotes as \code{1} and
-recesive homozygotes as \code{0}.}
+\code{"additive"}. In \code{"dominant"} model homozygotes and heterozygotes
+are coded as \code{1}. In \code{"recessive"} model homozygotes are coded as
+\code{1} and all other as \code{0}. In \code{"additive"} model homozygotes
+are coded as \code{2} and heterozygotes as \code{1}.}
 }
 \value{
-Data frame with hla counts and pheno, covar.
+Data frame with hla counts and pheno, covar. It also holds names of
+  variables under attributes: 'alleles', 'response', 'covariate'.
 }
 \description{
-Prepare data for statistical analysis
+\code{prepareHlaData} binds HLA alleles calls data frame with phenotypic
+observations and covariates, creating an input data for futherr statistical
+analysis.
 }
 \examples{
 hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")

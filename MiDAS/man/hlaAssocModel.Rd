@@ -7,8 +7,7 @@
 hlaAssocModel(model, response, variable, data, ...)
 }
 \arguments{
-\item{model}{String specifying statistical model to use or corresponding
-function.}
+\item{model}{String specifying statistical model to use.}
 
 \item{response}{String specifying response variable in \code{data}.}
 
@@ -27,6 +26,7 @@ analyses easier.
 }
 \examples{
 library("survival")
+
 hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 hla_calls <- readHlaCalls(hla_calls_file)
 pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")

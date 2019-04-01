@@ -8,8 +8,7 @@ analyzeHlaAssociations(model = "coxph", hla_data, response, covariate,
   correction = "BH", exponentiate = FALSE, ...)
 }
 \arguments{
-\item{model}{String specifying statistical model to use or corresponding
-function.}
+\item{model}{String specifying statistical model to use.}
 
 \item{hla_data}{hla_data object as returned by \code{\link{prepareHlaData}}
 function.}
@@ -18,18 +17,18 @@ function.}
 response variable.}
 
 \item{covariate}{Character speciyfing which variables should be treated as
-covariates. Can \code{NULL}, than no covariates are considered in the
+covariates. Can be \code{NULL}, than no covariates are considered in the
 model.}
 
 \item{correction}{String specifying multiple testing correction method. See
 details for further information.}
 
-\item{exponentiate}{Logical indicating whether or not to exponentiate the the
+\item{exponentiate}{Logical indicating whether or not to exponentiate the
 coefficient estimates. This is typical for logistic and multinomial
 regressions, but a bad idea if there is no log or logit link. Defaults to
 FALSE.}
 
-\item{...}{Further arguments passed to \code{model} function.
+\item{...}{Further arguments passed to \code{model}.
 
 \code{correction} specifies p-value adjustment method to use, common choice
 is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
@@ -40,11 +39,12 @@ Tibble containing combined results for all alleles in
   \code{hla_calls}.
 }
 \description{
-\code{analyzeHlaAssociations} performs associations analysis on HLA alleles
-calls using statistical model of choice.
+\code{analyzeHlaAssociations} performs associations analysis on single HLA
+allele level using statistical model of choice.
 }
 \examples{
 library("survival")
+
 hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 hla_calls <- readHlaCalls(hla_calls_file)
 pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")

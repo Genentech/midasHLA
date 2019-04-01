@@ -1,26 +1,25 @@
 #' Association analysis of HLA allele calls
 #'
-#' \code{analyzeHlaAssociations} performs associations analysis on HLA alleles
-#' calls using statistical model of choice.
+#' \code{analyzeHlaAssociations} performs associations analysis on single HLA
+#' allele level using statistical model of choice.
 #'
 #' @inheritParams checkHlaCallsFormat
 #' @inheritParams hlaCallsToCounts
-#' @param model String specifying statistical model to use or corresponding
-#'   function.
+#' @param model String specifying statistical model to use.
 #' @param hla_data hla_data object as returned by \code{\link{prepareHlaData}}
 #'   function.
 #' @param response Character speciyfing which variables should be treated as
 #'   response variable.
 #' @param covariate Character speciyfing which variables should be treated as
-#'   covariates. Can \code{NULL}, than no covariates are considered in the
+#'   covariates. Can be \code{NULL}, than no covariates are considered in the
 #'   model.
 #' @param correction String specifying multiple testing correction method. See
 #'   details for further information.
-#' @param exponentiate Logical indicating whether or not to exponentiate the the
+#' @param exponentiate Logical indicating whether or not to exponentiate the
 #'   coefficient estimates. This is typical for logistic and multinomial
 #'   regressions, but a bad idea if there is no log or logit link. Defaults to
 #'   FALSE.
-#' @param ... Further arguments passed to \code{model} function.
+#' @param ... Further arguments passed to \code{model}.
 #'
 #' \code{correction} specifies p-value adjustment method to use, common choice
 #' is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
@@ -31,6 +30,7 @@
 #'
 #' @examples
 #' library("survival")
+#'
 #' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(hla_calls_file)
 #' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
@@ -79,7 +79,7 @@ analyzeHlaAssociations <- function(model = "coxph",
     is.character(response),
     {
       response_len <- length(response)
-      is_cox <- substitute(model) %in% c("coxph", "cph")
+      is_cox <- as.character(substitute(model)) %in% c("coxph", "cph")
       if (is_cox & response_len != 2) {
         structure(FALSE, msg = "cox survival analysis requires response to be character vector of length 2")
       } else if (! is_cox & response_len != 1) {
@@ -160,6 +160,7 @@ analyzeHlaAssociations <- function(model = "coxph",
 #'
 #' @examples
 #' library("survival")
+#'
 #' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(hla_calls_file)
 #' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
@@ -273,11 +274,11 @@ hlaAssocModel <- function(model,
 #' obtained making further attempts at model selection nonsense, thus function
 #' is stopped. This behavior can be controlled using \code{rss_th}.
 #'
-#' @return selected model of the same class as \code{object} or list of models.
-#'   See \code{keep} parameter.
+#' @return selected model or list of models. See \code{keep} parameter.
 #'
 #' @examples
 #' library("survival")
+#'
 #' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(hla_calls_file)
 #' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
@@ -327,7 +328,7 @@ forwardConditionalSelection <- function(model,
     is.character(response),
     {
       response_len <- length(response)
-      is_cox <- substitute(model) %in% c("coxph", "cph")
+      is_cox <- as.character(substitute(model)) %in% c("coxph", "cph")
       if (is_cox & response_len != 2) {
         structure(FALSE, msg = "cox survival analysis requires response to be character vector of length 2")
       } else if (! is_cox & response_len != 1) {
@@ -425,6 +426,10 @@ forwardConditionalSelection <- function(model,
 
 #' Prepare data for statistical analysis
 #'
+#' \code{prepareHlaData} binds HLA alleles calls data frame with phenotypic
+#' observations and covariates, creating an input data for futherr statistical
+#' analysis.
+#'
 #' @inheritParams checkHlaCallsFormat
 #' @inheritParams analyzeHlaAssociations
 #' @inheritParams hlaCallsToCounts
@@ -435,7 +440,8 @@ forwardConditionalSelection <- function(model,
 #' samples IDs and named \code{ID}. Those should correspond to \code{ID} column
 #' in \code{hla_calls}.
 #'
-#' @return Data frame with hla counts and pheno, covar.
+#' @return Data frame with hla counts and pheno, covar. It also holds names of
+#'   variables under attributes: 'alleles', 'response', 'covariate'.
 #'
 #' @examples
 #' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")

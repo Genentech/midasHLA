@@ -245,20 +245,18 @@ reduceHlaCalls <- function(hla_calls,
 
 #' Transform HLA calls to counts table
 #'
-#' \code{hlaCallsToCounts} converts HLA calls data frame into counts table
+#' \code{hlaCallsToCounts} converts HLA calls data frame into counts table.
 #'
 #' @inheritParams checkHlaCallsFormat
 #' @param inheritance_model String specifying inheritance model to use.
 #'   Available choices are \code{"dominant"}, \code{"recessive"},
-#'   \code{"additive"}. In \code{"dominant"} model dominant homozygotes and
-#'   dominant heterozygotes are coded as \code{1} and recesive homozygotes as
-#'   \code{0}. In \code{"recessive"} model dominant homozygotes are coded as
-#'   \code{1} and all other as \code{0}. In \code{"additive"} model dominant
-#'   homozygotes are coded as \code{2}, dominant heterozygotes as \code{1} and
-#'   recesive homozygotes as \code{0}.
+#'   \code{"additive"}. In \code{"dominant"} model homozygotes and heterozygotes
+#'   are coded as \code{1}. In \code{"recessive"} model homozygotes are coded as
+#'   \code{1} and all other as \code{0}. In \code{"additive"} model homozygotes
+#'   are coded as \code{2} and heterozygotes as \code{1}.
 #'
-#' @return Data frame containing counts of HLA alleles found in input data
-#'   frame.
+#' @return Data frame containing counts of HLA alleles counted according to
+#'   specified model.
 #'
 #' @examples
 #' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
