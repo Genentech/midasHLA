@@ -4,8 +4,8 @@
 \alias{prepareHlaData}
 \title{Prepare data for statistical analysis}
 \usage{
-prepareHlaData(hla_calls, pheno, covar = NULL, zygo = FALSE,
-  reduce_counts = FALSE)
+prepareHlaData(hla_calls, pheno, covar = NULL,
+  inheritance_model = "additive")
 }
 \arguments{
 \item{hla_calls}{Data frame containing HLA allele calls, as return by
@@ -13,16 +13,27 @@ prepareHlaData(hla_calls, pheno, covar = NULL, zygo = FALSE,
 
 \item{pheno}{Data frame holding phenotypic response variables.}
 
-\item{covar}{Data frame holding covariates.}
+\item{covar}{Data frame holding covariates or NULL.
 
-\item{zygo}{Flag indicating whether zygosity should be added to
-covariates. See details for further explanations.}
+\code{pheno} and \code{covar} should be data frames with first column holding
+samples IDs and named \code{ID}. Those should correspond to \code{ID} column
+in \code{hla_calls}.}
 
-\item{reduce_counts}{Flag indicating whether allele counts should be reduced
-to presence / absence indicators. See details for further explanations.}
+\item{inheritance_model}{String specifying inheritance model to use.
+Available choices are \code{"dominant"}, \code{"recessive"},
+\code{"additive"}. In \code{"dominant"} model homozygotes and heterozygotes
+are coded as \code{1}. In \code{"recessive"} model homozygotes are coded as
+\code{1} and all other as \code{0}. In \code{"additive"} model homozygotes
+are coded as \code{2} and heterozygotes as \code{1}.}
+}
+\value{
+Data frame with hla counts and pheno, covar. It also holds names of
+  variables under attributes: 'alleles', 'response', 'covariate'.
 }
 \description{
-Prepare data for statistical analysis
+\code{prepareHlaData} binds HLA alleles calls data frame with phenotypic
+observations and covariates, creating an input data for further statistical
+analysis.
 }
 \examples{
 hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
@@ -34,8 +45,7 @@ covar <- read.table(covar_file, header = TRUE)
 prepareHlaData(hla_calls = hla_calls,
                pheno = pheno,
                covar = covar,
-               zygo = FALSE,
-               reduce_counts = FALSE
+               inheritance_model = "additive"
 )
 
 }

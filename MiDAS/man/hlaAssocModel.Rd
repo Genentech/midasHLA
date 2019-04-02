@@ -7,8 +7,7 @@
 hlaAssocModel(model, response, variable, data, ...)
 }
 \arguments{
-\item{model}{String specifying statistical model to use or corresponding
-function.}
+\item{model}{String specifying statistical model to use.}
 
 \item{response}{String specifying response variable in \code{data}.}
 
@@ -27,17 +26,18 @@ analyses easier.
 }
 \examples{
 library("survival")
+
 hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 hla_calls <- readHlaCalls(hla_calls_file)
 pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
 pheno <- read.table(pheno_file, header = TRUE)
 covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 covar <- read.table(covar_file, header = TRUE)
-hla_data <- prepareHlaData(hla_calls, pheno, covar)
+hla_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
 hlaAssocModel(model = "coxph",
               response = "Surv(OS, OS_DIED)",
               variable = c("AGE", "SEX"),
-              data = hla_data$data
+              data = hla_data
 )
 
 }

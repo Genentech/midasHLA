@@ -375,11 +375,11 @@ checkAdditionalData <- function(data_frame,
 #' pheno <- read.table(pheno_file, header = TRUE)
 #' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE)
-#' hla_data <- prepareHlaData(hla_calls, pheno, covar)
+#' hla_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
 #' coxmod <- hlaAssocModel(model = "coxph",
 #'                         response = "Surv(OS, OS_DIED)",
 #'                         variable = "1",
-#'                         data = hla_data$data
+#'                         data = hla_data
 #' )
 #' updateModel(coxmod, "A*01:01", backquote = TRUE, collapse = " + ")
 #'

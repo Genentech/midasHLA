@@ -4,49 +4,31 @@
 \alias{analyzeHlaAssociations}
 \title{Association analysis of HLA allele calls}
 \usage{
-analyzeHlaAssociations(model = "coxph", hla_calls, pheno, covar,
-  zygo = FALSE, reduce_counts = FALSE, correction = "BH",
-  exponentiate = FALSE)
+analyzeHlaAssociations(model = "coxph", hla_data, response, covariate,
+  correction = "BH", exponentiate = FALSE, ...)
 }
 \arguments{
-\item{model}{String specifying statistical model to use or corresponding
+\item{model}{String specifying statistical model to use.}
+
+\item{hla_data}{hla_data object as returned by \code{\link{prepareHlaData}}
 function.}
 
-\item{hla_calls}{Data frame containing HLA allele calls, as return by
-\code{\link{readHlaCalls}} function.}
+\item{response}{Character specifying which variables should be treated as
+response variable.}
 
-\item{pheno}{Data frame holding phenotypic response variables.}
-
-\item{covar}{Data frame holding covariates.}
-
-\item{zygo}{Flag indicating whether zygosity should be added to
-covariates. See details for further explanations.}
-
-\item{reduce_counts}{Flag indicating whether allele counts should be reduced
-to presence / absence indicators. See details for further explanations.}
+\item{covariate}{Character specifying which variables should be treated as
+covariates. Can be \code{NULL}, than no covariates are considered in the
+model.}
 
 \item{correction}{String specifying multiple testing correction method. See
 details for further information.}
 
-\item{exponentiate}{Logical indicating whether or not to exponentiate the the
-  coefficient estimates. This is typical for logistic and multinomial
-  regressions, but a bad idea if there is no log or logit link. Defaults to
-  FALSE.
+\item{exponentiate}{Logical indicating whether or not to exponentiate the
+coefficient estimates. This is typical for logistic and multinomial
+regressions, but a bad idea if there is no log or logit link. Defaults to
+FALSE.}
 
-\code{pheno} and \code{covar} should be data frames with first column holding
-samples IDs and named \code{ID}. Those should correspond to \code{ID} column
-in \code{hla_calls}.
-
-\code{zygo} indicate if additional covariate, indicating sample zygosity
-status, should be added to covariates. HLA allele counts for each sample
-can take the following values \code{0, 1, 2}. To avoid implying ordering on those
-levels and effect size, this information can be split between two variables.
-If \code{zygo} is set to \code{TRUE} zygosity variable is added during model
-fitting, it specifies if sample is homozygous for an allele.
-
-If \code{reduce_counts} is set to \code{TRUE} HLA allele counts are reduced
-to presence / absence indicators. This is done by setting counts for
-homozygotes as \code{1}.
+\item{...}{Further arguments passed to \code{model}.
 
 \code{correction} specifies p-value adjustment method to use, common choice
 is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
@@ -57,25 +39,29 @@ Tibble containing combined results for all alleles in
   \code{hla_calls}.
 }
 \description{
-\code{analyzeHlaAssociations} performs associations analysis on HLA alleles
-calls using statistical model of choice.
+\code{analyzeHlaAssociations} performs associations analysis on single HLA
+allele level using statistical model of choice.
 }
 \examples{
 library("survival")
+
 hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 hla_calls <- readHlaCalls(hla_calls_file)
 pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
 pheno <- read.table(pheno_file, header = TRUE)
 covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 covar <- read.table(covar_file, header = TRUE)
+hla_data <- prepareHlaData(hla_calls = hla_calls,
+                           pheno = pheno,
+                           covar = covar,
+                           inheritance_model = "additive"
+)
 
 # Cox proportional hazards regression model
 analyzeHlaAssociations(model = "coxph",
-                       hla_calls,
-                       pheno,
-                       covar,
-                       zygo = FALSE,
-                       reduce_counts = FALSE,
+                       hla_data = hla_data,
+                       response = c("OS", "OS_DIED"),
+                       covariate = c("AGE", "SEX"),
                        correction = "BH"
 )
 

@@ -245,29 +245,67 @@ reduceHlaCalls <- function(hla_calls,
 
 #' Transform HLA calls to counts table
 #'
-#' \code{hlaCallsToCounts} converts HLA calls data frame into counts table
+#' \code{hlaCallsToCounts} converts HLA calls data frame into counts table.
 #'
 #' @inheritParams checkHlaCallsFormat
+#' @param inheritance_model String specifying inheritance model to use.
+#'   Available choices are \code{"dominant"}, \code{"recessive"},
+#'   \code{"additive"}. In \code{"dominant"} model homozygotes and heterozygotes
+#'   are coded as \code{1}. In \code{"recessive"} model homozygotes are coded as
+#'   \code{1} and all other as \code{0}. In \code{"additive"} model homozygotes
+#'   are coded as \code{2} and heterozygotes as \code{1}.
 #'
-#' @return Data frame containing counts of HLA alleles found in input data
-#'   frame.
+#' @return Data frame containing counts of HLA alleles counted according to
+#'   specified model.
 #'
 #' @examples
 #' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(file)
-#' hlaCallsToCounts(hla_calls)
+#' hlaCallsToCounts(hla_calls, inheritance_model = "additive")
 #'
+#' @importFrom assertthat assert_that is.string
 #' @importFrom qdapTools mtabulate
 #'
 #' @export
-hlaCallsToCounts <- function(hla_calls) {
+hlaCallsToCounts <- function(hla_calls,
+                             inheritance_model = c("dominant", "recessive", "additive")) {
   assert_that(
-    checkHlaCallsFormat(hla_calls)
+    checkHlaCallsFormat(hla_calls),
+    is.string(inheritance_model),
+    see_if(
+      pmatch(inheritance_model,
+             table = c("dominant", "recessive", "additive"),
+             nomatch = 0
+      ) != 0,
+      msg = "inheritance_model should be one of 'dominant', 'recessive', 'additive'"
+    )
   )
-  hla_counts <- hla_calls[, -1]
+
+  inheritance_model <- match.arg(inheritance_model)
+
+  hla_counts <- hla_calls[, -1, drop = FALSE]
   hla_counts <- mtabulate(as.data.frame(t(hla_counts)))
   rownames(hla_counts) <- NULL
-  hla_counts <- hla_counts[, order(names(hla_counts))]
+  hla_counts <- hla_counts[, order(colnames(hla_counts))]
+
+  hla_counts <- switch(inheritance_model,
+                       "dominant" = as.data.frame(
+                         lapply(hla_counts,
+                                function(x) ifelse(x == 2, 1, x)
+                         ),
+                         stringsAsFactors = FALSE,
+                         optional = TRUE
+                       ),
+                       "recessive" = as.data.frame(
+                         lapply(hla_counts,
+                                function(x) ifelse(x == 2, 1, 0)
+                         ),
+                         stringsAsFactors = FALSE,
+                         optional = TRUE
+                       ),
+                       "additive" = hla_counts # Do nothing this is default res
+  )
+
   hla_counts <- cbind(ID = hla_calls[, 1], hla_counts)
 
   return(hla_counts)
