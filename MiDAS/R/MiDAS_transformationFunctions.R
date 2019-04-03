@@ -155,11 +155,11 @@ hlaToAAVariation <- function(hla_calls,
 #' \code{dictionary} file should be a tsv format with header and two columns.
 #' First column should hold allele numbers and second corresponding additional
 #' variables. Optionally a data frame formatted in the same manner can be passed
-#' insted.
+#' instead.
 #'
 #' \code{dictionary} optional parameter that can be also used to access
 #' matchings files shipped with the package. They can be referred to by using
-#' one of following strings:
+#' one of the following strings:
 #'
 #' \code{"2digit_A-allele_expression"} reference data to impute expression
 #' levels for HLA-A alleles.
@@ -170,7 +170,7 @@ hlaToAAVariation <- function(hla_calls,
 #' level the allele would encode a Bw4 epitope it's not really there and it is
 #' assigned to Bw6 group. However in 4-digit resolution these alleles can not be
 #' distinguished from other Bw4 groups. Since alleles with premature stop codons
-#' are rare in those ambigious cases those are assigned to Bw4 group.
+#' are rare in those ambiguous cases those are assigned to Bw4 group.
 #'
 #' \code{"4digit_C-allele_C1-2"} C alleles can be grouped in allele groups C1
 #' and C2.
@@ -178,7 +178,7 @@ hlaToAAVariation <- function(hla_calls,
 #' \code{"2digit_C-allele_expression"} reference data to impute expression
 #' levels for HLA-C alleles.
 #'
-#' \code{"4digit_allele_Ggroup"} HLA alleles can be recoded in G groups,
+#' \code{"4digit_allele_Ggroup"} HLA alleles can be re-coded in G groups,
 #' which defines amino acid identity only in the exons relevant for peptide
 #' binding.
 #'
