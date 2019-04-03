@@ -29,13 +29,35 @@ based on match table (dictionary).
 \code{dictionary} file should be a tsv format with header and two columns.
 First column should hold allele numbers and second corresponding additional
 variables. Optionally a data frame formatted in the same manner can be passed
-insted.
+instead.
 
-\code{dictionary} parameter can be also used to access matchings files
-shipped with the package. They can be referred to by using one of following
-strings: "2digit_A-allele_expression", "2digit_C-allele_expression",
-"4digit_allele_Ggroup", "4digit_B-allele_Bw", "4digit_C-allele_C1-2",
-"4digit_supertype".
+\code{dictionary} optional parameter that can be also used to access
+matchings files shipped with the package. They can be referred to by using
+one of the following strings:
+
+\code{"2digit_A-allele_expression"} reference data to impute expression
+levels for HLA-A alleles.
+
+\code{"4digit_B-allele_Bw"} B alleles can be grouped in allele groups Bw4 and
+Bw6. In some cases HLA alleles containing Bw4 epitope, on nucleotide level
+actually carries a premature stop codon. Meaning that although on nucleotide
+level the allele would encode a Bw4 epitope it's not really there and it is
+assigned to Bw6 group. However in 4-digit resolution these alleles can not be
+distinguished from other Bw4 groups. Since alleles with premature stop codons
+are rare in those ambiguous cases those are assigned to Bw4 group.
+
+\code{"4digit_C-allele_C1-2"} C alleles can be grouped in allele groups C1
+and C2.
+
+\code{"2digit_C-allele_expression"} reference data to impute expression
+levels for HLA-C alleles.
+
+\code{"4digit_allele_Ggroup"} HLA alleles can be re-coded in G groups,
+which defines amino acid identity only in the exons relevant for peptide
+binding.
+
+\code{"4digit_supertype"} A and B alleles can be assigned to so-called
+supertypes.
 }
 \examples{
 file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
