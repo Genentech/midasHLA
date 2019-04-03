@@ -310,3 +310,31 @@ hlaCallsToCounts <- function(hla_calls,
 
   return(hla_counts)
 }
+
+#' Calculate alleles frequencies
+#'
+#' \code{getHlaFrequencies} calculates alleles frequencies in HLA calls data
+#' frame.
+#'
+#' Allele frequencies are counted in reference to sample taking both gene copies
+#' into consideration. `n / (2 * j)` where `n` is the number of allele
+#' occurences and `j` is the sample size.
+#'
+#' @inheritParams checkHlaCallsFormat
+#'
+#' @return Data frame containing the allele and its corresponding frequncies.
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @export
+getHlaFrequencies <- function(hla_calls) {
+  assert_that(
+    checkHlaCallsFormat(hla_calls)
+  )
+
+  allele <- unlist(hla_calls[, -1])
+  allele_freq <- table(allele, useNA = "no") / (2 * nrow(hla_calls))
+  allele_freq <- as.data.frame(allele_freq, stringsAsFactors = FALSE)
+
+  return(allele_freq)
+}
