@@ -500,13 +500,18 @@ prepareHlaData <- function(hla_calls,
   pheno_var <- colnames(pheno)[-1]
   covar_var <- colnames(covar)[-1]
   alleles_var <- colnames(hla_counts)[-1]
+  alleles_freq <- getHlaFrequencies(hla_calls)
 
   hla_data <- structure(
     data,
     response = pheno_var,
     covariate = covar_var,
-    alleles = alleles_var
+    alleles = alleles_var,
+    alleles_freq = alleles_freq,
+    hla_calls = hla_calls,
+    inheritance_model = inheritance_model
   )
+  class(hla_data) <- c("data.frame", "hla_data")
 
   return(hla_data)
 }
