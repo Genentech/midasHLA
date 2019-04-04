@@ -286,7 +286,7 @@ hlaCallsToCounts <- function(hla_calls,
   hla_counts <- hla_calls[, -1, drop = FALSE]
   hla_counts <- mtabulate(as.data.frame(t(hla_counts)))
   rownames(hla_counts) <- NULL
-  hla_counts <- hla_counts[, order(colnames(hla_counts))]
+  hla_counts <- hla_counts[, order(colnames(hla_counts)), drop = FALSE]
 
   hla_counts <- switch(inheritance_model,
                        "dominant" = as.data.frame(
@@ -306,7 +306,7 @@ hlaCallsToCounts <- function(hla_calls,
                        "additive" = hla_counts # Do nothing this is default res
   )
 
-  hla_counts <- cbind(ID = hla_calls[, 1], hla_counts)
+  hla_counts <- cbind(ID = hla_calls[, 1, drop = FALSE], hla_counts)
 
   return(hla_counts)
 }
@@ -338,3 +338,4 @@ getHlaFrequencies <- function(hla_calls) {
 
   return(allele_freq)
 }
+
