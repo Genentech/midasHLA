@@ -6,7 +6,7 @@
 #' @inheritParams checkHlaCallsFormat
 #' @inheritParams hlaCallsToCounts
 #' @param model String specifying statistical model to use.
-#' @param hla_data hla_data object as returned by \code{\link{prepareHlaData}}
+#' @param midas_data midas_data object as returned by \code{\link{prepareHlaData}}
 #'   function.
 #' @param response Character specifying which variables should be treated as
 #'   response variable.
@@ -37,7 +37,7 @@
 #' pheno <- read.table(pheno_file, header = TRUE)
 #' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE)
-#' hla_data <- prepareHlaData(hla_calls = hla_calls,
+#' midas_data <- prepareHlaData(hla_calls = hla_calls,
 #'                            pheno = pheno,
 #'                            covar = covar,
 #'                            inheritance_model = "additive"
@@ -45,7 +45,7 @@
 #'
 #' # Cox proportional hazards regression model
 #' analyzeHlaAssociations(model = "coxph",
-#'                        hla_data = hla_data,
+#'                        midas_data = midas_data,
 #'                        response = c("OS", "OS_DIED"),
 #'                        covariate = c("AGE", "SEX"),
 #'                        correction = "BH"
@@ -59,7 +59,7 @@
 #'
 #' @export
 analyzeHlaAssociations <- function(model = "coxph",
-                                   hla_data,
+                                   midas_data,
                                    response,
                                    covariate,
                                    correction = "BH",
@@ -88,16 +88,16 @@ analyzeHlaAssociations <- function(model = "coxph",
         TRUE
       }
     },
-    see_if(all(response %in% colnames(hla_data)),
-           msg = "response variables can not be found in hla_data"
+    see_if(all(response %in% colnames(midas_data)),
+           msg = "response variables can not be found in midas_data"
     ),
     see_if(is.character(covariate) | is.null(covariate),
            msg = "covariate have to be a character or NULL"
     ),
     {
       if (is.character(covariate)) {
-        see_if(all(covariate %in% colnames(hla_data)),
-               msg = "covariate variables can not be found in hla_data"
+        see_if(all(covariate %in% colnames(midas_data)),
+               msg = "covariate variables can not be found in midas_data"
         )
       } else {
         TRUE
@@ -107,7 +107,7 @@ analyzeHlaAssociations <- function(model = "coxph",
     is.flag(exponentiate)
   )
 
-  alleles <- backquote(attr(hla_data, "alleles"))
+  alleles <- backquote(attr(midas_data, "alleles"))
 
   response <- backquote(response)
   if (substitute(model) %in% c("coxph", "cph")) {
@@ -123,7 +123,7 @@ analyzeHlaAssociations <- function(model = "coxph",
   model_function <- hlaAssocModel(model = model,
                                   response = response,
                                   variable = covariate,
-                                  data = hla_data,
+                                  data = midas_data,
                                   ...
   )
 
@@ -167,11 +167,11 @@ analyzeHlaAssociations <- function(model = "coxph",
 #' pheno <- read.table(pheno_file, header = TRUE)
 #' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE)
-#' hla_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
+#' midas_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
 #' hlaAssocModel(model = "coxph",
 #'               response = "Surv(OS, OS_DIED)",
 #'               variable = c("AGE", "SEX"),
-#'               data = hla_data
+#'               data = midas_data
 #' )
 #'
 #' @importFrom assertthat assert_that is.string see_if
@@ -285,13 +285,13 @@ hlaAssocModel <- function(model,
 #' pheno <- read.table(pheno_file, header = TRUE)
 #' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE)
-#' hla_data <- prepareHlaData(hla_calls = hla_calls,
+#' midas_data <- prepareHlaData(hla_calls = hla_calls,
 #'                            pheno = pheno,
 #'                            covar = covar,
 #'                            inheritance_model = "additive"
 #' )
 #' forwardConditionalSelection(model = "coxph",
-#'                             hla_data = hla_data,
+#'                             midas_data = midas_data,
 #'                             response = c("OS", "OS_DIED"),
 #'                             covariate = c("AGE", "SEX"),
 #'                             th = 0.05,
@@ -306,7 +306,7 @@ hlaAssocModel <- function(model,
 #' @importFrom stats formula resid update
 #' @export
 forwardConditionalSelection <- function(model,
-                                        hla_data,
+                                        midas_data,
                                         response,
                                         covariate,
                                         th,
@@ -337,16 +337,16 @@ forwardConditionalSelection <- function(model,
         TRUE
       }
     },
-    see_if(all(response %in% colnames(hla_data)),
-           msg = "response variables can not be found in hla_data"
+    see_if(all(response %in% colnames(midas_data)),
+           msg = "response variables can not be found in midas_data"
     ),
     see_if(is.character(covariate) | is.null(covariate),
            msg = "covariate have to be a character or NULL"
     ),
     {
       if (is.character(covariate)) {
-        see_if(all(covariate %in% colnames(hla_data)),
-               msg = "covariate variables can not be found in hla_data"
+        see_if(all(covariate %in% colnames(midas_data)),
+               msg = "covariate variables can not be found in midas_data"
         )
       } else {
         TRUE
@@ -357,7 +357,7 @@ forwardConditionalSelection <- function(model,
     is.number(rss_th)
   )
 
-  alleles <- attr(hla_data, "alleles")
+  alleles <- attr(midas_data, "alleles")
 
   response <- backquote(response)
   if (substitute(model) %in% c("coxph", "cph")) {
@@ -373,7 +373,7 @@ forwardConditionalSelection <- function(model,
   object <- hlaAssocModel(model = model,
                           response = response,
                           variable = covariate,
-                          data = hla_data
+                          data = midas_data
   )
 
   vars <- alleles
@@ -464,7 +464,7 @@ prepareHlaData <- function(hla_calls,
                            covar = NULL,
                            inheritance_model = "additive") {
 
-  assert_that(
+  assert_that( #TODO add restircted colnames in data tables
     checkHlaCallsFormat(hla_calls),
     checkAdditionalData(pheno, hla_calls),
     checkAdditionalData(covar, hla_calls, accept.null = TRUE),
@@ -492,26 +492,35 @@ prepareHlaData <- function(hla_calls,
       msg = "some colnames in hla_calls and pheno and covar duplicated"
     ))
 
+
+  pheno <- rapply(pheno, as.character, classes = "factor", how = "replace")
   data <- left_join(hla_counts, pheno, by = "ID")
   if (! is.null(covar)) {
+    covar <- rapply(covar, as.character, classes = "factor", how = "replace")
     data <- left_join(data, covar, by = "ID")
   }
 
   pheno_var <- colnames(pheno)[-1]
   covar_var <- colnames(covar)[-1]
-  alleles_var <- colnames(hla_counts)[-1]
   alleles_freq <- getHlaFrequencies(hla_calls)
 
-  hla_data <- structure(
+# more like add it to tests
+#   assert_that(
+#     see_if(all(colnames(hla_counts)[-1]) %in% alleles_freq$allele,
+#            msg = "Ooops! we are missing some alleles..."
+#     )
+#   )
+
+  midas_data <- structure(
     data,
     response = pheno_var,
     covariate = covar_var,
-    alleles = alleles_var,
-    alleles_freq = alleles_freq,
-    hla_calls = hla_calls,
-    inheritance_model = inheritance_model
+    alleles = alleles_freq[, "allele"],
+    alleles_freq = alleles_freq[, "Freq"],
+    hla_calls = hla_calls, # It is not possible to easly go back from counts to hla_calls due to different inheritance models
+    inheritance_model = inheritance_model,
+    class = c("midas_data", "data.frame") #When using a class in a package, I recommend including the package name in the class name.
   )
-  class(hla_data) <- c("data.frame", "hla_data")
 
-  return(hla_data)
+  return(midas_data)
 }

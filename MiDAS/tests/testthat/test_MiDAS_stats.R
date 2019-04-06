@@ -11,14 +11,14 @@ test_that("HLA allele associations are analyzed properly", {
   pheno <- read.table(pheno_file, header = TRUE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE)
-  hla_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
+  midas_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
 
   load(system.file("extdata", "test_hla_analyze.Rdata", package = "MiDAS"))
 
   res <- analyzeHlaAssociations(model = "coxph",
                                 response = c("OS", "OS_DIED"),
                                 covariate = c("AGE", "SEX"),
-                                hla_data,
+                                midas_data,
                                 correction = "BH"
   )
   expect_equal(as.data.frame(res), as.data.frame(test_hla_analyze[["base"]])) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
@@ -26,7 +26,7 @@ test_that("HLA allele associations are analyzed properly", {
   res <- analyzeHlaAssociations(model = "coxph",
                                 response = c("OS", "OS_DIED"),
                                 covariate = NULL,
-                                hla_data,
+                                midas_data,
                                 correction = "BH"
   )
   expect_equal(
@@ -45,7 +45,7 @@ test_that("HLA allele associations are analyzed properly", {
     analyzeHlaAssociations(model = "lm",
                            response = 1,
                            covariate = c("AGE", "SEX"),
-                           hla_data = hla_data,
+                           midas_data = midas_data,
                            correction = 12
     ),
     "response is not a character vector"
@@ -55,7 +55,7 @@ test_that("HLA allele associations are analyzed properly", {
     analyzeHlaAssociations(model = "coxph",
                            response = "OS",
                            covariate = c("AGE", "SEX"),
-                           hla_data = hla_data,
+                           midas_data = midas_data,
                            correction = 12
     ),
     "cox survival analysis requires response to be a character vector of length 2"
@@ -65,7 +65,7 @@ test_that("HLA allele associations are analyzed properly", {
     analyzeHlaAssociations(model = "lm",
                            response = c("OS", "OS_DIED"),
                            covariate = c("AGE", "SEX"),
-                           hla_data = hla_data,
+                           midas_data = midas_data,
                            correction = 12
     ),
     "response is not a string \\(a length one character vector\\)."
@@ -75,17 +75,17 @@ test_that("HLA allele associations are analyzed properly", {
     analyzeHlaAssociations(model = "lm",
                            response = "foo",
                            covariate = c("AGE", "SEX"),
-                           hla_data = hla_data,
+                           midas_data = midas_data,
                            correction = 12
     ),
-    "response variables can not be found in hla_data"
+    "response variables can not be found in midas_data"
   )
 
   expect_error(
     analyzeHlaAssociations(model = "lm",
                            response = "OS",
                            covariate = 1,
-                           hla_data = hla_data,
+                           midas_data = midas_data,
                            correction = 12
     ),
     "covariate have to be a character or NULL"
@@ -95,17 +95,17 @@ test_that("HLA allele associations are analyzed properly", {
     analyzeHlaAssociations(model = "lm",
                            response = "OS",
                            covariate = "foo",
-                           hla_data = hla_data,
+                           midas_data = midas_data,
                            correction = 12
     ),
-    "covariate variables can not be found in hla_data"
+    "covariate variables can not be found in midas_data"
   )
 
   expect_error(
     analyzeHlaAssociations(model = "lm",
                            response = c("OS", "OS_DIED"),
                            covariate = c("AGE", "SEX"),
-                           hla_data = hla_data,
+                           midas_data = midas_data,
                            correction = 12
     ),
     "response is not a string \\(a length one character vector\\)."
@@ -113,7 +113,7 @@ test_that("HLA allele associations are analyzed properly", {
 
   expect_error(
     analyzeHlaAssociations(model = "lm",
-                           hla_data = hla_data,
+                           midas_data = midas_data,
                            response = "OS",
                            covariate = c("AGE", "SEX"),
                            correction = 1
@@ -123,7 +123,7 @@ test_that("HLA allele associations are analyzed properly", {
 
   expect_error(
     analyzeHlaAssociations(model = "lm",
-                           hla_data = hla_data,
+                           midas_data = midas_data,
                            response = "OS",
                            covariate = c("AGE", "SEX"),
                            exponentiate = 1
@@ -141,19 +141,19 @@ test_that("HLA statistical models are defined properly", {
   pheno <- read.table(pheno_file, header = TRUE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE)
-  hla_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
+  midas_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
 
   fun <- hlaAssocModel(model = "glm",
-                       response = attr(hla_data, "response")[2],
-                       variable = attr(hla_data, "covariate"),
-                       data = hla_data,
+                       response = attr(midas_data, "response")[2],
+                       variable = attr(midas_data, "covariate"),
+                       data = midas_data,
                        family = binomial(link = "logit")
   )
   expect_equal(
     fun,
     glm(
       OS_DIED ~ AGE + SEX,
-      data = hla_data,
+      data = midas_data,
       family = binomial(link = "logit")
     )
   )
@@ -171,22 +171,22 @@ test_that("HLA statistical models are defined properly", {
   )
 
   expect_error(hlaAssocModel(model = "lm",
-                             response = attr(hla_data, "response")[2],
+                             response = attr(midas_data, "response")[2],
                              variable = 1),
                "variable have to be a character or formula"
   )
 
   expect_error(hlaAssocModel(model = "lm",
-                              response = attr(hla_data, "response")[2],
-                              variable = attr(hla_data, "covariate"),
+                              response = attr(midas_data, "response")[2],
+                              variable = attr(midas_data, "covariate"),
                               data = 1),
                "data is not a data.frame"
   )
 
   expect_error(hlaAssocModel(model = "list",
-                             response = attr(hla_data, "response")[2],
-                             variable = attr(hla_data, "covariate"),
-                             data = hla_data,
+                             response = attr(midas_data, "response")[2],
+                             variable = attr(midas_data, "covariate"),
+                             data = midas_data,
                              family = binomial(link = "logit")),
                "object returned by list doesn't have OBJECT bit set"
   )
@@ -201,10 +201,10 @@ test_that("Stepwise conditional alleles subset selection", {
   pheno <- read.table(pheno_file, header = TRUE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE)
-  hla_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
+  midas_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
 
   object <- forwardConditionalSelection("coxph",
-                                        hla_data,
+                                        midas_data,
                                         response = c("OS", "OS_DIED"),
                                         covariate = c("AGE", "SEX"),
                                         th = 0.02
@@ -212,13 +212,13 @@ test_that("Stepwise conditional alleles subset selection", {
 
   test_object <- coxph(
     Surv(OS, OS_DIED) ~ AGE + SEX + `B*14:02` + `DRB1*11:01` + `DRA*01:02`,
-    data = hla_data
+    data = midas_data
   )
   expect_equal(object, test_object)
 
   # test if NULL covariate passes without errors
   object <- forwardConditionalSelection("coxph",
-                                        hla_data,
+                                        midas_data,
                                         response = c("OS", "OS_DIED"),
                                         covariate = NULL,
                                         th = 0.04
@@ -227,7 +227,7 @@ test_that("Stepwise conditional alleles subset selection", {
   test_object <- coxph(
     Surv(OS, OS_DIED) ~ `B*14:02` + `DPB1*14:01` + `B*15:01` + `DRA*01:01` +
       `DQA1*06:01` + `F*01:01`,
-    data = hla_data
+    data = midas_data
   )
   expect_equal(object, test_object)
 
@@ -237,15 +237,15 @@ test_that("Stepwise conditional alleles subset selection", {
   )
 
   expect_error(
-    forwardConditionalSelection(model = "hla_data",
-                                hla_data = hla_data
+    forwardConditionalSelection(model = "midas_data",
+                                midas_data = midas_data
     ),
-               "could not find function hla_data"
+               "could not find function midas_data"
   )
 
   expect_error(
     forwardConditionalSelection(model = "coxph",
-                                hla_data = hla_data,
+                                midas_data = midas_data,
                                 response = 1
     ),
     "response is not a character vector"
@@ -253,7 +253,7 @@ test_that("Stepwise conditional alleles subset selection", {
 
   expect_error(
     forwardConditionalSelection(model = "coxph",
-                                hla_data = hla_data,
+                                midas_data = midas_data,
                                 response = "OS"
     ),
     "cox survival analysis requires response to be a character vector of length 2"
@@ -261,7 +261,7 @@ test_that("Stepwise conditional alleles subset selection", {
 
   expect_error(
     forwardConditionalSelection(model = "lm",
-                                hla_data = hla_data,
+                                midas_data = midas_data,
                                 response = c("OS", "OS_DIED")
     ),
     "response is not a string \\(a length one character vector\\)."
@@ -269,15 +269,15 @@ test_that("Stepwise conditional alleles subset selection", {
 
   expect_error(
     forwardConditionalSelection(model = "lm",
-                                hla_data = hla_data,
+                                midas_data = midas_data,
                                 response = "foo"
     ),
-    "response variables can not be found in hla_data"
+    "response variables can not be found in midas_data"
   )
 
   expect_error(
     forwardConditionalSelection(model = "lm",
-                                hla_data = hla_data,
+                                midas_data = midas_data,
                                 response = "OS",
                                 covariate = 1
 
@@ -287,16 +287,16 @@ test_that("Stepwise conditional alleles subset selection", {
 
   expect_error(
     forwardConditionalSelection(model = "lm",
-                                hla_data = hla_data,
+                                midas_data = midas_data,
                                 response = "OS",
                                 covariate = "foo"
 
     ),
-    "covariate variables can not be found in hla_data"
+    "covariate variables can not be found in midas_data"
   )
 
   expect_error(forwardConditionalSelection(model = "lm",
-                                           hla_data = hla_data,
+                                           midas_data = midas_data,
                                            response = "OS",
                                            covariate = NULL,
                                            th = "foo"
@@ -305,7 +305,7 @@ test_that("Stepwise conditional alleles subset selection", {
   )
 
   expect_error(forwardConditionalSelection(model = "lm",
-                                           hla_data = hla_data,
+                                           midas_data = midas_data,
                                            response = "OS",
                                            covariate = NULL,
                                            th = 0.05,
@@ -315,7 +315,7 @@ test_that("Stepwise conditional alleles subset selection", {
   )
 
   expect_error(forwardConditionalSelection(model = "lm",
-                                           hla_data = hla_data,
+                                           midas_data = midas_data,
                                            response = "OS",
                                            covariate = NULL,
                                            th = 0.05,
@@ -333,8 +333,8 @@ test_that("HLA data is properly formatted", {
   )
   small_pheno <- data.frame(ID = 1:2, OS = c(123, 321), OS_DIED = c(0, 0))
   small_covar <- data.frame(ID = 1:2, AGE = c(23, 24))
-  hla_data <- prepareHlaData(small_hla_calls, small_pheno, small_covar, inheritance_model = "additive")
-  expect_equal(hla_data,
+  midas_data <- prepareHlaData(small_hla_calls, small_pheno, small_covar, inheritance_model = "additive")
+  expect_equal(midas_data,
                structure(
                  data.frame(ID = 1:2,
                             "A*01:01" = c(1, 1),
