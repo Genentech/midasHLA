@@ -3,7 +3,11 @@ context("Transforming MiDAS objects")
 test_that("Amino acids variability is infered correctly", {
   hla_calls <- system.file("extdata/HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(hla_calls)
-  aa_variation <- hlaToAAVariation(hla_calls, indels = TRUE, unkchar = TRUE)
+  aa_variation <-
+    hlaToAAVariation(hla_calls,
+                     indels = TRUE,
+                     unkchar = TRUE,
+                     as_df = FALSE)
   load(system.file("extdata", "test_aa_variation.Rdata", package = "MiDAS"))
   expect_equal(aa_variation, test_aa_variation)
 
@@ -21,6 +25,10 @@ test_that("Amino acids variability is infered correctly", {
 
   expect_error(hlaToAAVariation(hla_calls, alnpath = system.file(package = "MiDAS")),
                sprintf("no alignment files was found in path %s", system.file("inst", package = "MiDAS"))
+  )
+
+  expect_error(hlaToAAVariation(hla_calls, as_df = 1),
+               "as_df is not a flag \\(a length one logical vector\\)."
   )
 })
 

@@ -15,8 +15,11 @@
 #'   should be treated as variability.
 #' @param alnpath String providing optional path to directory containing HLA
 #'   alignment files. See details for further explanations.
+#' @param as_df Logical indicating if data frame should be returned.
+#'   Otherwise function matrix is returned.
 #'
-#' @return Matrix containing variable amino acid positions.
+#' @return Data frame or matrix containing variable amino acid positions. See
+#'   \code{as_df} parameter.
 #'
 #'   Rownames corresponds to ID column of input data frame, and colnames to
 #'   alignment positions for given genes. If no variation in amino acids
@@ -33,12 +36,14 @@
 hlaToAAVariation <- function(hla_calls,
                              indels = TRUE,
                              unkchar = FALSE,
-                             alnpath = system.file("extdata", package = "MiDAS")){
+                             alnpath = system.file("extdata", package = "MiDAS"),
+                             as_df = TRUE){
   assert_that(
     checkHlaCallsFormat(hla_calls),
     is.flag(indels),
     is.flag(unkchar),
-    is.dir(alnpath)
+    is.dir(alnpath),
+    is.flag(as_df)
   )
   ids <- hla_calls[, 1]
   hla_calls <- hla_calls[, -1]
@@ -142,6 +147,15 @@ hlaToAAVariation <- function(hla_calls,
   } else {
     aa_variation <- matrix(nrow = length(ids))
     rownames(aa_variation) <- ids
+  }
+
+  if (as_df) {
+    aa_variation <- as.data.frame(aa_variation,
+                                  optional = TRUE,
+                                  stringsAsFactors = FALSE
+    )
+    aa_variation <- cbind(ID = ids, aa_variation)
+    rownames(aa_variation) <- NULL
   }
 
   return(aa_variation)
