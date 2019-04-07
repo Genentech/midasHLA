@@ -368,20 +368,8 @@ checkAdditionalData <- function(data_frame,
 #' @importFrom purrr is_formula
 #'
 #' @examples
-#' library("survival")
-#' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-#' hla_calls <- readHlaCalls(hla_calls_file)
-#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-#' pheno <- read.table(pheno_file, header = TRUE)
-#' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-#' covar <- read.table(covar_file, header = TRUE)
-#' midas_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
-#' coxmod <- hlaAssocModel(model = "coxph",
-#'                         response = "Surv(OS, OS_DIED)",
-#'                         variable = "1",
-#'                         data = midas_data
-#' )
-#' updateModel(coxmod, "A*01:01", backquote = TRUE, collapse = " + ")
+#' object <- lm(dist ~ 1, data = cars)
+#' updateModel(object, "dist")
 #'
 #' @export
 updateModel <- function(object, x, backquote = TRUE, collapse = " + ") {
@@ -410,12 +398,13 @@ updateModel <- function(object, x, backquote = TRUE, collapse = " + ") {
 #' \code{checkStatisticalModel} asserts if object is an existing fit from a
 #' model function such as lm, glm and many others.
 #'
-#' @inheritParams checkHlaCallsFormat
+#' @inheritParams updateModel
 #'
 #' @return Logical indicating if \code{data_frame} is an existing fit from a
 #' model function such as lm, glm and many others. Otherwise raise error.
 #'
 #' @importFrom assertthat assert_that see_if
+#' @importFrom stats getCall
 #' @examples
 #' object <- lm(dist ~ speed, data = cars)
 #' checkStatisticalModel(object)
