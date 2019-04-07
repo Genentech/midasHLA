@@ -151,30 +151,39 @@ test_that("HLA statistical models are updated properly", {
   covar <- read.table(covar_file, header = TRUE)
   midas_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
   coxmod <- coxph(Surv(OS, OS_DIED) ~ 1, data = midas_data)
-
   expect_equal(updateModel(coxmod, "A*01:01"),
                coxph(Surv(OS, OS_DIED) ~ `A*01:01`, data = midas_data)
   )
 
-  expect_error(updateModel(list(1), "A*01:01"),
+  expect_error(updateModel(coxmod, 1),
+               "x is not a character vector or formula"
+  )
+
+  expect_error(updateModel(coxmod, x = "A*01:01", backquote = 1),
+               "backquote is not a flag \\(a length one logical vector\\)."
+  )
+
+  expect_error(updateModel(coxmod, x = "A*01:01", collapse = 1),
+               "collapse is not a string \\(a length one character vector\\)."
+  )
+})
+
+
+test_that("statistical models are statistical model", {
+  object <- lm(speed ~ dist, data = cars)
+  expect_equal(checkStatisticalModel(object), TRUE)
+
+  expect_error(checkStatisticalModel(list(1)),
                "object have to have the internal OBJECT bit set"
   )
 
-  expect_error(updateModel(data.frame(), "A*01:01"),
+  expect_error(updateModel(speed ~ cars),
                "object have to have an attribute 'call'"
   )
 
   fake_model <- list(call = list(formula = "foo"))
   class(fake_model) <- "fake"
-  expect_error(updateModel(fake_model, "A*01:01"),
+  expect_error(updateModel(fake_model),
                "object have to be a model with defined formula"
   )
-
-  expect_error(updateModel(coxmod, 1),
-               "x have to be a string \\(a length one character vector\\) or formula"
-  )
-
-  # expect_error(updateModel(coxmod, "foo"),
-  #             "variable foo could not be found in object data"
-  # ) TODO
 })
