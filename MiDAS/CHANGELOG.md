@@ -1,3 +1,14 @@
+## 0.0.0.9006 - 6/04/2019
++ analyzing associations and stepwise selection now has been rewriten such that
+  they operate on model objects returned by functions such as lm. The amount of
+  inputs is minimized to only variables that are to be analyzed.
++ hlaAssocModels function has been removed as it became obsolete.
++ hlaToAAVariation now returns data frame by default, matrix still can be
+  returned for now if specified.
++ Functions for calculation alleles and amino acids frequencies were added.
++ Function for converting amino acids data frame have been added.
+
+
 ## 0.0.0.9005 - 18/03/2019
 + now hla calls are merged with phenotypic and covariate data before using 
   statistical functions, using prepareHlaData. This workflow is going to be
