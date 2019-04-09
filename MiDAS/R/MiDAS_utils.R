@@ -170,7 +170,7 @@ getVariableAAPos <- function(alignment,
 #' \code{dictionary} file should be a tsv format with header and two columns.
 #' First column should hold allele numbers and second corresponding additional
 #' variables. Optionally a data frame formatted in the same manner can be passed
-#' insted.
+#' instead.
 #'
 #' @inheritParams checkAlleleFormat
 #' @param dictionary Path to the file containing HLA allele numbers matchings or
@@ -270,7 +270,7 @@ checkHlaCallsFormat <- function(hla_calls) {
 #'
 #' \code{backquote} places backticks around string.
 #'
-#' \code{backquote} is usefull when using HLA allele numbers in fomulas, where
+#' \code{backquote} is useful when using HLA allele numbers in formulas, where
 #' \code{'*'} and \code{':'} characters have special meanings.
 #'
 #' @param x Character vector.

@@ -335,7 +335,7 @@ hlaCallsToCounts <- function(hla_calls,
 #'
 #' Allele frequencies are counted in reference to sample taking both gene copies
 #' into consideration. `n / (2 * j)` where `n` is the number of allele
-#' occurences and `j` is the sample size.
+#' occurrences and `j` is the sample size.
 #'
 #' @inheritParams checkHlaCallsFormat
 #'
@@ -363,7 +363,7 @@ getHlaFrequencies <- function(hla_calls) {
 
 #' Transform amino acids variation data frame to counts table
 #'
-#' \code{aaVariationToCounts} converts ariation data frame data frame into
+#' \code{aaVariationToCounts} converts variation data frame data frame into
 #' counts table.
 #'
 #' @inheritParams hlaCallsToCounts
@@ -451,12 +451,12 @@ aaVariationToCounts <- function(aa_variation,
 #'
 #' Amino acids frequencies are counted in reference to sample taking both gene
 #' copies into consideration. `n / (2 * j)` where `n` is the number of amino
-#' acid occurences and `j` is the sample size.
+#' acid occurrences and `j` is the sample size.
 #'
 #' @inheritParams aaVariationToCounts
 #'
 #' @return Data frame containing the amino acids with positions and its
-#'   corresponding frequncies.
+#'   corresponding frequencies.
 #'
 #' @examples
 #' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")

@@ -8,8 +8,8 @@
 #' @param correction String specifying multiple testing correction method. See
 #'   details for further information.
 #' @param exponentiate Logical indicating whether or not to exponentiate the
-#'   coefficient estimates. Internaly this is passed to \link[broom]{tidy}. This
-#'   is typical for logistic and multinomial regressions, but a bad idea if
+#'   coefficient estimates. Internally this is passed to \link[broom]{tidy}.
+#'   This is typical for logistic and multinomial regressions, but a bad idea if
 #'   there is no log or logit link. Defaults to FALSE.
 #'
 #' \code{correction} specifies p-value adjustment method to use, common choice
@@ -259,7 +259,7 @@ prepareHlaData <- function(hla_calls,
           ))
         )
       ) == 0,
-      msg = "column names in additional data are duplicated or overlapp with alleles in hla_calls"
+      msg = "column names in additional data are duplicated or overlap with alleles in hla_calls"
     ),
     is.string(inheritance_model),
     see_if(

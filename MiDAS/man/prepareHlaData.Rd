@@ -4,20 +4,18 @@
 \alias{prepareHlaData}
 \title{Prepare data for statistical analysis}
 \usage{
-prepareHlaData(hla_calls, pheno, covar = NULL,
-  inheritance_model = "additive")
+prepareHlaData(hla_calls, ..., inheritance_model = "additive")
 }
 \arguments{
 \item{hla_calls}{Data frame containing HLA allele calls, as return by
 \code{\link{readHlaCalls}} function.}
 
-\item{pheno}{Data frame holding phenotypic response variables.}
+\item{...}{Data frames holding additional variables like phenotypic
+  observations or covariates.
 
-\item{covar}{Data frame holding covariates or NULL.
-
-\code{pheno} and \code{covar} should be data frames with first column holding
-samples IDs and named \code{ID}. Those should correspond to \code{ID} column
-in \code{hla_calls}.}
+\code{...} should be data frames with first column holding samples IDs and
+named \code{ID}. Those should correspond to \code{ID} column in
+\code{hla_calls}.}
 
 \item{inheritance_model}{String specifying inheritance model to use.
 Available choices are \code{"dominant"}, \code{"recessive"},
@@ -27,13 +25,12 @@ are coded as \code{1}. In \code{"recessive"} model homozygotes are coded as
 are coded as \code{2} and heterozygotes as \code{1}.}
 }
 \value{
-Data frame with hla counts and pheno, covar. It also holds names of
-  variables under attributes: 'alleles', 'response', 'covariate'.
+Data frame with hla counts and additional variables.
 }
 \description{
-\code{prepareHlaData} binds HLA alleles calls data frame with phenotypic
-observations and covariates, creating an input data for further statistical
-analysis.
+\code{prepareHlaData} binds HLA alleles calls data frame with additional data
+frames like phenotypic observations or covariates, creating an input data for
+further statistical analysis.
 }
 \examples{
 hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")

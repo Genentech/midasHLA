@@ -29,7 +29,7 @@ variables based on the supplied match table (dictionary).
 \code{dictionary} file should be a tsv format with header and two columns.
 First column should hold allele numbers and second corresponding additional
 variables. Optionally a data frame formatted in the same manner can be passed
-insted.
+instead.
 }
 \examples{
 dictionary <- system.file("extdata", "Match_4digit_supertype.txt", package = "MiDAS")
