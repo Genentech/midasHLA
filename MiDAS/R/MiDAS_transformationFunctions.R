@@ -154,7 +154,7 @@ hlaToAAVariation <- function(hla_calls,
                                   optional = TRUE,
                                   stringsAsFactors = FALSE
     )
-    aa_variation <- cbind(ID = ids, aa_variation)
+    aa_variation <- cbind(ID = ids, aa_variation, stringsAsFactors = FALSE)
     rownames(aa_variation) <- NULL
   }
 
@@ -320,7 +320,10 @@ hlaCallsToCounts <- function(hla_calls,
                        "additive" = hla_counts # Do nothing this is default res
   )
 
-  hla_counts <- cbind(ID = hla_calls[, 1, drop = FALSE], hla_counts)
+  hla_counts <- cbind(ID = hla_calls[, 1, drop = FALSE],
+                      hla_counts,
+                      stringsAsFactors = FALSE
+  )
 
   return(hla_counts)
 }
@@ -338,6 +341,11 @@ hlaCallsToCounts <- function(hla_calls,
 #'
 #' @return Data frame containing the allele and its corresponding frequncies.
 #'
+#' @examples
+#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(file)
+#' getHlaFrequencies(hla_calls)
+#'
 #' @importFrom assertthat assert_that
 #'
 #' @export
@@ -353,3 +361,133 @@ getHlaFrequencies <- function(hla_calls) {
   return(allele_freq)
 }
 
+#' Transform amino acids variation data frame to counts table
+#'
+#' \code{aaVariationToCounts} converts ariation data frame data frame into
+#' counts table.
+#'
+#' @inheritParams hlaCallsToCounts
+#' @param aa_variation Data frame holding amino acid variation data as returned
+#'   by \link{hlaToVariable}.
+#'
+#' @return Data frame containing counts of amino acids at specific positions
+#'   counted according to specified model.
+#'
+#' @examples
+#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(file)
+#' aa_variation <- hlaToAAVariation(hla_calls)
+#' aaVariationToCounts(aa_variation, inheritance_model = "additive")
+#'
+#' @importFrom assertthat assert_that is.string
+#' @importFrom qdapTools mtabulate
+#'
+#' @export
+aaVariationToCounts <- function(aa_variation,
+                                inheritance_model = c("dominant", "recessive", "additive")) {
+  assert_that(
+    is.data.frame(aa_variation),
+    see_if(colnames(aa_variation)[1] == "ID",
+           msg = "first column of aa_variation must be named ID"
+    ),
+    is.string(inheritance_model),
+    see_if(
+      pmatch(inheritance_model,
+             table = c("dominant", "recessive", "additive"),
+             nomatch = 0
+      ) != 0,
+      msg = "inheritance_model should be one of 'dominant', 'recessive', 'additive'"
+    )
+  )
+
+  inheritance_model <- match.arg(inheritance_model)
+
+  ids <- aa_variation[, 1]
+  aa_counts <- aa_variation[, -1]
+  aa_ids <- colnames(aa_variation[, -1])
+  aa_ids <- gsub("_[12]_AA", "", aa_ids)
+  aa_counts <- lapply(1:(ncol(aa_counts)),
+                         function(i) {
+                           paste(aa_ids[i], aa_counts[, i], sep = "_")
+                         }
+  )
+  ord <- unique(unlist(aa_counts))
+  aa_counts <- do.call(rbind, aa_counts)
+  aa_counts <- mtabulate(as.data.frame(aa_counts, stringsAsFactors = FALSE))
+  rownames(aa_counts) <- NULL
+  aa_counts <- aa_counts[, ord]
+
+  aa_counts <- switch(
+    inheritance_model,
+    "dominant" = as.data.frame(
+      lapply(aa_counts,
+             function(x)
+               ifelse(x == 2, 1, x)),
+      stringsAsFactors = FALSE,
+      optional = TRUE
+    ),
+    "recessive" = as.data.frame(
+      lapply(aa_counts,
+             function(x)
+               ifelse(x == 2, 1, 0)),
+      stringsAsFactors = FALSE,
+      optional = TRUE
+    ),
+    "additive" = aa_counts # Do nothing this is default res
+  )
+
+  aa_counts <- cbind(ID = aa_variation[, 1, drop = FALSE],
+                     aa_counts,
+                     stringsAsFactors = FALSE
+  )
+
+  return(aa_counts)
+}
+
+#' Calculate amino acids frequencies
+#'
+#' \code{getAAFrequencies} calculates amino acids frequencies in amino acids
+#' data frame.
+#'
+#' Amino acids frequencies are counted in reference to sample taking both gene
+#' copies into consideration. `n / (2 * j)` where `n` is the number of amino
+#' acid occurences and `j` is the sample size.
+#'
+#' @inheritParams aaVariationToCounts
+#'
+#' @return Data frame containing the amino acids with positions and its
+#'   corresponding frequncies.
+#'
+#' @examples
+#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(file)
+#' aa_variation <- hlaToAAVariation(hla_calls)
+#' getAAFrequencies(aa_variation)
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @export
+getAAFrequencies <- function(aa_variation) {
+  assert_that(
+    is.data.frame(aa_variation),
+    see_if(colnames(aa_variation)[1] == "ID",
+           msg = "first column of aa_variation must be named ID"
+    )
+  )
+
+  aa_pos <- aa_variation[, -1]
+  aa_ids <- colnames(aa_variation[, -1])
+  aa_ids <- gsub("_[12]_AA", "", aa_ids)
+  aa_pos <- lapply(1:(ncol(aa_pos)),
+                   function(i) {
+                     paste(aa_ids[i], aa_pos[, i], sep = "_")
+                   }
+  )
+  aa_pos <- unlist(aa_pos)
+
+  aa_freq <- table(aa_pos, useNA = "no") / (2 * nrow(aa_variation))
+  aa_freq <- as.data.frame(aa_freq, stringsAsFactors = FALSE)
+
+
+  return(aa_freq)
+}
