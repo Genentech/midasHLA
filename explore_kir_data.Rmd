@@ -1,0 +1,87 @@
+---
+title: "Explore KIR data"
+author: "Maciej Migdal"
+date: "14 04 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(dplyr)
+library(knitr)
+library(kableExtra)
+```
+
+## some custom function
+```{r custom_fun}
+library(stringi)
+
+hap2genes <- function(x, hap_dict) {
+  x <- unlist(stringi::stri_split_fixed(x, "|"))
+  x <- vapply(x, function(x) unlist(stri_split_fixed(x, pattern = "+")), character(2))
+  apply(x, 2, function(i) colSums(hap_dict[i, ]))
+}
+```
+
+## load data and prepare haplotype 2 genes copy numbers dictionary
+```{r load_data}
+kir <- read.table("KIR_output.txt", header = TRUE, fill = TRUE, stringsAsFactors = FALSE)
+hap_set <- read.table("../kpi/input/HapSet18_v2.txt", header = TRUE, sep ="\t", stringsAsFactors = FALSE)
+hap_dict <- dplyr::select(hap_set, -haplotype, -nomenclature, -freq, -structure)
+rownames(hap_dict) <- hap_set$haplotype
+```
+
+## check haplotypes ambigiuity at genes copy numbers level
+```{r check_ambigiuity}
+haps <- kir$Haplotypes
+ambig <- c()
+for (i in 1:length(haps)) {
+  hap <- haps[i]
+  if (nchar(hap) == 0) next()
+  genes <- hap2genes(hap, hap_dict)
+  if (ncol(genes) > 1) {
+    nonambig <- all(apply(genes, 1, function(row) all(row == row[1])))
+    if (! nonambig) {
+      print(sprintf("Haplotypes for sample %i are ambigious", i))
+      ambig <- append(ambig, i)
+    }
+  }
+}
+
+kable(kir[ambig, ], caption = "ambigious haplotypes") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  scroll_box(width = "100%", height = "200px")
+
+
+# Let's look closer into one of them to see it for our selfs
+ambigious_haplotype <- kir[ambig[1], "Haplotypes"]
+genes <- hap2genes(ambigious_haplotype, hap_dict)
+kable(t(genes), caption = sprintf("Example %s haplotype genes copy numbers", ambigious_haplotype)) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  scroll_box(width = "100%", height = "200px")
+
+
+# Here with ambigious positions only
+ambig_pos <- apply(genes, 1, function(row) ! all(row == row[1]))
+kable(t(genes[ambig_pos, ]), caption = sprintf("Example %s haplotype genes copy numbers - ambigious genes only", ambigious_haplotype)) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  scroll_box(width = "100%", height = "200px")
+
+```
+## test that hap2genes works correctly
+```{r check hap2genes}
+hap <- "1+3|16+3"
+genes_hap2genes <- hap2genes(hap, hap_dict)
+
+hap1 <- c("1", "3")
+hap1_manual <- hap_dict[hap1, ]
+hap1_manual <- colSums(hap1_manual)
+hap2 <- c("16", "3")
+hap2_manual <- hap_dict[hap2, ]
+hap2_manual <- colSums(hap2_manual)
+genes_manual <- cbind(hap1_manual, hap2_manual)
+colnames(genes_manual) <- c("1+3", "16+3")
+
+testthat::expect_equal(genes_hap2genes, genes_manual) # no errors
+```
