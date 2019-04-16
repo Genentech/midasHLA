@@ -170,7 +170,7 @@ getVariableAAPos <- function(alignment,
 #' \code{dictionary} file should be a tsv format with header and two columns.
 #' First column should hold allele numbers and second corresponding additional
 #' variables. Optionally a data frame formatted in the same manner can be passed
-#' insted.
+#' instead.
 #'
 #' @inheritParams checkAlleleFormat
 #' @param dictionary Path to the file containing HLA allele numbers matchings or
@@ -271,7 +271,7 @@ checkHlaCallsFormat <- function(hla_calls) {
 #'
 #' \code{backquote} places backticks around string.
 #'
-#' \code{backquote} is usefull when using HLA allele numbers in fomulas, where
+#' \code{backquote} is useful when using HLA allele numbers in formulas, where
 #' \code{'*'} and \code{':'} characters have special meanings.
 #'
 #' @param x Character vector.
@@ -364,46 +364,23 @@ checkAdditionalData <- function(data_frame,
 #'
 #' @return Updated fit of input model.
 #'
-#' @importFrom assertthat assert_that
+#' @importFrom assertthat assert_that is.flag is.string
 #' @importFrom stats update
 #' @importFrom purrr is_formula
 #'
 #' @examples
-#' library("survival")
-#' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-#' hla_calls <- readHlaCalls(hla_calls_file)
-#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-#' pheno <- read.table(pheno_file, header = TRUE)
-#' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-#' covar <- read.table(covar_file, header = TRUE)
-#' hla_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
-#' coxmod <- hlaAssocModel(model = "coxph",
-#'                         response = "Surv(OS, OS_DIED)",
-#'                         variable = "1",
-#'                         data = hla_data
-#' )
-#' updateModel(coxmod, "A*01:01", backquote = TRUE, collapse = " + ")
+#' object <- lm(dist ~ 1, data = cars)
+#' updateModel(object, "dist")
 #'
 #' @export
 updateModel <- function(object, x, backquote = TRUE, collapse = " + ") {
-  assert_that( # This could be simplified to simple object type is wrong / not supported
-    see_if(is.object(object),
-           msg = "object have to have the internal OBJECT bit set"
-    ),
-    {
-      object_call <- get0("call", envir = as.environment(object))
-      if (! is.null(object_call)) {
-        object_formula <- eval(substitute(formula, env = as.list(object_call)))
-        see_if(is_formula(object_formula),
-               msg = "object have to be a model with defined formula"
-        )
-      } else {
-        structure(FALSE, msg = "object have to have an attribute 'call'")
-      }
-    },
+  assert_that(
+    checkStatisticalModel(object),
     see_if(is.character(x) | is_formula(x),
-           msg = "x have to be a string (a length one character vector) or formula"
-    )
+           msg = "x is not a character vector or formula"
+    ),
+    is.flag(backquote),
+    is.string(collapse)
   )
 
   if (is.character(x)) {
@@ -415,4 +392,40 @@ updateModel <- function(object, x, backquote = TRUE, collapse = " + ") {
   new_object <- eval.parent(new_object)
 
   return(new_object)
+}
+
+#' Assert statistical model
+#'
+#' \code{checkStatisticalModel} asserts if object is an existing fit from a
+#' model function such as lm, glm and many others.
+#'
+#' @inheritParams updateModel
+#'
+#' @return Logical indicating if \code{data_frame} is an existing fit from a
+#' model function such as lm, glm and many others. Otherwise raise error.
+#'
+#' @importFrom assertthat assert_that see_if
+#' @importFrom stats getCall
+#' @examples
+#' object <- lm(dist ~ speed, data = cars)
+#' checkStatisticalModel(object)
+#'
+#' @export
+checkStatisticalModel <- function(object) { # TODO simplyfy output of this function; or something like object is not a stat model: potential problem bla bla
+  assert_that(
+    see_if(is.object(object),
+           msg = "object have to have the internal OBJECT bit set"
+    ),
+    {
+      object_call <- getCall(object)
+      if (! is.null(object_call)) {
+        object_formula <- eval(substitute(formula, env = as.list(object_call)))
+        see_if(is_formula(object_formula),
+               msg = "object have to be a model with defined formula"
+        )
+      } else {
+        structure(FALSE, msg = "object have to have an attribute 'call'")
+      }
+    }
+  )
 }

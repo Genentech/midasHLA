@@ -3,7 +3,11 @@ context("Transforming MiDAS objects")
 test_that("Amino acids variability is infered correctly", {
   hla_calls <- system.file("extdata/HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(hla_calls)
-  aa_variation <- hlaToAAVariation(hla_calls, indels = TRUE, unkchar = TRUE)
+  aa_variation <-
+    hlaToAAVariation(hla_calls,
+                     indels = TRUE,
+                     unkchar = TRUE,
+                     as_df = FALSE)
   load(system.file("extdata", "test_aa_variation.Rdata", package = "MiDAS"))
   expect_equal(aa_variation, test_aa_variation)
 
@@ -21,6 +25,10 @@ test_that("Amino acids variability is infered correctly", {
 
   expect_error(hlaToAAVariation(hla_calls, alnpath = system.file(package = "MiDAS")),
                sprintf("no alignment files was found in path %s", system.file("inst", package = "MiDAS"))
+  )
+
+  expect_error(hlaToAAVariation(hla_calls, as_df = 1),
+               "as_df is not a flag \\(a length one logical vector\\)."
   )
 })
 
@@ -77,5 +85,113 @@ test_that("HLA calls table is converted to counts table", {
   expect_error(
     hlaCallsToCounts(hla_calls, inheritance_model = "foo"),
     "inheritance_model should be one of 'dominant', 'recessive', 'additive'"
+  )
+})
+
+test_that("hla frequencies are calculated properly", {
+  minimal_hla_calls <- data.frame(
+    ID = c("P1", "P2"),
+    A_1 = c("A*01:01", "A*02:01"),
+    A_2 = c("A*02:01", "A*01:01"),
+    stringsAsFactors = FALSE
+  )
+  hla_freq <- getHlaFrequencies(minimal_hla_calls)
+  test_hla_freq <- data.frame(
+    allele = c("A*01:01", "A*02:01"),
+    Freq = c(0.5, 0.5),
+    stringsAsFactors = FALSE
+  )
+  expect_equal(hla_freq, test_hla_freq)
+
+  # checkHlaCallsFormat tests are ommited here
+})
+
+test_that("amino acids variation data frame is converted to counts table", {
+  minimal_hla_calls <- data.frame(
+    ID = c("P1", "P2"),
+    A_1 = c("A*01:01", "A*02:01"),
+    A_2 = c("A*02:01", "A*01:01"),
+    stringsAsFactors = FALSE
+  )
+  aa_var <- hlaToAAVariation(minimal_hla_calls)[, 1:5]
+
+  aa_counts <- aaVariationToCounts(aa_var, inheritance_model = "additive")
+  test_aa_counts <- data.frame(
+    ID = c("P1", "P2"),
+    A_44_K = c(1, 1),
+    A_44_R = c(1, 1),
+    A_62_Q = c(1, 1),
+    A_62_G = c(1, 1),
+    stringsAsFactors = FALSE
+  )
+  expect_equal(aa_counts, test_aa_counts)
+
+  aa_counts <- aaVariationToCounts(aa_var, inheritance_model = "dominant")
+  test_aa_counts <- data.frame(
+    ID = c("P1", "P2"),
+    A_44_K = c(1, 1),
+    A_44_R = c(1, 1),
+    A_62_Q = c(1, 1),
+    A_62_G = c(1, 1),
+    stringsAsFactors = FALSE
+  )
+  expect_equal(aa_counts, test_aa_counts)
+
+  aa_counts <- aaVariationToCounts(aa_var, inheritance_model = "recessive")
+  test_aa_counts <- data.frame(
+    ID = c("P1", "P2"),
+    A_44_K = c(0, 0),
+    A_44_R = c(0, 0),
+    A_62_Q = c(0, 0),
+    A_62_G = c(0, 0),
+    stringsAsFactors = FALSE
+  )
+  expect_equal(aa_counts, test_aa_counts)
+
+  expect_error(
+    aaVariationToCounts(c("x", "c"), inheritance_model = "additive"),
+    "aa_variation is not a data frame"
+  )
+
+  expect_error(
+    aaVariationToCounts(aa_var[, -1], inheritance_model = "additive"),
+    "first column of aa_variation must be named ID"
+  )
+
+  expect_error(
+    aaVariationToCounts(aa_var, inheritance_model = 123),
+    "inheritance_model is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(
+    aaVariationToCounts(aa_var, inheritance_model = "foo"),
+    "inheritance_model should be one of 'dominant', 'recessive', 'additive'"
+  )
+})
+
+test_that("amino acids frequencies are calculated properly", {
+  minimal_hla_calls <- data.frame(
+    ID = c("P1", "P2"),
+    A_1 = c("A*01:01", "A*02:01"),
+    A_2 = c("A*02:01", "A*01:01"),
+    stringsAsFactors = FALSE
+  )
+  aa_var <- hlaToAAVariation(minimal_hla_calls)[, 1:5]
+  aa_freq <- getAAFrequencies(aa_var)
+  test_aa_freq <- data.frame(
+    aa_pos = c("A_44_K", "A_44_R", "A_62_G", "A_62_Q"),
+    Freq = c(0.5, 0.5, 0.5, 0.5),
+    stringsAsFactors = FALSE
+  )
+  expect_equal(aa_freq, test_aa_freq)
+
+  expect_error(
+    aaVariationToCounts(c("x", "c"), inheritance_model = "additive"),
+    "aa_variation is not a data frame"
+  )
+
+  expect_error(
+    aaVariationToCounts(aa_var[, -1], inheritance_model = "additive"),
+    "first column of aa_variation must be named ID"
   )
 })
