@@ -50,7 +50,7 @@
 #'
 #' @export
 analyzeAssociations <- function(object,
-                                variables,
+                                variables, # TODO check if variables are specified in object,  # opcja all
                                 correction = "BH",
                                 exponentiate = FALSE) {
   assert_that(
@@ -121,11 +121,11 @@ analyzeAssociations <- function(object,
 #' forwardConditionalSelection(object,
 #'                             variables = c("B*14:02", "DRB1*11:01"),
 #'                             th = 0.05,
-#'                             keep = FALSE,
 #'                             rss_th = 1e-07
 #' )
 #'
-#' @importFrom assertthat assert_that is.flag is.number
+#' @importFrom assertthat assert_that is.number
+#' @importFrom dplyr bind_rows tibble
 #' @importFrom purrr map_dfr
 #' @importFrom rlang warn
 #' @importFrom stats formula resid
@@ -134,21 +134,19 @@ analyzeAssociations <- function(object,
 forwardConditionalSelection <- function(object,
                                         variables,
                                         th,
-                                        keep = FALSE,
                                         rss_th = 1e-07) {
   assert_that(
     checkStatisticalModel(object),
     is.character(variables),
     is.number(th),
-    is.flag(keep),
     is.number(rss_th)
   )
 
   prev_formula <- formula(object)
   prev_variables <- all.vars(prev_formula)
 
-  best <- list(object)
-  i <- 2
+  best <- list()
+  i <- 1
 
   while (TRUE) {
     new_variables <- variables[! variables %in% prev_variables]
@@ -184,11 +182,27 @@ forwardConditionalSelection <- function(object,
     i <- i + 1
   }
 
-  if (! keep) {
-    best <- best[[length(best)]]
+  if (length(best) > 0) {
+    results <- lapply(
+      X = best,
+      FUN = function(obj) {
+        cov <- formula(obj)[[3]]
+        cov <- all.vars(cov)
+        cov <- cov[-length(cov)]
+        obj_tidy <- tidy(obj)
+        obj_tidy <- obj_tidy[length(cov) + 1, ]
+        obj_tidy$covariates <- paste(cov, collapse = " + ")
+        return(obj_tidy)
+      }
+    )
+    results <- bind_rows(results)
+    results$term <- gsub("`", "", results$term)
+    results <- results[results$term %in% variables, ]
+  } else {
+    results <- tibble()
   }
 
-  return(best)
+  return(results)
 }
 
 #' Prepare data for statistical analysis
