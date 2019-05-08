@@ -8,6 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
+devtools::load_all("MiDAS")
 library(dplyr)
 library(knitr)
 library(kableExtra)
@@ -28,8 +29,25 @@ hap2genes <- function(x, hap_dict) {
 ```{r load_data}
 kir <- read.table("KIR_output.txt", header = TRUE, fill = TRUE, stringsAsFactors = FALSE)
 hap_set <- read.table("../kpi/input/HapSet18_v2.txt", header = TRUE, sep ="\t", stringsAsFactors = FALSE)
-hap_dict <- dplyr::select(hap_set, -haplotype, -nomenclature, -freq, -structure)
+hap_dict <- dplyr::select(hap_set, X3DL3, X2DS2, X2DL2, X2DL3, X2DP1, X2DL1, X3DP1, X2DL4, X3DL1, X3DS1, X2DL5, X2DS3, X2DS5, X2DS4, X2DS1, X3DL2)
 rownames(hap_dict) <- hap_set$haplotype
+```
+
+## test that hap2genes works correctly
+```{r check hap2genes}
+hap <- "1+3|16+3"
+genes_hap2genes <- hap2genes(hap, hap_dict)
+
+hap1 <- c("1", "3")
+hap1_manual <- hap_dict[hap1, ]
+hap1_manual <- colSums(hap1_manual)
+hap2 <- c("16", "3")
+hap2_manual <- hap_dict[hap2, ]
+hap2_manual <- colSums(hap2_manual)
+genes_manual <- cbind(hap1_manual, hap2_manual)
+colnames(genes_manual) <- c("1+3", "16+3")
+
+testthat::expect_equal(genes_hap2genes, genes_manual) # no errors
 ```
 
 ## check haplotypes ambigiuity at genes copy numbers level
@@ -67,21 +85,33 @@ ambig_pos <- apply(genes, 1, function(row) ! all(row == row[1]))
 kable(t(genes[ambig_pos, ]), caption = sprintf("Example %s haplotype genes copy numbers - ambigious genes only", ambigious_haplotype)) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
   scroll_box(width = "100%", height = "200px")
-
 ```
-## test that hap2genes works correctly
-```{r check hap2genes}
-hap <- "1+3|16+3"
-genes_hap2genes <- hap2genes(hap, hap_dict)
 
-hap1 <- c("1", "3")
-hap1_manual <- hap_dict[hap1, ]
-hap1_manual <- colSums(hap1_manual)
-hap2 <- c("16", "3")
-hap2_manual <- hap_dict[hap2, ]
-hap2_manual <- colSums(hap2_manual)
-genes_manual <- cbind(hap1_manual, hap2_manual)
-colnames(genes_manual) <- c("1+3", "16+3")
+# check consistency on simple presence/absence of gene level
+```{r}
+haps <- kir$Haplotypes
+ambig <- c()
+for (i in 1:length(haps)) {
+  hap <- haps[i]
+  if (nchar(hap) == 0) next()
+  genes <- hap2genes(hap, hap_dict)
+  # reduce to presence/absence
+  genes <- ifelse(genes == 0, 0, 1)
+  if (ncol(genes) > 1) {
+    nonambig <- all(apply(genes, 1, function(row) all(row == row[1])))
+    if (! nonambig) {
+      print(sprintf("Haplotypes for sample %i are ambigious", i))
+      ambig <- append(ambig, i)
+    }
+  }
+}
 
-testthat::expect_equal(genes_hap2genes, genes_manual) # no errors
+# No ambigiutity found on presence / absence level!
 ```
+
+# Conclusions:
+1. In HapSet only first 16 variables (X3DL3, X2DS2, X2DL2, X2DL3, X2DP1, X2DL1, 
+   X3DP1, X2DL4, X3DL1, X3DS1, X2DL5, X2DS3, X2DS5, X2DS4, X2DS1, X3DL2) 
+   correspons to genes.
+2. While for ambigiuous haplotypes we also observe ambiguity on gene numbers 
+   level, yet they are consistient on presence / abscence level.
