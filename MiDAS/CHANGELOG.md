@@ -1,3 +1,11 @@
+## 0.0.0.9007 - 8/05/2019
++ forwardConditionalSelection has been renamed to analyzeConditionalAssociations,
+  now it returns tibble containing results from conditional testing as the new
+  covariates are beeing added. For each variable results from the test upon which
+  the variable is used for the first time are showed.
++ Warnings about uninitialized variables comming from dplyr functions has been 
+  solved.
+
 ## 0.0.0.9006 - 6/04/2019
 + analyzing associations and stepwise selection now has been rewriten such that
   they operate on model objects returned by functions such as lm. The amount of
