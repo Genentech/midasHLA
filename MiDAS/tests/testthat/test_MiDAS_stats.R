@@ -62,7 +62,7 @@ test_that("Stepwise conditional alleles subset selection", {
     prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
 
   object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
-  res <- forwardConditionalSelection(object,
+  res <- analyzeConditionalAssociations(object,
                                      variables = c("B*14:02", "DRB1*11:01"),
                                      th = 0.05)
   test_res <- list(
@@ -78,13 +78,13 @@ test_that("Stepwise conditional alleles subset selection", {
   # Tests for checkStatisticalModel errors are ommitted here
 
   expect_error(
-    forwardConditionalSelection(object,
+    analyzeConditionalAssociations(object,
                                 variables = 1),
     "variables is not a character vector"
   )
 
   expect_error(
-    forwardConditionalSelection(
+    analyzeConditionalAssociations(
       object,
       variables = c("B*14:02", "DRB1*11:01"),
       th = "bar"
@@ -93,7 +93,7 @@ test_that("Stepwise conditional alleles subset selection", {
   )
 
   expect_error(
-    forwardConditionalSelection(
+    analyzeConditionalAssociations(
       object,
       variables = c("B*14:02", "DRB1*11:01"),
       th = 0.05,

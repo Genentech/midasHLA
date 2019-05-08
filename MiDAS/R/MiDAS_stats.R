@@ -81,30 +81,25 @@ analyzeAssociations <- function(object,
   return(results)
 }
 
-#' Stepwise conditional variables selection
+#' Stepwise conditional association analysis
 #'
-#' \code{stepwiseConditionalSelection} performs stepwise conditional testing
-#' adding the previous top-associated variable as covariate, until there’s no
+#' \code{analyzeConditionalAssociations} performs stepwise conditional testing
+#' adding the previous top-associated variable as covariate, until there is no
 #' more significant variables based on a self-defined threshold.
 #'
 #' Selection criteria is the p-value from the test on coefficients values.
 #'
 #' @inheritParams updateModel
-#' @param variables Character specifying variables to use in selection
-#'   procedure.
-#' @param th number specifying p-value threshold for a term to be included into
-#'   model.
-#' @param keep logical flag indicating if the output should be a list of models
-#'   resulting from each selection step. Default is to return only the final
-#'   model.
+#' @inheritParams analyzeAssociations
+#' @param th number specifying p-value threshold for a variable to be considered
+#'   significant.
 #' @param rss_th number specifying residual sum of squares threshold at which
-#'   function should stop adding additional terms.
+#'   function should stop adding additional variables. As the residual sum of
+#'   squares approaches \code{0} the perfect fit is obtained making further
+#'   attempts at variables selection nonsense, thus function is stopped. This
+#'   behavior can be controlled using \code{rss_th}.
 #'
-#' As the residual sum of squares approaches \code{0} the perfect fit is
-#' obtained making further attempts at model selection nonsense, thus function
-#' is stopped. This behavior can be controlled using \code{rss_th}.
-#'
-#' @return selected model or list of models. See \code{keep} parameter.
+#' @return tibble with stepwise conditional testsing results.
 #'
 #' @examples
 #' library("survival")
@@ -122,7 +117,7 @@ analyzeAssociations <- function(object,
 #'
 #' ## define base model with covariates only
 #' object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
-#' forwardConditionalSelection(object,
+#' analyzeConditionalAssociations(object,
 #'                             variables = c("B*14:02", "DRB1*11:01"),
 #'                             th = 0.05,
 #'                             rss_th = 1e-07
@@ -135,10 +130,11 @@ analyzeAssociations <- function(object,
 #' @importFrom stats formula resid
 #'
 #' @export
-forwardConditionalSelection <- function(object,
-                                        variables,
-                                        th,
-                                        rss_th = 1e-07) {
+analyzeConditionalAssociations <- function(object,
+                                           variables,
+                                           th,
+                                           rss_th = 1e-07,
+                                           exponentiate = FALSE) {
   assert_that(
     checkStatisticalModel(object),
     is.character(variables),
@@ -161,7 +157,9 @@ forwardConditionalSelection <- function(object,
                               x = .,
                               backquote = TRUE,
                               collapse = " + "
-      ))
+                  ),
+                  exponentiate = exponentiate
+      )
     )
     results <- results[results[["term"]] %in% backquote(new_variables), ]
     eesults <- results[! is.infinite(results[["p.value"]]), ]
