@@ -45,7 +45,7 @@
 #'
 #' @importFrom assertthat assert_that see_if is.flag is.string
 #' @importFrom broom tidy
-#' @importFrom dplyr bind_rows left_join filter mutate rename
+#' @importFrom dplyr bind_rows
 #' @importFrom stats p.adjust
 #'
 #' @export
@@ -69,10 +69,14 @@ analyzeAssociations <- function(object,
 
   results <- lapply(results, tidy, exponentiate = exponentiate)
   results <- bind_rows(results)
-  results <- mutate(results, term = gsub("`", "", term))
-  results <- filter(results, term %in% variables)
+  results$term <- gsub("`", "", results$term)
+  results <- results[results$term %in% variables, ]
 
-  results <- mutate(results, p.adjusted = p.adjust(p.value, correction))
+  results$p.adjusted <- p.adjust(results$p.value, correction)
+
+  covariates <- formula(object)[[3]]
+  covariates <- deparse(covariates)
+  results$covariates <- covariates
 
   return(results)
 }
