@@ -45,12 +45,12 @@
 #'
 #' @importFrom assertthat assert_that see_if is.flag is.string
 #' @importFrom broom tidy
-#' @importFrom dplyr bind_rows left_join filter mutate rename
+#' @importFrom dplyr bind_rows
 #' @importFrom stats p.adjust
 #'
 #' @export
 analyzeAssociations <- function(object,
-                                variables,
+                                variables, # TODO check if variables are specified in object,  # opcja all
                                 correction = "BH",
                                 exponentiate = FALSE) {
   assert_that(
@@ -69,47 +69,46 @@ analyzeAssociations <- function(object,
 
   results <- lapply(results, tidy, exponentiate = exponentiate)
   results <- bind_rows(results)
-  results <- mutate(results, term = gsub("`", "", term))
-  results <- filter(results, term %in% variables)
+  results$term <- gsub("`", "", results$term)
+  results <- results[results$term %in% variables, ]
 
-  results <- mutate(results, p.adjusted = p.adjust(p.value, correction))
+  results$p.adjusted <- p.adjust(results$p.value, correction)
+
+  covariates <- formula(object)[[3]]
+  covariates <- deparse(covariates)
+  results$covariates <- covariates
 
   return(results)
 }
 
-#' Stepwise conditional variables selection
+#' Stepwise conditional association analysis
 #'
-#' \code{stepwiseConditionalSelection} performs stepwise conditional testing
-#' adding the previous top-associated variable as covariate, until there’s no
+#' \code{analyzeConditionalAssociations} performs stepwise conditional testing
+#' adding the previous top-associated variable as covariate, until there is no
 #' more significant variables based on a self-defined threshold.
 #'
 #' Selection criteria is the p-value from the test on coefficients values.
 #'
 #' @inheritParams updateModel
-#' @param variables Character specifying variables to use in selection
-#'   procedure.
-#' @param th number specifying p-value threshold for a term to be included into
-#'   model.
-#' @param keep logical flag indicating if the output should be a list of models
-#'   resulting from each selection step. Default is to return only the final
-#'   model.
+#' @inheritParams analyzeAssociations
+#' @param th number specifying p-value threshold for a variable to be considered
+#'   significant.
 #' @param rss_th number specifying residual sum of squares threshold at which
-#'   function should stop adding additional terms.
+#'   function should stop adding additional variables. As the residual sum of
+#'   squares approaches \code{0} the perfect fit is obtained making further
+#'   attempts at variables selection nonsense, thus function is stopped. This
+#'   behavior can be controlled using \code{rss_th}.
 #'
-#' As the residual sum of squares approaches \code{0} the perfect fit is
-#' obtained making further attempts at model selection nonsense, thus function
-#' is stopped. This behavior can be controlled using \code{rss_th}.
-#'
-#' @return selected model or list of models. See \code{keep} parameter.
+#' @return tibble with stepwise conditional testsing results.
 #'
 #' @examples
 #' library("survival")
 #' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(hla_calls_file)
 #' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-#' pheno <- read.table(pheno_file, header = TRUE)
+#' pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
 #' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-#' covar <- read.table(covar_file, header = TRUE)
+#' covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
 #' midas_data <- prepareHlaData(hla_calls = hla_calls,
 #'                              pheno = pheno,
 #'                              covar = covar,
@@ -118,37 +117,36 @@ analyzeAssociations <- function(object,
 #'
 #' ## define base model with covariates only
 #' object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
-#' forwardConditionalSelection(object,
+#' analyzeConditionalAssociations(object,
 #'                             variables = c("B*14:02", "DRB1*11:01"),
 #'                             th = 0.05,
-#'                             keep = FALSE,
 #'                             rss_th = 1e-07
 #' )
 #'
-#' @importFrom assertthat assert_that is.flag is.number
+#' @importFrom assertthat assert_that is.number
+#' @importFrom dplyr bind_rows tibble
 #' @importFrom purrr map_dfr
 #' @importFrom rlang warn
 #' @importFrom stats formula resid
 #'
 #' @export
-forwardConditionalSelection <- function(object,
-                                        variables,
-                                        th,
-                                        keep = FALSE,
-                                        rss_th = 1e-07) {
+analyzeConditionalAssociations <- function(object,
+                                           variables,
+                                           th,
+                                           rss_th = 1e-07,
+                                           exponentiate = FALSE) {
   assert_that(
     checkStatisticalModel(object),
     is.character(variables),
     is.number(th),
-    is.flag(keep),
     is.number(rss_th)
   )
 
   prev_formula <- formula(object)
   prev_variables <- all.vars(prev_formula)
 
-  best <- list(object)
-  i <- 2
+  best <- list()
+  i <- 1
 
   while (TRUE) {
     new_variables <- variables[! variables %in% prev_variables]
@@ -159,12 +157,14 @@ forwardConditionalSelection <- function(object,
                               x = .,
                               backquote = TRUE,
                               collapse = " + "
-      ))
+                  ),
+                  exponentiate = exponentiate
+      )
     )
-    results <- results[results$term %in% backquote(new_variables), ]
-    results <- results[! is.infinite(results$p.value), ]
+    results <- results[results[["term"]] %in% backquote(new_variables), ]
+    eesults <- results[! is.infinite(results[["p.value"]]), ]
 
-    i_min <- which.min(results$p.value)
+    i_min <- which.min(results[["p.value"]])
     if (length(i_min) == 0) break
     if (results$p.value[i_min] > th) break
 
@@ -184,11 +184,27 @@ forwardConditionalSelection <- function(object,
     i <- i + 1
   }
 
-  if (! keep) {
-    best <- best[[length(best)]]
+  if (length(best) > 0) {
+    results <- lapply(
+      X = best,
+      FUN = function(obj) {
+        cov <- formula(obj)[[3]]
+        cov <- all.vars(cov)
+        cov <- cov[-length(cov)]
+        obj_tidy <- tidy(obj)
+        obj_tidy <- obj_tidy[length(cov) + 1, ]
+        obj_tidy$covariates <- paste(cov, collapse = " + ")
+        return(obj_tidy)
+      }
+    )
+    results <- bind_rows(results)
+    results$term <- gsub("`", "", results$term)
+    results <- results[results$term %in% variables, ]
+  } else {
+    results <- tibble()
   }
 
-  return(best)
+  return(results)
 }
 
 #' Prepare data for statistical analysis

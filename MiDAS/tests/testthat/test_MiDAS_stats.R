@@ -7,9 +7,9 @@ test_that("HLA allele associations are analyzed properly", {
     system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(hla_calls_file)
   pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-  pheno <- read.table(pheno_file, header = TRUE)
+  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-  covar <- read.table(covar_file, header = TRUE)
+  covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
   midas_data <<-
     prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
 
@@ -27,6 +27,7 @@ test_that("HLA allele associations are analyzed properly", {
   test_res$term <- gsub("`", "", test_res$term)
   test_res <- test_res[test_res$term %in% c("A*01:01", "A*02:01"), ]
   test_res$p.adjusted <- p.adjust(test_res$p.value, "BH")
+  test_res$covariates <- "AGE + SEX"
 
   expect_equal(as.data.frame(res), as.data.frame(test_res)) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
 
@@ -54,45 +55,36 @@ test_that("Stepwise conditional alleles subset selection", {
     system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(hla_calls_file)
   pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-  pheno <- read.table(pheno_file, header = TRUE)
+  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-  covar <- read.table(covar_file, header = TRUE)
+  covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
   midas_data <<-
     prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
 
   object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
-
-  res <- forwardConditionalSelection(object,
+  res <- analyzeConditionalAssociations(object,
                                      variables = c("B*14:02", "DRB1*11:01"),
                                      th = 0.05)
-  test_object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX + `B*14:02` + `DRB1*11:01`,
-                       data = midas_data)
-  expect_equal(res, test_object)
-
-  res <- forwardConditionalSelection(object,
-                                     variables = c("B*14:02", "DRB1*11:01"),
-                                     th = 0.05,
-                                     keep = TRUE)
-  test_object <- list(
-    coxph(Surv(OS, OS_DIED) ~ AGE + SEX,
-          data = midas_data),
-    coxph(Surv(OS, OS_DIED) ~ AGE + SEX + `B*14:02`,
-          data = midas_data),
-    coxph(Surv(OS, OS_DIED) ~ AGE + SEX + `B*14:02` + `DRB1*11:01`,
-          data = midas_data)
+  test_res <- list(
+    tidy(updateModel(object, "B*14:02"))[3, ],
+    tidy(updateModel(object, c("B*14:02", "DRB1*11:01")))[4, ]
   )
-  expect_equal(res, test_object)
+  test_res <- do.call("rbind", test_res)
+  test_res$term <- gsub("`", "", test_res$term)
+  test_res$covariates <- c("AGE + SEX", "AGE + SEX + B*14:02")
 
-  # Tests for checkStatisticalModel errors are ommitted how
+  expect_equal(res, test_res)
+
+  # Tests for checkStatisticalModel errors are ommitted here
 
   expect_error(
-    forwardConditionalSelection(object,
+    analyzeConditionalAssociations(object,
                                 variables = 1),
     "variables is not a character vector"
   )
 
   expect_error(
-    forwardConditionalSelection(
+    analyzeConditionalAssociations(
       object,
       variables = c("B*14:02", "DRB1*11:01"),
       th = "bar"
@@ -101,17 +93,7 @@ test_that("Stepwise conditional alleles subset selection", {
   )
 
   expect_error(
-    forwardConditionalSelection(
-      object,
-      variables = c("B*14:02", "DRB1*11:01"),
-      th = 0.05,
-      keep = 1
-    ),
-    "keep is not a flag \\(a length one logical vector\\)."
-  )
-
-  expect_error(
-    forwardConditionalSelection(
+    analyzeConditionalAssociations(
       object,
       variables = c("B*14:02", "DRB1*11:01"),
       th = 0.05,
