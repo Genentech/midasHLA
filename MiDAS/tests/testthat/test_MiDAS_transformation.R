@@ -225,7 +225,7 @@ test_that("hla counts table can be rreverted to hla calls", {
   colnames(err_hla_counts) <- make.names(colnames(err_hla_counts))
   expect_error(
     countsToHlaCalls(err_hla_counts),
-    "counts table column names contains impropely formated HLA alleles numbers"
+    "counts table column names contains improperly formated HLA alleles numbers"
   )
 
   err_hla_counts <- hla_counts

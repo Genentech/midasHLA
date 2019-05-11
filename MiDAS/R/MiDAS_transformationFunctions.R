@@ -530,10 +530,10 @@ getAAFrequencies <- function(aa_variation) {
 #' \code{hlaCallsToCounts(hla_calls, inheritance_model = 'additive')}.
 #'
 #' @param counts Data frame with HLA alleles counts, as returned by
-#'   \link{hlaCallsToCounts} function. First column should contains samples IDs,
+#'   \link{hlaCallsToCounts} function. First column should contain samples IDs,
 #'   following columns should be named with valid HLA alleles numbers.
 #'
-#' @return HLA calls data frame.
+#' @return Data frame containing HLA allele calls.
 #'
 #' @examples
 #' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
@@ -554,7 +554,7 @@ countsToHlaCalls <- function(counts) {
            msg = "column names contains NA values"
     ),
     see_if(all(checkAlleleFormat(colnames(counts)[-1])),
-           msg = "counts table column names contains impropely formated HLA alleles numbers"
+           msg = "counts table column names contains improperly formated HLA alleles numbers"
     ),
     see_if(
       all(counts[-1] == 0 | counts[-1] == 1 | counts[-1] == 2, na.rm = TRUE),
