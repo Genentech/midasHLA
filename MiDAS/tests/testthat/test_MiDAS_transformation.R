@@ -195,3 +195,50 @@ test_that("amino acids frequencies are calculated properly", {
     "first column of aa_variation must be named ID"
   )
 })
+
+test_that("hla counts table can be rreverted to hla calls", {
+  hla_calls <- data.frame(ID = c("PAT1", "PAT2", "PAT3"),
+                          A_1 = c("A*02:01", "A*02:01", "A*01:01"),
+                          A_2 = c("A*02:01", "A*02:06", "A*24:02"),
+                          B_1 = c("B*13:02", "B*15:01", "B*13:02"),
+                          B_2 = c("B*40:01", "B*57:01", "B*57:01"),
+                          stringsAsFactors = FALSE
+  )
+  hla_counts <- hlaCallsToCounts(hla_calls, inheritance_model = "additive")
+  expect_equal(countsToHlaCalls(hla_counts), hla_calls)
+
+  err_hla_counts <- hla_counts
+  colnames(err_hla_counts) <- NULL
+  expect_error(
+    countsToHlaCalls(err_hla_counts),
+    "count table has no column names"
+  )
+
+  err_hla_counts <- hla_counts
+  colnames(err_hla_counts)[2] <- NA
+  expect_error(
+    countsToHlaCalls(err_hla_counts),
+    "column names contains NA values"
+  )
+
+  err_hla_counts <- hla_counts
+  colnames(err_hla_counts) <- make.names(colnames(err_hla_counts))
+  expect_error(
+    countsToHlaCalls(err_hla_counts),
+    "counts table column names contains impropely formated HLA alleles numbers"
+  )
+
+  err_hla_counts <- hla_counts
+  err_hla_counts[2, 2] <- 1.5
+  expect_error(
+    countsToHlaCalls(err_hla_counts),
+    "counts can only take values 0, 1 or 2"
+  )
+
+  err_hla_counts <- hla_counts
+  err_hla_counts[2, 2:3] <- 2
+  expect_error(
+    countsToHlaCalls(err_hla_counts),
+    "some samples have more than two alleles per gene"
+  )
+})
