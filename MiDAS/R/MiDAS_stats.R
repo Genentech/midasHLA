@@ -157,8 +157,7 @@ analyzeConditionalAssociations <- function(object,
                               x = .,
                               backquote = TRUE,
                               collapse = " + "
-                  ),
-                  exponentiate = exponentiate
+                  )
       )
     )
     results <- results[results[["term"]] %in% backquote(new_variables), ]
@@ -191,7 +190,7 @@ analyzeConditionalAssociations <- function(object,
         cov <- formula(obj)[[3]]
         cov <- all.vars(cov)
         cov <- cov[-length(cov)]
-        obj_tidy <- tidy(obj)
+        obj_tidy <- tidy(obj, exponentiate = exponentiate)
         obj_tidy <- obj_tidy[length(cov) + 1, ]
         obj_tidy$covariates <- paste(cov, collapse = " + ")
         return(obj_tidy)
