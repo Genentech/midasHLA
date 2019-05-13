@@ -518,3 +518,76 @@ getAAFrequencies <- function(aa_variation) {
 
   return(aa_freq)
 }
+
+#' Convert HLA counts table to HLA calls
+#'
+#' \code{countsToHlaCalls} converts counts table to hla calls data frame, this
+#' is useful when working with data from UK Biobank.
+#'
+#' Note that proper HLA calls reconstruction from counts table is only possible
+#' under additive inheritance model. This mode of operation is the only one
+#' implemented so the function will always treat counts table as coming from
+#' \code{hlaCallsToCounts(hla_calls, inheritance_model = 'additive')}.
+#'
+#' @param counts Data frame with HLA alleles counts, as returned by
+#'   \link{hlaCallsToCounts} function. First column should contain samples IDs,
+#'   following columns should be named with valid HLA alleles numbers.
+#'
+#' @return Data frame containing HLA allele calls.
+#'
+#' @examples
+#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(file)
+#' hla_counts <- hlaCallsToCounts(hla_calls, inheritance_model = "additive")
+#' countsToHlaCalls(hla_counts)
+#'
+#' @importFrom assertthat assert_that see_if
+#' @importFrom uniqtag cumcount make_unique_all
+#'
+#' @export
+countsToHlaCalls <- function(counts) {
+  assert_that(
+    see_if(! is.null(colnames(counts)),
+           msg = "count table has no column names"
+    ),
+    see_if(! any(is.na(colnames(counts))),
+           msg = "column names contains NA values"
+    ),
+    see_if(all(checkAlleleFormat(colnames(counts)[-1])),
+           msg = "counts table column names contains improperly formated HLA alleles numbers"
+    ),
+    see_if(
+      all(counts[-1] == 0 | counts[-1] == 1 | counts[-1] == 2, na.rm = TRUE),
+      msg = "counts can only take values 0, 1 or 2"
+    )
+  )
+
+  ids <- counts[1]
+  counts <- counts[-1]
+  counts[is.na(counts)] <- 0
+
+  alleles <- colnames(counts)
+  genes <- gsub("\\*.*$", "", alleles)
+  genes <- sort(unique(genes))
+  genes <- make_unique_all(rep(genes, each = 2), sep = "_")
+
+  haplotypes <- apply(counts, 1, function(row) {
+    hap_ids <- row != 0
+    hap <- alleles[hap_ids]
+    hap <- rep(hap, times = row[hap_ids])
+    row_genes <- gsub("\\*.*", "", hap)
+    assert_that(
+      see_if(! any(cumcount(row_genes) > 2),
+             msg = "some samples have more than two alleles per gene"
+      )
+    )
+    names(hap) <- make_unique_all(row_genes, sep = "_")
+    hap[genes]
+  })
+  haplotypes <- t(haplotypes)
+  colnames(haplotypes) <- genes
+
+  new_df <- cbind(ids, haplotypes, stringsAsFactors = FALSE)
+
+  return(new_df)
+}
