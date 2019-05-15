@@ -429,3 +429,44 @@ checkStatisticalModel <- function(object) { # TODO simplyfy output of this funct
     }
   )
 }
+
+#'
+x <- c("1+3|16+3", "1+1")
+kirHaplotype2Counts(x)
+#' @import assertthat assert_that see_if
+kirHaplotype2Counts <- function(x, # make it so it will work with NAs
+                               hap_dict = system.file("extdata", "kir_hapset.tsv", package = "MiDAS"),
+                               binary = TRUE) {
+  hap_dict <- read.table(hap_dict)
+  counts <- unlist(stringi::stri_split_fixed(x, "|"))
+  counts <- vapply(
+    X = stri_split_fixed(counts, pattern = "+"),
+    FUN = function(x) ifelse(is.na(x), c(NA, NA), x),
+    FUN.VALUE = character(2)
+  )
+  counts <- apply(counts, 2, function(i) colSums(hap_dict[i, ]))
+
+  if (binary) {
+    counts <- ifelse(counts > 1, 1, counts)
+  }
+
+  counts <- vapply(
+    X = x,
+    FUN = function(hap) {
+      i <- unlist(stringi::stri_split_fixed(hap, "|"))
+      hap <- counts[, i]
+      if (length(i) > 1) {
+        assert_that(
+          all(apply(hap, 2, function(col) all(col == hap[, 1]))),
+          msg = sprintf("haplotype %s can not be unambigously converted to counts", hap)
+        )
+        hap <- hap[, 1]
+      }
+      return(hap)
+    },
+    FUN.VALUE = numeric(length = ncol(hap_dict))
+  )
+  counts <- t(counts)
+
+  return(counts)
+}

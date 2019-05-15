@@ -229,3 +229,7 @@ readHlaAlignments <- function(file,
 
   return(aln)
 }
+
+readKirTypes <- function() {
+
+}
