@@ -11,9 +11,16 @@ getAlleleResolution(allele)
 }
 \value{
 Integer vector specifying alleles resolutions.
+
+  \code{NA} values are accepted and returned as \code{NA}.
 }
 \description{
-Infers HLA allele resolution
+\code{getAlleleResolution} returns the resolution of input HLA allele
+numbers.
+}
+\details{
+HLA allele resolution can take following values: 2, 4, 6, 8.See
+\url{http://hla.alleles.org/nomenclature/naming.html} for more details.
 }
 \examples{
 allele <- c("A*01:01", "A*01:02")

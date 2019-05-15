@@ -15,8 +15,10 @@ test_that("HLA allele calls are read properly", {
   load(system.file("extdata", "test_hla_calls_res.Rdata", package = "MiDAS"))
   expect_equal(res2, test_res2)
 
-  expect_error(readHlaCalls("/path/to/non/existing/file"),
-               "Path '/path/to/non/existing/file' does not exist"
+  expect_error(readHlaCalls(file.path("path", "to", "nonexisting", "file")),
+               sprintf("Path '%s' does not exist",
+                       file.path("path", "to", "nonexisting", "file")
+               )
   )
 
   expect_error(readHlaCalls(file, resolution = "foo"),
@@ -27,30 +29,6 @@ test_that("HLA allele calls are read properly", {
                            A_1 = c("A*01", "A*02", "A*03"),
                            A_2 = c("A*01", "B*02", "C*03")
   )
-
-  fake_calls_no_id <- tempfile()
-  write.table(fake_calls[, c(2, 1, 3)],
-              file = fake_calls_no_id,
-              sep = "\t",
-              row.names = FALSE,
-              col.names = TRUE
-  )
-  expect_error(readHlaCalls(fake_calls_no_id, resolution = 2),
-               "First column of input file should specify samples id"
-  )
-  unlink(fake_calls_no_id)
-
-  fake_calls_non_hla_numbers <- tempfile()
-  write.table(fake_calls[, c(1, 1, 3)],
-              file = fake_calls_non_hla_numbers,
-              sep = "\t",
-              row.names = FALSE,
-              col.names = TRUE
-  )
-  expect_error(readHlaCalls(fake_calls_non_hla_numbers, resolution = 2),
-               "Values in input file doesn't follow HLA numbers specification"
-  )
-  unlink(fake_calls_non_hla_numbers)
 
   fake_calls_non_uniq_genes <- tempfile()
   write.table(fake_calls,
@@ -88,8 +66,10 @@ test_that("HLA allele alignments are read properly", {
   test_res2 <- c(2, 4, 2, 2, 2, 2, 2)
   expect_equal(res2, test_res2)
 
-  expect_error(readHlaAlignments("/path/to/non/existing/file"),
-               "Path '/path/to/non/existing/file' does not exist"
+  expect_error(readHlaAlignments(file.path("path", "to", "nonexisting", "file")),
+               sprintf("Path '%s' does not exist",
+                       file.path("path", "to", "nonexisting", "file")
+               )
   )
 
   expect_error(

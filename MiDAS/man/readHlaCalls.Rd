@@ -7,17 +7,28 @@
 readHlaCalls(file, resolution = 4)
 }
 \arguments{
-\item{file}{Path to the file containing HLA allele calls.}
+\item{file}{Path to input file.}
 
-\item{resolution}{Integer specifying the resolution to which the HLA allele
-calls should be reduced to. Valid values should be one of
-`2, 4, 6, 8`. To disable this functionality see `reduce` parameter.}
+\item{resolution}{Numeric vector of length one specifying output resolution.}
 }
 \value{
 Data frame containing HLA allele calls.
+
+\code{NA} values in input file are parsed unchanged.
 }
 \description{
-Reads data table with HLA allele calls from file in tsv format.
+\code{readHlaCalls} reads table with HLA allele calls from file.
+}
+\details{
+Input file have to be a tsv formatted table with header. First column should
+contain samples IDs, further columns should hold corresponding HLA allele
+numbers.
+
+\code{resolution} parameter can be used to reduce HLA allele numbers. If
+reduction is not needed \code{resolution} can be set to 8. \code{resolution}
+parameter can take following values: 2, 4, 6, 8. For more details
+about HLA allele numbers resolution see
+\url{http://hla.alleles.org/nomenclature/naming.html}.
 }
 \examples{
 file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")

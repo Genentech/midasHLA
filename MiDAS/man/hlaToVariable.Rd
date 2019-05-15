@@ -7,32 +7,61 @@
 hlaToVariable(hla_calls, dictionary, nacols.rm = TRUE)
 }
 \arguments{
-\item{hla_calls}{data frame containing HLA allele calls, in a format as
-return by `readHlaCalls` function.}
+\item{hla_calls}{Data frame containing HLA allele calls, as return by
+\code{\link{readHlaCalls}} function.}
 
-\item{dictionary}{table containing allele numbers matchings, this can be
-either path to tsv file or a data frame. Fist column
-should contain alleles and second corresponding
-assignments. Optionally matchings files shipped with the
-package can be referred to by using one of following
-strings: "2digit_A-allele_expression",
-"2digit_C-allele_expression", "4digit_allele_Ggroup",
-"4digit_B-allele_Bw", "4digit_C-allele_C1-2",
-"4digit_supertype".}
+\item{dictionary}{Path to the file containing HLA allele numbers matchings or
+data frame providing this information. See details for further
+explanations.}
 
 \item{nacols.rm}{logical indicating if result columns that contain only
 \code{NA} should be removed.}
 }
 \value{
 Data frame of hla numbers converted to additional variables according
-        to match table.
+  to match table.
 }
 \description{
-Converts hla calls data frame according to match table
+\code{hlaToVariable} converts hla calls data frame to additional variables
+based on match table (dictionary).
+}
+\details{
+\code{dictionary} file should be a tsv format with header and two columns.
+First column should hold allele numbers and second corresponding additional
+variables. Optionally a data frame formatted in the same manner can be passed
+instead.
+
+\code{dictionary} optional parameter that can be also used to access
+matchings files shipped with the package. They can be referred to by using
+one of the following strings:
+
+\code{"2digit_A-allele_expression"} reference data to impute expression
+levels for HLA-A alleles.
+
+\code{"4digit_B-allele_Bw"} B alleles can be grouped in allele groups Bw4 and
+Bw6. In some cases HLA alleles containing Bw4 epitope, on nucleotide level
+actually carries a premature stop codon. Meaning that although on nucleotide
+level the allele would encode a Bw4 epitope it's not really there and it is
+assigned to Bw6 group. However in 4-digit resolution these alleles can not be
+distinguished from other Bw4 groups. Since alleles with premature stop codons
+are rare in those ambiguous cases those are assigned to Bw4 group.
+
+\code{"4digit_C-allele_C1-2"} C alleles can be grouped in allele groups C1
+and C2.
+
+\code{"2digit_C-allele_expression"} reference data to impute expression
+levels for HLA-C alleles.
+
+\code{"4digit_allele_Ggroup"} HLA alleles can be re-coded in G groups,
+which defines amino acid identity only in the exons relevant for peptide
+binding.
+
+\code{"4digit_supertype"} A and B alleles can be assigned to so-called
+supertypes.
 }
 \examples{
-hla_calls <- system.file("extdata/HLAHD_output_example.txt", package = "MiDAS")
-hla_calls <- readHlaCalls(hla_calls)
+file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+hla_calls <- readHlaCalls(file)
 hlaToVariable(hla_calls, dictionary = "4digit_supertype")
 
 }

@@ -1,29 +1,34 @@
 #' Converts HLA allele numbers to amino acid variation
 #'
-#' Converts HLA allele numbers data frame to a matrix holding information on
-#' amino acid level variation.
+#' \code{hlaToAAVariation} converts HLA allele numbers data frame to a matrix
+#' holding information on amino acid level variation.
 #'
-#' @param hla_calls Data frame containing HLA allele calls, in a format as
-#'                  return by `readHlaCalls` function.
+#' \code{alnpath} can be used to provide path to directory containing custom
+#' alignment files. Each alignment file have to be named following EBI database
+#' convention GENENAME_prot.txt. By default \code{alnpath} points to directory
+#' containing alignments files shipped with the package.
+#'
+#' @inheritParams checkHlaCallsFormat
 #' @param indels Logical indicating whether indels should be considered as
-#'               variability.
+#'   variability.
 #' @param unkchar Logical indicating whether unknown characters in the alignment
-#'                should be treated as variability.
-#' @param alnpath String providing optional path to directory containing
-#'                HLA alignment files. Each alignment file have to be named
-#'                following EBI database convention GENENAME_prot.txt. If
-#'                \code{alnpath} is provided alignment files shipped with the
-#'                package are ignored.
+#'   should be treated as variability.
+#' @param alnpath String providing optional path to directory containing HLA
+#'   alignment files. See details for further explanations.
+#' @param as_df Logical indicating if data frame should be returned.
+#'   Otherwise function matrix is returned.
 #'
-#' @return Matrix containing variable amino acid positions. Rownames corresponds
-#'         to ID column of input data frame, and colnames to alignment positions
-#'         for given genes. If no variation in amino acids alignments is found
-#'         function return one column matrix filled with `NA`.
+#' @return Data frame or matrix containing variable amino acid positions. See
+#'   \code{as_df} parameter.
+#'
+#'   Rownames corresponds to ID column of input data frame, and colnames to
+#'   alignment positions for given genes. If no variation in amino acids
+#'   alignments is found function return one column matrix filled with `NA`.
 #'
 #' @examples
-#' hla_calls <- system.file("extdata/HLAHD_output_example.txt", package = "MiDAS")
-#' hla_calls <- readHlaCalls(hla_calls)
-#' aa_variation <- hlaToAAVariation(hla_calls)
+#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(file)
+#' hlaToAAVariation(hla_calls)
 #'
 #' @importFrom assertthat assert_that see_if is.dir is.flag
 #' @importFrom stringi stri_split_fixed
@@ -31,21 +36,14 @@
 hlaToAAVariation <- function(hla_calls,
                              indels = TRUE,
                              unkchar = FALSE,
-                             alnpath = system.file("extdata", package = "MiDAS")){
+                             alnpath = system.file("extdata", package = "MiDAS"),
+                             as_df = TRUE){
   assert_that(
-    is.data.frame(hla_calls),
-    see_if(nrow(hla_calls) >= 1 & ncol(hla_calls) >= 2,
-           msg = "input data frame have to have at least 1 rows and 2 columns"
-    ),
-    see_if(! all(checkAlleleFormat(hla_calls[, 1]), na.rm = TRUE),
-           msg = "first column of input data frame should specify samples id"
-    ),
-    see_if(all(checkAlleleFormat(unlist(hla_calls[, -1])), na.rm = TRUE),
-           msg = "values in input data frame doesn't follow HLA numbers specification"
-    ),
+    checkHlaCallsFormat(hla_calls),
     is.flag(indels),
     is.flag(unkchar),
-    is.dir(alnpath)
+    is.dir(alnpath),
+    is.flag(as_df)
   )
   ids <- hla_calls[, 1]
   hla_calls <- hla_calls[, -1]
@@ -151,46 +149,78 @@ hlaToAAVariation <- function(hla_calls,
     rownames(aa_variation) <- ids
   }
 
+  if (as_df) {
+    aa_variation <- as.data.frame(aa_variation,
+                                  optional = TRUE,
+                                  stringsAsFactors = FALSE
+    )
+    aa_variation <- cbind(ID = ids, aa_variation, stringsAsFactors = FALSE)
+    rownames(aa_variation) <- NULL
+  }
+
   return(aa_variation)
 }
 
 #' Converts hla calls data frame according to match table
 #'
-#' @param hla_calls data frame containing HLA allele calls, in a format as
-#'                  return by `readHlaCalls` function.
-#' @param dictionary table containing allele numbers matchings, this can be
-#'                   either path to tsv file or a data frame. Fist column
-#'                   should contain alleles and second corresponding
-#'                   assignments. Optionally matchings files shipped with the
-#'                   package can be referred to by using one of following
-#'                   strings: "2digit_A-allele_expression",
-#'                   "2digit_C-allele_expression", "4digit_allele_Ggroup",
-#'                   "4digit_B-allele_Bw", "4digit_C-allele_C1-2",
-#'                   "4digit_supertype".
+#' \code{hlaToVariable} converts hla calls data frame to additional variables
+#' based on match table (dictionary).
+#'
+#' \code{dictionary} file should be a tsv format with header and two columns.
+#' First column should hold allele numbers and second corresponding additional
+#' variables. Optionally a data frame formatted in the same manner can be passed
+#' instead.
+#'
+#' \code{dictionary} optional parameter that can be also used to access
+#' matchings files shipped with the package. They can be referred to by using
+#' one of the following strings:
+#'
+#' \code{"2digit_A-allele_expression"} reference data to impute expression
+#' levels for HLA-A alleles.
+#'
+#' \code{"4digit_B-allele_Bw"} B alleles can be grouped in allele groups Bw4 and
+#' Bw6. In some cases HLA alleles containing Bw4 epitope, on nucleotide level
+#' actually carries a premature stop codon. Meaning that although on nucleotide
+#' level the allele would encode a Bw4 epitope it's not really there and it is
+#' assigned to Bw6 group. However in 4-digit resolution these alleles can not be
+#' distinguished from other Bw4 groups. Since alleles with premature stop codons
+#' are rare in those ambiguous cases those are assigned to Bw4 group.
+#'
+#' \code{"4digit_C-allele_C1-2"} C alleles can be grouped in allele groups C1
+#' and C2.
+#'
+#' \code{"2digit_C-allele_expression"} reference data to impute expression
+#' levels for HLA-C alleles.
+#'
+#' \code{"4digit_allele_Ggroup"} HLA alleles can be re-coded in G groups,
+#' which defines amino acid identity only in the exons relevant for peptide
+#' binding.
+#'
+#' \code{"4digit_supertype"} A and B alleles can be assigned to so-called
+#' supertypes.
+#'
+#' @inheritParams checkHlaCallsFormat
+#' @inheritParams convertAlleleToVariable
 #' @param nacols.rm logical indicating if result columns that contain only
-#'                 \code{NA} should be removed.
+#'   \code{NA} should be removed.
 #'
 #' @return Data frame of hla numbers converted to additional variables according
-#'         to match table.
+#'   to match table.
 #'
 #' @examples
-#' hla_calls <- system.file("extdata/HLAHD_output_example.txt", package = "MiDAS")
-#' hla_calls <- readHlaCalls(hla_calls)
+#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(file)
 #' hlaToVariable(hla_calls, dictionary = "4digit_supertype")
 #'
 #' @importFrom assertthat assert_that is.string is.flag see_if
+#' @importFrom rlang warn
 #' @export
 hlaToVariable <- function(hla_calls,
                           dictionary,
                           nacols.rm = TRUE) {
   assert_that(
     is.data.frame(hla_calls),
-    see_if(! all(checkAlleleFormat(hla_calls[, 1]), na.rm = TRUE),
-           msg = "first column of input data frame should specify samples id"
-    ),
-    see_if(all(checkAlleleFormat(unlist(hla_calls[, -1])), na.rm = TRUE),
-           msg = "values in input data frame doesn't follow HLA numbers specification"
-    ),
+    checkHlaCallsFormat(hla_calls),
     is.flag(nacols.rm)
   )
   if (is.string(dictionary)) {
@@ -200,6 +230,9 @@ hlaToVariable <- function(hla_calls,
     )
     lib <- gsub("^Match_", "", gsub(".txt$", "", lib))
     if (dictionary %in% lib) {
+      if (dictionary == "4digit_B-allele_Bw") {
+        warn("In ambigious cases Bw4 will be assigned! See documentation for more details.")
+      }
       dictionary <- system.file(
         "extdata",
         paste0("Match_", dictionary, ".txt"),
@@ -209,7 +242,8 @@ hlaToVariable <- function(hla_calls,
   }
   variable <- as.data.frame(
     lapply(hla_calls[, -1], convertAlleleToVariable, dictionary = dictionary),
-    stringsAsFactors = FALSE
+    stringsAsFactors = FALSE,
+    row.names = 1:nrow(hla_calls)
   )
   if (nacols.rm) {
     variable <- Filter(function(x) ! all(is.na(x)), variable)
@@ -217,4 +251,343 @@ hlaToVariable <- function(hla_calls,
   variable <- cbind(hla_calls[, 1], variable)
   colnames(variable) <- c("ID", colnames(variable[, -1]))
   return(variable)
+}
+
+#' Reduce hla calls data frame resolution
+#'
+#' \code{reduceHlaCalls} reduces hla calls data frame to specified resolution.
+#'
+#' If \code{resolution} is greater than resolution of \code{hla_calls} elements,
+#' those elements will be returned unchanged. Elements with optional suffixes
+#' are not reduced.
+#'
+#' @inheritParams checkHlaCallsFormat
+#' @inheritParams reduceAlleleResolution
+#'
+#' @return Data frame containing HLA allele calls reduced to required
+#'   resolution.
+#'
+#' @examples
+#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(file)
+#' reduceHlaCalls(hla_calls, resolution = 2)
+#'
+#' @export
+reduceHlaCalls <- function(hla_calls,
+                           resolution = 4) {
+  assert_that(checkHlaCallsFormat(hla_calls))
+  hla_calls[, -1] <- as.data.frame(
+    lapply(hla_calls[, -1], reduceAlleleResolution, resolution = resolution),
+    stringsAsFactors = FALSE
+  )
+
+  return(hla_calls)
+}
+
+#' Transform HLA calls to counts table
+#'
+#' \code{hlaCallsToCounts} converts HLA calls data frame into counts table.
+#'
+#' @inheritParams checkHlaCallsFormat
+#' @param inheritance_model String specifying inheritance model to use.
+#'   Available choices are \code{"dominant"}, \code{"recessive"},
+#'   \code{"additive"}. In \code{"dominant"} model homozygotes and heterozygotes
+#'   are coded as \code{1}. In \code{"recessive"} model homozygotes are coded as
+#'   \code{1} and all other as \code{0}. In \code{"additive"} model homozygotes
+#'   are coded as \code{2} and heterozygotes as \code{1}.
+#'
+#' @return Data frame containing counts of HLA alleles counted according to
+#'   specified model.
+#'
+#' @examples
+#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(file)
+#' hlaCallsToCounts(hla_calls, inheritance_model = "additive")
+#'
+#' @importFrom assertthat assert_that is.string
+#' @importFrom qdapTools mtabulate
+#'
+#' @export
+hlaCallsToCounts <- function(hla_calls,
+                             inheritance_model = c("dominant", "recessive", "additive")) {
+  assert_that(
+    checkHlaCallsFormat(hla_calls),
+    is.string(inheritance_model),
+    see_if(
+      pmatch(inheritance_model,
+             table = c("dominant", "recessive", "additive"),
+             nomatch = 0
+      ) != 0,
+      msg = "inheritance_model should be one of 'dominant', 'recessive', 'additive'"
+    )
+  )
+
+  inheritance_model <- match.arg(inheritance_model)
+
+  hla_counts <- hla_calls[, -1, drop = FALSE]
+  hla_counts <- mtabulate(as.data.frame(t(hla_counts)))
+  rownames(hla_counts) <- NULL
+  hla_counts <- hla_counts[, order(colnames(hla_counts)), drop = FALSE]
+
+  hla_counts <- switch(inheritance_model,
+                       "dominant" = as.data.frame(
+                         lapply(hla_counts,
+                                function(x) ifelse(x == 2, 1, x)
+                         ),
+                         stringsAsFactors = FALSE,
+                         optional = TRUE
+                       ),
+                       "recessive" = as.data.frame(
+                         lapply(hla_counts,
+                                function(x) ifelse(x == 2, 1, 0)
+                         ),
+                         stringsAsFactors = FALSE,
+                         optional = TRUE
+                       ),
+                       "additive" = hla_counts # Do nothing this is default res
+  )
+
+  hla_counts <- cbind(ID = hla_calls[, 1, drop = FALSE],
+                      hla_counts,
+                      stringsAsFactors = FALSE
+  )
+
+  return(hla_counts)
+}
+
+#' Calculate alleles frequencies
+#'
+#' \code{getHlaFrequencies} calculates alleles frequencies in HLA calls data
+#' frame.
+#'
+#' Allele frequencies are counted in reference to sample taking both gene copies
+#' into consideration. `n / (2 * j)` where `n` is the number of allele
+#' occurrences and `j` is the sample size.
+#'
+#' @inheritParams checkHlaCallsFormat
+#'
+#' @return Data frame containing the allele and its corresponding frequncies.
+#'
+#' @examples
+#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(file)
+#' getHlaFrequencies(hla_calls)
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @export
+getHlaFrequencies <- function(hla_calls) {
+  assert_that(
+    checkHlaCallsFormat(hla_calls)
+  )
+
+  allele <- unlist(hla_calls[, -1])
+  allele_freq <- table(allele, useNA = "no") / (2 * nrow(hla_calls))
+  allele_freq <- as.data.frame(allele_freq, stringsAsFactors = FALSE)
+
+  return(allele_freq)
+}
+
+#' Transform amino acids variation data frame to counts table
+#'
+#' \code{aaVariationToCounts} converts variation data frame data frame into
+#' counts table.
+#'
+#' @inheritParams hlaCallsToCounts
+#' @param aa_variation Data frame holding amino acid variation data as returned
+#'   by \link{hlaToVariable}.
+#'
+#' @return Data frame containing counts of amino acids at specific positions
+#'   counted according to specified model.
+#'
+#' @examples
+#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(file)
+#' aa_variation <- hlaToAAVariation(hla_calls)
+#' aaVariationToCounts(aa_variation, inheritance_model = "additive")
+#'
+#' @importFrom assertthat assert_that is.string
+#' @importFrom qdapTools mtabulate
+#'
+#' @export
+aaVariationToCounts <- function(aa_variation,
+                                inheritance_model = c("dominant", "recessive", "additive")) {
+  assert_that(
+    is.data.frame(aa_variation),
+    see_if(colnames(aa_variation)[1] == "ID",
+           msg = "first column of aa_variation must be named ID"
+    ),
+    is.string(inheritance_model),
+    see_if(
+      pmatch(inheritance_model,
+             table = c("dominant", "recessive", "additive"),
+             nomatch = 0
+      ) != 0,
+      msg = "inheritance_model should be one of 'dominant', 'recessive', 'additive'"
+    )
+  )
+
+  inheritance_model <- match.arg(inheritance_model)
+
+  ids <- aa_variation[, 1]
+  aa_counts <- aa_variation[, -1]
+  aa_ids <- colnames(aa_variation[, -1])
+  aa_ids <- gsub("_[12]_AA", "", aa_ids)
+  aa_counts <- lapply(1:(ncol(aa_counts)),
+                         function(i) {
+                           paste(aa_ids[i], aa_counts[, i], sep = "_")
+                         }
+  )
+  ord <- unique(unlist(aa_counts))
+  aa_counts <- do.call(rbind, aa_counts)
+  aa_counts <- mtabulate(as.data.frame(aa_counts, stringsAsFactors = FALSE))
+  rownames(aa_counts) <- NULL
+  aa_counts <- aa_counts[, ord]
+
+  aa_counts <- switch(
+    inheritance_model,
+    "dominant" = as.data.frame(
+      lapply(aa_counts,
+             function(x)
+               ifelse(x == 2, 1, x)),
+      stringsAsFactors = FALSE,
+      optional = TRUE
+    ),
+    "recessive" = as.data.frame(
+      lapply(aa_counts,
+             function(x)
+               ifelse(x == 2, 1, 0)),
+      stringsAsFactors = FALSE,
+      optional = TRUE
+    ),
+    "additive" = aa_counts # Do nothing this is default res
+  )
+
+  aa_counts <- cbind(ID = aa_variation[, 1, drop = FALSE],
+                     aa_counts,
+                     stringsAsFactors = FALSE
+  )
+
+  return(aa_counts)
+}
+
+#' Calculate amino acids frequencies
+#'
+#' \code{getAAFrequencies} calculates amino acids frequencies in amino acids
+#' data frame.
+#'
+#' Amino acids frequencies are counted in reference to sample taking both gene
+#' copies into consideration. `n / (2 * j)` where `n` is the number of amino
+#' acid occurrences and `j` is the sample size.
+#'
+#' @inheritParams aaVariationToCounts
+#'
+#' @return Data frame containing the amino acids with positions and its
+#'   corresponding frequencies.
+#'
+#' @examples
+#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(file)
+#' aa_variation <- hlaToAAVariation(hla_calls)
+#' getAAFrequencies(aa_variation)
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @export
+getAAFrequencies <- function(aa_variation) {
+  assert_that(
+    is.data.frame(aa_variation),
+    see_if(colnames(aa_variation)[1] == "ID",
+           msg = "first column of aa_variation must be named ID"
+    )
+  )
+
+  aa_pos <- aa_variation[, -1]
+  aa_ids <- colnames(aa_variation[, -1])
+  aa_ids <- gsub("_[12]_AA", "", aa_ids)
+  aa_pos <- lapply(1:(ncol(aa_pos)),
+                   function(i) {
+                     paste(aa_ids[i], aa_pos[, i], sep = "_")
+                   }
+  )
+  aa_pos <- unlist(aa_pos)
+
+  aa_freq <- table(aa_pos, useNA = "no") / (2 * nrow(aa_variation))
+  aa_freq <- as.data.frame(aa_freq, stringsAsFactors = FALSE)
+
+
+  return(aa_freq)
+}
+
+#' Convert HLA counts table to HLA calls
+#'
+#' \code{countsToHlaCalls} converts counts table to hla calls data frame, this
+#' is useful when working with data from UK Biobank.
+#'
+#' Note that proper HLA calls reconstruction from counts table is only possible
+#' under additive inheritance model. This mode of operation is the only one
+#' implemented so the function will always treat counts table as coming from
+#' \code{hlaCallsToCounts(hla_calls, inheritance_model = 'additive')}.
+#'
+#' @param counts Data frame with HLA alleles counts, as returned by
+#'   \link{hlaCallsToCounts} function. First column should contain samples IDs,
+#'   following columns should be named with valid HLA alleles numbers.
+#'
+#' @return Data frame containing HLA allele calls.
+#'
+#' @examples
+#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(file)
+#' hla_counts <- hlaCallsToCounts(hla_calls, inheritance_model = "additive")
+#' countsToHlaCalls(hla_counts)
+#'
+#' @importFrom assertthat assert_that see_if
+#' @importFrom uniqtag cumcount make_unique_all
+#'
+#' @export
+countsToHlaCalls <- function(counts) {
+  assert_that(
+    see_if(! is.null(colnames(counts)),
+           msg = "count table has no column names"
+    ),
+    see_if(! any(is.na(colnames(counts))),
+           msg = "column names contains NA values"
+    ),
+    see_if(all(checkAlleleFormat(colnames(counts)[-1])),
+           msg = "counts table column names contains improperly formated HLA alleles numbers"
+    ),
+    see_if(
+      all(counts[-1] == 0 | counts[-1] == 1 | counts[-1] == 2, na.rm = TRUE),
+      msg = "counts can only take values 0, 1 or 2"
+    )
+  )
+
+  ids <- counts[1]
+  counts <- counts[-1]
+  counts[is.na(counts)] <- 0
+
+  alleles <- colnames(counts)
+  genes <- gsub("\\*.*$", "", alleles)
+  genes <- sort(unique(genes))
+  genes <- make_unique_all(rep(genes, each = 2), sep = "_")
+
+  haplotypes <- apply(counts, 1, function(row) {
+    hap_ids <- row != 0
+    hap <- alleles[hap_ids]
+    hap <- rep(hap, times = row[hap_ids])
+    row_genes <- gsub("\\*.*", "", hap)
+    assert_that(
+      see_if(! any(cumcount(row_genes) > 2),
+             msg = "some samples have more than two alleles per gene"
+      )
+    )
+    names(hap) <- make_unique_all(row_genes, sep = "_")
+    hap[genes]
+  })
+  haplotypes <- t(haplotypes)
+  colnames(haplotypes) <- genes
+
+  new_df <- cbind(ids, haplotypes, stringsAsFactors = FALSE)
+
+  return(new_df)
 }

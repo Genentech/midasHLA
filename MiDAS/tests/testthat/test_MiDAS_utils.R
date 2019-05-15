@@ -35,6 +35,9 @@ test_that("Reduced HLA allele have desired resoulution", {
                ),
                c("A*01", "A*01", "B*01", "C*05", "C*05:24:55:54N")
   )
+  expect_error(getAlleleResolution("word"),
+               "allele have to be a valid HLA allele number"
+  )
   expect_error(reduceAlleleResolution("C*05:24:55:54", resolution = "four"),
                "resolution is not a count \\(a single positive integer\\)"
   )
@@ -53,30 +56,65 @@ test_that("HLA allels are converted to additional variables", {
   )
   )
 
-  expect_error(convertAlleleToVariable(c("a", "b", "c"), dictionary = c("foo", "bar"),
+  expect_error(convertAlleleToVariable(c("A*01", "A*02", "A*03"), dictionary = c("foo", "bar"),
                                        "dictionary have to be either path or data.frame"
   )
   )
 
-  expect_error(convertAlleleToVariable(c("a", "b", "c"), dictionary = "/foo/bar",
-                                       "Path '/foo/bar' does not exist"
-  )
+  expect_error(
+    convertAlleleToVariable(
+      allele = c("A*01", "A*02", "A*03"),
+      dictionary = file.path("foo", "bar")
+    ),
+    sprintf("Path '%s' does not exist", file.path("foo", "bar"))
   )
 
-  expect_error(convertAlleleToVariable(c("a", "b", "c"), dictionary = dictionary[, 1],
+  expect_error(convertAlleleToVariable(c("A*01", "A*02", "A*03"), dictionary = dictionary[, 1],
                                        "match table have to consist out of two columns"
   )
   )
 
-  expect_error(convertAlleleToVariable(c("a", "b", "c"), dictionary = dictionary[, c(2, 2)],
+  expect_error(convertAlleleToVariable(c("A*01", "A*02", "A*03"), dictionary = dictionary[, c(2, 2)],
                                        "first column of match table must contain valid HLA allele numbers"
   )
   )
 
-  expect_error(convertAlleleToVariable(c("a", "b", "c"), dictionary = dictionary[c(1, 1), ],
+  expect_error(convertAlleleToVariable(c("A*01", "A*02", "A*03"), dictionary = dictionary[c(1, 1), ],
                                        "match table contains duplicated allele numbers"
   )
   )
+})
+
+test_that("HLA calls data frame have proper format", {
+  file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(file)
+  expect_equal(checkHlaCallsFormat(hla_calls), TRUE)
+
+  expect_error(checkHlaCallsFormat("A"), "hla_calls is not a data frame")
+  expect_error(checkHlaCallsFormat(data.frame()),
+               "hla_calls have to have at least 1 rows and 2 columns"
+  )
+  hla_calls[, 1] <- as.factor(hla_calls[, 1])
+  expect_error(checkHlaCallsFormat(hla_calls),
+               "hla_calls can't contain factors"
+  )
+  fake_calls <- data.frame(ID = c("Sample1", "Sample2", "Sample3"),
+                           A_1 = c("A*01", "A*02", "A*03"),
+                           A_2 = c("A*01", "B*02", "C*03"),
+                           stringsAsFactors = FALSE
+  )
+  expect_error(checkHlaCallsFormat(fake_calls[, c(2, 1, 3)]),
+               "first column of hla_calls should specify samples id"
+  )
+
+  expect_error(checkHlaCallsFormat(fake_calls[, c(1, 1, 3)]),
+               "values in hla_calls doesn't follow HLA numbers specification"
+  )
+})
+
+test_that("HLA allele are backquoted properly", {
+  expect_equal(backquote(c("A:01:01", "A:02:01")), c("`A:01:01`", "`A:02:01`"))
+  expect_error(backquote(1), "x is not a character vector")
 })
 
 context("HLA allele alignments")
@@ -96,4 +134,56 @@ test_that("Variable amino acids positions are detected properly", {
   expect_equal(getVariableAAPos(hlaa_aln), c(9, 17))
 
   expect_error(getVariableAAPos(hlaa_calls), "alignment is not a matrix")
+})
+
+context("HLA statistical models handling")
+
+test_that("HLA statistical models are updated properly", {
+  library("survival")
+  hla_calls_file <- system.file("extdata",
+                                "HLAHD_output_example.txt",
+                                package = "MiDAS"
+  )
+  hla_calls <- readHlaCalls(hla_calls_file)
+  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+  pheno <- read.table(pheno_file, header = TRUE)
+  covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
+  covar <- read.table(covar_file, header = TRUE)
+  midas_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
+  coxmod <- coxph(Surv(OS, OS_DIED) ~ 1, data = midas_data)
+  expect_equal(updateModel(coxmod, "A*01:01"),
+               coxph(Surv(OS, OS_DIED) ~ `A*01:01`, data = midas_data)
+  )
+
+  expect_error(updateModel(coxmod, 1),
+               "x is not a character vector or formula"
+  )
+
+  expect_error(updateModel(coxmod, x = "A*01:01", backquote = 1),
+               "backquote is not a flag \\(a length one logical vector\\)."
+  )
+
+  expect_error(updateModel(coxmod, x = "A*01:01", collapse = 1),
+               "collapse is not a string \\(a length one character vector\\)."
+  )
+})
+
+
+test_that("statistical models are statistical model", {
+  object <- lm(speed ~ dist, data = cars)
+  expect_equal(checkStatisticalModel(object), TRUE)
+
+  expect_error(checkStatisticalModel(list(1)),
+               "object have to have the internal OBJECT bit set"
+  )
+
+  expect_error(updateModel(speed ~ cars),
+               "object have to have an attribute 'call'"
+  )
+
+  fake_model <- list(call = list(formula = "foo"))
+  class(fake_model) <- "fake"
+  expect_error(updateModel(fake_model),
+               "object have to be a model with defined formula"
+  )
 })

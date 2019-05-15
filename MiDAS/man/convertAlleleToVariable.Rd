@@ -2,24 +2,34 @@
 % Please edit documentation in R/MiDAS_utils.R
 \name{convertAlleleToVariable}
 \alias{convertAlleleToVariable}
-\title{Converts allele numbers to additional variables based on match file.}
+\title{Converts allele numbers to additional variables}
 \usage{
 convertAlleleToVariable(allele, dictionary)
 }
 \arguments{
 \item{allele}{Character vector containing HLA allele numbers.}
 
-\item{dictionary}{Path to the file containing HLA allele numbers matchings.
-The file should be in tsv format with header and two columns. First column
-should hold allele numbers and second corresponding additional variables.
-Function also accepts match table in form of data frame.}
+\item{dictionary}{Path to the file containing HLA allele numbers matchings or
+data frame providing this information. See details for further
+explanations.}
 }
 \value{
-Vector containing allele numbers converted to additional variables
-according to matching file.
+Vector containing HLA allele numbers converted to additional
+  variables according to matching file.
+
+  Type of the returned vector depends on the type of the additional variable.
+  For example for HLA alleles supertypes character vector is returned while
+  for expression values numeric vector will be returned.
 }
 \description{
-Converts allele numbers to additional variables based on match file.
+\code{convertAlleleToVariable} convert input HLA allele numbers to additional
+variables based on the supplied match table (dictionary).
+}
+\details{
+\code{dictionary} file should be a tsv format with header and two columns.
+First column should hold allele numbers and second corresponding additional
+variables. Optionally a data frame formatted in the same manner can be passed
+instead.
 }
 \examples{
 dictionary <- system.file("extdata", "Match_4digit_supertype.txt", package = "MiDAS")
