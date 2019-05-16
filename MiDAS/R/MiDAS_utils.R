@@ -413,19 +413,25 @@ updateModel <- function(object, x, backquote = TRUE, collapse = " + ") {
 #' @export
 checkStatisticalModel <- function(object) { # TODO simplyfy output of this function; or something like object is not a stat model: potential problem bla bla
   assert_that(
-    see_if(is.object(object),
-           msg = "object have to have the internal OBJECT bit set"
-    ),
-    {
-      object_call <- getCall(object)
-      if (! is.null(object_call)) {
-        object_formula <- eval(substitute(formula, env = as.list(object_call)))
-        see_if(is_formula(object_formula),
-               msg = "object have to be a model with defined formula"
-        )
-      } else {
-        structure(FALSE, msg = "object have to have an attribute 'call'")
-      }
-    }
+    is.object(object),
+    msg = "object have to have the internal OBJECT bit set"
+  )
+
+  object_call <- getCall(object)
+  assert_that(
+    ! is.null(object_call),
+    msg = "object have to have an attribute 'call'"
+  )
+
+  object_formula <- eval(object_call[["formula"]])
+  assert_that(
+    is_formula(object_formula),
+    msg = "object have to be a model with defined formula"
+  )
+
+  object_data <- eval(object_call[["data"]])
+  assert_that(
+    ! is.null(object_data) & is.data.frame(object_data),
+    msg = "object need to have data attribue defined"
   )
 }

@@ -4,13 +4,21 @@
 #' level using statistical model of choice.
 #'
 #' @inheritParams updateModel
-#' @param variables Character specifying variables to use in association tests.
+#' @param variables Character specifying variables to use in association tests
+#'   or \code{NULL}. If \code{NULL} all variables in object data are tested.
+#'   See details for further information.
 #' @param correction String specifying multiple testing correction method. See
 #'   details for further information.
 #' @param exponentiate Logical indicating whether or not to exponentiate the
 #'   coefficient estimates. Internally this is passed to \link[broom]{tidy}.
 #'   This is typical for logistic and multinomial regressions, but a bad idea if
 #'   there is no log or logit link. Defaults to FALSE.
+#'
+#' \code{variables} takes \code{NULL} as a default value. When specifed as such
+#' column names of data frame associated with the \code{object} are used as
+#' variables for testing. This exludes first column which should corresponds
+#' to samples IDs as well as covariates and response variables defined in
+#' object formula.
 #'
 #' \code{correction} specifies p-value adjustment method to use, common choice
 #' is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
@@ -39,7 +47,6 @@
 #'
 #' ## test for alleles associations
 #' analyzeAssociations(object = object,
-#'                     variables = c("B*14:02", "DRB1*11:01"),
 #'                     correction = "BH"
 #' )
 #'
@@ -50,15 +57,36 @@
 #'
 #' @export
 analyzeAssociations <- function(object,
-                                variables, # TODO check if variables are specified in object,  # opcja all
+                                variables = NULL,
                                 correction = "BH",
                                 exponentiate = FALSE) {
   assert_that(
-    checkStatisticalModel(object),
-    is.character(variables),
+    checkStatisticalModel(object)
+  )
+  object_call <- getCall(object)
+  object_formula <- eval(object_call[["formula"]], envir = parent.frame())
+  object_data <- eval(object_call[["data"]], envir = parent.frame())
+  object_variables <- colnames(object_data)[-1]
+
+  assert_that(
+    see_if(
+      is.character(variables) | is.null(variables),
+      msg = "variables is not a character vector or NULL"
+    ),
+    see_if(
+      all(test_vars <- variables %in% object_variables) | is.null(variables),
+      msg = sprintf("%s can not be found in object data",
+                    paste(variables[! test_vars], collapse = ", ")
+      )
+    ),
     is.string(correction),
     is.flag(exponentiate)
   )
+
+  if (is.null(variables)) {
+    mask <- ! object_variables %in% all.vars(object_formula)
+    variables <- object_variables[mask]
+  }
 
   results <- lapply(variables,
                     updateModel,

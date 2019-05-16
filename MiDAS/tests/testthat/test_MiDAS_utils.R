@@ -186,4 +186,16 @@ test_that("statistical models are statistical model", {
   expect_error(updateModel(fake_model),
                "object have to be a model with defined formula"
   )
+
+  fake_model <- list(call = list(formula = 1 ~ 1))
+  class(fake_model) <- "fake"
+  expect_error(updateModel(fake_model),
+               "object need to have data attribue defined"
+  )
+
+  fake_model <- list(call = list(formula = 1 ~ 1, data = "bigData"))
+  class(fake_model) <- "fake"
+  expect_error(updateModel(fake_model),
+               "object need to have data attribue defined"
+  )
 })

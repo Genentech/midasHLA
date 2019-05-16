@@ -31,10 +31,14 @@ test_that("HLA allele associations are analyzed properly", {
 
   expect_equal(as.data.frame(res), as.data.frame(test_res)) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
 
-  # Tests for checkStatisticalModel errors are ommitted how
+  # Tests for checkStatisticalModel errors are ommitted here
 
   expect_error(analyzeAssociations(object, variables = 1),
-               "variables is not a character vector"
+               "variables is not a character vector or NULL"
+  )
+
+  expect_error(analyzeAssociations(object, variables = "thief"),
+               "thief can not be found in object data"
   )
 
   expect_error(
