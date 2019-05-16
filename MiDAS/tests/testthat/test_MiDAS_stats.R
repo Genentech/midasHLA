@@ -82,9 +82,12 @@ test_that("Stepwise conditional alleles subset selection", {
   # Tests for checkStatisticalModel errors are ommitted here
 
   expect_error(
-    analyzeConditionalAssociations(object,
-                                variables = 1),
-    "variables is not a character vector"
+    analyzeConditionalAssociations(object, variables = 1),
+    "variables is not a character vector or NULL"
+  )
+
+  expect_error(analyzeConditionalAssociations(object, variables = "thief"),
+               "thief can not be found in object data"
   )
 
   expect_error(

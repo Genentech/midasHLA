@@ -159,16 +159,37 @@ analyzeAssociations <- function(object,
 #'
 #' @export
 analyzeConditionalAssociations <- function(object,
-                                           variables,
+                                           variables = NULL,
                                            th,
                                            rss_th = 1e-07,
                                            exponentiate = FALSE) {
   assert_that(
-    checkStatisticalModel(object),
-    is.character(variables),
+    checkStatisticalModel(object)
+  )
+  object_call <- getCall(object)
+  object_formula <- eval(object_call[["formula"]], envir = parent.frame())
+  object_data <- eval(object_call[["data"]], envir = parent.frame())
+  object_variables <- colnames(object_data)[-1]
+
+  assert_that(
+    see_if(
+      is.character(variables) | is.null(variables),
+      msg = "variables is not a character vector or NULL"
+    ),
+    see_if(
+      all(test_vars <- variables %in% object_variables) | is.null(variables),
+      msg = sprintf("%s can not be found in object data",
+                    paste(variables[! test_vars], collapse = ", ")
+      )
+    ),
     is.number(th),
     is.number(rss_th)
   )
+
+  if (is.null(variables)) {
+    mask <- ! object_variables %in% all.vars(object_formula)
+    variables <- object_variables[mask]
+  }
 
   prev_formula <- formula(object)
   prev_variables <- all.vars(prev_formula)
