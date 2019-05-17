@@ -166,6 +166,11 @@ hlaToAAVariation <- function(hla_calls,
 #' \code{hlaToVariable} converts hla calls data frame to additional variables
 #' based on match table (dictionary).
 #'
+#' \code{reduce} controls if conversion should happen in a greedy way, such that
+#' if some hla numbers cannot be converted, thier resolution is reduced by 2 and
+#' another attempt is taken. This iterative process stops when alleles cannot be
+#' further reduced or all have been successfully converted.
+#'
 #' \code{dictionary} file should be a tsv format with header and two columns.
 #' First column should hold allele numbers and second corresponding additional
 #' variables. Optionally a data frame formatted in the same manner can be passed
@@ -201,6 +206,8 @@ hlaToAAVariation <- function(hla_calls,
 #'
 #' @inheritParams checkHlaCallsFormat
 #' @inheritParams convertAlleleToVariable
+#' @param reduce logical indicating if function should try to reduce alleles
+#'   resolution when no maching is found. See details for more details.
 #' @param nacols.rm logical indicating if result columns that contain only
 #'   \code{NA} should be removed.
 #'
@@ -217,12 +224,15 @@ hlaToAAVariation <- function(hla_calls,
 #' @export
 hlaToVariable <- function(hla_calls,
                           dictionary,
+                          reduce = TRUE,
                           nacols.rm = TRUE) {
   assert_that(
     is.data.frame(hla_calls),
     checkHlaCallsFormat(hla_calls),
+    is.flag(reduce),
     is.flag(nacols.rm)
   )
+
   if (is.string(dictionary)) {
     lib <- list.files(
       path = system.file("extdata", package = "MiDAS"),
@@ -240,11 +250,26 @@ hlaToVariable <- function(hla_calls,
       )
     }
   }
+
   variable <- as.data.frame(
     lapply(hla_calls[, -1], convertAlleleToVariable, dictionary = dictionary),
     stringsAsFactors = FALSE,
     row.names = 1:nrow(hla_calls)
   )
+
+  if (reduce) {
+    max_resolution <- getAlleleResolution(unlist(hla_calls[, -1]))
+    max_resolution <- max(max_resolution, na.rm = TRUE)
+    while (any(is.na(variable)) & max_resolution > 2) {
+      max_resolution <- max_resolution - 2
+      hla_calls <- reduceHlaCalls(hla_calls, resolution = max_resolution)
+      variable[is.na(variable)] <- convertAlleleToVariable(
+        allele = hla_calls[, -1][is.na(variable)],
+        dictionary = dictionary
+      )
+    }
+  }
+
   if (nacols.rm) {
     variable <- Filter(function(x) ! all(is.na(x)), variable)
   }

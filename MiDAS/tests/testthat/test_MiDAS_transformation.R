@@ -50,6 +50,15 @@ test_that("HLA calls table is converted to additional variables", {
     hlaToVariable(
       hla_calls = hla_calls,
       dictionary = "4digit_supertype",
+      reduce = "yes"
+    ),
+    "reduce is not a flag \\(a length one logical vector\\)."
+  )
+
+  expect_error(
+    hlaToVariable(
+      hla_calls = hla_calls,
+      dictionary = "4digit_supertype",
       nacols.rm = "yes"
     ),
     "nacols.rm is not a flag \\(a length one logical vector\\)."
