@@ -244,6 +244,7 @@ analyzeConditionalAssociations <- function(object,
   }
 
   if (length(best) == 0) {
+    warn("No significat variables found. Returning empty table.")
     results <- results[0, ]
   } else {
     results <- bind_rows(best)
