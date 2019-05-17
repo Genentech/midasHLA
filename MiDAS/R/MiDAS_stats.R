@@ -151,7 +151,7 @@ analyzeAssociations <- function(object,
 #'                             rss_th = 1e-07
 #' )
 #'
-#' @importFrom assertthat assert_that is.number
+#' @importFrom assertthat assert_that is.flag is.number is.string
 #' @importFrom dplyr bind_rows tibble
 #' @importFrom purrr map_dfr
 #' @importFrom rlang warn
@@ -160,6 +160,7 @@ analyzeAssociations <- function(object,
 #' @export
 analyzeConditionalAssociations <- function(object,
                                            variables = NULL,
+                                           correction = "BH",
                                            th,
                                            rss_th = 1e-07,
                                            exponentiate = FALSE) {
@@ -182,8 +183,10 @@ analyzeConditionalAssociations <- function(object,
                     paste(variables[! test_vars], collapse = ", ")
       )
     ),
+    is.string(correction),
     is.number(th),
-    is.number(rss_th)
+    is.number(rss_th),
+    is.flag(exponentiate)
   )
 
   if (is.null(variables)) {
@@ -191,15 +194,15 @@ analyzeConditionalAssociations <- function(object,
     variables <- object_variables[mask]
   }
 
-  prev_formula <- formula(object)
-  prev_variables <- all.vars(prev_formula)
+  prev_formula <- object_formula
+  first_variables <- all.vars(object_formula)
+  prev_variables <- first_variables
+  new_variables <- variables[! variables %in% prev_variables]
 
   best <- list()
   i <- 1
 
-  while (TRUE) {
-    new_variables <- variables[! variables %in% prev_variables]
-
+  while (length(new_variables) > 0) {
     results <- map_dfr(
       .x = new_variables,
       .f = ~ tidy(updateModel(object = object,
@@ -210,7 +213,11 @@ analyzeConditionalAssociations <- function(object,
       )
     )
     results <- results[results[["term"]] %in% backquote(new_variables), ]
-    eesults <- results[! is.infinite(results[["p.value"]]), ]
+    results$p.adjusted <- p.adjust(results[["p.value"]], correction)
+    results <- results[! is.infinite(results[["p.value"]]), ]
+
+    mask <- ! prev_variables %in% first_variables
+    results$covariates <- paste(prev_variables[mask], collapse = " + ")
 
     i_min <- which.min(results[["p.value"]])
     if (length(i_min) == 0) break
@@ -228,28 +235,18 @@ analyzeConditionalAssociations <- function(object,
     }
     prev_formula <- formula(object)
     prev_variables <- all.vars(prev_formula)
-    best[[i]] <- object
+    new_variables <- variables[! variables %in% prev_variables]
+
+    results <- results[i_min, ]
+    results$term <- gsub("`", "", results$term)
+    best[[i]] <- results
     i <- i + 1
   }
 
-  if (length(best) > 0) {
-    results <- lapply(
-      X = best,
-      FUN = function(obj) {
-        cov <- formula(obj)[[3]]
-        cov <- all.vars(cov)
-        cov <- cov[-length(cov)]
-        obj_tidy <- tidy(obj, exponentiate = exponentiate)
-        obj_tidy <- obj_tidy[length(cov) + 1, ]
-        obj_tidy$covariates <- paste(cov, collapse = " + ")
-        return(obj_tidy)
-      }
-    )
-    results <- bind_rows(results)
-    results$term <- gsub("`", "", results$term)
-    results <- results[results$term %in% variables, ]
+  if (length(best) == 0) {
+    results <- results[0, ]
   } else {
-    results <- tibble()
+    results <- bind_rows(best)
   }
 
   return(results)

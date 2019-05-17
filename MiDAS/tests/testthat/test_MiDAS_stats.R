@@ -67,15 +67,20 @@ test_that("Stepwise conditional alleles subset selection", {
 
   object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
   res <- analyzeConditionalAssociations(object,
-                                     variables = c("B*14:02", "DRB1*11:01"),
-                                     th = 0.05)
-  test_res <- list(
-    tidy(updateModel(object, "B*14:02"))[3, ],
-    tidy(updateModel(object, c("B*14:02", "DRB1*11:01")))[4, ]
+                                        variables = c("B*14:02", "DRB1*11:01"),
+                                        th = 0.05)
+  res <- rapply(res, classes = "numeric", how = "replace", round, digits = 3)
+
+  test_res <- tibble(term = c("B*14:02", "DRB1*11:01"),
+                     estimate = c(3.72, 2.612),
+                     std.error = c(1.59, 1.069),
+                     statistic = c(2.339, 2.442),
+                     p.value = c(0.019, 0.015),
+                     conf.low = c(0.603, 0.516),
+                     conf.high = c(6.838, 4.707),
+                     p.adjusted = c(0.039, 0.015),
+                     covariates = c("", "B*14:02")
   )
-  test_res <- do.call("rbind", test_res)
-  test_res$term <- gsub("`", "", test_res$term)
-  test_res$covariates <- c("AGE + SEX", "AGE + SEX + B*14:02")
 
   expect_equal(res, test_res)
 
@@ -90,23 +95,21 @@ test_that("Stepwise conditional alleles subset selection", {
                "thief can not be found in object data"
   )
 
-  expect_error(
-    analyzeConditionalAssociations(
-      object,
-      variables = c("B*14:02", "DRB1*11:01"),
-      th = "bar"
-    ),
+  expect_error(analyzeConditionalAssociations(object, correction = 1),
+               "correction is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(analyzeConditionalAssociations(object, th = "bar"),
     "th is not a number \\(a length one numeric vector\\)."
   )
 
-  expect_error(
-    analyzeConditionalAssociations(
-      object,
-      variables = c("B*14:02", "DRB1*11:01"),
-      th = 0.05,
-      rss_th = "foo"
-    ),
+  expect_error(analyzeConditionalAssociations(object, th = 0.05, rss_th = "foo"),
     "rss_th is not a number \\(a length one numeric vector\\)."
+  )
+
+  expect_error(
+    analyzeConditionalAssociations(object, th = 0.05, exponentiate = "yes"),
+    "exponentiate is not a flag \\(a length one logical vector\\)."
   )
 })
 
