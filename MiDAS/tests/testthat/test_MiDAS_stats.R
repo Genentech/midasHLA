@@ -37,6 +37,10 @@ test_that("HLA allele associations are analyzed properly", {
                "variables is not a character vector or NULL"
   )
 
+  expect_error(analyzeAssociations(object, frequency_cutoff = "big"),
+               "frequency_cutoff is not a number \\(a length one numeric vector\\)."
+  )
+
   expect_error(analyzeAssociations(object, variables = "thief"),
                "thief can not be found in object data"
   )

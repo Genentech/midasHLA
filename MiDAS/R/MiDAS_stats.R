@@ -4,9 +4,17 @@
 #' level using statistical model of choice.
 #'
 #' @inheritParams updateModel
+#' @param analysis_type String specifying type of analysis that is to be done.
+#'   This parameter is used to figure out how to calculate variables frequencies
+#'   and header for kabled output.
 #' @param variables Character specifying variables to use in association tests
 #'   or \code{NULL}. If \code{NULL} all variables in object data are tested.
 #'   See details for further information.
+#' @param frequency_cutoff Number specifying threshold for inclusion of a
+#'   variable. If it's a number between 0 and 1 variables with frequency below
+#'   this number will not be considered during analysis. If it's greater or
+#'   equal 1 variables with number of counts less that this will not be
+#'   considered during analysis.
 #' @param correction String specifying multiple testing correction method. See
 #'   details for further information.
 #' @param exponentiate Logical indicating whether or not to exponentiate the
@@ -63,7 +71,9 @@
 #'
 #' @export
 analyzeAssociations <- function(object,
+                                # analysis_type = c("hla alleles", "aa level", "expression levels"),
                                 variables = NULL,
+                                frequency_cutoff = 0,
                                 correction = "BH",
                                 exponentiate = FALSE,
                                 kable_results = FALSE,
@@ -81,6 +91,8 @@ analyzeAssociations <- function(object,
       is.character(variables) | is.null(variables),
       msg = "variables is not a character vector or NULL"
     ),
+    is.number(frequency_cutoff),
+    # is.string(analysis_type),
     see_if(
       all(test_vars <- variables %in% object_variables) | is.null(variables),
       msg = sprintf("%s can not be found in object data",
@@ -99,6 +111,14 @@ analyzeAssociations <- function(object,
     mask <- ! object_variables %in% all.vars(object_formula)
     variables <- object_variables[mask]
   }
+
+  variables_freq <- colSums(object_data[variables])
+  variables_freq <- variables_freq / ifelse(
+    test = frequency_cutoff >= 1,
+    yes = 1,
+    no = 2 * nrow(object_data)
+  ) # is this formula general enough?
+  variables <- variables[variables_freq >= frequency_cutoff]
 
   results <- lapply(variables,
                     updateModel,
