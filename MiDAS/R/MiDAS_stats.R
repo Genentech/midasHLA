@@ -13,6 +13,11 @@
 #'   coefficient estimates. Internally this is passed to \link[broom]{tidy}.
 #'   This is typical for logistic and multinomial regressions, but a bad idea if
 #'   there is no log or logit link. Defaults to FALSE.
+#' @param kable_results Logical indicating if function should print results
+#'   as additional output. Results are formatted with kable.
+#' @param pvalue_cutoff P-value cutoff for results to be included in
+#'   kable output. If \code{NULL} cutoff of \code{0.05} on \code{p.adjusted}
+#'   value is used instead.
 #'
 #' \code{variables} takes \code{NULL} as a default value. When specifed as such
 #' column names of data frame associated with the \code{object} are used as
@@ -47,19 +52,22 @@
 #'
 #' ## test for alleles associations
 #' analyzeAssociations(object = object,
-#'                     correction = "BH"
+#'                     correction = "BH",
+#'                     kable_results = TRUE
 #' )
 #'
 #' @importFrom assertthat assert_that see_if is.flag is.string
 #' @importFrom broom tidy
-#' @importFrom dplyr bind_rows
+#' @importFrom dplyr arrange bind_rows filter
 #' @importFrom stats p.adjust
 #'
 #' @export
 analyzeAssociations <- function(object,
                                 variables = NULL,
                                 correction = "BH",
-                                exponentiate = FALSE) {
+                                exponentiate = FALSE,
+                                kable_results = FALSE,
+                                pvalue_cutoff = NULL) {
   assert_that(
     checkStatisticalModel(object)
   )
@@ -80,7 +88,11 @@ analyzeAssociations <- function(object,
       )
     ),
     is.string(correction),
-    is.flag(exponentiate)
+    is.flag(exponentiate),
+    is.flag(kable_results),
+    see_if(is.number(pvalue_cutoff) | is.null(pvalue_cutoff),
+           msg = "pvalue_cutoff is not a number (a length one numeric vector) or NULL"
+    )
   )
 
   if (is.null(variables)) {
@@ -105,6 +117,25 @@ analyzeAssociations <- function(object,
   covariates <- formula(object)[[3]]
   covariates <- deparse(covariates)
   results$covariates <- covariates
+
+  if (kable_results) {
+    format <- getOption("knitr.table.format")
+    format <- ifelse(is.null(format), "html", format)
+    filter_by <- ifelse(
+      test = is.null(pvalue_cutoff),
+      yes = "p.value <= %f",
+      no = "p.adjusted <= %f"
+    )
+    pvalue_cutoff <- ifelse(is.null(pvalue_cutoff), 0.05, pvalue_cutoff)
+
+    reskab <- formatResults(
+      results = results,
+      filter_by = sprintf(filter_by, pvalue_cutoff),
+      format = format,
+      header = "foo"
+    )
+    print(reskab)
+  }
 
   return(results)
 }

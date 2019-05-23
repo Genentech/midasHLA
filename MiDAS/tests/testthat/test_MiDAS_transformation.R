@@ -251,3 +251,50 @@ test_that("hla counts table can be rreverted to hla calls", {
     "some samples have more than two alleles per gene"
   )
 })
+
+test_that("results are formatted properly", {
+  res <- tibble(term = c("A*01:01", "A*02:01"),
+                estimate = c(5, -6),
+                p.value = c(0.05, 0.1))
+  restab <- formatResults(res,
+                          filter_by = c("p.value <= 0.05", "estimate > 0"),
+                          arrange_by = c("p.value * estimate"),
+                          select_cols = c("allele" = "term", "p.value"),
+                          format = "html",
+                          header = "informative header")
+  correct_tab <-
+    dplyr::filter(res, .data[["p.value"]] <= 0.05, .data[["estimate"]] > 0)
+  correct_tab <-
+    dplyr::arrange(correct_tab, .data[["p.value"]] * .data[["estimate"]])
+  correct_tab <-
+    dplyr::select(correct_tab, "allele" = .data[["term"]], .data[["p.value"]])
+  correct_tab <-
+    knitr::kable(correct_tab, format = "html", digits = 50)
+  correct_tab <-
+    kableExtra::add_header_above(correct_tab, header = c("informative header" = 2))
+  correct_tab <-
+    kableExtra::kable_styling(correct_tab,
+                              bootstrap_options = c("striped", "hover", "condensed"))
+  correct_tab <-
+    kableExtra::scroll_box(correct_tab, width = "100%", height = "200px")
+
+  expect_equal(restab, correct_tab)
+
+  expect_error(formatResults(res, filter_by = 1),
+               "filter_by is not a character vector")
+
+  expect_error(formatResults(res, arrange_by = 1),
+               "arrange_by is not a character vector")
+
+  expect_error(formatResults(res, select_cols = 1),
+               "select_cols is not a character vector")
+
+  expect_error(formatResults(res, format = 1),
+               "format is not a string \\(a length one character vector\\).")
+
+  expect_error(formatResults(res, format = "markdown"),
+               "format should be one of 'html', 'latex'")
+
+  expect_error(formatResults(res, format ="html", header = 1),
+               "header is not character vector or NULL")
+})

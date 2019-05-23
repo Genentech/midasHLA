@@ -50,6 +50,16 @@ test_that("HLA allele associations are analyzed properly", {
     analyzeAssociations(object, variables = "A*01:01", exponentiate = 1),
     "exponentiate is not a flag \\(a length one logical vector\\)."
   )
+
+  expect_error(
+    analyzeAssociations(object, variables = "A*01:01", kable_results = 1),
+    "kable_results is not a flag \\(a length one logical vector\\)."
+  )
+
+  expect_error(
+    analyzeAssociations(object, variables = "A*01:01", pvalue_cutoff = "A"),
+    "pvalue_cutoff is not a number \\(a length one numeric vector\\) or NULL"
+  )
 })
 
 test_that("Stepwise conditional alleles subset selection", {

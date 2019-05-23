@@ -616,3 +616,106 @@ countsToHlaCalls <- function(counts) {
 
   return(new_df)
 }
+
+#' Pretty format association analysis table
+#'
+#' \code{formatResults} formats association analysis results table to specified
+#' format.
+#'
+#' @param results Tibble as returned by \link{analyzeConditionalAssociations}.
+#' @param filter_by Character specifying conditional expression used to filter
+#'   \code{results}, this is equivalent to \code{...} argument passed to
+#'   \link[dplyr]{filter} except it has to be a character vector.
+#' @param arrange_by Character specifying variable names to use for sorting.
+#'   Equivalent to \code{...} argument passed to \link[dplyr]{arrange}.
+#' @param select_cols Character specifying variable names that should be
+#'   included in the output table. Can be also used to rename selected
+#'   variables, see examples.
+#' @param format A character string. Possible values are \code{"latex"} and
+#'   \code{"html"}.
+#' @param header String specifying header for result table. If NULL header is
+#'   ommitted.
+#'
+#' @return A character vector of the table source code.
+#'
+#' @examples
+#' hla_calls <- readHlaCalls(system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS"))
+#' hla_counts <- hlaCallsToCounts(hla_calls, inheritance_model = "additive")
+#' midas_data <- read.table(
+#'   system.file("extdata", "pheno_example.txt", package = "MiDAS"),
+#'   header = TRUE)
+#' midas_data <- dplyr::left_join(x = midas_data, y = hla_counts, by = "ID")
+#' mod <- lm(OS ~ 1, data = midas_data)
+#' res <- analyzeAssociations(mod)
+#' formatResults(res,
+#'               filter_by = c("p.value <= 0.05", "estimate > 0"),
+#'               arrange_by = c("p.value * estimate"),
+#'               select_cols = c("allele" = "term", "p.value"),
+#'               format = "html",
+#'               header = "HLA allelic associations")
+#'
+#' @importFrom assertthat assert_that
+#' @importFrom dplyr arrange filter select
+#' @importFrom knitr kable
+#' @importFrom kableExtra add_header_above kable_styling scroll_box
+#' @importFrom magrittr %>% %<>%
+#' @importFrom stats setNames
+#' @importFrom rlang parse_exprs .data
+#'
+#' @export
+formatResults <- function(results,
+                          filter_by = "p.value <= 0.05",
+                          arrange_by = "p.value",
+                          select_cols = c("term", "estimate", "std.error", "p.value", "p.adjusted"),
+                          format = c("html", "latex"),
+                          header = NULL
+                          ) {
+  assert_that(
+    is.character(filter_by),
+    is.character(arrange_by),
+    is.character(select_cols),
+    is.string(format),
+    see_if(
+      pmatch(format, table = c("html", "latex"), nomatch = 0) != 0,
+      msg = "format should be one of 'html', 'latex'"
+    ),
+    see_if(is.character(header) | is.null(header),
+           msg = "header is not character vector or NULL"
+    )
+  )
+
+  filter_by <- parse_exprs(filter_by)
+  arrange_by <- parse_exprs(arrange_by)
+  select_cols_quo <- parse_exprs(select_cols)
+  names(select_cols_quo) <- names(select_cols)
+
+  results %<>%
+    filter(!!! filter_by) %>%
+    arrange(!!! arrange_by) %>%
+    select(!!! select_cols_quo)
+
+  if (format == "html" & isTRUE(getOption("knitr.in.progress"))) {
+    results <-
+      rapply(
+        results,
+        f = gsub,
+        classes = "character",
+        how = "replace",
+        pattern = "(\\*)",
+        replacement = "\\\\\\1"
+      )
+  }
+
+  if (! (is.null(header) & format == "html")) {
+    header <- setNames(ncol(results), header) # Still if format is 'latex' and format = NULL the result is not visualy appealing, and without it gives error. Issue created on github:
+  }
+
+  results %<>%
+    kable(format = format, digits = 50) %>%
+    add_header_above(header = header) %>%
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+    scroll_box(width = "100%", height = "200px")
+
+  return(results)
+}
+
