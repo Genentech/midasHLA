@@ -719,3 +719,56 @@ formatResults <- function(results,
   return(results)
 }
 
+#' Calculate variables frequencies
+#'
+#' \code{getCountsFrequencies} calculate variables frequencies based on counts
+#' table, such as produced by \link{hlaCallsToCounts}.
+#'
+#' Variables frequencies are counted in reference to sample size, depending on
+#' the inheritance model under which the counts table has been generated one
+#' might need to take under consideration both gene copies. Here sample size is
+#' assumed to be depended on both gene copies if any count is greater than
+#' \code{1} (`n / (2 * j)` where `n` is the number of term occurrences and `j`
+#' is the sample size). If this is not the case the sample size is taken as is
+#' (`n / j`).
+#'
+#' @param counts_table Data frame containing variables counts, such as produced
+#'   by \link{hlaCallsToCounts}.
+#'
+#' @return Data frame containing variables, its corresponding total counts
+#'   and frequncies.
+#'
+#' @examples
+#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(file)
+#' hla_counts <- hlaCallsToCounts(hla_calls, inheritance_model = "additive")
+#' getCountsFrequencies(hla_counts)
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @export
+getCountsFrequencies <- function(counts_table) {
+  assert_that(
+    is.data.frame(counts_table),
+    see_if(colnames(counts_table)[1] == "ID",
+           msg = "first column of counts_table must be named ID"
+    )
+  )
+
+  counts_table <- counts_table[-1]
+  assert_that(isCountsOrZeros(counts_table))
+  counts_sums <- colSums(counts_table, na.rm = TRUE)
+
+  # Under additive inheritace model population size equals 2 * nrow(counts_table), in other cases it's 1 * nrow(counts_table)
+  pop_mul <- ifelse(max(counts_table, na.rm = TRUE) > 1, 2, 1)
+  counts_freq <- counts_sums / (pop_mul * nrow(counts_table))
+
+  counts_df <- data.frame(
+    term = colnames(counts_table),
+    Counts = counts_sums,
+    Freq = counts_freq,
+    stringsAsFactors = FALSE
+  )
+
+  return(counts_df)
+}

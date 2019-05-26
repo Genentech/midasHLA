@@ -298,3 +298,23 @@ test_that("results are formatted properly", {
   expect_error(formatResults(res, format ="html", header = 1),
                "header is not character vector or NULL")
 })
+
+test_that("counts are conveerted into frequencies", {
+  file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(file)
+  hla_counts <- hlaCallsToCounts(hla_calls, inheritance_model = "additive")
+  hla_freq <- getCountsFrequencies(hla_counts)
+  hla_freq <- hla_freq[, c("term", "Freq")]
+  colnames(hla_freq) <- c("allele", "Freq")
+  rownames(hla_freq) <- NULL
+  test_hla_freq <- getHlaFrequencies(hla_calls)
+  expect_equal(hla_freq, test_hla_freq)
+
+  expect_error(getCountsFrequencies("foo"), "counts_table is not a data frame")
+
+  expect_error(getCountsFrequencies(hla_counts[-1]),
+               "first column of counts_table must be named ID")
+
+  expect_error(getCountsFrequencies(hla_calls),
+               "values in counts_table are not counts \\(a positive integers or zeros\\).")
+})

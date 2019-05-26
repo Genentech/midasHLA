@@ -199,3 +199,12 @@ test_that("statistical models are statistical model", {
                "object need to have data attribue defined"
   )
 })
+
+test_that("is counts or zeros", {
+  expect_equal(isCountsOrZeros(c(1, 0, 2, NA)), TRUE)
+
+  expect_error(
+    assertthat::assert_that(isCountsOrZeros(c(1, 0, 2, NA, 1.5))),
+    "values in c\\(1, 0, 2, NA, 1.5\\) are not counts \\(a positive integers or zeros\\)."
+  )
+})

@@ -435,3 +435,36 @@ checkStatisticalModel <- function(object) { # TODO simplyfy output of this funct
     msg = "object need to have data attribue defined"
   )
 }
+
+#' Check if vectors contains only counts or zeros
+#'
+#' \code{isCountsOrZeros} checks if vector contains only positive integers or
+#' zeros.
+#'
+#' @param x Numeric vector or object that can be \code{unlist} to numeric
+#'   vector.
+#' @param na.rm Logical indicating if \code{NA} values should be omited.
+#'
+#' @return Logical indicating if provided vector contains only positive integers
+#'   or zeros.
+#'
+#' @examples
+#' isCountsOrZeros(c(0, 1, 2))
+#'
+#' @importFrom rlang is_integerish
+#'
+isCountsOrZeros <- function(x, na.rm = TRUE) {
+    x <- unlist(x)
+    test <- is_integerish(x) & x >= 0
+    test <- all(test, na.rm = na.rm)
+
+  return(test)
+}
+
+#' Error message for isCountsOrZeros
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(isCountsOrZeros) <- function(call, env) {
+  paste0("values in ", deparse(call$x), " are not counts (a positive integers or zeros).")
+}
