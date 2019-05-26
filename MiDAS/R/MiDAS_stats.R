@@ -61,23 +61,20 @@
 #' ## test for alleles associations
 #' analyzeAssociations(object = object,
 #'                     correction = "BH",
-#'                     kable_results = TRUE
 #' )
 #'
 #' @importFrom assertthat assert_that see_if is.flag is.string
 #' @importFrom broom tidy
-#' @importFrom dplyr arrange bind_rows filter
+#' @importFrom dplyr arrange bind_rows rename .data
+#' @importFrom magrittr %>%
 #' @importFrom stats p.adjust
 #'
 #' @export
 analyzeAssociations <- function(object,
-                                # analysis_type = c("hla alleles", "aa level", "expression levels"),
                                 variables = NULL,
                                 frequency_cutoff = 0,
                                 correction = "BH",
-                                exponentiate = FALSE,
-                                kable_results = FALSE,
-                                pvalue_cutoff = NULL) {
+                                exponentiate = FALSE) {
   assert_that(
     checkStatisticalModel(object)
   )
@@ -91,36 +88,33 @@ analyzeAssociations <- function(object,
       is.character(variables) | is.null(variables),
       msg = "variables is not a character vector or NULL"
     ),
-    is.number(frequency_cutoff),
-    # is.string(analysis_type),
     see_if(
       all(test_vars <- variables %in% object_variables) | is.null(variables),
       msg = sprintf("%s can not be found in object data",
                     paste(variables[! test_vars], collapse = ", ")
       )
     ),
+    is.number(frequency_cutoff),
     is.string(correction),
-    is.flag(exponentiate),
-    is.flag(kable_results),
-    see_if(is.number(pvalue_cutoff) | is.null(pvalue_cutoff),
-           msg = "pvalue_cutoff is not a number (a length one numeric vector) or NULL"
-    )
+    is.flag(exponentiate)
   )
 
   if (is.null(variables)) {
     mask <- ! object_variables %in% all.vars(object_formula)
     variables <- object_variables[mask]
+    assert_that(length(variables) != 0,
+                msg = "No new variables found in object's data."
+    )
   }
 
-  variables_freq <- colSums(object_data[variables])
-  variables_freq <- variables_freq / ifelse(
-    test = frequency_cutoff >= 1,
-    yes = 1,
-    no = 2 * nrow(object_data)
-  ) # is this formula general enough?
-  variables <- variables[variables_freq >= frequency_cutoff]
+  variables_freq <- object_data %>%
+    select("ID", !! variables) %>%
+    getCountsFrequencies() %>%
+    rename(Ntotal.count = .data$Counts, Ntotal.freq = .data$Freq) %>%
+    filter(.data$Ntotal.count > frequency_cutoff | frequency_cutoff < 1) %>%
+    filter(.data$Ntotal.freq > frequency_cutoff | frequency_cutoff >= 1)
 
-  results <- lapply(variables,
+  results <- lapply(variables_freq$term,
                     updateModel,
                     object = object,
                     backquote = TRUE,
@@ -130,31 +124,33 @@ analyzeAssociations <- function(object,
   results <- lapply(results, tidy, exponentiate = exponentiate)
   results <- bind_rows(results)
   results$term <- gsub("`", "", results$term)
-  results <- results[results$term %in% variables, ]
+  results <- results[results$term %in% variables_freq$term, ]
 
   results$p.adjusted <- p.adjust(results$p.value, correction)
 
-  covariates <- formula(object)[[3]]
-  covariates <- deparse(covariates)
-  results$covariates <- covariates
+#  This covariates were added for consistiency with conditional analyze, now however that we are filtering covariates there it doesn't make much sense to keep those?
+#  covariates <- formula(object)[[3]]
+#  covariates <- deparse(covariates)
+#  results$covariates <- covariates
 
-  if (kable_results) {
-    format <- getOption("knitr.table.format")
-    format <- ifelse(is.null(format), "html", format)
-    filter_by <- ifelse(
-      test = is.null(pvalue_cutoff),
-      yes = "p.value <= %f",
-      no = "p.adjusted <= %f"
-    )
-    pvalue_cutoff <- ifelse(is.null(pvalue_cutoff), 0.05, pvalue_cutoff)
+  results <- left_join(x = results, y = variables_freq, by = "term")
 
-    reskab <- formatResults(
-      results = results,
-      filter_by = sprintf(filter_by, pvalue_cutoff),
-      format = format,
-      header = "foo"
-    )
-    print(reskab)
+  pheno_var <- all.vars(object_formula)[1]
+  binary_phenotype <- object_data[, pheno_var] %in% c(0, 1)
+  if (all(binary_phenotype, na.rm = TRUE)) {
+    results <- object_data %>%
+      filter(.data[[!! pheno_var]] == 1) %>%
+      select("ID", !! variables) %>%
+      getCountsFrequencies() %>%
+      rename(Npositive.count = .data$Counts, Npositive.freq = .data$Freq) %>%
+      left_join(x = results, by = "term")
+
+    results <- object_data %>%
+      filter(.data[[!! pheno_var]] != 1) %>%
+      select("ID", !! variables) %>%
+      getCountsFrequencies() %>%
+      rename(Nnegative.count = .data$Counts, Nnegative.freq = .data$Freq) %>%
+      left_join(x = results, by = "term")
   }
 
   return(results)

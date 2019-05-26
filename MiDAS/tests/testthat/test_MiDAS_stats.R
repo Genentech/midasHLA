@@ -1,8 +1,6 @@
 context("HLA allele statistical methods")
 
 test_that("HLA allele associations are analyzed properly", {
-  library("survival")
-
   hla_calls_file <-
     system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(hla_calls_file)
@@ -13,21 +11,30 @@ test_that("HLA allele associations are analyzed properly", {
   midas_data <<-
     prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
 
-  object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
+  object <- lm(OS_DIED ~ AGE + SEX, data = midas_data)
   res <- analyzeAssociations(object,
                              variables = c("A*01:01", "A*02:01"),
                              correction = "BH"
   )
 
   test_res <- list(
-    coxph(Surv(OS, OS_DIED) ~ AGE + SEX + `A*01:01`, data = midas_data),
-    coxph(Surv(OS, OS_DIED) ~ AGE + SEX + `A*02:01`, data = midas_data)
+    lm(OS_DIED ~ AGE + SEX + `A*01:01`, data = midas_data),
+    lm(OS_DIED ~ AGE + SEX + `A*02:01`, data = midas_data)
   )
   test_res <- do.call("rbind", lapply(test_res, tidy))
   test_res$term <- gsub("`", "", test_res$term)
   test_res <- test_res[test_res$term %in% c("A*01:01", "A*02:01"), ]
   test_res$p.adjusted <- p.adjust(test_res$p.value, "BH")
-  test_res$covariates <- "AGE + SEX"
+  variables_freq <- getCountsFrequencies(midas_data[, c("ID", "A*01:01", "A*02:01")])
+  test_res$Ntotal.count <- variables_freq$Counts
+  test_res$Ntotal.freq <- variables_freq$Freq
+  pos <- midas_data$OS_DIED == 1
+  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", "A*01:01", "A*02:01")])
+  test_res$Npositive.count <- pos_freq$Counts
+  test_res$Npositive.freq <- pos_freq$Freq
+  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", "A*01:01", "A*02:01")])
+  test_res$Nnegative.count <- neg_freq$Counts
+  test_res$Nnegative.freq <- neg_freq$Freq
 
   expect_equal(as.data.frame(res), as.data.frame(test_res)) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
 
@@ -37,32 +44,22 @@ test_that("HLA allele associations are analyzed properly", {
                "variables is not a character vector or NULL"
   )
 
-  expect_error(analyzeAssociations(object, frequency_cutoff = "big"),
-               "frequency_cutoff is not a number \\(a length one numeric vector\\)."
-  )
-
   expect_error(analyzeAssociations(object, variables = "thief"),
                "thief can not be found in object data"
   )
 
+  expect_error(analyzeAssociations(object, frequency_cutoff = "big"),
+               "frequency_cutoff is not a number \\(a length one numeric vector\\)."
+  )
+
   expect_error(
-    analyzeAssociations(object, variables = "A*01:01", correction = 1),
+    analyzeAssociations(object, correction = 1),
     "correction is not a string \\(a length one character vector\\)."
   )
 
   expect_error(
-    analyzeAssociations(object, variables = "A*01:01", exponentiate = 1),
+    analyzeAssociations(object, exponentiate = 1),
     "exponentiate is not a flag \\(a length one logical vector\\)."
-  )
-
-  expect_error(
-    analyzeAssociations(object, variables = "A*01:01", kable_results = 1),
-    "kable_results is not a flag \\(a length one logical vector\\)."
-  )
-
-  expect_error(
-    analyzeAssociations(object, variables = "A*01:01", pvalue_cutoff = "A"),
-    "pvalue_cutoff is not a number \\(a length one numeric vector\\) or NULL"
   )
 })
 
