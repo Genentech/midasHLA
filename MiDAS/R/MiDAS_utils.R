@@ -466,5 +466,125 @@ isCountsOrZeros <- function(x, na.rm = TRUE) {
 #' @inheritParams assertthat::on_failure
 #'
 assertthat::on_failure(isCountsOrZeros) <- function(call, env) {
-  paste0("values in ", deparse(call$x), " are not counts (a positive integers or zeros).")
+  paste0("values in ", deparse(call$x), " are not counts (a positive integers) or zeros.")
+}
+
+#' Check if object is character vector or NULL
+#'
+#' \code{isCharacterOrNULL} checks if object is character vector or NULL.
+#'
+#' @param x object to test.
+#'
+#' @return Logical indicating if object is character vector or NULL
+#'
+#' @examples
+#' isCharacterOrNULL(c("A", "B"))
+#'
+isCharacterOrNULL <- function(x) {
+    test <- is.character(x) | is.null(x)
+
+  return(test)
+}
+
+#' Error message for isCharacterOrNULL
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(isCharacterOrNULL) <- function(call, env) {
+  paste0(deparse(call$x), " is not a character vector or NULL.")
+}
+
+#' Check if object is number or NULL
+#'
+#' \code{isNumberOrNULL} checks if object is number (a length one numeric
+#' vector) or NULL.
+#'
+#' @param x object to test.
+#'
+#' @return Logical indicating if object is number or NULL
+#'
+#' @examples
+#' isNumberOrNULL(1)
+#'
+#' @importFrom assertthat is.number
+#'
+isNumberOrNULL <- function(x) {
+    test <- is.number(x) | is.null(x)
+
+  return(test)
+}
+
+#' Error message for isNumberOrNULL
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(isNumberOrNULL) <- function(call, env) {
+  paste0(deparse(call$x),
+         " is not number (a length one numeric vector) or NULL."
+  )
+}
+
+#' Check if object is string or NULL
+#'
+#' \code{isStringOrNULL} checks if object is string (a length one character
+#' vector) or NULL.
+#'
+#' @param x object to test.
+#'
+#' @return Logical indicating if object is string or NULL
+#'
+#' @examples
+#' isStringOrNULL("a")
+#'
+#' @importFrom assertthat is.string
+#'
+isStringOrNULL <- function(x) {
+    test <- is.string(x) | is.null(x)
+
+  return(test)
+}
+
+#' Error message for isStringOrNULL
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(isStringOrNULL) <- function(call, env) {
+  paste0(deparse(call$x),
+         " is not a string (a length one character vector) or NULL."
+  )
+}
+
+#' Check if string matches one of possible values
+#'
+#' \code{stringMatches} checks if string is equal to one of the choices.
+#'
+#' @param x string to test.
+#' @param choice Character vector with possible values for \code{x}.
+#'
+#' @return Logical indicating if \code{x} matches one of the strings in
+#'   \code{choice}.
+#'
+#' @examples
+#' stringMatches("foo", c("foo", "bar"))
+#'
+stringMatches <- function(x, choice) {
+    test <- pmatch(
+      x = x,
+      table = choice,
+      nomatch = 0
+    ) != 0
+
+  return(test)
+}
+
+#' Error message for stringMatches
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(stringMatches) <- function(call, env) {
+  paste0(deparse(call$x),
+         ' should be one of "',
+         paste(call$choice, collapse = '", "'),
+         '".'
+  )
 }
