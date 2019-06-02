@@ -339,7 +339,11 @@ prepareHlaData <- function(hla_calls,
 #' statistical model specified by user.
 #'
 #' @inheritParams analyzeAssociations
+#' @inheritParams analyzeConditionalAssociations
 #' @inheritParams formatAssociationsResults
+#' @param conditional Logical indicating if the analysis should be performed
+#'   using stepwise conditional tests or not. See
+#'   \link{analyzeConditionalAssociations} for more details.
 #' @param variables Character specifying variables to use in association tests
 #'   or \code{NULL}. If \code{NULL} all variables in object data are tested.
 #'   See details for further information.
@@ -388,10 +392,13 @@ prepareHlaData <- function(hla_calls,
 #'
 #' @export
 analyzeMiDASData <- function(object,
+                             conditional = FALSE,
                              variables = NULL,
                              frequency_cutoff = 0,
                              pvalue_cutoff = NULL,
                              correction = "BH",
+                             th = 0.05,
+                             rss_th = 1e-07,
                              kable_output = TRUE,
                              type = "hla_alleles",
                              format = getOption("knitr.table.format")) {
@@ -405,6 +412,7 @@ analyzeMiDASData <- function(object,
   object_variables <- colnames(object_data)[-1]
 
   assert_that(
+    is.flag(conditional),
     see_if(
       is.character(variables) | is.null(variables),
       msg = "variables is not a character vector or NULL"
@@ -421,6 +429,8 @@ analyzeMiDASData <- function(object,
       msg = "pvalue_cutoff is not a number or NULL"
     ),
     is.string(correction),
+    is.number(th),
+    is.number(rss_th),
     is.flag(kable_output),
     is.string(type),
     see_if(
@@ -453,10 +463,21 @@ analyzeMiDASData <- function(object,
     filter(.data$Ntotal.frequency > frequency_cutoff |
              frequency_cutoff >= 1)
 
-  results <- analyzeAssociations(object,
-                                 variables = variables_freq$term,
-                                 correction = correction,
-                                 exponentiate = logistic)
+  if (conditional) {
+    results <- analyzeConditionalAssociations(object,
+                                              variables = variables_freq$term,
+                                              correction = correction,
+                                              th = th,
+                                              rss_th = rss_th,
+                                              exponentiate = logistic
+    )
+  } else {
+    results <- analyzeAssociations(object,
+                                   variables = variables_freq$term,
+                                   correction = correction,
+                                   exponentiate = logistic
+    )
+  }
 
   # Add frequency information to results table
   results <- left_join(x = results, y = variables_freq, by = "term")
