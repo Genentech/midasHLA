@@ -332,3 +332,173 @@ prepareHlaData <- function(hla_calls,
 
   return(data)
 }
+
+#' Analyze associations in MiDAS data
+#'
+#' \code{analyzeMiDASData} performs association analysis on MiDAS data using
+#' statistical model specified by user.
+#'
+#' @inheritParams analyzeAssociations
+#' @inheritParams formatAssociationsResults
+#' @param variables Character specifying variables to use in association tests
+#'   or \code{NULL}. If \code{NULL} all variables in object data are tested.
+#'   See details for further information.
+#' @param frequency_cutoff Number specifying threshold for inclusion of a
+#'   variable. If it's a number between 0 and 1 variables with frequency below
+#'   this number will not be considered during analysis. If it's greater or
+#'   equal 1 variables with number of counts less that this will not be
+#'   considered during analysis.
+#' @param kable_output Logical indicating if additionally results should be
+#'   preety printed in specified \code{format}.
+#'
+#' \code{variables} takes \code{NULL} as a default value. When specifed as such
+#' column names of data frame associated with the \code{object} are used as
+#' variables for testing. This exludes first column which should corresponds
+#' to samples IDs as well as covariates and response variables defined in
+#' object formula.
+#'
+#' \code{correction} specifies p-value adjustment method to use, common choice
+#' is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
+#' \link[stats]{p.adjust}. Check there to get more details.
+#'
+#' @return Tibble containing results for all tested variables.
+#'
+#' @examples
+#' library("survival")
+#' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(hla_calls_file)
+#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+#' pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
+#' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
+#' covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
+#' midas_data <- prepareHlaData(hla_calls = hla_calls,
+#'                              pheno = pheno,
+#'                              covar = covar,
+#'                              inheritance_model = "additive"
+#' )
+#'
+#' object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
+#' analyzeMiDASData(object)
+#'
+#' @importFrom assertthat assert_that is.flag is.number is.string
+#' @importFrom dplyr filter left_join select rename
+#' @importFrom stats getCall
+#' @importFrom rlang as_string !!
+#' @importFrom magrittr %>%
+#'
+#' @export
+analyzeMiDASData <- function(object,
+                             variables = NULL,
+                             frequency_cutoff = 0,
+                             pvalue_cutoff = NULL,
+                             correction = "BH",
+                             kable_output = TRUE,
+                             type = "hla_alleles",
+                             format = getOption("knitr.table.format")) {
+
+  assert_that(
+    checkStatisticalModel(object)
+  )
+  object_call <- getCall(object)
+  object_formula <- eval(object_call[["formula"]], envir = parent.frame())
+  object_data <- eval(object_call[["data"]], envir = parent.frame())
+  object_variables <- colnames(object_data)[-1]
+
+  assert_that(
+    see_if(
+      is.character(variables) | is.null(variables),
+      msg = "variables is not a character vector or NULL"
+    ),
+    see_if(
+      all(test_vars <- variables %in% object_variables) | is.null(variables),
+      msg = sprintf("%s can not be found in object data",
+                    paste(variables[! test_vars], collapse = ", ")
+      )
+    ),
+    is.number(frequency_cutoff),
+    see_if(
+      is.number(pvalue_cutoff) | is.null(pvalue_cutoff),
+      msg = "pvalue_cutoff is not a number or NULL"
+    ),
+    is.string(correction),
+    is.flag(kable_output),
+    is.string(type),
+    see_if(
+      pmatch(type, table = c("hla_alleles", "aa_level", "expression_levels"),
+             nomatch = 0) != 0,
+      msg = "type must be one of 'hla_alleles', 'aa_level', 'expression_levels'"
+    ),
+    is.string(format),
+    see_if(
+      pmatch(format, table = c("html", "latex"), nomatch = 0) != 0,
+      msg = "format must be one of 'html', 'latex'"
+    )
+  )
+
+  if (is.null(variables)) {
+    mask <- ! object_variables %in% all.vars(object_formula)
+    variables <- object_variables[mask]
+    assert_that(length(variables) != 0,
+                msg = "No new variables found in object data."
+    )
+  }
+
+  # Filter variables on frequency cutoff
+  variables_freq <- object_data %>%
+    select("ID",!!variables) %>%
+    getCountsFrequencies() %>%
+    rename(Ntotal = .data$Counts, Ntotal.frequency = .data$Freq) %>%
+    filter(.data$Ntotal > frequency_cutoff |
+             frequency_cutoff < 1) %>%
+    filter(.data$Ntotal.frequency > frequency_cutoff |
+             frequency_cutoff >= 1)
+
+  results <- analyzeAssociations(object,
+                                 variables = variables_freq$term,
+                                 correction = correction,
+                                 exponentiate = logistic)
+
+  # Add frequency information to results table
+  results <- left_join(x = results, y = variables_freq, by = "term")
+
+  pheno_var <- all.vars(object_formula)[1]
+  binary_phenotype <- object_data[, pheno_var] %in% c(0, 1)
+  if (all(binary_phenotype, na.rm = TRUE)) {
+    results <- object_data %>%
+      filter(.data[[!! pheno_var]] == 1) %>%
+      select("ID", !! variables) %>%
+      getCountsFrequencies() %>%
+      rename(Npositive = .data$Counts,
+             Npositive.frequency = .data$Freq) %>%
+      left_join(x = results, by = "term")
+
+    results <- object_data %>%
+      filter(.data[[!! pheno_var]] != 1) %>%
+      select("ID", !! variables) %>%
+      getCountsFrequencies() %>%
+      rename(Nnegative = .data$Counts,
+             Nnegative.frequency = .data$Freq) %>%
+      left_join(x = results, by = "term")
+  }
+
+  if (kable_output) {
+    # Figure out formatting arguments
+    response_variable <- as_string(object_formula[[2]])
+    model_fun <- as_string(object_call[[1]])
+    model_family <- as_string(object_call[["family"]])
+    logistic <- model_fun == "coxph" |
+      (model_fun == "glm" & model_family == "binomial")
+
+    preety_table <- formatAssociationsResults(
+      results,
+      type = type,
+      response_variable = response_variable,
+      logistic = logistic,
+      pvalue_cutoff = pvalue_cutoff,
+      format = format
+    )
+    print(preety_table)
+  }
+
+  return(results)
+}
