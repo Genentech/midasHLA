@@ -147,7 +147,7 @@ analyzeAssociations <- function(object,
 #'
 #' @export
 analyzeConditionalAssociations <- function(object,
-                                           variables = NULL,
+                                           variables,
                                            correction = "BH",
                                            th,
                                            rss_th = 1e-07,
@@ -161,12 +161,9 @@ analyzeConditionalAssociations <- function(object,
   object_variables <- colnames(object_data)[-1]
 
   assert_that(
+    is.character(variables),
     see_if(
-      is.character(variables) | is.null(variables),
-      msg = "variables is not a character vector or NULL"
-    ),
-    see_if(
-      all(test_vars <- variables %in% object_variables) | is.null(variables),
+      all(test_vars <- variables %in% object_variables),
       msg = sprintf("%s can not be found in object data",
                     paste(variables[! test_vars], collapse = ", ")
       )
@@ -176,11 +173,6 @@ analyzeConditionalAssociations <- function(object,
     is.number(rss_th),
     is.flag(exponentiate)
   )
-
-  if (is.null(variables)) {
-    mask <- ! object_variables %in% all.vars(object_formula)
-    variables <- object_variables[mask]
-  }
 
   prev_formula <- object_formula
   first_variables <- all.vars(object_formula)
@@ -413,10 +405,7 @@ analyzeMiDASData <- function(object,
 
   assert_that(
     is.flag(conditional),
-    see_if(
-      is.character(variables) | is.null(variables),
-      msg = "variables is not a character vector or NULL"
-    ),
+    isCharacterOrNULL(variables),
     see_if(
       all(test_vars <- variables %in% object_variables) | is.null(variables),
       msg = sprintf("%s can not be found in object data",
@@ -424,25 +413,17 @@ analyzeMiDASData <- function(object,
       )
     ),
     is.number(frequency_cutoff),
-    see_if(
-      is.number(pvalue_cutoff) | is.null(pvalue_cutoff),
-      msg = "pvalue_cutoff is not a number or NULL"
-    ),
+    isNumberOrNULL(pvalue_cutoff),
     is.string(correction),
     is.number(th),
     is.number(rss_th),
     is.flag(kable_output),
     is.string(type),
-    see_if(
-      pmatch(type, table = c("hla_alleles", "aa_level", "expression_levels"),
-             nomatch = 0) != 0,
-      msg = "type must be one of 'hla_alleles', 'aa_level', 'expression_levels'"
+    stringMatches(type,
+                  choice = c("hla_alleles", "aa_level", "expression_levels")
     ),
     is.string(format),
-    see_if(
-      pmatch(format, table = c("html", "latex"), nomatch = 0) != 0,
-      msg = "format must be one of 'html', 'latex'"
-    )
+    stringMatches(format, choice = c("html", "latex"))
   )
 
   if (is.null(variables)) {
