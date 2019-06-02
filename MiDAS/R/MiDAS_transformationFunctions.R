@@ -617,12 +617,12 @@ countsToHlaCalls <- function(counts) {
   return(new_df)
 }
 
-#' Pretty format association analysis table
+#' Helper function for pretty formating statistical analysis results
 #'
-#' \code{formatResults} formats association analysis results table to specified
-#' format.
+#' \code{formatResults} formats statistical analysis results table to html or
+#' latex format.
 #'
-#' @param results Tibble as returned by \link{analyzeConditionalAssociations}.
+#' @param results Tibble as returned by \link{analyzeAssociations}.
 #' @param filter_by Character specifying conditional expression used to filter
 #'   \code{results}, this is equivalent to \code{...} argument passed to
 #'   \link[dplyr]{filter} except it has to be a character vector.
@@ -645,8 +645,8 @@ countsToHlaCalls <- function(counts) {
 #'   system.file("extdata", "pheno_example.txt", package = "MiDAS"),
 #'   header = TRUE)
 #' midas_data <- dplyr::left_join(x = midas_data, y = hla_counts, by = "ID")
-#' mod <- lm(OS ~ 1, data = midas_data)
-#' res <- analyzeAssociations(mod)
+#' object <- lm(OS ~ 1, data = midas_data)
+#' res <- analyzeAssociations(object)
 #' formatResults(res,
 #'               filter_by = c("p.value <= 0.05", "estimate > 0"),
 #'               arrange_by = c("p.value * estimate"),
@@ -677,7 +677,7 @@ formatResults <- function(results,
     is.string(format),
     see_if(
       pmatch(format, table = c("html", "latex"), nomatch = 0) != 0,
-      msg = "format should be one of 'html', 'latex'"
+      msg = "format must be one of 'html', 'latex'"
     ),
     see_if(is.character(header) | is.null(header),
            msg = "header is not character vector or NULL"
@@ -707,14 +707,14 @@ formatResults <- function(results,
   }
 
   if (! (is.null(header) & format == "html")) {
-    header <- setNames(ncol(results), header) # Still if format is 'latex' and format = NULL the result is not visualy appealing, and without it gives error. Issue created on github:
+    header <- setNames(ncol(results), header) # Still if format is 'latex' and format = NULL the result is not visualy appealing, and without it gives error. Issue created on github: https://github.com/haozhu233/kableExtra/issues/387
   }
 
   results %<>%
     kable(format = format, digits = 50) %>%
     add_header_above(header = header) %>%
     kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
-    scroll_box(width = "100%", height = "200px")
+    scroll_box(width = "100%", height = "200px", fixed_thead = TRUE)
 
   return(results)
 }
