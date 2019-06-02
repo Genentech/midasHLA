@@ -208,3 +208,42 @@ test_that("is counts or zeros", {
     "values in c\\(1, 0, 2, NA, 1.5\\) are not counts \\(a positive integers or zeros\\)."
   )
 })
+
+test_that("is character or null", {
+  expect_equal(isCharacterOrNULL(LETTERS), TRUE)
+  expect_equal(isCharacterOrNULL(NULL), TRUE)
+
+  expect_error(
+    assertthat::assert_that(isCharacterOrNULL(1)),
+    "1 is not a character vector or NULL."
+  )
+})
+
+test_that("is is number or null", {
+  expect_equal(isNumberOrNULL(1), TRUE)
+  expect_equal(isNumberOrNULL(NULL), TRUE)
+
+  expect_error(
+    assertthat::assert_that(isNumberOrNULL("a")),
+    "\"a\" is not number \\(a length one numeric vector\\) or NULL."
+  )
+})
+
+test_that("is is string or null", {
+  expect_equal(isStringOrNULL("foo"), TRUE)
+  expect_equal(isStringOrNULL(NULL), TRUE)
+
+  expect_error(
+    assertthat::assert_that(isStringOrNULL(1)),
+    "1 is not a string \\(a length one character vector\\) or NULL."
+  )
+})
+
+test_that("string matches", {
+  expect_equal(stringMatches("foo", c("foo", "bar")), TRUE)
+
+  expect_error(
+    assertthat::assert_that(stringMatches("foo", c("bar", "Foo"))),
+    "\"foo\" should be one of c\\(\"bar\", \"Foo\"\\)."
+  )
+})
