@@ -772,3 +772,111 @@ getCountsFrequencies <- function(counts_table) {
 
   return(counts_df)
 }
+
+#' Pretty format association analysis results
+#'
+#' \link{formatAssociationsResults} formats results table to specified
+#' format. It uses \link{formatResults} with prespecifed arguments to return
+#' nice table depending on type of analysis and model type.
+#'
+#' @inheritParams formatResults
+#' @param type String specifying type of analysis from which \code{results} were
+#'   produced. Possible values includes \code{'hla_alleles'}, \code{'aa_level'},
+#'   \code{'expression_levels'}.
+#' @param response_variable String giving the name of response variable, it is
+#'   used to produce binary phenotype column names.
+#' @param logistic Logical indicating if statistical model is logistic. If set
+#'  to \code{TRUE}, estimate will be renamed to odds ratio.
+#' @param pvalue_cutoff Nuber specifying p-value cutoff for results to be
+#'   included in output. If \code{NULL} cutoff of \code{0.05} on
+#'   \code{p.adjusted} value is used instead.
+#'
+#' @return A character vector with preety formatted \code{results} table.
+#'
+#' @importFrom assertthat assert_that is.flag is.number is.string see_if
+#' @importFrom dplyr ends_with mutate_at vars
+#' @importFrom magrittr %>% %<>%
+#' @importFrom rlang has_name list2 parse_expr warn !! :=
+#'
+formatAssociationsResults <- function(results,
+                                      type = "hla_alleles",
+                                      response_variable = "R",
+                                      logistic = FALSE,
+                                      pvalue_cutoff = NULL,
+                                      format = getOption("knitr.table.format")) {
+  assert_that(
+    is.string(type),
+    see_if(
+      pmatch(type, table = c("hla_alleles", "aa_level", "expression_levels"),
+             nomatch = 0) != 0,
+      msg = "type must be one of 'hla_alleles', 'aa_level', 'expression_levels'"
+    ),
+    is.string(response_variable),
+    is.flag(logistic),
+    see_if(is.number(pvalue_cutoff) | is.null(pvalue_cutoff), msg = "pvalue_cutoff must be number or null"),
+    is.string(format),
+    see_if(
+      pmatch(format, table = c("html", "latex"), nomatch = 0) != 0,
+      msg = "format must be one of 'html', 'latex'"
+    )
+  )
+
+  filter_by <- ifelse(
+    test = is.null(pvalue_cutoff),
+    yes = "p.adjusted <= 0.05",
+    no = sprintf("p.value <= %f", pvalue_cutoff)
+  )
+  passed_filter <- eval(parse_expr(filter_by), envir = as.list(results))
+  if (! any(passed_filter, na.rm = TRUE)) {
+    warn(sprintf("None of the results meets filtering criteria: %s", filter_by))
+  }
+
+  estimate_name <- ifelse(logistic, "odds ratio", "estimate")
+  term_name <- switch (type,
+                       "hla_alleles" = "allele",
+                       "aa_level" = "aa",
+                       "expression_levels" = "allele",
+                       "term"
+  )
+  select_cols <- unlist(list2(
+    !! term_name := "term",
+    !! estimate_name := "estimate",
+    "std.error",
+    "p.value",
+    "p.adjusted",
+    "Ntotal",
+    "Ntotal (%)" = "Ntotal.frequency",
+    !! sprintf("N %s=1", response_variable) := "Npositive",
+    !! sprintf("N %s=1 (%%)", response_variable) := "Npositive.frequency",
+    !! sprintf("N %s=0", response_variable) := "Nnegative",
+    !! sprintf("N %s=0 (%%)", response_variable) := "Nnegative.frequency"
+  ))
+  present_cols <- has_name(results, select_cols)
+  assert_that(
+    sum(present_cols) != 0,
+    msg = sprintf("results does not contain any of the following columns: %s",
+                  paste(select_cols, collapse = ", ")
+    )
+  )
+  select_cols <- select_cols[present_cols]
+
+
+  header <- switch (type,
+                    "hla_alleles" = "HLA allelic associations",
+                    "aa_level" = "HLA AA associations",
+                    "expression_levels" = "HLA expression level associations",
+                    "Associations results"
+  )
+
+  results %<>%
+    mutate_at(vars(ends_with(".frequency")), ~ . * 100) %>%
+    formatResults(
+      filter_by = filter_by,
+      arrange_by = "p.value",
+      select_cols = select_cols,
+      format = format,
+      header = header
+    )
+
+  return(results)
+}
