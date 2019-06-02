@@ -4,34 +4,13 @@
 #' level using statistical model of choice.
 #'
 #' @inheritParams updateModel
-#' @param analysis_type String specifying type of analysis that is to be done.
-#'   This parameter is used to figure out how to calculate variables frequencies
-#'   and header for kabled output.
-#' @param variables Character specifying variables to use in association tests
-#'   or \code{NULL}. If \code{NULL} all variables in object data are tested.
-#'   See details for further information.
-#' @param frequency_cutoff Number specifying threshold for inclusion of a
-#'   variable. If it's a number between 0 and 1 variables with frequency below
-#'   this number will not be considered during analysis. If it's greater or
-#'   equal 1 variables with number of counts less that this will not be
-#'   considered during analysis.
+#' @param variables Character specifying variables to use in association tests.
 #' @param correction String specifying multiple testing correction method. See
 #'   details for further information.
 #' @param exponentiate Logical indicating whether or not to exponentiate the
 #'   coefficient estimates. Internally this is passed to \link[broom]{tidy}.
 #'   This is typical for logistic and multinomial regressions, but a bad idea if
 #'   there is no log or logit link. Defaults to FALSE.
-#' @param kable_results Logical indicating if function should print results
-#'   as additional output. Results are formatted with kable.
-#' @param pvalue_cutoff P-value cutoff for results to be included in
-#'   kable output. If \code{NULL} cutoff of \code{0.05} on \code{p.adjusted}
-#'   value is used instead.
-#'
-#' \code{variables} takes \code{NULL} as a default value. When specifed as such
-#' column names of data frame associated with the \code{object} are used as
-#' variables for testing. This exludes first column which should corresponds
-#' to samples IDs as well as covariates and response variables defined in
-#' object formula.
 #'
 #' \code{correction} specifies p-value adjustment method to use, common choice
 #' is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
@@ -65,21 +44,18 @@
 #'
 #' @importFrom assertthat assert_that see_if is.flag is.string
 #' @importFrom broom tidy
-#' @importFrom dplyr arrange bind_rows rename .data
-#' @importFrom magrittr %>%
+#' @importFrom dplyr bind_rows
 #' @importFrom stats p.adjust
 #'
 #' @export
 analyzeAssociations <- function(object,
-                                variables = NULL,
-                                frequency_cutoff = 0,
+                                variables,
                                 correction = "BH",
                                 exponentiate = FALSE) {
   assert_that(
     checkStatisticalModel(object)
   )
   object_call <- getCall(object)
-  object_formula <- eval(object_call[["formula"]], envir = parent.frame())
   object_data <- eval(object_call[["data"]], envir = parent.frame())
   object_variables <- colnames(object_data)[-1]
 
@@ -99,22 +75,7 @@ analyzeAssociations <- function(object,
     is.flag(exponentiate)
   )
 
-  if (is.null(variables)) {
-    mask <- ! object_variables %in% all.vars(object_formula)
-    variables <- object_variables[mask]
-    assert_that(length(variables) != 0,
-                msg = "No new variables found in object's data."
-    )
-  }
-
-  variables_freq <- object_data %>%
-    select("ID", !! variables) %>%
-    getCountsFrequencies() %>%
-    rename(Ntotal.count = .data$Counts, Ntotal.freq = .data$Freq) %>%
-    filter(.data$Ntotal.count > frequency_cutoff | frequency_cutoff < 1) %>%
-    filter(.data$Ntotal.freq > frequency_cutoff | frequency_cutoff >= 1)
-
-  results <- lapply(variables_freq$term,
+  results <- lapply(variables,
                     updateModel,
                     object = object,
                     backquote = TRUE,
@@ -124,7 +85,7 @@ analyzeAssociations <- function(object,
   results <- lapply(results, tidy, exponentiate = exponentiate)
   results <- bind_rows(results)
   results$term <- gsub("`", "", results$term)
-  results <- results[results$term %in% variables_freq$term, ]
+  results <- results[results$term %in% variables, ]
 
   results$p.adjusted <- p.adjust(results$p.value, correction)
 
@@ -132,26 +93,6 @@ analyzeAssociations <- function(object,
 #  covariates <- formula(object)[[3]]
 #  covariates <- deparse(covariates)
 #  results$covariates <- covariates
-
-  results <- left_join(x = results, y = variables_freq, by = "term")
-
-  pheno_var <- all.vars(object_formula)[1]
-  binary_phenotype <- object_data[, pheno_var] %in% c(0, 1)
-  if (all(binary_phenotype, na.rm = TRUE)) {
-    results <- object_data %>%
-      filter(.data[[!! pheno_var]] == 1) %>%
-      select("ID", !! variables) %>%
-      getCountsFrequencies() %>%
-      rename(Npositive.count = .data$Counts, Npositive.freq = .data$Freq) %>%
-      left_join(x = results, by = "term")
-
-    results <- object_data %>%
-      filter(.data[[!! pheno_var]] != 1) %>%
-      select("ID", !! variables) %>%
-      getCountsFrequencies() %>%
-      rename(Nnegative.count = .data$Counts, Nnegative.freq = .data$Freq) %>%
-      left_join(x = results, by = "term")
-  }
 
   return(results)
 }
