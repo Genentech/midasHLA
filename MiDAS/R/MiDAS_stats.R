@@ -453,6 +453,11 @@ analyzeMiDASData <- function(object,
     )
   }
 
+  model_fun <- as_string(object_call[[1]])
+  model_family <- ifelse(is.null(model_family), "null", as_string(model_family))
+  logistic <- model_fun == "coxph" |
+    (model_fun == "glm" & model_family == "binomial")
+
   # Filter variables on frequency cutoff
   variables_freq <- object_data %>%
     select("ID",!!variables) %>%
@@ -503,12 +508,7 @@ analyzeMiDASData <- function(object,
   }
 
   if (kable_output) {
-    # Figure out formatting arguments
     response_variable <- as_string(object_formula[[2]])
-    model_fun <- as_string(object_call[[1]])
-    model_family <- as_string(object_call[["family"]])
-    logistic <- model_fun == "coxph" |
-      (model_fun == "glm" & model_family == "binomial")
 
     preety_table <- formatAssociationsResults(
       results,
