@@ -675,13 +675,8 @@ formatResults <- function(results,
     is.character(arrange_by),
     is.character(select_cols),
     is.string(format),
-    see_if(
-      pmatch(format, table = c("html", "latex"), nomatch = 0) != 0,
-      msg = "format must be one of 'html', 'latex'"
-    ),
-    see_if(is.character(header) | is.null(header),
-           msg = "header is not character vector or NULL"
-    )
+    stringMatches(format, choice = c("html", "latex")),
+    isStringOrNULL(header)
   )
 
   filter_by <- parse_exprs(filter_by)
@@ -806,19 +801,14 @@ formatAssociationsResults <- function(results,
                                       format = getOption("knitr.table.format")) {
   assert_that(
     is.string(type),
-    see_if(
-      pmatch(type, table = c("hla_alleles", "aa_level", "expression_levels"),
-             nomatch = 0) != 0,
-      msg = "type must be one of 'hla_alleles', 'aa_level', 'expression_levels'"
+    stringMatches(type,
+                  choice = c("hla_alleles", "aa_level", "expression_levels")
     ),
     is.string(response_variable),
     is.flag(logistic),
-    see_if(is.number(pvalue_cutoff) | is.null(pvalue_cutoff), msg = "pvalue_cutoff must be number or null"),
+    isNumberOrNULL(pvalue_cutoff),
     is.string(format),
-    see_if(
-      pmatch(format, table = c("html", "latex"), nomatch = 0) != 0,
-      msg = "format must be one of 'html', 'latex'"
-    )
+    stringMatches(format, choice = c("html", "latex"))
   )
 
   filter_by <- ifelse(
