@@ -39,7 +39,7 @@
 #'
 #' ## test for alleles associations
 #' analyzeAssociations(object = object,
-#'                     correction = "BH",
+#'                     variables = c("B*14:02", "DRB1*11:01")
 #' )
 #'
 #' @importFrom assertthat assert_that see_if is.flag is.string
@@ -375,7 +375,7 @@ prepareHlaData <- function(hla_calls,
 #' @importFrom assertthat assert_that is.flag is.number is.string
 #' @importFrom dplyr filter left_join select rename
 #' @importFrom stats getCall
-#' @importFrom rlang as_string !!
+#' @importFrom rlang !!
 #' @importFrom magrittr %>%
 #'
 #' @export
@@ -438,7 +438,7 @@ analyzeMiDASData <- function(object,
   # Filter variables on frequency cutoff
   frequency_cutoff <- ifelse(is.null(frequency_cutoff), 0, frequency_cutoff)
   variables_freq <- object_data %>%
-    select("ID",!!variables) %>%
+    select("ID",!! variables) %>%
     getCountsFrequencies() %>%
     rename(Ntotal = .data$Counts, Ntotal.frequency = .data$Freq) %>%
     filter(.data$Ntotal > frequency_cutoff |
@@ -486,7 +486,7 @@ analyzeMiDASData <- function(object,
   }
 
   if (kable_output) {
-    response_variable <- as_string(object_formula[[2]])
+    response_variable <- deparse(object_formula[[2]])
 
     preety_table <- formatAssociationsResults(
       results,
