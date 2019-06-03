@@ -568,11 +568,7 @@ assertthat::on_failure(isStringOrNULL) <- function(call, env) {
 #' stringMatches("foo", c("foo", "bar"))
 #'
 stringMatches <- function(x, choice) {
-    test <- pmatch(
-      x = x,
-      table = choice,
-      nomatch = 0
-    ) != 0
+    test <- x %in% choice
 
   return(test)
 }
@@ -583,8 +579,8 @@ stringMatches <- function(x, choice) {
 #'
 assertthat::on_failure(stringMatches) <- function(call, env) {
   paste0(deparse(call$x),
-         ' should be one of "',
-         paste(call$choice, collapse = '", "'),
-         '".'
+         ' should be one of ',
+         deparse(call$choice),
+         '.'
   )
 }
