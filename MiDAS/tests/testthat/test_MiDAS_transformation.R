@@ -293,10 +293,10 @@ test_that("results are formatted properly", {
                "format is not a string \\(a length one character vector\\).")
 
   expect_error(formatResults(res, format = "markdown"),
-               "format should be one of 'html', 'latex'")
+               "format should be one of c\\(\"html\", \"latex\"\\).")
 
   expect_error(formatResults(res, format ="html", header = 1),
-               "header is not character vector or NULL")
+               "header is not a string \\(a length one character vector\\) or NULL.")
 })
 
 test_that("counts are conveerted into frequencies", {
@@ -316,5 +316,70 @@ test_that("counts are conveerted into frequencies", {
                "first column of counts_table must be named ID")
 
   expect_error(getCountsFrequencies(hla_calls),
-               "values in counts_table are not counts \\(a positive integers or zeros\\).")
+               "values in counts_table are not counts \\(a positive integers\\) or zeros.")
+})
+
+test_that("results are formatted properly with preselected args", {
+  midas_data <<- data.frame( # in one of the tests above midas_data is assigned as global variable, this leads to unexpected behaviour!
+    ID = c(1, 2),
+    "A*01:01" = c(0, 2),
+    "A*01:02" = c(2, 0),
+    R = c(1, 0),
+    check.names = FALSE,
+    stringsAsFactors = FALSE
+  )
+
+  object <- stats::glm(R ~ 1, data = midas_data, family = stats::binomial)
+  res <- analyzeMiDASData(object, pvalue_cutoff = 1, kable_output = FALSE)
+
+  res_kable <- formatAssociationsResults(res)
+  res_kable_test <- formatResults(res,
+                                  filter_by = "p.adjusted <= 0.05",
+                                  arrange_by = "p.value",
+                                  select_cols = c(
+                                    "allele" = "term",
+                                    "estimate" = "estimate",
+                                    "std.error",
+                                    "p.value",
+                                    "p.adjusted",
+                                    "Ntotal",
+                                    "Ntotal (%)" = "Ntotal.frequency",
+                                    "N R=1" = "Npositive",
+                                    "N R=1 (%)" = "Npositive.frequency",
+                                    "N R=0" = "Nnegative",
+                                    "N R=0 (%)"= "Nnegative.frequency"
+  ),
+                                  format = "html",
+                                  header = "HLA allelic associations"
+  )
+
+  expect_equal(res_kable, res_kable_test)
+
+  expect_error(formatAssociationsResults(res, type = 1),
+               "type is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(formatAssociationsResults(res, type = "foo"),
+               "type should be one of c\\(\"hla_alleles\", \"aa_level\", \"expression_levels\"\\)."
+  )
+
+  expect_error(formatAssociationsResults(res, response_variable = 1),
+               "response_variable is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(formatAssociationsResults(res, logistic = 1),
+               "logistic is not a flag \\(a length one logical vector\\)."
+  )
+
+  expect_error(formatAssociationsResults(res, pvalue_cutoff = "a"),
+               "pvalue_cutoff is not number \\(a length one numeric vector\\) or NULL."
+  )
+
+  expect_error(formatAssociationsResults(res, format = 1),
+               "format is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(formatAssociationsResults(res, format = "foo"),
+               "format should be one of c\\(\"html\", \"latex\"\\)."
+  )
 })
