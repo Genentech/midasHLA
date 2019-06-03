@@ -308,7 +308,7 @@ test_that("HLA allele associations are analyzed properly", {
   )
 
   expect_error(analyzeMiDASData(object, frequency_cutoff = "foo"),
-               "frequency_cutoff is not a number \\(a length one numeric vector\\)."
+               "frequency_cutoff is not number \\(a length one numeric vector\\) or NULL."
   )
 
   expect_error(analyzeMiDASData(object, pvalue_cutoff = "foo"),

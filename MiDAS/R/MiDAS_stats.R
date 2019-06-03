@@ -60,17 +60,13 @@ analyzeAssociations <- function(object,
   object_variables <- colnames(object_data)[-1]
 
   assert_that(
-    see_if(
-      is.character(variables) | is.null(variables),
-      msg = "variables is not a character vector or NULL"
-    ),
+    is.character(variables),
     see_if(
       all(test_vars <- variables %in% object_variables) | is.null(variables),
       msg = sprintf("%s can not be found in object data",
                     paste(variables[! test_vars], collapse = ", ")
       )
     ),
-    is.number(frequency_cutoff),
     is.string(correction),
     is.flag(exponentiate)
   )
@@ -386,7 +382,7 @@ prepareHlaData <- function(hla_calls,
 analyzeMiDASData <- function(object,
                              conditional = FALSE,
                              variables = NULL,
-                             frequency_cutoff = 0,
+                             frequency_cutoff = NULL,
                              pvalue_cutoff = NULL,
                              correction = "BH",
                              th = 0.05,
@@ -412,7 +408,7 @@ analyzeMiDASData <- function(object,
                     paste(variables[! test_vars], collapse = ", ")
       )
     ),
-    is.number(frequency_cutoff),
+    isNumberOrNULL(frequency_cutoff),
     isNumberOrNULL(pvalue_cutoff),
     is.string(correction),
     is.number(th),
@@ -434,12 +430,13 @@ analyzeMiDASData <- function(object,
     )
   }
 
-  model_fun <- as_string(object_call[[1]])
-  model_family <- ifelse(is.null(model_family), "null", as_string(model_family))
-  logistic <- model_fun == "coxph" |
-    (model_fun == "glm" & model_family == "binomial")
+  model_fun <- deparse(object_call[[1]])
+  model_family <- deparse(object_call[["family"]])
+  logistic <- grepl("coxph", model_fun) |
+    (grepl("glm", model_fun) & grepl("binomial", model_family))
 
   # Filter variables on frequency cutoff
+  frequency_cutoff <- ifelse(is.null(frequency_cutoff), 0, frequency_cutoff)
   variables_freq <- object_data %>%
     select("ID",!!variables) %>%
     getCountsFrequencies() %>%
