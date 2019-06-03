@@ -207,7 +207,7 @@ hlaToAAVariation <- function(hla_calls,
 #' @inheritParams checkHlaCallsFormat
 #' @inheritParams convertAlleleToVariable
 #' @param reduce logical indicating if function should try to reduce alleles
-#'   resolution when no maching is found. See details for more details.
+#'   resolution when no matching is found. See details for more details.
 #' @param nacols.rm logical indicating if result columns that contain only
 #'   \code{NA} should be removed.
 #'
@@ -241,7 +241,7 @@ hlaToVariable <- function(hla_calls,
     lib <- gsub("^Match_", "", gsub(".txt$", "", lib))
     if (dictionary %in% lib) {
       if (dictionary == "4digit_B-allele_Bw") {
-        warn("In ambigious cases Bw4 will be assigned! See documentation for more details.")
+        warn("In ambiguous cases Bw4 will be assigned! See documentation for more details.")
       }
       dictionary <- system.file(
         "extdata",
@@ -634,7 +634,7 @@ countsToHlaCalls <- function(counts) {
 #' @param format A character string. Possible values are \code{"latex"} and
 #'   \code{"html"}.
 #' @param header String specifying header for result table. If NULL header is
-#'   ommitted.
+#'   omitted.
 #'
 #' @return A character vector of the table source code.
 #'
@@ -731,7 +731,7 @@ formatResults <- function(results,
 #'   by \link{hlaCallsToCounts}.
 #'
 #' @return Data frame containing variables, its corresponding total counts
-#'   and frequncies.
+#'   and frequencies.
 #'
 #' @examples
 #' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
@@ -754,7 +754,7 @@ getCountsFrequencies <- function(counts_table) {
   assert_that(isCountsOrZeros(counts_table))
   counts_sums <- colSums(counts_table, na.rm = TRUE)
 
-  # Under additive inheritace model population size equals 2 * nrow(counts_table), in other cases it's 1 * nrow(counts_table)
+  # Under additive inheritance model population size equals 2 * nrow(counts_table), in other cases it's 1 * nrow(counts_table)
   pop_mul <- ifelse(max(counts_table, na.rm = TRUE) > 1, 2, 1)
   counts_freq <- counts_sums / (pop_mul * nrow(counts_table))
 
@@ -782,11 +782,11 @@ getCountsFrequencies <- function(counts_table) {
 #'   used to produce binary phenotype column names.
 #' @param logistic Logical indicating if statistical model is logistic. If set
 #'  to \code{TRUE}, estimate will be renamed to odds ratio.
-#' @param pvalue_cutoff Nuber specifying p-value cutoff for results to be
+#' @param pvalue_cutoff Number specifying p-value cutoff for results to be
 #'   included in output. If \code{NULL} cutoff of \code{0.05} on
 #'   \code{p.adjusted} value is used instead.
 #'
-#' @return A character vector with preety formatted \code{results} table.
+#' @return A character vector with pretty formatted \code{results} table.
 #'
 #' @importFrom assertthat assert_that is.flag is.number is.string see_if
 #' @importFrom dplyr ends_with mutate_at vars

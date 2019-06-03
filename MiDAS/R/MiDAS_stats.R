@@ -111,7 +111,7 @@ analyzeAssociations <- function(object,
 #'   attempts at variables selection nonsense, thus function is stopped. This
 #'   behavior can be controlled using \code{rss_th}.
 #'
-#' @return tibble with stepwise conditional testsing results.
+#' @return tibble with stepwise conditional testing results.
 #'
 #' @examples
 #' library("survival")
@@ -220,7 +220,7 @@ analyzeConditionalAssociations <- function(object,
   }
 
   if (length(best) == 0) {
-    warn("No significat variables found. Returning empty table.")
+    warn("No significant variables found. Returning empty table.")
     results <- results[0, ]
   } else {
     results <- bind_rows(best)
@@ -341,11 +341,11 @@ prepareHlaData <- function(hla_calls,
 #'   equal 1 variables with number of counts less that this will not be
 #'   considered during analysis.
 #' @param kable_output Logical indicating if additionally results should be
-#'   preety printed in specified \code{format}.
+#'   pretty printed in specified \code{format}.
 #'
-#' \code{variables} takes \code{NULL} as a default value. When specifed as such
+#' \code{variables} takes \code{NULL} as a default value. When specified as such
 #' column names of data frame associated with the \code{object} are used as
-#' variables for testing. This exludes first column which should corresponds
+#' variables for testing. This excludes first column which should corresponds
 #' to samples IDs as well as covariates and response variables defined in
 #' object formula.
 #'
