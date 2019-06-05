@@ -1,4 +1,7 @@
 ## 0.0.0.9008 - 11/05/2019
++ adds script for conversion of HLA calls to VCF format
+
+## 0.0.0.9008 - 11/05/2019
 + introduces countsToHlaCalls that allows converting HLA counts table back to
   HLA calls data frame under additive inheritance model 
 
