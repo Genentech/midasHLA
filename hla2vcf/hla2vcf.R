@@ -23,7 +23,7 @@ suppressMessages(library("stats"))
 suppressPackageStartupMessages(library("vcfR"))
 
 args <- commandArgs(trailingOnly = TRUE)
-if (length(args) == 3) {
+if (length(args) != 3) {
   stop(usage)
 }
 
