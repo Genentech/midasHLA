@@ -12,7 +12,7 @@ resolution desierd HLA calls resolution
 output output gziped vcf file
 
 Example:
-Rscript hla2vcf.R HLAHD_output_example.txt 8 output HLAHD_output_example.vcf.gz
+Rscript hla2vcf.R HLAHD_output_example.txt 8 HLAHD_output_example.vcf.gz
 
 "
 
@@ -21,6 +21,9 @@ suppressMessages(library("magrittr"))
 suppressMessages(library("MiDAS"))
 suppressMessages(library("stats"))
 suppressPackageStartupMessages(library("vcfR"))
+suppressMessages(library("ensembldb"))
+suppressMessages(library("EnsDb.Hsapiens.v86"))
+edb <- EnsDb.Hsapiens.v86
 
 args <- commandArgs(trailingOnly = TRUE)
 if (length(args) != 3) {
@@ -30,6 +33,7 @@ if (length(args) != 3) {
 hla_calls_path <- args[1]
 resolution <- as.numeric(args[2])
 vcf_out_file <- args[3]
+seqlevelsStyle(edb) <- "UCSC"
 
 hla_calls <- readHlaCalls(hla_calls_path, resolution = resolution)
 
@@ -41,10 +45,10 @@ genes <- hla_calls[-1] %>%
 alleles_by_gene <- lapply(genes, function(x) {
   x_pattern <- paste0(x, "_")
   hla_calls %>%
-    select(starts_with(x_pattern)) %>%
+    dplyr::select(dplyr::starts_with(x_pattern)) %>%
     unlist() %>%
     unique() %>%
-    na.omit() %>%
+    stats::na.omit() %>%
     as.character()
 })
 names(alleles_by_gene) <- genes
@@ -70,16 +74,34 @@ meta <- c(
 )
 
 # create header
-fix <- lapply(genes,
-              FUN = function(x) {
-                hlagene <- paste0("HLA-", x)
-                alt <- alleles_by_gene[[x]] %>%
-                  paste0("<", ., ">") %>%
-                  paste(., collapse = ",")
-                ns <- nrow(hla_calls) %>%
-                  paste0("NS=", .)
-                c("chr6", "31982024", hlagene, "A", alt, "50", "PASS", ns)
-              }
+hla_genes <- paste0("HLA-", genes)
+hla_genes_pos <- ensembldb::select(
+  edb,
+  keys = hla_genes,
+  keytype = "GENENAME",
+  columns = c("GENESEQSTART", "GENESEQEND")
+) %>%
+  dplyr::group_by(GENENAME) %>%
+  dplyr::summarise(
+    POS = min(GENESEQSTART) + floor((max(GENESEQEND) - min(GENESEQSTART)) / 2)
+  ) %>%
+  with(setNames(POS, GENENAME))
+
+if (length(hla_genes) != length(hla_genes_pos)) {
+  stop("Annotations were not found for all genes! Exiting...")
+}
+
+fix <- lapply(
+  genes,
+  FUN = function(x) {
+    hlagene <- paste0("HLA-", x)
+    alt <- alleles_by_gene[[x]] %>%
+      paste0("<", ., ">") %>%
+      paste(., collapse = ",")
+    ns <- nrow(hla_calls) %>%
+      paste0("NS=", .)
+    c("chr6", hla_genes_pos[hlagene], hlagene, "A", alt, "50", "PASS", ns)
+  }
 )
 
 if (length(genes) == 1) {
@@ -101,7 +123,7 @@ if (length(genes) == 1) {
 gt <- lapply(genes, function(gene) {
   gene1 <- paste0(gene, "_1")
   allele1 <- hla_calls %>%
-    select(starts_with(gene1)) %>%
+    dplyr::select(starts_with(gene1)) %>%
     unlist() %>%
     match(alleles_by_gene[[gene]], nomatch = 0) %>%
     as.character()
@@ -109,7 +131,7 @@ gt <- lapply(genes, function(gene) {
 
   gene2 <- paste0(gene, "_2")
   allele2 <- hla_calls %>%
-    select(starts_with(gene2)) %>%
+    dplyr::select(starts_with(gene2)) %>%
     unlist() %>%
     match(alleles_by_gene[[gene]], nomatch = 0) %>%
     as.character()
