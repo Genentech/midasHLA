@@ -45,4 +45,4 @@ vcf_tidy <- vcfR::extract_gt_tidy(vcf, verbose = FALSE) %>%
   dplyr::arrange(ID) %>%
   as.data.frame(stringsAsFactors = FALSE)
 
-write.table(vcf_tidy, file = "test_out.txt", sep = "\t")
+write.table(vcf_tidy, file = "test_out.txt", sep = "\t", quote = FALSE)
