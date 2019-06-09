@@ -17,12 +17,13 @@ Rscript hla2vcf.R HLAHD_output_example.txt 8 HLAHD_output_example.vcf.bgz
 "
 
 suppressMessages(library("dplyr"))
+suppressMessages(library("EnsDb.Hsapiens.v86"))
+suppressMessages(library("ensembldb"))
 suppressMessages(library("magrittr"))
+suppressMessages(library("methods"))
 suppressMessages(library("MiDAS"))
 suppressMessages(library("stats"))
-suppressPackageStartupMessages(library("vcfR"))
-suppressMessages(library("ensembldb"))
-suppressMessages(library("EnsDb.Hsapiens.v86"))
+suppressMessages(library("vcfR"))
 edb <- EnsDb.Hsapiens.v86
 
 args <- commandArgs(trailingOnly = TRUE)
@@ -37,7 +38,8 @@ seqlevelsStyle(edb) <- "UCSC"
 
 hla_calls <- readHlaCalls(hla_calls_path, resolution = resolution)
 
-genes <- hla_calls[-1] %>%
+genes <- hla_calls %>%
+  dplyr::select(-ID) %>%
   colnames() %>%
   gsub("_.*", "", .) %>%
   unique()
@@ -57,7 +59,7 @@ names(alleles_by_gene) <- genes
 mask <- vapply(alleles_by_gene, function(x) length(x) > 0, FUN.VALUE = logical(1))
 alleles_by_gene <- alleles_by_gene[mask]
 genes <- names(alleles_by_gene)
-if (length(genes) == 0) {
+if (length(genes) == 0) { # This situtation can only happen if hla_calls file is NA only...
   stop("No alleles found in HLA calls file!")
 }
 
@@ -85,15 +87,17 @@ hla_genes_pos <- ensembldb::select(
   dplyr::summarise(
     POS = min(GENESEQSTART) + floor((max(GENESEQEND) - min(GENESEQSTART)) / 2)
   ) %>%
-  with(., setNames(POS, GENENAME))
+  with(., stats::setNames(POS, GENENAME))
 
 if (length(hla_genes) != length(hla_genes_pos)) {
   stop("Annotations were not found for all genes! Exiting...")
 }
 
 # sort genes by position to allow indexing
-hla_genes_sorted <- names(sort(hla_genes_pos, decreasing = FALSE))
-genes <- gsub(".*-", "", hla_genes_sorted)
+genes <- hla_genes_pos %>%
+  sort(decreasing = FALSE) %>%
+  names() %>%
+  gsub(".*-", "", .)
 
 fix <- lapply(
   genes,
@@ -159,7 +163,7 @@ if (length(gt) == 1) {
   colnames(gt) <- c("FORMAT", hla_calls$ID)
 }
 
-vcf <- new(Class = "vcfR")
+vcf <- methods::new(Class = "vcfR")
 vcf@meta <- meta
 vcf@fix <- fix
 vcf@gt <- gt
@@ -173,4 +177,4 @@ zipped <- Rsamtools::bgzip(temp_file, dest = vcf_out_file, overwrite = TRUE)
 idx <- Rsamtools::indexTabix(vcf_out_file, format = "vcf4")
 
 # remove temporary file
-temp_removed <- file.remove(temp_file)
+unlink(temp_file)
