@@ -85,11 +85,15 @@ hla_genes_pos <- ensembldb::select(
   dplyr::summarise(
     POS = min(GENESEQSTART) + floor((max(GENESEQEND) - min(GENESEQSTART)) / 2)
   ) %>%
-  with(setNames(POS, GENENAME))
+  with(., setNames(POS, GENENAME))
 
 if (length(hla_genes) != length(hla_genes_pos)) {
   stop("Annotations were not found for all genes! Exiting...")
 }
+
+# sort genes by position to allow indexing
+hla_genes_sorted <- names(sort(hla_genes_pos, decreasing = FALSE))
+genes <- gsub(".*-", "", hla_genes_sorted)
 
 fix <- lapply(
   genes,
