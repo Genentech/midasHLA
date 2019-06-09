@@ -9,10 +9,10 @@ Rscript hla2vcf.R input resolution output
 
 input input HLA calls file
 resolution desierd HLA calls resolution
-output output gziped vcf file
+output output bgziped vcf file
 
 Example:
-Rscript hla2vcf.R HLAHD_output_example.txt 8 HLAHD_output_example.vcf.gz
+Rscript hla2vcf.R HLAHD_output_example.txt 8 HLAHD_output_example.vcf.bgz
 
 "
 
@@ -165,4 +165,12 @@ vcf@fix <- fix
 vcf@gt <- gt
 check_keys(vcf)
 
-write.vcf(vcf, file = vcf_out_file)
+temp_file <- tempfile()
+write.vcf(vcf, file = temp_file)
+
+# compress output to bgzip
+zipped <- Rsamtools::bgzip(temp_file, dest = vcf_out_file, overwrite = TRUE)
+idx <- Rsamtools::indexTabix(vcf_out_file, format = "vcf4")
+
+# remove temporary file
+temp_removed <- file.remove(temp_file)
