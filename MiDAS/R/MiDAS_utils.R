@@ -448,9 +448,6 @@ checkStatisticalModel <- function(object) { # TODO simplyfy output of this funct
 #' @return Logical indicating if provided vector contains only positive integers
 #'   or zeros.
 #'
-#' @examples
-#' isCountsOrZeros(c(0, 1, 2))
-#'
 #' @importFrom rlang is_integerish
 #'
 isCountsOrZeros <- function(x, na.rm = TRUE) {
@@ -477,9 +474,6 @@ assertthat::on_failure(isCountsOrZeros) <- function(call, env) {
 #'
 #' @return Logical indicating if object is character vector or NULL
 #'
-#' @examples
-#' isCharacterOrNULL(c("A", "B"))
-#'
 isCharacterOrNULL <- function(x) {
     test <- is.character(x) | is.null(x)
 
@@ -502,9 +496,6 @@ assertthat::on_failure(isCharacterOrNULL) <- function(call, env) {
 #' @param x object to test.
 #'
 #' @return Logical indicating if object is number or NULL
-#'
-#' @examples
-#' isNumberOrNULL(1)
 #'
 #' @importFrom assertthat is.number
 #'
@@ -533,9 +524,6 @@ assertthat::on_failure(isNumberOrNULL) <- function(call, env) {
 #'
 #' @return Logical indicating if object is string or NULL
 #'
-#' @examples
-#' isStringOrNULL("a")
-#'
 #' @importFrom assertthat is.string
 #'
 isStringOrNULL <- function(x) {
@@ -563,9 +551,6 @@ assertthat::on_failure(isStringOrNULL) <- function(call, env) {
 #'
 #' @return Logical indicating if \code{x} matches one of the strings in
 #'   \code{choice}.
-#'
-#' @examples
-#' stringMatches("foo", c("foo", "bar"))
 #'
 stringMatches <- function(x, choice) {
     test <- x %in% choice

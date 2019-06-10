@@ -646,7 +646,7 @@ countsToHlaCalls <- function(counts) {
 #'   header = TRUE)
 #' midas_data <- dplyr::left_join(x = midas_data, y = hla_counts, by = "ID")
 #' object <- lm(OS ~ 1, data = midas_data)
-#' res <- analyzeAssociations(object)
+#' res <- analyzeAssociations(object, variables = colnames(midas_data)[-1])
 #' formatResults(res,
 #'               filter_by = c("p.value <= 0.05", "estimate > 0"),
 #'               arrange_by = c("p.value * estimate"),
