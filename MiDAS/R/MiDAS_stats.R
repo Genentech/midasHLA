@@ -375,7 +375,7 @@ prepareHlaData <- function(hla_calls,
 #' @importFrom assertthat assert_that is.flag is.number is.string
 #' @importFrom dplyr filter left_join select rename
 #' @importFrom stats getCall
-#' @importFrom rlang !! :=
+#' @importFrom rlang !! := .data
 #' @importFrom magrittr %>% %<>%
 #'
 #' @export
