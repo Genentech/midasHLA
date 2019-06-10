@@ -259,6 +259,7 @@ test_that("HLA allele associations are analyzed properly", {
   )
 
   test_res <- analyzeAssociations(object, variables = c("A*01:01", "A*02:01"))
+  test_res <- dplyr::rename(test_res, allele = term)
   variables_freq <- getCountsFrequencies(midas_data[, c("ID", "A*01:01", "A*02:01")])
   test_res$Ntotal <- variables_freq$Counts
   test_res$Ntotal.frequency <- variables_freq$Freq
@@ -279,7 +280,8 @@ test_that("HLA allele associations are analyzed properly", {
 
   test_res <-
     analyzeConditionalAssociations(object, variables = colnames(midas_data)[-1], th = 0.05)
-  alleles <- test_res$term
+  test_res <- dplyr::rename(test_res, allele = term)
+  alleles <- test_res$allele
   variables_freq <- getCountsFrequencies(midas_data[, c("ID", alleles)])
   test_res$Ntotal <- variables_freq$Counts
   test_res$Ntotal.frequency <- variables_freq$Freq
