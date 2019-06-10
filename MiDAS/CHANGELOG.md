@@ -1,6 +1,9 @@
 ## 0.0.0.9008 - 11/05/2019
 + introduces countsToHlaCalls that allows converting HLA counts table back to
   HLA calls data frame under additive inheritance model 
++ introduces analyzeMiDASData which is a higher level abstraction of analyzeConditionalAssociations 
+  and analyzeAssociations. It also pretty format results to kabled html or latex.
++ introduces formatResults that allows to format results to kabled html ir latex.
 
 ## 0.0.0.9007 - 8/05/2019
 + forwardConditionalSelection has been renamed to analyzeConditionalAssociations,
