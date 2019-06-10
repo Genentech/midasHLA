@@ -633,8 +633,8 @@ countsToHlaCalls <- function(counts) {
 #'   variables, see examples.
 #' @param format A character string. Possible values are \code{"latex"} and
 #'   \code{"html"}.
-#' @param header String specifying header for result table. If NULL header is
-#'   omitted.
+#' @param header String specifying header for result table. If \code{NULL}
+#'   header is omitted.
 #'
 #' @return A character vector of the table source code.
 #'
