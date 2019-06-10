@@ -702,14 +702,18 @@ formatResults <- function(results,
   }
 
   if (! (is.null(header) & format == "html")) {
-    header <- setNames(ncol(results), header) # Still if format is 'latex' and format = NULL the result is not visualy appealing, and without it gives error. Issue created on github: https://github.com/haozhu233/kableExtra/issues/387
+    header <- setNames(ncol(results), header) # Still if format is 'latex' and header = NULL the result is not visualy appealing, and without it gives error. Issue created on github: https://github.com/haozhu233/kableExtra/issues/387
   }
 
   results %<>%
     kable(format = format, digits = 50) %>%
-    add_header_above(header = header) %>%
-    kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
-    scroll_box(width = "100%", height = "200px", fixed_thead = TRUE)
+    add_header_above(header = header)
+
+  if (format == "html") {
+    results %<>%
+      scroll_box(width = "100%", height = "200px", fixed_thead = TRUE) %>%
+      kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+  }
 
   return(results)
 }
