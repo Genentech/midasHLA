@@ -776,7 +776,8 @@ getCountsFrequencies <- function(counts_table) {
 #'
 #' \link{formatAssociationsResults} formats results table to specified
 #' format. It uses \link{formatResults} with prespecifed arguments to return
-#' nice table depending on type of analysis and model type.
+#' nice table depending on type of analysis and model type. This function is
+#' indendet only to be used internally by \link{analyzeMiDASData}.
 #'
 #' @inheritParams formatResults
 #' @param type String specifying type of analysis from which \code{results} were
