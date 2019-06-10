@@ -15,7 +15,3 @@ Logical indicating if object is character vector or NULL
 \description{
 \code{isCharacterOrNULL} checks if object is character vector or NULL.
 }
-\examples{
-isCharacterOrNULL(c("A", "B"))
-
-}

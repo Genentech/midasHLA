@@ -18,7 +18,3 @@ Logical indicating if \code{x} matches one of the strings in
 \description{
 \code{stringMatches} checks if string is equal to one of the choices.
 }
-\examples{
-stringMatches("foo", c("foo", "bar"))
-
-}

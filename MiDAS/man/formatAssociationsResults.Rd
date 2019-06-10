@@ -34,5 +34,6 @@ A character vector with pretty formatted \code{results} table.
 \description{
 \link{formatAssociationsResults} formats results table to specified
 format. It uses \link{formatResults} with prespecifed arguments to return
-nice table depending on type of analysis and model type.
+nice table depending on type of analysis and model type. This function is
+indendet only to be used internally by \link{analyzeMiDASData}.
 }

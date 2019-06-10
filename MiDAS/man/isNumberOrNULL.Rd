@@ -16,7 +16,3 @@ Logical indicating if object is number or NULL
 \code{isNumberOrNULL} checks if object is number (a length one numeric
 vector) or NULL.
 }
-\examples{
-isNumberOrNULL(1)
-
-}

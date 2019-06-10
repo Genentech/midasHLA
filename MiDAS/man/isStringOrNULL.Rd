@@ -16,7 +16,3 @@ Logical indicating if object is string or NULL
 \code{isStringOrNULL} checks if object is string (a length one character
 vector) or NULL.
 }
-\examples{
-isStringOrNULL("a")
-
-}

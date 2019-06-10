@@ -26,8 +26,8 @@ variables, see examples.}
 \item{format}{A character string. Possible values are \code{"latex"} and
 \code{"html"}.}
 
-\item{header}{String specifying header for result table. If NULL header is
-omitted.}
+\item{header}{String specifying header for result table. If \code{NULL}
+header is omitted.}
 }
 \value{
 A character vector of the table source code.
@@ -44,7 +44,7 @@ midas_data <- read.table(
   header = TRUE)
 midas_data <- dplyr::left_join(x = midas_data, y = hla_counts, by = "ID")
 object <- lm(OS ~ 1, data = midas_data)
-res <- analyzeAssociations(object)
+res <- analyzeAssociations(object, variables = colnames(midas_data)[-1])
 formatResults(res,
               filter_by = c("p.value <= 0.05", "estimate > 0"),
               arrange_by = c("p.value * estimate"),

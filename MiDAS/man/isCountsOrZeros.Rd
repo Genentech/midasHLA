@@ -20,7 +20,3 @@ Logical indicating if provided vector contains only positive integers
 \code{isCountsOrZeros} checks if vector contains only positive integers or
 zeros.
 }
-\examples{
-isCountsOrZeros(c(0, 1, 2))
-
-}
