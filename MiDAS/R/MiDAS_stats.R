@@ -220,7 +220,7 @@ analyzeConditionalAssociations <- function(object,
   }
 
   if (length(best) == 0) {
-    warn("No significant variables found. Returning empty table.")
+    warn("No significant variables found. Returning empty table.") # Tibble to be more precise?
     results <- results[0, ]
   } else {
     results <- bind_rows(best)
@@ -375,8 +375,8 @@ prepareHlaData <- function(hla_calls,
 #' @importFrom assertthat assert_that is.flag is.number is.string
 #' @importFrom dplyr filter left_join select rename
 #' @importFrom stats getCall
-#' @importFrom rlang !!
-#' @importFrom magrittr %>%
+#' @importFrom rlang !! :=
+#' @importFrom magrittr %>% %<>%
 #'
 #' @export
 analyzeMiDASData <- function(object,
@@ -430,6 +430,7 @@ analyzeMiDASData <- function(object,
     )
   }
 
+  # guess if model used is logistic type -- so far the logistic models in HLA analysis I've seen are coxph and glm(family = binomial)
   model_fun <- deparse(object_call[[1]])
   model_family <- deparse(object_call[["family"]])
   logistic <- grepl("coxph", model_fun) |
@@ -498,6 +499,18 @@ analyzeMiDASData <- function(object,
     )
     print(preety_table)
   }
+
+  # rename term and estimate to match preety_table
+  estimate_name <- ifelse(logistic, "odds.ratio", "estimate")
+  term_name <- switch (type,
+                       "hla_alleles" = "allele",
+                       "aa_level" = "aa",
+                       "expression_levels" = "allele",
+                       "term"
+  )
+
+  results %<>%
+    rename(!! term_name := .data$term, !! estimate_name := .data$estimate)
 
   return(results)
 }
