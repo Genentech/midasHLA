@@ -711,8 +711,8 @@ formatResults <- function(results,
 
   if (format == "html") {
     results %<>%
-      scroll_box(width = "100%", height = "200px", fixed_thead = TRUE) %>%
-      kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+      kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+      scroll_box(width = "100%", height = "200px")
   }
 
   return(results)
