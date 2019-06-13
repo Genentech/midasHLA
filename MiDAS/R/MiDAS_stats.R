@@ -514,3 +514,136 @@ analyzeMiDASData <- function(object,
 
   return(results)
 }
+
+#' Prepare data for statistical analysis
+#'
+#' \code{prepareMiDASData} transform HLA alleles calls according to selected
+#' analysis type and joins obtained transformation with additional data frames
+#' like phenotypic observations or covariates, creating an input data for
+#' further statistical analysis.
+#'
+#' @inheritParams checkHlaCallsFormat
+#' @inheritParams hlaCallsToCounts
+#' @inheritParams hlaToAAVariation
+#' @param ... Data frames holding additional variables like phenotypic
+#'   observations or covariates.
+#' @param analysis_type String indicating analysis type for which data should be
+#'   prepared. Valid choices are \code{"hla_allele"}, \code{"aa_level"},
+#'   \code{"expression_levels"}, \code{"custom"}. See details for futher
+#'   explanations.
+#'
+#' \code{...} should be data frames with first column holding samples IDs and
+#' named \code{ID}. Those should correspond to \code{ID} column in
+#' \code{hla_calls}.
+#'
+#' \code{analysis_type} specifies type of analysis for which \code{hla_calls}
+#' should be prepared. For \code{"hla_allele"} analysis \code{hla_calls} are
+#' transformed into counts under \code{inheritance_model} of choice (this is
+#' done with \link{hlaCallsToCounts}). In \code{"aa_level"} input
+#' \code{hla_calls} are first coverted to amino acid level, taking only variable
+#' positions under consideration. Than variable amino acid positions are
+#' transformed to counts under \code{inheritance_model} of choice (this is done
+#' with \link{aaVariationToCounts}). For \code{"expression_levels"} input
+#' \code{hla_calls} are transformed to expression levels using all possible
+#' expression dictionaries shiped with package (this is done using
+#' \link{hlaToVariable}). The expression levels from both alleles are than
+#' summed into single variable for each translated HLA gene. \code{"custom"}
+#' will not transform \code{hla_calls} and only joins it with additional data
+#' (\code{...}).
+#'
+#' @return Data frame containing prepared data.
+#'
+#' @examples
+#' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(hla_calls_file)
+#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+#' pheno <- read.table(pheno_file, header = TRUE)
+#' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
+#' covar <- read.table(covar_file, header = TRUE)
+#' prepareMiDASData(hla_calls, pheno, covar, analysis_type = "hla_allele")
+#'
+#' @importFrom assertthat assert_that is.flag is.string see_if
+#' @importFrom dplyr funs group_by left_join mutate summarise_all syms
+#' @importFrom magrittr %>%
+#' @importFrom rlang .data !!!
+#' @importFrom tidyr gather spread
+#'
+#' @export
+prepareMiDASData <- function(hla_calls,
+                             ...,
+                             analysis_type = c("hla_allele", "aa_level", "expression_levels", "custom"),
+                             inheritance_model = "additive",
+                             indels = TRUE,
+                             unkchar = FALSE
+                             ) {
+  assert_that(
+    checkHlaCallsFormat(hla_calls),
+    is.string(analysis_type),
+    stringMatches(
+      x = analysis_type,
+      choice = c("hla_allele", "aa_level", "expression_levels", "custom")
+    ),
+    is.string(inheritance_model),
+    stringMatches(
+      x = inheritance_model,
+      choice = c("dominant", "recessive", "additive")
+    ),
+    is.flag(indels),
+    is.flag(unkchar)
+  )
+
+  additional_data <- list(...)
+  for (df in additional_data) { # rewrite those tests to addhere to current standard
+    assert_that(
+      checkAdditionalData(df, hla_calls)
+    )
+  }
+  analysis_type <- match.arg(analysis_type)
+  inheritance_model <- match.arg(inheritance_model)
+
+  # Process hla_calls based on analysis type
+  if (analysis_type == "hla_allele") {
+    midas_data <- hlaCallsToCounts(
+      hla_calls = hla_calls,
+      inheritance_model = inheritance_model
+    )
+  } else if (analysis_type == "aa_level") {
+    aa_variation <- hlaToAAVariation(
+      hla_calls = hla_calls,
+      indels = indels,
+      unkchar = unkchar
+    )
+    midas_data <- aaVariationToCounts(
+      aa_variation = aa_variation,
+      inheritance_model = inheritance_model
+    )
+  } else if (analysis_type == "expression_levels") {
+    lib <- list.files( # move this functionality to hlaToVariable
+      path = system.file("extdata", package = "MiDAS"),
+      pattern = "^Match_.*expression.txt$"
+    )
+    lib <- gsub("^Match_", "", gsub(".txt$", "", lib))
+    midas_data <- Reduce(
+      f = function(...) left_join(..., by = "ID"),
+      x = lapply(lib, hlaToVariable, hla_calls = hla_calls)
+    ) %>%
+      gather(expression, .data$value, -.data$ID) %>%
+      mutate(expression = gsub("_.*", "", .data$expression)) %>%
+      group_by(!!! syms(c("ID", "expression"))) %>%
+      summarise_all(funs(sum)) %>%
+      spread(.data$expression, .data$value, sep = "_")
+  } else {
+    midas_data <- hla_calls
+  }
+
+  # join with additional_data
+  if (length(additional_data) != 0) {
+    midas_data <- Reduce(
+      f = function(...) left_join(..., by = "ID"),
+      x = additional_data,
+      init = midas_data
+    )
+  }
+
+  return(midas_data)
+}
