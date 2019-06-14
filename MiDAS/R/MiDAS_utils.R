@@ -569,3 +569,26 @@ assertthat::on_failure(stringMatches) <- function(call, env) {
          '.'
   )
 }
+
+#' List HLA alleles dictionaries
+#'
+#' \code{listMiDASDictionaries} lists dictionaries shipped with MiDAS package.
+#'
+#' @param full.names Logical value. If FALSE, only the names of dictionaries are
+#' returned. If TRUE thier file names are returned.
+#'
+#' @return Character vector with names of available HLA alleles dictionaries.
+#'
+listMiDASDictionaries <- function(full.names = FALSE) {
+  lib <- list.files(
+    path = system.file("extdata", package = "MiDAS"),
+    pattern = "^Match_.*.txt$",
+    full.names = full.names
+  )
+
+  if (! full.names) {
+    lib <- gsub("^Match_", "", gsub(".txt$", "", lib))
+  }
+
+  return(lib)
+}
