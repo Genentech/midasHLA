@@ -593,9 +593,9 @@ prepareMiDASData <- function(hla_calls,
   )
 
   additional_data <- list(...)
-  for (df in additional_data) { # rewrite those tests to addhere to current standard
+  for (additional_data_frame in additional_data) { # rewrite those tests to addhere to current standard
     assert_that(
-      checkAdditionalData(df, hla_calls)
+      checkAdditionalData(additional_data_frame, hla_calls, accept.null = FALSE)
     )
   }
   analysis_type <- match.arg(analysis_type)
