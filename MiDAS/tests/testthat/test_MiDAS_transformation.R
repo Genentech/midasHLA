@@ -308,6 +308,10 @@ test_that("counts are conveerted into frequencies", {
   colnames(hla_freq) <- c("allele", "Freq")
   rownames(hla_freq) <- NULL
   test_hla_freq <- getHlaFrequencies(hla_calls)
+  if (all(class(test_hla_freq$Freq) == c("formattable", "numeric"))) {
+    stop("other freq functions are already updated delete this fix")
+  }
+  test_hla_freq$Freq <- formattable::percent(test_hla_freq$Freq)
   expect_equal(hla_freq, test_hla_freq)
 
   expect_error(getCountsFrequencies("foo"), "counts_table is not a data frame")

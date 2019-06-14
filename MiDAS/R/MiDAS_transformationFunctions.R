@@ -741,6 +741,7 @@ formatResults <- function(results,
 #' getCountsFrequencies(hla_counts)
 #'
 #' @importFrom assertthat assert_that
+#' @importFrom formattable percent
 #'
 #' @export
 getCountsFrequencies <- function(counts_table) {
@@ -762,7 +763,7 @@ getCountsFrequencies <- function(counts_table) {
   counts_df <- data.frame(
     term = colnames(counts_table),
     Counts = counts_sums,
-    Freq = counts_freq,
+    Freq = percent(counts_freq),
     stringsAsFactors = FALSE
   )
 
@@ -863,7 +864,6 @@ formatAssociationsResults <- function(results,
   )
 
   results %<>%
-    mutate_at(vars(ends_with(".frequency")), ~ . * 100) %>%
     formatResults(
       filter_by = filter_by,
       arrange_by = "p.value",
