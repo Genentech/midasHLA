@@ -560,11 +560,11 @@ analyzeMiDASData <- function(object,
 #' pheno <- read.table(pheno_file, header = TRUE)
 #' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE)
-#' prepareMiDASData(hla_calls, pheno, covar, analysis_type = "hla_allele")
+#' prepareMiDASData(hla_calls, pheno, covar, analysis_type = "expression_levels")
 #'
 #' @importFrom assertthat assert_that is.flag is.string see_if
 #' @importFrom dplyr funs group_by left_join mutate summarise_all syms
-#' @importFrom magrittr %>%
+#' @importFrom magrittr %>% %<>%
 #' @importFrom rlang .data !!!
 #' @importFrom tidyr gather spread
 #'
@@ -618,16 +618,20 @@ prepareMiDASData <- function(hla_calls,
       inheritance_model = inheritance_model
     )
   } else if (analysis_type == "expression_levels") {
-    lib <- list.files( # move this functionality to hlaToVariable
-      path = system.file("extdata", package = "MiDAS"),
-      pattern = "^Match_.*expression.txt$"
-    )
-    lib <- gsub("^Match_", "", gsub(".txt$", "", lib))
+    lib <- listMiDASDictionaries()
+    lib <- grep("expression", lib, value = TRUE)
     midas_data <- Reduce(
       f = function(...) left_join(..., by = "ID"),
       x = lapply(lib, hlaToVariable, hla_calls = hla_calls)
-    ) %>%
-      gather(expression, .data$value, -.data$ID) %>%
+    )
+
+    assert_that(
+      ncol(midas_data) > 1,
+      msg = "no expression levels were found for input hla_calls"
+    )
+
+    midas_data %<>%
+      gather("expression", "value", -c("ID")) %>%
       mutate(expression = gsub("_.*", "", .data$expression)) %>%
       group_by(!!! syms(c("ID", "expression"))) %>%
       summarise_all(funs(sum)) %>%
