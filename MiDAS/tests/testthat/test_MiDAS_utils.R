@@ -244,6 +244,6 @@ test_that("string matches", {
 
   expect_error(
     assertthat::assert_that(stringMatches("foo", c("bar", "Foo"))),
-    "\"foo\" should be one of c\\(\"bar\", \"Foo\"\\)."
+    "\"foo\" should be one of \"bar\", \"Foo\"."
   )
 })

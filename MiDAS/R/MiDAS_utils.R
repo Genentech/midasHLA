@@ -564,9 +564,9 @@ stringMatches <- function(x, choice) {
 #'
 assertthat::on_failure(stringMatches) <- function(call, env) {
   paste0(deparse(call$x),
-         ' should be one of ',
-         deparse(call$choice),
-         '.'
+         ' should be one of "',
+         paste(eval(call$choice), collapse = '", "'),
+         '".'
   )
 }
 

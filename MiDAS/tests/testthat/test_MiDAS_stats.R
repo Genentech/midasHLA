@@ -340,14 +340,14 @@ test_that("HLA allele associations are analyzed properly", {
   )
 
   expect_error(analyzeMiDASData(object, type = "a"),
-               "type should be one of c\\(\"hla_alleles\", \"aa_level\", \"expression_levels\"\\)."
+               "type should be one of \"hla_alleles\", \"aa_level\", \"expression_levels\", \"allele_groups\", \"custom\"."
   )
 
-  expect_error(analyzeMiDASData(object, format = 1),
+  expect_error(analyzeMiDASData(object, type = "hla_alleles", format = 1),
                "format is not a string \\(a length one character vector\\)."
   )
 
-  expect_error(analyzeMiDASData(object, format = "pdf"),
-               "format should be one of c\\(\"html\", \"latex\"\\)."
+  expect_error(analyzeMiDASData(object, type = "hla_alleles", format = "pdf"),
+               "format should be one of \"html\", \"latex\"."
   )
 })
