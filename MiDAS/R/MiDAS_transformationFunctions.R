@@ -804,7 +804,7 @@ formatAssociationsResults <- function(results,
   assert_that(
     is.string(type),
     stringMatches(type,
-                  choice = c("hla_alleles", "aa_level", "expression_levels")
+                  choice = c("hla_alleles", "aa_level", "expression_levels", "allele_groups", "custom")
     ),
     is.string(response_variable),
     is.flag(logistic),
@@ -828,6 +828,7 @@ formatAssociationsResults <- function(results,
                        "hla_alleles" = "allele",
                        "aa_level" = "aa",
                        "expression_levels" = "allele",
+                       "allele_groups" = "allele group",
                        "term"
   )
   select_cols <- unlist(list2(
@@ -857,6 +858,7 @@ formatAssociationsResults <- function(results,
                     "hla_alleles" = "HLA allelic associations",
                     "aa_level" = "HLA AA associations",
                     "expression_levels" = "HLA expression level associations",
+                    "allele_groups" = "HLA alleles groups associations",
                     "Associations results"
   )
 

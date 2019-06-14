@@ -254,6 +254,7 @@ test_that("HLA allele associations are analyzed properly", {
 
   object <- lm(OS_DIED ~ AGE + SEX, data = midas_data)
   res <- analyzeMiDASData(object,
+                          type = "hla_alleles",
                           variables = c("A*01:01", "A*02:01"),
                           kable_output = FALSE
   )
@@ -274,6 +275,7 @@ test_that("HLA allele associations are analyzed properly", {
   expect_equal(as.data.frame(res), as.data.frame(test_res)) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
 
   res <- analyzeMiDASData(object,
+                          type = "hla_alleles",
                           conditional = TRUE,
                           kable_output = FALSE
   )

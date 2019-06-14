@@ -370,7 +370,7 @@ prepareHlaData <- function(hla_calls,
 #' )
 #'
 #' object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
-#' analyzeMiDASData(object)
+#' analyzeMiDASData(object, type = "hla_alleles")
 #'
 #' @importFrom assertthat assert_that is.flag is.number is.string
 #' @importFrom dplyr filter left_join select rename
@@ -388,7 +388,7 @@ analyzeMiDASData <- function(object,
                              th = 0.05,
                              rss_th = 1e-07,
                              kable_output = TRUE,
-                             type = "hla_alleles",
+                             type = c("hla_alleles", "aa_level", "expression_levels",  "allele_groups", "custom"), # this should go higher
                              format = getOption("knitr.table.format")) {
 
   assert_that(
@@ -416,7 +416,7 @@ analyzeMiDASData <- function(object,
     is.flag(kable_output),
     is.string(type),
     stringMatches(type,
-                  choice = c("hla_alleles", "aa_level", "expression_levels")
+                  choice = c("hla_alleles", "aa_level", "expression_levels",  "allele_groups", "custom")
     ),
     is.string(format),
     stringMatches(format, choice = c("html", "latex"))
@@ -506,6 +506,7 @@ analyzeMiDASData <- function(object,
                        "hla_alleles" = "allele",
                        "aa_level" = "aa",
                        "expression_levels" = "allele",
+                       "allele_groups" = "allele.group",
                        "term"
   )
 
@@ -515,7 +516,7 @@ analyzeMiDASData <- function(object,
   return(results)
 }
 
-#' Prepare data for statistical analysis
+#' Prepare HLA calls data for statistical analysis
 #'
 #' \code{prepareMiDASData} transform HLA alleles calls according to selected
 #' analysis type and joins obtained transformation with additional data frames
@@ -600,8 +601,6 @@ prepareMiDASData <- function(hla_calls,
       checkAdditionalData(additional_data_frame, hla_calls, accept.null = FALSE)
     )
   }
-  analysis_type <- match.arg(analysis_type)
-  inheritance_model <- match.arg(inheritance_model)
 
   # Process hla_calls based on analysis type
   if (analysis_type == "hla_allele") {
