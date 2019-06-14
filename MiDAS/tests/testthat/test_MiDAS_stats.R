@@ -254,7 +254,7 @@ test_that("HLA allele associations are analyzed properly", {
 
   object <- lm(OS_DIED ~ AGE + SEX, data = midas_data)
   res <- analyzeMiDASData(object,
-                          type = "hla_alleles",
+                          analysis_type = "hla_alleles",
                           variables = c("A*01:01", "A*02:01"),
                           kable_output = FALSE
   )
@@ -275,7 +275,7 @@ test_that("HLA allele associations are analyzed properly", {
   expect_equal(as.data.frame(res), as.data.frame(test_res)) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
 
   res <- analyzeMiDASData(object,
-                          type = "hla_alleles",
+                          analysis_type = "hla_alleles",
                           conditional = TRUE,
                           kable_output = FALSE
   )
@@ -335,19 +335,19 @@ test_that("HLA allele associations are analyzed properly", {
                "kable_output is not a flag \\(a length one logical vector\\)."
   )
 
-  expect_error(analyzeMiDASData(object, type = 1),
-               "type is not a string \\(a length one character vector\\)."
+  expect_error(analyzeMiDASData(object, analysis_type = 1),
+               "analysis_type is not a string \\(a length one character vector\\)."
   )
 
-  expect_error(analyzeMiDASData(object, type = "a"),
-               "type should be one of \"hla_alleles\", \"aa_level\", \"expression_levels\", \"allele_groups\", \"custom\"."
+  expect_error(analyzeMiDASData(object, analysis_type = "a"),
+               "analysis_type should be one of \"hla_alleles\", \"aa_level\", \"expression_levels\", \"allele_groups\", \"custom\"."
   )
 
-  expect_error(analyzeMiDASData(object, type = "hla_alleles", format = 1),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", format = 1),
                "format is not a string \\(a length one character vector\\)."
   )
 
-  expect_error(analyzeMiDASData(object, type = "hla_alleles", format = "pdf"),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", format = "pdf"),
                "format should be one of \"html\", \"latex\"."
   )
 })

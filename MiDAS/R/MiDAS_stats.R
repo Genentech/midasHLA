@@ -380,6 +380,7 @@ prepareHlaData <- function(hla_calls,
 #'
 #' @export
 analyzeMiDASData <- function(object,
+                             analysis_type = c("hla_alleles", "aa_level", "expression_levels",  "allele_groups", "custom"),
                              conditional = FALSE,
                              variables = NULL,
                              frequency_cutoff = NULL,
@@ -388,7 +389,6 @@ analyzeMiDASData <- function(object,
                              th = 0.05,
                              rss_th = 1e-07,
                              kable_output = TRUE,
-                             type = c("hla_alleles", "aa_level", "expression_levels",  "allele_groups", "custom"), # this should go higher
                              format = getOption("knitr.table.format")) {
 
   assert_that(
@@ -414,8 +414,8 @@ analyzeMiDASData <- function(object,
     is.number(th),
     is.number(rss_th),
     is.flag(kable_output),
-    is.string(type),
-    stringMatches(type,
+    is.string(analysis_type),
+    stringMatches(analysis_type,
                   choice = c("hla_alleles", "aa_level", "expression_levels",  "allele_groups", "custom")
     ),
     is.string(format),
@@ -491,7 +491,7 @@ analyzeMiDASData <- function(object,
 
     preety_table <- formatAssociationsResults(
       results,
-      type = type,
+      type = analysis_type,
       response_variable = response_variable,
       logistic = logistic,
       pvalue_cutoff = pvalue_cutoff,
@@ -502,7 +502,7 @@ analyzeMiDASData <- function(object,
 
   # rename term and estimate to match preety_table
   estimate_name <- ifelse(logistic, "odds.ratio", "estimate")
-  term_name <- switch (type,
+  term_name <- switch (analysis_type,
                        "hla_alleles" = "allele",
                        "aa_level" = "aa",
                        "expression_levels" = "allele",
