@@ -547,9 +547,11 @@ analyzeMiDASData <- function(object,
 #' \code{hla_calls} are transformed to expression levels using all possible
 #' expression dictionaries shiped with package (this is done using
 #' \link{hlaToVariable}). The expression levels from both alleles are than
-#' summed into single variable for each translated HLA gene. \code{"custom"}
-#' will not transform \code{hla_calls} and only joins it with additional data
-#' (\code{...}).
+#' summed into single variable for each translated HLA gene. For
+#' \code{"allele_groups"} HLA alleles are transformed to HLA alleles groups
+#' using all possible groups dictionaries shiped with package (this is done
+#' using \link{hlaToVariable}). \code{"custom"} will not transform
+#' \code{hla_calls} and only joins it with additional data(\code{...}).
 #'
 #' @return Data frame containing prepared data.
 #'
@@ -571,7 +573,7 @@ analyzeMiDASData <- function(object,
 #' @export
 prepareMiDASData <- function(hla_calls,
                              ...,
-                             analysis_type = c("hla_allele", "aa_level", "expression_levels", "custom"),
+                             analysis_type = c("hla_allele", "aa_level", "expression_levels", "allele_groups", "custom"),
                              inheritance_model = "additive",
                              indels = TRUE,
                              unkchar = FALSE
@@ -581,7 +583,7 @@ prepareMiDASData <- function(hla_calls,
     is.string(analysis_type),
     stringMatches(
       x = analysis_type,
-      choice = c("hla_allele", "aa_level", "expression_levels", "custom")
+      choice = c("hla_allele", "aa_level", "expression_levels", "allele_groups", "custom")
     ),
     is.string(inheritance_model),
     stringMatches(
@@ -636,6 +638,18 @@ prepareMiDASData <- function(hla_calls,
       group_by(!!! syms(c("ID", "expression"))) %>%
       summarise_all(funs(sum)) %>%
       spread(.data$expression, .data$value, sep = "_")
+  } else if (analysis_type == "allele_groups") {
+    lib <- listMiDASDictionaries()
+    lib <- grep("expression", lib, value = TRUE, invert = TRUE)
+    midas_data <- Reduce(
+      f = function(...) left_join(..., by = "ID"),
+      x = lapply(lib, hlaToVariable, hla_calls = hla_calls)
+    )
+
+    assert_that(
+      ncol(midas_data) > 1,
+      msg = "no allele groups were found for input hla_calls"
+    )
   } else {
     midas_data <- hla_calls
   }
