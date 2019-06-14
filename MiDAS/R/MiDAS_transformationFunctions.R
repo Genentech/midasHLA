@@ -178,7 +178,8 @@ hlaToAAVariation <- function(hla_calls,
 #'
 #' \code{dictionary} optional parameter that can be also used to access
 #' matchings files shipped with the package. They can be referred to by using
-#' one of the following strings:
+#' one of the following strings (to list available dictionaries use
+#' \link{listMiDASDictionaries}):
 #'
 #' \code{"2digit_A-allele_expression"} reference data to impute expression
 #' levels for HLA-A alleles.
@@ -234,11 +235,7 @@ hlaToVariable <- function(hla_calls,
   )
 
   if (is.string(dictionary)) {
-    lib <- list.files(
-      path = system.file("extdata", package = "MiDAS"),
-      pattern = "^Match_.*txt$"
-    )
-    lib <- gsub("^Match_", "", gsub(".txt$", "", lib))
+    lib <- listMiDASDictionaries()
     if (dictionary %in% lib) {
       if (dictionary == "4digit_B-allele_Bw") {
         warn("In ambiguous cases Bw4 will be assigned! See documentation for more details.")
@@ -420,7 +417,7 @@ getHlaFrequencies <- function(hla_calls) {
 #'
 #' @inheritParams hlaCallsToCounts
 #' @param aa_variation Data frame holding amino acid variation data as returned
-#'   by \link{hlaToVariable}.
+#'   by \link{hlaToAAVariation}.
 #'
 #' @return Data frame containing counts of amino acids at specific positions
 #'   counted according to specified model.
