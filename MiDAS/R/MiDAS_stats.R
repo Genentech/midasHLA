@@ -344,6 +344,9 @@ prepareHlaData <- function(hla_calls,
 #'   this number will not be considered during analysis. If it's greater or
 #'   equal 1 variables with number of counts less that this will not be
 #'   considered during analysis.
+#' @param logistic Logical indicating if statistical model used is logistic (eg.
+#'   \code{coxph}). If \code{NULL} function wi;; try to figure this out. This is
+#'   only used for results formatting.
 #' @param binary_phenotype Logical indicating if coefficient estimates should be
 #'   exponentiated. This is typical for logistic and multinomial regressions,
 #'   but a bad idea if there is no log or logit link. If \code{NULL} function
@@ -395,6 +398,7 @@ analyzeMiDASData <- function(object,
                              frequency_cutoff = NULL,
                              pvalue_cutoff = NULL,
                              correction = "BH",
+                             logistic = NULL,
                              binary_phenotype = NULL,
                              th = 0.05,
                              rss_th = 1e-07,
@@ -421,6 +425,7 @@ analyzeMiDASData <- function(object,
     isNumberOrNULL(frequency_cutoff),
     isNumberOrNULL(pvalue_cutoff),
     is.string(correction),
+    isFlagOrNULL(logistic),
     isFlagOrNULL(binary_phenotype),
     is.number(th),
     is.number(rss_th),
@@ -442,10 +447,12 @@ analyzeMiDASData <- function(object,
   }
 
   # guess if model used is logistic type -- so far the logistic models in HLA analysis I've seen are coxph and glm(family = binomial)
-  model_fun <- deparse(object_call[[1]])
-  model_family <- deparse(object_call[["family"]])
-  logistic <- grepl("coxph", model_fun) |
-    (grepl("glm", model_fun) & grepl("binomial", model_family))
+  if (is.null(logistic)) {
+    model_fun <- deparse(object_call[[1]])
+    model_family <- deparse(object_call[["family"]])
+    logistic <- grepl("coxph", model_fun) |
+       (grepl("glm", model_fun) & grepl("binomial", model_family))
+  }
 
   # Filter variables on frequency cutoff
   frequency_cutoff <- ifelse(is.null(frequency_cutoff), 0, frequency_cutoff)

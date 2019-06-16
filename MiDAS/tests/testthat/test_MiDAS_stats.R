@@ -331,8 +331,12 @@ test_that("MiDAS associations are analyzed properly", {
                "correction is not a string \\(a length one character vector\\)."
   )
 
+  expect_error(analyzeMiDASData(object, logistic = "NA"),
+               "logistic is not a flag \\(a length one logical vector\\) or NULL."
+  )
+
   expect_error(analyzeMiDASData(object, binary_phenotype = "NA"),
-               "binary_phenotype is not a flag \\(a length one logical vector\\)."
+               "binary_phenotype is not a flag \\(a length one logical vector\\) or NULL."
   )
 
   expect_error(analyzeMiDASData(object, th = "NA"),
