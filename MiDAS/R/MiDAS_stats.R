@@ -344,6 +344,11 @@ prepareHlaData <- function(hla_calls,
 #'   this number will not be considered during analysis. If it's greater or
 #'   equal 1 variables with number of counts less that this will not be
 #'   considered during analysis.
+#' @param binary_phenotype Logical indicating if coefficient estimates should be
+#'   exponentiated. This is typical for logistic and multinomial regressions,
+#'   but a bad idea if there is no log or logit link. If \code{NULL} function
+#'   will try to figure this out by testing if response is binary (\code{0} or
+#'   \code{1}).
 #' @param kable_output Logical indicating if additionally results should be
 #'   pretty printed in specified \code{format}.
 #'
@@ -390,6 +395,7 @@ analyzeMiDASData <- function(object,
                              frequency_cutoff = NULL,
                              pvalue_cutoff = NULL,
                              correction = "BH",
+                             binary_phenotype = NULL,
                              th = 0.05,
                              rss_th = 1e-07,
                              kable_output = TRUE,
@@ -415,6 +421,7 @@ analyzeMiDASData <- function(object,
     isNumberOrNULL(frequency_cutoff),
     isNumberOrNULL(pvalue_cutoff),
     is.string(correction),
+    isFlagOrNULL(binary_phenotype),
     is.number(th),
     is.number(rss_th),
     is.flag(kable_output),
@@ -471,8 +478,12 @@ analyzeMiDASData <- function(object,
   results <- left_join(x = results, y = variables_freq, by = "term")
 
   pheno_var <- all.vars(object_formula)[1]
-  binary_phenotype <- object_data[, pheno_var] %in% c(0, 1)
-  if (all(binary_phenotype, na.rm = TRUE)) {
+  if (is.null(binary_phenotype)) {
+    binary_phenotype <- object_data[, pheno_var] %in% c(0, 1)
+    binary_phenotype <- all(binary_phenotype, na.rm = TRUE)
+  }
+
+  if (binary_phenotype) {
     results <- object_data %>%
       filter(.data[[!! pheno_var]] == 1) %>%
       select("ID", !! variables) %>%
