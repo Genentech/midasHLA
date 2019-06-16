@@ -329,6 +329,10 @@ prepareHlaData <- function(hla_calls,
 #' @inheritParams analyzeAssociations
 #' @inheritParams analyzeConditionalAssociations
 #' @inheritParams formatAssociationsResults
+#' @param analysis_type String indicating type of analysis beeing performed,
+#'   at this point it is only used for results formatting. Valid values are
+#'   \code{"hla_alleles"}, \code{"aa_level"}, \code{"expression_levels"},
+#'   \code{"allele_groups"}, \code{"custom"}.
 #' @param conditional Logical indicating if the analysis should be performed
 #'   using stepwise conditional tests or not. See
 #'   \link{analyzeConditionalAssociations} for more details.
@@ -530,7 +534,7 @@ analyzeMiDASData <- function(object,
 #'   observations or covariates.
 #' @param analysis_type String indicating analysis type for which data should be
 #'   prepared. Valid choices are \code{"hla_allele"}, \code{"aa_level"},
-#'   \code{"expression_levels"}, \code{"custom"}. See details for futher
+#'   \code{"expression_levels"}, \code{"custom"}. See details for further
 #'   explanations.
 #'
 #' \code{...} should be data frames with first column holding samples IDs and
