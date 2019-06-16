@@ -613,15 +613,12 @@ prepareMiDASData <- function(hla_calls,
       inheritance_model = inheritance_model
     )
   } else if (analysis_type == "aa_level") {
-    aa_variation <- hlaToAAVariation(
+    midas_data <- hlaToAAVariation(
       hla_calls = hla_calls,
       indels = indels,
       unkchar = unkchar
-    )
-    midas_data <- aaVariationToCounts(
-      aa_variation = aa_variation,
-      inheritance_model = inheritance_model
-    )
+    ) %>%
+      aaVariationToCounts(inheritance_model = inheritance_model)
   } else if (analysis_type == "expression_levels") {
     lib <- listMiDASDictionaries()
     lib <- grep("expression", lib, value = TRUE)
