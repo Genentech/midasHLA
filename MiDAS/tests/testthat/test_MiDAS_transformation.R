@@ -38,7 +38,17 @@ test_that("HLA calls table is converted to additional variables", {
   )
   hla_calls <- readHlaCalls(hla_calls)
   hla_supertypes <- hlaToVariable(hla_calls, dictionary = "4digit_supertype")
-  load(system.file("extdata", "test_hla_supertypes.RData", package = "MiDAS"))
+  test_hla_supertypes <-
+    lapply(
+      hla_calls[,-1],
+      convertAlleleToVariable,
+      dictionary = system.file("extdata", "Match_4digit_supertype.txt", package = "MiDAS")
+    )
+  na_mask <- vapply(test_hla_supertypes, function(x) all(is.na(x)), FUN.VALUE = logical(1))
+  test_hla_supertypes <- test_hla_supertypes[! na_mask]
+  test_hla_supertypes <- do.call(cbind, test_hla_supertypes)
+  test_hla_supertypes <-
+    cbind(hla_calls[, 1, drop = FALSE], test_hla_supertypes, stringsAsFactors = FALSE)
   expect_equal(hla_supertypes, test_hla_supertypes)
 
   expect_error(
