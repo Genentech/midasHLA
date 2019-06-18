@@ -228,7 +228,6 @@ hlaToVariable <- function(hla_calls,
                           reduce = TRUE,
                           nacols.rm = TRUE) {
   assert_that(
-    is.data.frame(hla_calls),
     checkHlaCallsFormat(hla_calls),
     is.flag(reduce),
     is.flag(nacols.rm)
