@@ -5,7 +5,7 @@
 \title{Converts HLA allele numbers to amino acid variation}
 \usage{
 hlaToAAVariation(hla_calls, indels = TRUE, unkchar = FALSE,
-  alnpath = system.file("extdata", package = "MiDAS"))
+  alnpath = system.file("extdata", package = "MiDAS"), as_df = TRUE)
 }
 \arguments{
 \item{hla_calls}{Data frame containing HLA allele calls, as return by
@@ -19,9 +19,13 @@ should be treated as variability.}
 
 \item{alnpath}{String providing optional path to directory containing HLA
 alignment files. See details for further explanations.}
+
+\item{as_df}{Logical indicating if data frame should be returned.
+Otherwise function matrix is returned.}
 }
 \value{
-Matrix containing variable amino acid positions.
+Data frame or matrix containing variable amino acid positions. See
+  \code{as_df} parameter.
 
   Rownames corresponds to ID column of input data frame, and colnames to
   alignment positions for given genes. If no variation in amino acids

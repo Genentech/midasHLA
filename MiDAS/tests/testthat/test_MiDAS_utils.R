@@ -135,3 +135,55 @@ test_that("Variable amino acids positions are detected properly", {
 
   expect_error(getVariableAAPos(hlaa_calls), "alignment is not a matrix")
 })
+
+context("HLA statistical models handling")
+
+test_that("HLA statistical models are updated properly", {
+  library("survival")
+  hla_calls_file <- system.file("extdata",
+                                "HLAHD_output_example.txt",
+                                package = "MiDAS"
+  )
+  hla_calls <- readHlaCalls(hla_calls_file)
+  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+  pheno <- read.table(pheno_file, header = TRUE)
+  covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
+  covar <- read.table(covar_file, header = TRUE)
+  midas_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
+  coxmod <- coxph(Surv(OS, OS_DIED) ~ 1, data = midas_data)
+  expect_equal(updateModel(coxmod, "A*01:01"),
+               coxph(Surv(OS, OS_DIED) ~ `A*01:01`, data = midas_data)
+  )
+
+  expect_error(updateModel(coxmod, 1),
+               "x is not a character vector or formula"
+  )
+
+  expect_error(updateModel(coxmod, x = "A*01:01", backquote = 1),
+               "backquote is not a flag \\(a length one logical vector\\)."
+  )
+
+  expect_error(updateModel(coxmod, x = "A*01:01", collapse = 1),
+               "collapse is not a string \\(a length one character vector\\)."
+  )
+})
+
+
+test_that("statistical models are statistical model", {
+  object <- lm(speed ~ dist, data = cars)
+  expect_equal(checkStatisticalModel(object), TRUE)
+
+  expect_error(checkStatisticalModel(list(1)),
+               "object have to have the internal OBJECT bit set"
+  )
+
+  expect_error(updateModel(speed ~ cars),
+               "object have to have an attribute 'call'"
+  )
+
+  fake_model <- list(call = list(formula = "foo"))
+  class(fake_model) <- "fake"
+  expect_error(updateModel(fake_model),
+               "object have to be a model with defined formula"
+  )
+})

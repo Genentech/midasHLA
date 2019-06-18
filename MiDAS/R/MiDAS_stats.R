@@ -1,266 +1,299 @@
-#' Association analysis of HLA allele calls
+#' Association analysis
 #'
-#' \code{analyzeHlaAssociations} performs associations analysis on HLA alleles
-#' calls using statistical model of choice.
+#' \code{analyzeAssociations} performs associations analysis on single variable
+#' level using statistical model of choice.
 #'
-#' @inheritParams checkHlaCallsFormat
-#' @param model String specifying statistical model to use.
-#' @param pheno Data frame holding phenotypic response variables.
-#' @param covar Data frame holding covariates.
-#' @param zygo Flag indicating whether zygosity should be added to
-#'   covariates. See details for further explanations.
-#' @param reduce_counts Flag indicating whether allele counts should be reduced
-#'   to presence / absence indicators.
-#' @param correction String specifying multiple testing correction method.
-#'
-#' Available choices for \code{model} include:
-#' \code{"coxph"} - Cox survival analysis,
-#' \code{"lm"} - Linear regression,
-#' \code{"glm.logit"} - Logistic regression,
-#' \code{"glm.nb"} - Negative binomial regression
-#'
-#' \code{pheno} and \code{covar} should be data frames with first column holding
-#' samples IDs and named \code{ID}. Those should correspond to \code{ID} column
-#' in \code{hla_calls}.
-#'
-#' \code{zygo} indicate if additional covariate, indicating sample zygosity
-#' status, should be added to covariates. HLA allele counts for each sample
-#' can take following values \code{0, 1, 2}. To avoid implying ordering on those
-#' levels and effect size, this information can be split between two variables.
-#' If \code{zygo} is set to \code{TRUE} zygosity variable is added during model
-#' fitting, it specifies if sample is homozygous for an allele.
-#'
-#' If \code{reduce_counts} is set to \code{TRUE} HLA allele counts are reduced
-#' to presence / absence indicators. This is done by setting counts for
-#' homozygotes as \code{1}.
+#' @inheritParams updateModel
+#' @param variables Character specifying variables to use in association tests.
+#' @param correction String specifying multiple testing correction method. See
+#'   details for further information.
+#' @param exponentiate Logical indicating whether or not to exponentiate the
+#'   coefficient estimates. Internally this is passed to \link[broom]{tidy}.
+#'   This is typical for logistic and multinomial regressions, but a bad idea if
+#'   there is no log or logit link. Defaults to FALSE.
 #'
 #' \code{correction} specifies p-value adjustment method to use, common choice
 #' is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
-#' \link{p.adjust}. Check there to get more details.
+#' \link[stats]{p.adjust}. Check there to get more details.
 #'
 #' @return Tibble containing combined results for all alleles in
 #'   \code{hla_calls}.
 #'
 #' @examples
+#' library("survival")
 #' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(hla_calls_file)
 #' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
 #' pheno <- read.table(pheno_file, header = TRUE)
 #' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE)
-#'
-#' # Cox proportional hazards regression model
-#' analyzeHlaAssociations(model = "coxph",
-#'                        hla_calls,
-#'                        pheno,
-#'                        covar,
-#'                        zygo = FALSE,
-#'                        reduce_counts = FALSE,
-#'                        correction = "BH"
+#' midas_data <- prepareHlaData(hla_calls = hla_calls,
+#'                              pheno = pheno,
+#'                              covar = covar,
+#'                              inheritance_model = "additive"
 #' )
 #'
-#' # Logistic regression
-#' pheno <- pheno[, c(1, 3)]
-#' analyzeHlaAssociations(model = "glm.logit",
-#'                        hla_calls,
-#'                        pheno,
-#'                        covar,
-#'                        zygo = FALSE,
-#'                        reduce_counts = FALSE,
-#'                        correction = "BH"
+#' # Cox proportional hazards regression model
+#' ## define base model with response and covariates
+#' object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
+#'
+#' ## test for alleles associations
+#' analyzeAssociations(object = object,
+#'                     variables = c("B*14:02", "DRB1*11:01"),
+#'                     correction = "BH"
 #' )
 #'
 #' @importFrom assertthat assert_that see_if is.flag is.string
 #' @importFrom broom tidy
-#' @importFrom dplyr left_join filter mutate rename
+#' @importFrom dplyr bind_rows
 #' @importFrom stats p.adjust
-#' @importFrom purrr map_dfr
+#'
 #' @export
-analyzeHlaAssociations <- function(model = "coxph",
-                                   hla_calls,
-                                   pheno,
-                                   covar,
-                                   zygo = FALSE,
-                                   reduce_counts = FALSE,
-                                   correction = "BH") {
+analyzeAssociations <- function(object,
+                                variables, # TODO check if variables are specified in object,  # opcja all
+                                correction = "BH",
+                                exponentiate = FALSE) {
   assert_that(
-    is.string(model),
-    see_if(model %in% hlaAssocModels(),
-           msg = sprintf("model %s is not implemented", model)),
-    checkHlaCallsFormat(hla_calls),
-    is.data.frame(pheno),
-    see_if(nrow(pheno) >= 1 & ncol(pheno) >= 2,
-           msg = "pheno have to have at least 1 rows and 2 columns"
-    ),
-    see_if(colnames(pheno)[1] == colnames(hla_calls)[1],
-           msg = "first column in pheno must be named as first column in hla_calls"
-    ),
-    see_if(any(hla_calls[, 1] %in% pheno[, 1]),
-           msg = "IDs in hla_calls doesn't match IDs in pheno"
-    ),
-    is.data.frame(covar),
-    see_if(nrow(covar) >= 1 & ncol(covar) >= 2,
-           msg = "covar have to have at least 1 rows and 2 columns"
-    ),
-    see_if(colnames(covar)[1] == colnames(hla_calls)[1],
-           msg = "first column in covar must be named as first column in hla_calls"
-    ),
-    see_if(any(hla_calls[, 1] %in% covar[, 1]),
-           msg = "IDs in hla_calls doesn't match IDs in covar"
-    ),
-    is.flag(zygo),
-    is.flag(reduce_counts),
-    is.string(correction)
+    checkStatisticalModel(object),
+    is.character(variables),
+    is.string(correction),
+    is.flag(exponentiate)
   )
 
-  hla_counts <- hlaCallsToCounts(hla_calls)
-  zygosity <- hla_counts
-
-  assert_that(
-    see_if(
-    anyDuplicated(
-      c(
-        colnames(hla_counts[, -1]), colnames(pheno[, -1]),
-        colnames(covar[, -1]), paste0(colnames(zygosity[, -1]), "_zygosity")
-      )
-    ) == 0,
-    msg = "some colnames in hla_calls and pheno and covar and zygosity are duplicated"
-  ))
-
-  if (reduce_counts) {
-    hla_counts[, -1] <- lapply(hla_counts[, -1],
-                               function(x) ifelse(x == 2, 1, x)
-    )
-  }
-
-  data <- left_join(hla_counts, pheno, by = "ID")
-  data <- left_join(data, covar, by = "ID")
-
-  pheno_var <- paste(backquote(colnames(pheno)[-1]), collapse = ", ")
-  covar_var <- paste(backquote(colnames(covar)[-1]), collapse = " + ")
-  alleles_var <- backquote(colnames(hla_counts)[-1])
-
-  if (zygo) {
-    zygosity[, -1] <- lapply(zygosity[, -1], function(x) ifelse(x == 2, 1, 0))
-    colnames(zygosity) <- c("ID", paste0(colnames(zygosity[, -1]), "_zygosity"))
-    data <- left_join(data, zygosity, by = "ID")
-    zygo_var <- paste0(colnames(hla_counts)[-1], "_zygosity")
-    zygo_var <- backquote(zygo_var)
-    alleles_var <- paste(alleles_var, zygo_var, sep = " + ")
-  }
-
-  model_function <- hlaAssocModels(model = model,
-                                   response = pheno_var,
-                                   covariate = covar_var,
-                                   data = data
+  results <- lapply(variables,
+                    updateModel,
+                    object = object,
+                    backquote = TRUE,
+                    collapse = " + "
   )
 
-  results <- map_dfr(
-    .x = alleles_var,
-    .f = ~tidy(model_function(.), exponentiate = FALSE) # TODO exponentiate could be passed somehow
-  )
+  results <- lapply(results, tidy, exponentiate = exponentiate)
+  results <- bind_rows(results)
+  results$term <- gsub("`", "", results$term)
+  results <- results[results$term %in% variables, ]
 
-  results <- mutate(results, term = gsub("`", "", term))
-  results <- filter(results, checkAlleleFormat(term))
-  results <- rename(results, allele = term)
+  results$p.adjusted <- p.adjust(results$p.value, correction)
 
-  results <- mutate(results, p.adjusted = p.adjust(p.value, correction))
-
-  # results <- as.data.frame(results)
+  covariates <- formula(object)[[3]]
+  covariates <- deparse(covariates)
+  results$covariates <- covariates
 
   return(results)
 }
 
-#' Association models for analysis of HLA alleles
+#' Stepwise conditional association analysis
 #'
-#' \code{hlaAssocModels} is a collection of preconfigured models for use with
-#' HLA alleles count table.
+#' \code{analyzeConditionalAssociations} performs stepwise conditional testing
+#' adding the previous top-associated variable as covariate, until there is no
+#' more significant variables based on a self-defined threshold.
 #'
-#' \code{hlaAssocModels} is not indended to use by basic user.
+#' Selection criteria is the p-value from the test on coefficients values.
 #'
-#' @inheritParams analyzeHlaAssociations
-#' @param response Character specifying response variables in \code{data}.
-#' @param covariate Character specifying covariates in \code{data}.
-#' @param data Data frame containing variables in the model.
+#' @inheritParams updateModel
+#' @inheritParams analyzeAssociations
+#' @param th number specifying p-value threshold for a variable to be considered
+#'   significant.
+#' @param rss_th number specifying residual sum of squares threshold at which
+#'   function should stop adding additional variables. As the residual sum of
+#'   squares approaches \code{0} the perfect fit is obtained making further
+#'   attempts at variables selection nonsense, thus function is stopped. This
+#'   behavior can be controlled using \code{rss_th}.
 #'
-#' @return Function for fitting association model of choice, it takes allele
-#'   number as an argument. Additional arguments can be passed as well.
+#' @return tibble with stepwise conditional testsing results.
 #'
-#'   Returned function takes one required argument: HLA allele number
-#'   (\code{allele}). Additional parameters are passed to statistical model
-#'   function. Due to fact that allele numbers contains characters that have
-#'   special meanings in formulas, they should be back quoted. This can be
-#'   easily done with \link{backquote}. See examples section for general usage
-#'   case.
+#' @examples
+#' library("survival")
+#' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(hla_calls_file)
+#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+#' pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
+#' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
+#' covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
+#' midas_data <- prepareHlaData(hla_calls = hla_calls,
+#'                              pheno = pheno,
+#'                              covar = covar,
+#'                              inheritance_model = "additive"
+#' )
 #'
-#'   If model is equal to \code{NULL} names of available models are returned
-#'   instead.
+#' ## define base model with covariates only
+#' object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
+#' analyzeConditionalAssociations(object,
+#'                             variables = c("B*14:02", "DRB1*11:01"),
+#'                             th = 0.05,
+#'                             rss_th = 1e-07
+#' )
+#'
+#' @importFrom assertthat assert_that is.number
+#' @importFrom dplyr bind_rows tibble
+#' @importFrom purrr map_dfr
+#' @importFrom rlang warn
+#' @importFrom stats formula resid
+#'
+#' @export
+analyzeConditionalAssociations <- function(object,
+                                           variables,
+                                           th,
+                                           rss_th = 1e-07,
+                                           exponentiate = FALSE) {
+  assert_that(
+    checkStatisticalModel(object),
+    is.character(variables),
+    is.number(th),
+    is.number(rss_th)
+  )
+
+  prev_formula <- formula(object)
+  prev_variables <- all.vars(prev_formula)
+
+  best <- list()
+  i <- 1
+
+  while (TRUE) {
+    new_variables <- variables[! variables %in% prev_variables]
+
+    results <- map_dfr(
+      .x = new_variables,
+      .f = ~ tidy(updateModel(object = object,
+                              x = .,
+                              backquote = TRUE,
+                              collapse = " + "
+                  )
+      )
+    )
+    results <- results[results[["term"]] %in% backquote(new_variables), ]
+    eesults <- results[! is.infinite(results[["p.value"]]), ]
+
+    i_min <- which.min(results[["p.value"]])
+    if (length(i_min) == 0) break
+    if (results$p.value[i_min] > th) break
+
+    object <- updateModel(object,
+                          results$term[i_min],
+                          backquote = FALSE,
+                          collapse = " + "
+    )
+
+    if (sum(resid(object) ^ 2) <= rss_th) {
+      warn("Perfect fit was reached attempting further model selection is nonsense.")
+      break
+    }
+    prev_formula <- formula(object)
+    prev_variables <- all.vars(prev_formula)
+    best[[i]] <- object
+    i <- i + 1
+  }
+
+  if (length(best) > 0) {
+    results <- lapply(
+      X = best,
+      FUN = function(obj) {
+        cov <- formula(obj)[[3]]
+        cov <- all.vars(cov)
+        cov <- cov[-length(cov)]
+        obj_tidy <- tidy(obj, exponentiate = exponentiate)
+        obj_tidy <- obj_tidy[length(cov) + 1, ]
+        obj_tidy$covariates <- paste(cov, collapse = " + ")
+        return(obj_tidy)
+      }
+    )
+    results <- bind_rows(results)
+    results$term <- gsub("`", "", results$term)
+    results <- results[results$term %in% variables, ]
+  } else {
+    results <- tibble()
+  }
+
+  return(results)
+}
+
+#' Prepare data for statistical analysis
+#'
+#' \code{prepareHlaData} binds HLA alleles calls data frame with additional data
+#' frames like phenotypic observations or covariates, creating an input data for
+#' further statistical analysis.
+#'
+#' @inheritParams checkHlaCallsFormat
+#' @inheritParams hlaCallsToCounts
+#' @param ... Data frames holding additional variables like phenotypic
+#'   observations or covariates.
+#'
+#' \code{...} should be data frames with first column holding samples IDs and
+#' named \code{ID}. Those should correspond to \code{ID} column in
+#' \code{hla_calls}.
+#'
+#' @return Data frame with hla counts and additional variables.
 #'
 #' @examples
 #' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(hla_calls_file)
-#' hla_counts <- hlaCallsToCounts(hla_calls)
 #' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
 #' pheno <- read.table(pheno_file, header = TRUE)
 #' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE)
-#' data <- dplyr::left_join(hla_counts, pheno, by = "ID")
-#' data <- dplyr::left_join(data, covar, by = "ID")
-#' response <- paste(colnames(pheno[, -1]), collapse = ", ")
-#' covariate <- paste(colnames(covar[, -1]), collapse = " + ")
-#' fun <- hlaAssocModels(model = "coxph",
-#'                        response = response,
-#'                        covariate = covariate,
-#'                        data = data
+#' prepareHlaData(hla_calls = hla_calls,
+#'                pheno = pheno,
+#'                covar = covar,
+#'                inheritance_model = "additive"
 #' )
-#' allele <- backquote("A*01:01")
-#' fun(allele)
 #'
-#' @importFrom assertthat assert_that see_if
-#' @importFrom MASS glm.nb
-#' @importFrom stats as.formula binomial glm lm
-#' @importFrom survival coxph Surv
+#' @importFrom assertthat assert_that is.string see_if
+#' @importFrom dplyr left_join
+#'
 #' @export
-hlaAssocModels <- function(model = NULL,
-                           response,
-                           covariate,
-                           data) {
-  if (is.null(model)) {
-    return(c("coxph", "lm", "glm.logit", "glm.nb"))
+prepareHlaData <- function(hla_calls,
+                           ...,
+                           inheritance_model = "additive") {
+
+  additional_data <- list(...)
+  if (length(additional_data) == 0) {
+    additional_data <- NULL
   }
+
   assert_that(
-    is.string(model),
-    is.character(response),
-    is.character(covariate),
-    is.data.frame(data)
-  )
-  model_function <- switch(
-    model,
-    coxph = function(allele, ...) { # Cox survival analysis
-      form <- sprintf("Surv(%s) ~ %s + %s", response, allele, covariate)
-      result <- coxph(formula = as.formula(form), data = data, ...)
-      return(result)
-    },
-    lm = function(allele, ...) { # Linear regression
-      form <- sprintf("%s ~ %s + %s", response, allele, covariate)
-      result <- lm(formula = as.formula(form), data = data, ...)
-      return(result)
-    },
-    glm.logit = function(allele, ...) { # Logistic regression
-      form <- sprintf("%s ~ %s + %s", response, allele, covariate)
-      result <- glm(
-        formula = as.formula(form),
-        family = binomial(link = "logit"),
-        data = data,
-        ...
+    checkHlaCallsFormat(hla_calls),
+    all(
+      vapply(
+        X = additional_data,
+        FUN = function(x) {
+          additional_data_frame <- x
+          checkAdditionalData(additional_data_frame,
+                              hla_calls = hla_calls,
+                              accept.null = TRUE
+          )
+        },
+        FUN.VALUE = logical(1)
       )
-      return(result)
-    },
-    glm.nb = function(allele, ...) { # Negative binomial regression
-      form <- sprintf("%s ~ %s + %s", response, allele, covariate)
-      result <- glm.nb(formula = as.formula(form), data = data, ...)
-      return(result)
-    }
+    ),
+    see_if(
+      anyDuplicated(
+        c(
+          unique(unlist(hla_calls[, -1])),
+          unlist(lapply(
+            X = additional_data,
+            FUN = function(x) colnames(x)[-1]
+          ))
+        )
+      ) == 0,
+      msg = "column names in additional data are duplicated or overlap with alleles in hla_calls"
+    ),
+    is.string(inheritance_model),
+    see_if(
+      pmatch(inheritance_model,
+             table = c("dominant", "recessive", "additive"),
+             nomatch = 0
+      ) != 0,
+      msg = "inheritance_model should be one of 'dominant', 'recessive', 'additive'"
+    )
   )
-  return(model_function)
+
+  data <- hlaCallsToCounts(hla_calls,
+                           inheritance_model = inheritance_model
+  )
+  if (length(additional_data) != 0) {
+    for (i in 1:length(additional_data)) {
+      data <- left_join(data, additional_data[[i]], by = "ID")
+    }
+  }
+
+  return(data)
 }

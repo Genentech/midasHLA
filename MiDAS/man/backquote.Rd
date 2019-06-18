@@ -16,7 +16,7 @@ Character vector with its elements backticked.
 \code{backquote} places backticks around string.
 }
 \details{
-\code{backquote} is usefull when using HLA allele numbers in fomulas, where
+\code{backquote} is useful when using HLA allele numbers in formulas, where
 \code{'*'} and \code{':'} characters have special meanings.
 }
 \examples{

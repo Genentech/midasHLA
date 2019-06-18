@@ -170,7 +170,7 @@ getVariableAAPos <- function(alignment,
 #' \code{dictionary} file should be a tsv format with header and two columns.
 #' First column should hold allele numbers and second corresponding additional
 #' variables. Optionally a data frame formatted in the same manner can be passed
-#' insted.
+#' instead.
 #'
 #' @inheritParams checkAlleleFormat
 #' @param dictionary Path to the file containing HLA allele numbers matchings or
@@ -188,9 +188,9 @@ getVariableAAPos <- function(alignment,
 #' dictionary <- system.file("extdata", "Match_4digit_supertype.txt", package = "MiDAS")
 #' convertAlleleToVariable(c("A*01:01", "A*02:01"), dictionary = dictionary)
 #'
-#' @importFrom assertthat assert_that is.readable see_if
+#' @importFrom assertthat assert_that is.string is.readable see_if
 #' @importFrom stats setNames
-#' @importFrom utils type.convert
+#' @importFrom utils read.table
 #' @export
 convertAlleleToVariable <- function(allele,
                                     dictionary) {
@@ -224,7 +224,8 @@ convertAlleleToVariable <- function(allele,
   )
   dictionary <- setNames(dictionary[, 2], dictionary[, 1])
   variable <- dictionary[allele]
-  variable <- type.convert(variable, as.is = TRUE)
+  names(variable) <- NULL
+
   return(variable)
 }
 
@@ -255,7 +256,7 @@ checkHlaCallsFormat <- function(hla_calls) {
     see_if(! any(vapply(hla_calls, is.factor, logical(length = 1))),
            msg = "hla_calls can't contain factors"
     ),
-    see_if(! all(checkAlleleFormat(hla_calls[, 1]), na.rm = TRUE),
+    see_if(! all(checkAlleleFormat(as.character(hla_calls[, 1])), na.rm = TRUE),
            msg = "first column of hla_calls should specify samples id"
     ),
     see_if(all(checkAlleleFormat(unlist(hla_calls[, -1])), na.rm = TRUE),
@@ -270,7 +271,7 @@ checkHlaCallsFormat <- function(hla_calls) {
 #'
 #' \code{backquote} places backticks around string.
 #'
-#' \code{backquote} is usefull when using HLA allele numbers in fomulas, where
+#' \code{backquote} is useful when using HLA allele numbers in formulas, where
 #' \code{'*'} and \code{':'} characters have special meanings.
 #'
 #' @param x Character vector.
@@ -284,6 +285,147 @@ checkHlaCallsFormat <- function(hla_calls) {
 #' @export
 backquote <- function(x) {
   assert_that(is.character(x))
-  backquoted <- paste0("`", x, "`")
-  return(backquoted)
+  x <- gsub("`", "", x)
+  backquted <- paste0("`", x, "`")
+  return(backquted)
+}
+
+#' Assert additional data
+#'
+#' \code{checkAdditionalData} asserts if phenotype or covariate data frame
+#' has proper format.
+#'
+#' @inheritParams checkHlaCallsFormat
+#' @param data_frame Data frame containing phenotype or covariate data
+#'   corresponding to accompanying hla calls data frame.
+#' @param accept.null Logical indicating if NULL data_frame should be accepted.
+#'
+#' @return Logical indicating if \code{data_frame} is properly formatted.
+#'   Otherwise raise error.
+#'
+#' @importFrom assertthat assert_that see_if
+#' @examples
+#' hla_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+#' pheno <- read.table(pheno_file, header = TRUE)
+#' hla_calls <- readHlaCalls(hla_file)
+#' checkAdditionalData(pheno, hla_calls)
+#'
+#' @export
+checkAdditionalData <- function(data_frame,
+                                hla_calls,
+                                accept.null = FALSE) {
+  data_frame_name <- deparse(substitute(data_frame))
+  hla_calls_name <- deparse(substitute(hla_calls))
+  if (! (is.null(data_frame) & accept.null)) {
+    assert_that(
+      see_if(is.data.frame(data_frame),
+             msg = sprintf("%s have to be a data frame",
+                           data_frame_name
+             )
+      ),
+      checkHlaCallsFormat(hla_calls),
+      see_if(nrow(data_frame) >= 1 & ncol(data_frame) >= 2,
+             msg = sprintf("%s have to have at least 1 rows and 2 columns",
+                           data_frame_name
+             )
+      ),
+      see_if(colnames(data_frame)[1] == colnames(hla_calls)[1],
+             msg = sprintf(
+               "first column in %s must be named as first column in %s",
+               data_frame_name, hla_calls_name
+             )
+      ),
+      see_if(any(hla_calls[, 1] %in% data_frame[, 1]),
+             msg = sprintf(
+               "IDs in %s doesn't match IDs in %s",
+               data_frame_name, hla_calls_name
+             )
+      )
+    )
+  }
+
+  return(TRUE)
+}
+
+#' Add new variables to statistical model
+#'
+#' \code{updateModel} will add new variables to model and re-fit it.
+#'
+#' @param object An existing fit from a model function such as lm, glm and many
+#'   others.
+#' @param x Character vector specifying variables to be added to model or a
+#'   formula giving a template which specifies how to update.
+#' @param backquote Logical indicating if added variables should be quoted.
+#'   Longer than one element vectors are accepted as well, specifying which new
+#'   variables should be backquoted. Only relevant if x is of type character.
+#' @param collapse Character specifying how new characters should be added to
+#'   old formula. Only relevant if x is of type character.
+#'
+#' @return Updated fit of input model.
+#'
+#' @importFrom assertthat assert_that is.flag is.string
+#' @importFrom stats update
+#' @importFrom purrr is_formula
+#'
+#' @examples
+#' object <- lm(dist ~ 1, data = cars)
+#' updateModel(object, "dist")
+#'
+#' @export
+updateModel <- function(object, x, backquote = TRUE, collapse = " + ") {
+  assert_that(
+    checkStatisticalModel(object),
+    see_if(is.character(x) | is_formula(x),
+           msg = "x is not a character vector or formula"
+    ),
+    is.flag(backquote),
+    is.string(collapse)
+  )
+
+  if (is.character(x)) {
+    x[backquote] <- backquote(x[backquote])
+    x <- paste0(". ~ . + ", paste(x, collapse = collapse))
+  }
+
+  new_object <- update(object = object, x, evaluate = FALSE)
+  new_object <- eval.parent(new_object)
+
+  return(new_object)
+}
+
+#' Assert statistical model
+#'
+#' \code{checkStatisticalModel} asserts if object is an existing fit from a
+#' model function such as lm, glm and many others.
+#'
+#' @inheritParams updateModel
+#'
+#' @return Logical indicating if \code{data_frame} is an existing fit from a
+#' model function such as lm, glm and many others. Otherwise raise error.
+#'
+#' @importFrom assertthat assert_that see_if
+#' @importFrom stats getCall
+#' @examples
+#' object <- lm(dist ~ speed, data = cars)
+#' checkStatisticalModel(object)
+#'
+#' @export
+checkStatisticalModel <- function(object) { # TODO simplyfy output of this function; or something like object is not a stat model: potential problem bla bla
+  assert_that(
+    see_if(is.object(object),
+           msg = "object have to have the internal OBJECT bit set"
+    ),
+    {
+      object_call <- getCall(object)
+      if (! is.null(object_call)) {
+        object_formula <- eval(substitute(formula, env = as.list(object_call)))
+        see_if(is_formula(object_formula),
+               msg = "object have to be a model with defined formula"
+        )
+      } else {
+        structure(FALSE, msg = "object have to have an attribute 'call'")
+      }
+    }
+  )
 }
