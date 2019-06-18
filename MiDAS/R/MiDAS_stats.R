@@ -383,7 +383,7 @@ prepareHlaData <- function(hla_calls,
 #' )
 #'
 #' object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
-#' analyzeMiDASData(object, type = "hla_alleles")
+#' analyzeMiDASData(object, analysis_type = "hla_alleles")
 #'
 #' @importFrom assertthat assert_that is.flag is.number is.string
 #' @importFrom dplyr filter left_join select rename
