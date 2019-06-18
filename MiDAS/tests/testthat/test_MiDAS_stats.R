@@ -421,23 +421,23 @@ test_that("MiDAS data is prepared properly", {
     rleft_join(midas_expression_levels_test, pheno, covar)
   expect_equal(midas_expression_levels, midas_expression_levels_test)
 
-  # allele_groups - this is failing due to errors in Ggroup dictionary
-  # midas_allele_groups <- prepareMiDASData(hla_calls,
-  #                                         pheno,
-  #                                         covar,
-  #                                         analysis_type = "allele_groups",
-  #                                         inheritance_model = "additive")
-  # groups_dicts <-
-  #   grep("expression",
-  #        listMiDASDictionaries(),
-  #        value = TRUE,
-  #        invert = TRUE)
-  # midas_allele_groups_test <- Reduce(
-  #   f = function(...) dplyr::left_join(..., by = "ID"),
-  #   x = lapply(groups_dicts, hlaToVariable, hla_calls = hla_calls)
-  # )
-  # midas_allele_groups_test <- rleft_join(midas_allele_groups_test, pheno, covar)
-  # expect_equal(midas_allele_groups, midas_allele_groups_test)
+  # allele_groups
+  midas_allele_groups <- prepareMiDASData(hla_calls,
+                                          pheno,
+                                          covar,
+                                          analysis_type = "allele_groups",
+                                          inheritance_model = "additive")
+  groups_dicts <-
+    grep("expression",
+         listMiDASDictionaries(),
+         value = TRUE,
+         invert = TRUE)
+  midas_allele_groups_test <- Reduce(
+    f = function(...) dplyr::left_join(..., by = "ID"),
+    x = lapply(groups_dicts, hlaToVariable, hla_calls = hla_calls)
+  )
+  midas_allele_groups_test <- rleft_join(midas_allele_groups_test, pheno, covar)
+  expect_equal(midas_allele_groups, midas_allele_groups_test)
 
   # custom
   midas_custom <- prepareMiDASData(hla_calls,
