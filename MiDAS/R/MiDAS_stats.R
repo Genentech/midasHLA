@@ -329,7 +329,7 @@ prepareHlaData <- function(hla_calls,
 #' @inheritParams analyzeAssociations
 #' @inheritParams analyzeConditionalAssociations
 #' @inheritParams formatAssociationsResults
-#' @param analysis_type String indicating type of analysis beeing performed,
+#' @param analysis_type String indicating the type of analysis being performed,
 #'   at this point it is only used for results formatting. Valid values are
 #'   \code{"hla_alleles"}, \code{"aa_level"}, \code{"expression_levels"},
 #'   \code{"allele_groups"}, \code{"custom"}.
@@ -345,7 +345,7 @@ prepareHlaData <- function(hla_calls,
 #'   equal 1 variables with number of counts less that this will not be
 #'   considered during analysis.
 #' @param logistic Logical indicating if statistical model used is logistic (eg.
-#'   \code{coxph}). If \code{NULL} function wi;; try to figure this out. This is
+#'   \code{coxph}). If \code{NULL} function will try to figure this out. This is
 #'   only used for results formatting.
 #' @param binary_phenotype Logical indicating if coefficient estimates should be
 #'   exponentiated. This is typical for logistic and multinomial regressions,
@@ -355,9 +355,9 @@ prepareHlaData <- function(hla_calls,
 #' @param kable_output Logical indicating if additionally results should be
 #'   pretty printed in specified \code{format}.
 #'
-#' \code{variables} takes \code{NULL} as a default value. When specified as such
-#' column names of data frame associated with the \code{object} are used as
-#' variables for testing. This excludes first column which should corresponds
+#' \code{variables} takes \code{NULL} as a default value, than column names of
+#' data frame associated with the \code{object} are used as variables in
+#' association tests. This excludes first column which should corresponds
 #' to samples IDs as well as covariates and response variables defined in
 #' object formula.
 #'
@@ -375,10 +375,11 @@ prepareHlaData <- function(hla_calls,
 #' pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
 #' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-#' midas_data <- prepareHlaData(hla_calls = hla_calls,
-#'                              pheno = pheno,
-#'                              covar = covar,
-#'                              inheritance_model = "additive"
+#' midas_data <- prepareMiDASData(hla_calls = hla_calls,
+#'                                pheno = pheno,
+#'                                covar = covar,
+#'                                analysis_type = "hla_allele",
+#'                                inheritance_model = "additive"
 #' )
 #'
 #' object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
@@ -414,6 +415,10 @@ analyzeMiDASData <- function(object,
   object_variables <- colnames(object_data)[-1]
 
   assert_that(
+    is.string(analysis_type),
+    stringMatches(analysis_type,
+                  choice = c("hla_alleles", "aa_level", "expression_levels",  "allele_groups", "custom")
+    ),
     is.flag(conditional),
     isCharacterOrNULL(variables),
     see_if(
@@ -430,10 +435,6 @@ analyzeMiDASData <- function(object,
     is.number(th),
     is.number(rss_th),
     is.flag(kable_output),
-    is.string(analysis_type),
-    stringMatches(analysis_type,
-                  choice = c("hla_alleles", "aa_level", "expression_levels",  "allele_groups", "custom")
-    ),
     is.string(format),
     stringMatches(format, choice = c("html", "latex"))
   )
@@ -446,7 +447,7 @@ analyzeMiDASData <- function(object,
     )
   }
 
-  # guess if model used is logistic type -- so far the logistic models in HLA analysis I've seen are coxph and glm(family = binomial)
+  # guess if model used is logistic type
   if (is.null(logistic)) {
     model_fun <- deparse(object_call[[1]])
     model_family <- deparse(object_call[["family"]])
@@ -552,8 +553,8 @@ analyzeMiDASData <- function(object,
 #'   observations or covariates.
 #' @param analysis_type String indicating analysis type for which data should be
 #'   prepared. Valid choices are \code{"hla_allele"}, \code{"aa_level"},
-#'   \code{"expression_levels"}, \code{"custom"}. See details for further
-#'   explanations.
+#'   \code{"expression_levels"}, \code{"allele_groups"}, \code{"custom"}. See
+#'   details for further explanations.
 #'
 #' \code{...} should be data frames with first column holding samples IDs and
 #' named \code{ID}. Those should correspond to \code{ID} column in
@@ -563,16 +564,16 @@ analyzeMiDASData <- function(object,
 #' should be prepared. For \code{"hla_allele"} analysis \code{hla_calls} are
 #' transformed into counts under \code{inheritance_model} of choice (this is
 #' done with \link{hlaCallsToCounts}). In \code{"aa_level"} input
-#' \code{hla_calls} are first coverted to amino acid level, taking only variable
+#' \code{hla_calls} are first converted to amino acid level, taking only variable
 #' positions under consideration. Than variable amino acid positions are
 #' transformed to counts under \code{inheritance_model} of choice (this is done
 #' with \link{aaVariationToCounts}). For \code{"expression_levels"} input
 #' \code{hla_calls} are transformed to expression levels using all possible
-#' expression dictionaries shiped with package (this is done using
+#' expression dictionaries shipped with package (this is done using
 #' \link{hlaToVariable}). The expression levels from both alleles are than
 #' summed into single variable for each translated HLA gene. For
 #' \code{"allele_groups"} HLA alleles are transformed to HLA alleles groups
-#' using all possible groups dictionaries shiped with package (this is done
+#' using all possible groups dictionaries shipped with package (this is done
 #' using \link{hlaToVariable}). \code{"custom"} will not transform
 #' \code{hla_calls} and only joins it with additional data(\code{...}).
 #'
