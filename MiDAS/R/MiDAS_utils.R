@@ -570,6 +570,33 @@ assertthat::on_failure(stringMatches) <- function(call, env) {
   )
 }
 
+#' Check if object is flag or NULL
+#'
+#' \code{isFlagOrNULL} checks if object is flag (a length one logical vector) or
+#' NULL.
+#'
+#' @param x object to test.
+#'
+#' @return Logical indicating if object is flag or NULL
+#'
+#' @importFrom assertthat is.flag
+#'
+isFlagOrNULL <- function(x) {
+    test <- is.flag(x) | is.null(x)
+
+  return(test)
+}
+
+#' Error message for isFlagOrNULL
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(isFlagOrNULL) <- function(call, env) {
+  paste0(deparse(call$x),
+         " is not a flag (a length one logical vector) or NULL."
+  )
+}
+
 #' List HLA alleles dictionaries
 #'
 #' \code{listMiDASDictionaries} lists dictionaries shipped with MiDAS package.
@@ -579,6 +606,7 @@ assertthat::on_failure(stringMatches) <- function(call, env) {
 #'
 #' @return Character vector with names of available HLA alleles dictionaries.
 #'
+#' @export
 listMiDASDictionaries <- function(full.names = FALSE) {
   lib <- list.files(
     path = system.file("extdata", package = "MiDAS"),
