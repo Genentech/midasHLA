@@ -1,4 +1,8 @@
-## 0.0.0.9008 - 11/05/2019
+## 0.0.0.9008 - 18/06/2019
++ introduces prepareMiDASData which transforms hla_calls according to predefined schemas, like
+  amino acid variation, expression level etc.
+
+## 0.0.0.9008 - 11/06/2019
 + introduces countsToHlaCalls that allows converting HLA counts table back to
   HLA calls data frame under additive inheritance model 
 + introduces analyzeMiDASData which is a higher level abstraction of analyzeConditionalAssociations 
