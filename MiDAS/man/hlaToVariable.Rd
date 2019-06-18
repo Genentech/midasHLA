@@ -41,7 +41,8 @@ instead.
 
 \code{dictionary} optional parameter that can be also used to access
 matchings files shipped with the package. They can be referred to by using
-one of the following strings:
+one of the following strings (to list available dictionaries use
+\link{listMiDASDictionaries}):
 
 \code{"2digit_A-allele_expression"} reference data to impute expression
 levels for HLA-A alleles.
