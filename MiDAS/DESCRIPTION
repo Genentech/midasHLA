@@ -14,5 +14,7 @@ Imports:
     rlang (>= 0.3.1), uniqtag (>= 1.0), kableExtra (>= 1.1.0), knitr (>= 1.21), 
     magrittr (>= 1.5), tidyr (>= 0.8.2), formattable (>= 0.2.0.1)
 Suggests:
-    testthat (>= 2.0.1), seqinr (>= 3.4-5), survival (>= 2.43-3)
+    testthat (>= 2.0.1), seqinr (>= 3.4-5), survival (>= 2.43-3), vcfR (>= 1.8.0), 
+    ensembldb (>= 2.6.8), EnsDb.Hsapiens.v86 (>= 2.99.0), magrittr (>= 1.5), 
+    tidyr (>= 0.8.2), methods
 RoxygenNote: 6.1.1
