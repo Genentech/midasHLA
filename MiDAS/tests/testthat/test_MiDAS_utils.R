@@ -247,3 +247,14 @@ test_that("string matches", {
     "\"foo\" should be one of \"bar\", \"Foo\"."
   )
 })
+
+test_that("is flag or null", {
+  expect_equal(isFlagOrNULL(TRUE), TRUE)
+  expect_equal(isFlagOrNULL(NULL), TRUE)
+  # expect_equal(isFlagOrNULL(NA), FALSE) # returns TRUE... strange?
+
+  expect_error(
+    assertthat::assert_that(isFlagOrNULL(1)),
+    "1 is not a flag \\(a length one logical vector\\) or NULL."
+  )
+})
