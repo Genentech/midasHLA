@@ -39,8 +39,7 @@
 #'
 #' ## test for alleles associations
 #' analyzeAssociations(object = object,
-#'                     variables = c("B*14:02", "DRB1*11:01"),
-#'                     correction = "BH"
+#'                     variables = c("B*14:02", "DRB1*11:01")
 #' )
 #'
 #' @importFrom assertthat assert_that see_if is.flag is.string
@@ -50,12 +49,24 @@
 #'
 #' @export
 analyzeAssociations <- function(object,
-                                variables, # TODO check if variables are specified in object,  # opcja all
+                                variables,
                                 correction = "BH",
                                 exponentiate = FALSE) {
   assert_that(
-    checkStatisticalModel(object),
+    checkStatisticalModel(object)
+  )
+  object_call <- getCall(object)
+  object_data <- eval(object_call[["data"]], envir = parent.frame())
+  object_variables <- colnames(object_data)[-1]
+
+  assert_that(
     is.character(variables),
+    see_if(
+      all(test_vars <- variables %in% object_variables) | is.null(variables),
+      msg = sprintf("%s can not be found in object data",
+                    paste(variables[! test_vars], collapse = ", ")
+      )
+    ),
     is.string(correction),
     is.flag(exponentiate)
   )
@@ -74,9 +85,10 @@ analyzeAssociations <- function(object,
 
   results$p.adjusted <- p.adjust(results$p.value, correction)
 
-  covariates <- formula(object)[[3]]
-  covariates <- deparse(covariates)
-  results$covariates <- covariates
+#  This covariates were added for consistiency with conditional analyze, now however that we are filtering covariates there it doesn't make much sense to keep those?
+#  covariates <- formula(object)[[3]]
+#  covariates <- deparse(covariates)
+#  results$covariates <- covariates
 
   return(results)
 }
@@ -99,7 +111,7 @@ analyzeAssociations <- function(object,
 #'   attempts at variables selection nonsense, thus function is stopped. This
 #'   behavior can be controlled using \code{rss_th}.
 #'
-#' @return tibble with stepwise conditional testsing results.
+#' @return tibble with stepwise conditional testing results.
 #'
 #' @examples
 #' library("survival")
@@ -123,7 +135,7 @@ analyzeAssociations <- function(object,
 #'                             rss_th = 1e-07
 #' )
 #'
-#' @importFrom assertthat assert_that is.number
+#' @importFrom assertthat assert_that is.flag is.number is.string
 #' @importFrom dplyr bind_rows tibble
 #' @importFrom purrr map_dfr
 #' @importFrom rlang warn
@@ -132,25 +144,41 @@ analyzeAssociations <- function(object,
 #' @export
 analyzeConditionalAssociations <- function(object,
                                            variables,
+                                           correction = "BH",
                                            th,
                                            rss_th = 1e-07,
                                            exponentiate = FALSE) {
   assert_that(
-    checkStatisticalModel(object),
+    checkStatisticalModel(object)
+  )
+  object_call <- getCall(object)
+  object_formula <- eval(object_call[["formula"]], envir = parent.frame())
+  object_data <- eval(object_call[["data"]], envir = parent.frame())
+  object_variables <- colnames(object_data)[-1]
+
+  assert_that(
     is.character(variables),
+    see_if(
+      all(test_vars <- variables %in% object_variables),
+      msg = sprintf("%s can not be found in object data",
+                    paste(variables[! test_vars], collapse = ", ")
+      )
+    ),
+    is.string(correction),
     is.number(th),
-    is.number(rss_th)
+    is.number(rss_th),
+    is.flag(exponentiate)
   )
 
-  prev_formula <- formula(object)
-  prev_variables <- all.vars(prev_formula)
+  prev_formula <- object_formula
+  first_variables <- all.vars(object_formula)
+  prev_variables <- first_variables
+  new_variables <- variables[! variables %in% prev_variables]
 
   best <- list()
   i <- 1
 
-  while (TRUE) {
-    new_variables <- variables[! variables %in% prev_variables]
-
+  while (length(new_variables) > 0) {
     results <- map_dfr(
       .x = new_variables,
       .f = ~ tidy(updateModel(object = object,
@@ -161,7 +189,11 @@ analyzeConditionalAssociations <- function(object,
       )
     )
     results <- results[results[["term"]] %in% backquote(new_variables), ]
-    eesults <- results[! is.infinite(results[["p.value"]]), ]
+    results$p.adjusted <- p.adjust(results[["p.value"]], correction)
+    results <- results[! is.infinite(results[["p.value"]]), ]
+
+    mask <- ! prev_variables %in% first_variables
+    results$covariates <- paste(prev_variables[mask], collapse = " + ")
 
     i_min <- which.min(results[["p.value"]])
     if (length(i_min) == 0) break
@@ -179,28 +211,19 @@ analyzeConditionalAssociations <- function(object,
     }
     prev_formula <- formula(object)
     prev_variables <- all.vars(prev_formula)
-    best[[i]] <- object
+    new_variables <- variables[! variables %in% prev_variables]
+
+    results <- results[i_min, ]
+    results$term <- gsub("`", "", results$term)
+    best[[i]] <- results
     i <- i + 1
   }
 
-  if (length(best) > 0) {
-    results <- lapply(
-      X = best,
-      FUN = function(obj) {
-        cov <- formula(obj)[[3]]
-        cov <- all.vars(cov)
-        cov <- cov[-length(cov)]
-        obj_tidy <- tidy(obj, exponentiate = exponentiate)
-        obj_tidy <- obj_tidy[length(cov) + 1, ]
-        obj_tidy$covariates <- paste(cov, collapse = " + ")
-        return(obj_tidy)
-      }
-    )
-    results <- bind_rows(results)
-    results$term <- gsub("`", "", results$term)
-    results <- results[results$term %in% variables, ]
+  if (length(best) == 0) {
+    warn("No significant variables found. Returning empty table.") # Tibble to be more precise?
+    results <- results[0, ]
   } else {
-    results <- tibble()
+    results <- bind_rows(best)
   }
 
   return(results)
@@ -296,4 +319,198 @@ prepareHlaData <- function(hla_calls,
   }
 
   return(data)
+}
+
+#' Analyze associations in MiDAS data
+#'
+#' \code{analyzeMiDASData} performs association analysis on MiDAS data using
+#' statistical model specified by user.
+#'
+#' @inheritParams analyzeAssociations
+#' @inheritParams analyzeConditionalAssociations
+#' @inheritParams formatAssociationsResults
+#' @param conditional Logical indicating if the analysis should be performed
+#'   using stepwise conditional tests or not. See
+#'   \link{analyzeConditionalAssociations} for more details.
+#' @param variables Character specifying variables to use in association tests
+#'   or \code{NULL}. If \code{NULL} all variables in object data are tested.
+#'   See details for further information.
+#' @param frequency_cutoff Number specifying threshold for inclusion of a
+#'   variable. If it's a number between 0 and 1 variables with frequency below
+#'   this number will not be considered during analysis. If it's greater or
+#'   equal 1 variables with number of counts less that this will not be
+#'   considered during analysis.
+#' @param kable_output Logical indicating if additionally results should be
+#'   pretty printed in specified \code{format}.
+#'
+#' \code{variables} takes \code{NULL} as a default value. When specified as such
+#' column names of data frame associated with the \code{object} are used as
+#' variables for testing. This excludes first column which should corresponds
+#' to samples IDs as well as covariates and response variables defined in
+#' object formula.
+#'
+#' \code{correction} specifies p-value adjustment method to use, common choice
+#' is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
+#' \link[stats]{p.adjust}. Check there to get more details.
+#'
+#' @return Tibble containing results for all tested variables.
+#'
+#' @examples
+#' library("survival")
+#' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(hla_calls_file)
+#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+#' pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
+#' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
+#' covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
+#' midas_data <- prepareHlaData(hla_calls = hla_calls,
+#'                              pheno = pheno,
+#'                              covar = covar,
+#'                              inheritance_model = "additive"
+#' )
+#'
+#' object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
+#' analyzeMiDASData(object)
+#'
+#' @importFrom assertthat assert_that is.flag is.number is.string
+#' @importFrom dplyr filter left_join select rename
+#' @importFrom stats getCall
+#' @importFrom rlang !! := .data
+#' @importFrom magrittr %>% %<>%
+#'
+#' @export
+analyzeMiDASData <- function(object,
+                             conditional = FALSE,
+                             variables = NULL,
+                             frequency_cutoff = NULL,
+                             pvalue_cutoff = NULL,
+                             correction = "BH",
+                             th = 0.05,
+                             rss_th = 1e-07,
+                             kable_output = TRUE,
+                             type = "hla_alleles",
+                             format = getOption("knitr.table.format")) {
+
+  assert_that(
+    checkStatisticalModel(object)
+  )
+  object_call <- getCall(object)
+  object_formula <- eval(object_call[["formula"]], envir = parent.frame())
+  object_data <- eval(object_call[["data"]], envir = parent.frame())
+  object_variables <- colnames(object_data)[-1]
+
+  assert_that(
+    is.flag(conditional),
+    isCharacterOrNULL(variables),
+    see_if(
+      all(test_vars <- variables %in% object_variables) | is.null(variables),
+      msg = sprintf("%s can not be found in object data",
+                    paste(variables[! test_vars], collapse = ", ")
+      )
+    ),
+    isNumberOrNULL(frequency_cutoff),
+    isNumberOrNULL(pvalue_cutoff),
+    is.string(correction),
+    is.number(th),
+    is.number(rss_th),
+    is.flag(kable_output),
+    is.string(type),
+    stringMatches(type,
+                  choice = c("hla_alleles", "aa_level", "expression_levels")
+    ),
+    is.string(format),
+    stringMatches(format, choice = c("html", "latex"))
+  )
+
+  if (is.null(variables)) {
+    mask <- ! object_variables %in% all.vars(object_formula)
+    variables <- object_variables[mask]
+    assert_that(length(variables) != 0,
+                msg = "No new variables found in object data."
+    )
+  }
+
+  # guess if model used is logistic type -- so far the logistic models in HLA analysis I've seen are coxph and glm(family = binomial)
+  model_fun <- deparse(object_call[[1]])
+  model_family <- deparse(object_call[["family"]])
+  logistic <- grepl("coxph", model_fun) |
+    (grepl("glm", model_fun) & grepl("binomial", model_family))
+
+  # Filter variables on frequency cutoff
+  frequency_cutoff <- ifelse(is.null(frequency_cutoff), 0, frequency_cutoff)
+  variables_freq <- object_data %>%
+    select("ID",!! variables) %>%
+    getCountsFrequencies() %>%
+    rename(Ntotal = .data$Counts, Ntotal.frequency = .data$Freq) %>%
+    filter(.data$Ntotal > frequency_cutoff |
+             frequency_cutoff < 1) %>%
+    filter(.data$Ntotal.frequency > frequency_cutoff |
+             frequency_cutoff >= 1)
+
+  if (conditional) {
+    results <- analyzeConditionalAssociations(object,
+                                              variables = variables_freq$term,
+                                              correction = correction,
+                                              th = th,
+                                              rss_th = rss_th,
+                                              exponentiate = logistic
+    )
+  } else {
+    results <- analyzeAssociations(object,
+                                   variables = variables_freq$term,
+                                   correction = correction,
+                                   exponentiate = logistic
+    )
+  }
+
+  # Add frequency information to results table
+  results <- left_join(x = results, y = variables_freq, by = "term")
+
+  pheno_var <- all.vars(object_formula)[1]
+  binary_phenotype <- object_data[, pheno_var] %in% c(0, 1)
+  if (all(binary_phenotype, na.rm = TRUE)) {
+    results <- object_data %>%
+      filter(.data[[!! pheno_var]] == 1) %>%
+      select("ID", !! variables) %>%
+      getCountsFrequencies() %>%
+      rename(Npositive = .data$Counts,
+             Npositive.frequency = .data$Freq) %>%
+      left_join(x = results, by = "term")
+
+    results <- object_data %>%
+      filter(.data[[!! pheno_var]] != 1) %>%
+      select("ID", !! variables) %>%
+      getCountsFrequencies() %>%
+      rename(Nnegative = .data$Counts,
+             Nnegative.frequency = .data$Freq) %>%
+      left_join(x = results, by = "term")
+  }
+
+  if (kable_output) {
+    response_variable <- deparse(object_formula[[2]])
+
+    preety_table <- formatAssociationsResults(
+      results,
+      type = type,
+      response_variable = response_variable,
+      logistic = logistic,
+      pvalue_cutoff = pvalue_cutoff,
+      format = format
+    )
+    print(preety_table)
+  }
+
+  # rename term and estimate to match preety_table
+  estimate_name <- ifelse(logistic, "odds.ratio", "estimate")
+  term_name <- switch (type,
+                       "hla_alleles" = "allele",
+                       "aa_level" = "aa",
+                       "expression_levels" = "allele",
+                       "term"
+  )
+
+  results %<>%
+    rename(!! term_name := .data$term, !! estimate_name := .data$estimate)
+
+  return(results)
 }

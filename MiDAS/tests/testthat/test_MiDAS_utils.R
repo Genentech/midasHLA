@@ -146,9 +146,9 @@ test_that("HLA statistical models are updated properly", {
   )
   hla_calls <- readHlaCalls(hla_calls_file)
   pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-  pheno <- read.table(pheno_file, header = TRUE)
+  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-  covar <- read.table(covar_file, header = TRUE)
+  covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
   midas_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
   coxmod <- coxph(Surv(OS, OS_DIED) ~ 1, data = midas_data)
   expect_equal(updateModel(coxmod, "A*01:01"),
@@ -185,5 +185,65 @@ test_that("statistical models are statistical model", {
   class(fake_model) <- "fake"
   expect_error(updateModel(fake_model),
                "object have to be a model with defined formula"
+  )
+
+  fake_model <- list(call = list(formula = 1 ~ 1))
+  class(fake_model) <- "fake"
+  expect_error(updateModel(fake_model),
+               "object need to have data attribue defined"
+  )
+
+  fake_model <- list(call = list(formula = 1 ~ 1, data = "bigData"))
+  class(fake_model) <- "fake"
+  expect_error(updateModel(fake_model),
+               "object need to have data attribue defined"
+  )
+})
+
+test_that("is counts or zeros", {
+  expect_equal(isCountsOrZeros(c(1, 0, 2, NA)), TRUE)
+
+  expect_error(
+    assertthat::assert_that(isCountsOrZeros(c(1, 0, 2, NA, 1.5))),
+    "values in c\\(1, 0, 2, NA, 1.5\\) are not counts \\(a positive integers\\) or zeros."
+  )
+})
+
+test_that("is character or null", {
+  expect_equal(isCharacterOrNULL(LETTERS), TRUE)
+  expect_equal(isCharacterOrNULL(NULL), TRUE)
+
+  expect_error(
+    assertthat::assert_that(isCharacterOrNULL(1)),
+    "1 is not a character vector or NULL."
+  )
+})
+
+test_that("is number or null", {
+  expect_equal(isNumberOrNULL(1), TRUE)
+  expect_equal(isNumberOrNULL(NULL), TRUE)
+
+  expect_error(
+    assertthat::assert_that(isNumberOrNULL("a")),
+    "\"a\" is not number \\(a length one numeric vector\\) or NULL."
+  )
+})
+
+test_that("is string or null", {
+  expect_equal(isStringOrNULL("foo"), TRUE)
+  expect_equal(isStringOrNULL(NULL), TRUE)
+
+  expect_error(
+    assertthat::assert_that(isStringOrNULL(1)),
+    "1 is not a string \\(a length one character vector\\) or NULL."
+  )
+})
+
+test_that("string matches", {
+  expect_equal(stringMatches("foo", c("foo", "bar")), TRUE)
+
+  expect_error(
+    assertthat::assert_that(stringMatches("foo", c("bar", "Foo"))),
+    "\"foo\" should be one of c\\(\"bar\", \"Foo\"\\)."
   )
 })

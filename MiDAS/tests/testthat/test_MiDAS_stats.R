@@ -1,8 +1,6 @@
 context("HLA allele statistical methods")
 
 test_that("HLA allele associations are analyzed properly", {
-  library("survival")
-
   hla_calls_file <-
     system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(hla_calls_file)
@@ -13,28 +11,31 @@ test_that("HLA allele associations are analyzed properly", {
   midas_data <<-
     prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
 
-  object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
+  object <- lm(OS_DIED ~ AGE + SEX, data = midas_data)
   res <- analyzeAssociations(object,
                              variables = c("A*01:01", "A*02:01"),
                              correction = "BH"
   )
 
   test_res <- list(
-    coxph(Surv(OS, OS_DIED) ~ AGE + SEX + `A*01:01`, data = midas_data),
-    coxph(Surv(OS, OS_DIED) ~ AGE + SEX + `A*02:01`, data = midas_data)
+    lm(OS_DIED ~ AGE + SEX + `A*01:01`, data = midas_data),
+    lm(OS_DIED ~ AGE + SEX + `A*02:01`, data = midas_data)
   )
   test_res <- do.call("rbind", lapply(test_res, tidy))
   test_res$term <- gsub("`", "", test_res$term)
   test_res <- test_res[test_res$term %in% c("A*01:01", "A*02:01"), ]
   test_res$p.adjusted <- p.adjust(test_res$p.value, "BH")
-  test_res$covariates <- "AGE + SEX"
 
   expect_equal(as.data.frame(res), as.data.frame(test_res)) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
 
-  # Tests for checkStatisticalModel errors are ommitted how
+  # Tests for checkStatisticalModel errors are ommitted here
 
   expect_error(analyzeAssociations(object, variables = 1),
                "variables is not a character vector"
+  )
+
+  expect_error(analyzeAssociations(object, variables = "thief"),
+               "thief can not be found in object data"
   )
 
   expect_error(
@@ -63,43 +64,62 @@ test_that("Stepwise conditional alleles subset selection", {
 
   object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
   res <- analyzeConditionalAssociations(object,
-                                     variables = c("B*14:02", "DRB1*11:01"),
-                                     th = 0.05)
-  test_res <- list(
-    tidy(updateModel(object, "B*14:02"))[3, ],
-    tidy(updateModel(object, c("B*14:02", "DRB1*11:01")))[4, ]
+                                        variables = c("B*14:02", "DRB1*11:01"),
+                                        th = 0.05)
+  res <- rapply(res, classes = "numeric", how = "replace", round, digits = 3)
+
+  test_res <- tibble(term = c("B*14:02", "DRB1*11:01"),
+                     estimate = c(3.72, 2.612),
+                     std.error = c(1.59, 1.069),
+                     statistic = c(2.339, 2.442),
+                     p.value = c(0.019, 0.015),
+                     conf.low = c(0.603, 0.516),
+                     conf.high = c(6.838, 4.707),
+                     p.adjusted = c(0.039, 0.015),
+                     covariates = c("", "B*14:02")
   )
-  test_res <- do.call("rbind", test_res)
-  test_res$term <- gsub("`", "", test_res$term)
-  test_res$covariates <- c("AGE + SEX", "AGE + SEX + B*14:02")
 
   expect_equal(res, test_res)
 
   # Tests for checkStatisticalModel errors are ommitted here
 
   expect_error(
-    analyzeConditionalAssociations(object,
-                                variables = 1),
+    analyzeConditionalAssociations(object, variables = 1),
     "variables is not a character vector"
   )
 
+  expect_error(analyzeConditionalAssociations(object, variables = "thief"),
+               "thief can not be found in object data"
+  )
+
   expect_error(
-    analyzeConditionalAssociations(
-      object,
-      variables = c("B*14:02", "DRB1*11:01"),
-      th = "bar"
-    ),
+    analyzeConditionalAssociations(object, variables =  "A*01:01", correction = 1),
+    "correction is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(
+    analyzeConditionalAssociations(object, variables =  "A*01:01", th = "bar"),
     "th is not a number \\(a length one numeric vector\\)."
   )
 
   expect_error(
     analyzeConditionalAssociations(
       object,
-      variables = c("B*14:02", "DRB1*11:01"),
+      variables =  "A*01:01",
       th = 0.05,
       rss_th = "foo"
     ),
     "rss_th is not a number \\(a length one numeric vector\\)."
+  )
+
+  expect_error(
+    analyzeConditionalAssociations(
+      object,
+      variables =  "A*01:01",
+      th = 0.05,
+      exponentiate = "yes"
+    ),
+    "exponentiate is not a flag \\(a length one logical vector\\)."
   )
 })
 
@@ -218,5 +238,114 @@ test_that("HLA data is properly formatted", {
                    inheritance_model = "foo"
     ),
     "inheritance_model should be one of 'dominant', 'recessive', 'additive'"
+  )
+})
+
+test_that("HLA allele associations are analyzed properly", {
+  hla_calls_file <-
+    system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(hla_calls_file)
+  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
+  covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
+  covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
+  midas_data <<-
+    prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
+
+  object <- lm(OS_DIED ~ AGE + SEX, data = midas_data)
+  res <- analyzeMiDASData(object,
+                          variables = c("A*01:01", "A*02:01"),
+                          kable_output = FALSE
+  )
+
+  test_res <- analyzeAssociations(object, variables = c("A*01:01", "A*02:01"))
+  test_res <- dplyr::rename(test_res, allele = term)
+  variables_freq <- getCountsFrequencies(midas_data[, c("ID", "A*01:01", "A*02:01")])
+  test_res$Ntotal <- variables_freq$Counts
+  test_res$Ntotal.frequency <- variables_freq$Freq
+  pos <- midas_data$OS_DIED == 1
+  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", "A*01:01", "A*02:01")])
+  test_res$Npositive <- pos_freq$Counts
+  test_res$Npositive.frequency <- pos_freq$Freq
+  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", "A*01:01", "A*02:01")])
+  test_res$Nnegative <- neg_freq$Counts
+  test_res$Nnegative.frequency <- neg_freq$Freq
+
+  expect_equal(as.data.frame(res), as.data.frame(test_res)) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
+
+  res <- analyzeMiDASData(object,
+                          conditional = TRUE,
+                          kable_output = FALSE
+  )
+
+  test_res <-
+    analyzeConditionalAssociations(object, variables = colnames(midas_data)[-1], th = 0.05)
+  test_res <- dplyr::rename(test_res, allele = term)
+  alleles <- test_res$allele
+  variables_freq <- getCountsFrequencies(midas_data[, c("ID", alleles)])
+  test_res$Ntotal <- variables_freq$Counts
+  test_res$Ntotal.frequency <- variables_freq$Freq
+  pos <- midas_data$OS_DIED == 1
+  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", alleles)])
+  test_res$Npositive <- pos_freq$Counts
+  test_res$Npositive.frequency <- pos_freq$Freq
+  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", alleles)])
+  test_res$Nnegative <- neg_freq$Counts
+  test_res$Nnegative.frequency <- neg_freq$Freq
+
+  expect_equal(as.data.frame(res), as.data.frame(test_res)) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
+
+  # Tests for checkStatisticalModel errors are ommitted here
+
+  expect_error(analyzeMiDASData(object, conditional = 1),
+               "conditional is not a flag \\(a length one logical vector\\)."
+  )
+
+  expect_error(analyzeMiDASData(object, variables = 1),
+               "variables is not a character vector or NULL."
+  )
+
+  expect_error(analyzeMiDASData(object, variables = "thief"),
+               "thief can not be found in object data"
+  )
+
+  expect_error(analyzeMiDASData(object, frequency_cutoff = "foo"),
+               "frequency_cutoff is not number \\(a length one numeric vector\\) or NULL."
+  )
+
+  expect_error(analyzeMiDASData(object, pvalue_cutoff = "foo"),
+               "pvalue_cutoff is not number \\(a length one numeric vector\\) or NULL."
+  )
+
+  expect_error(analyzeMiDASData(object, correction = NA),
+               "correction is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(analyzeMiDASData(object, th = "NA"),
+               "th is not a number \\(a length one numeric vector\\)."
+  )
+
+  expect_error(analyzeMiDASData(object, rss_th = "NA"),
+               "rss_th is not a number \\(a length one numeric vector\\)."
+  )
+
+  expect_error(analyzeMiDASData(object, kable_output = "NA"),
+               "kable_output is not a flag \\(a length one logical vector\\)."
+  )
+
+  expect_error(analyzeMiDASData(object, type = 1),
+               "type is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(analyzeMiDASData(object, type = "a"),
+               "type should be one of c\\(\"hla_alleles\", \"aa_level\", \"expression_levels\"\\)."
+  )
+
+  expect_error(analyzeMiDASData(object, format = 1),
+               "format is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(analyzeMiDASData(object, format = "pdf"),
+               "format should be one of c\\(\"html\", \"latex\"\\)."
   )
 })

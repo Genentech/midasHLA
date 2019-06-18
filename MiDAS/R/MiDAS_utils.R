@@ -413,19 +413,159 @@ updateModel <- function(object, x, backquote = TRUE, collapse = " + ") {
 #' @export
 checkStatisticalModel <- function(object) { # TODO simplyfy output of this function; or something like object is not a stat model: potential problem bla bla
   assert_that(
-    see_if(is.object(object),
-           msg = "object have to have the internal OBJECT bit set"
-    ),
-    {
-      object_call <- getCall(object)
-      if (! is.null(object_call)) {
-        object_formula <- eval(substitute(formula, env = as.list(object_call)))
-        see_if(is_formula(object_formula),
-               msg = "object have to be a model with defined formula"
-        )
-      } else {
-        structure(FALSE, msg = "object have to have an attribute 'call'")
-      }
-    }
+    is.object(object),
+    msg = "object have to have the internal OBJECT bit set"
+  )
+
+  object_call <- getCall(object)
+  assert_that(
+    ! is.null(object_call),
+    msg = "object have to have an attribute 'call'"
+  )
+
+  object_formula <- eval(object_call[["formula"]])
+  assert_that(
+    is_formula(object_formula),
+    msg = "object have to be a model with defined formula"
+  )
+
+  object_data <- eval(object_call[["data"]])
+  assert_that(
+    ! is.null(object_data) & is.data.frame(object_data),
+    msg = "object need to have data attribue defined"
+  )
+}
+
+#' Check if vectors contains only counts or zeros
+#'
+#' \code{isCountsOrZeros} checks if vector contains only positive integers or
+#' zeros.
+#'
+#' @param x Numeric vector or object that can be \code{unlist} to numeric
+#'   vector.
+#' @param na.rm Logical indicating if \code{NA} values should be omited.
+#'
+#' @return Logical indicating if provided vector contains only positive integers
+#'   or zeros.
+#'
+#' @importFrom rlang is_integerish
+#'
+isCountsOrZeros <- function(x, na.rm = TRUE) {
+    x <- unlist(x)
+    test <- is_integerish(x) & x >= 0
+    test <- all(test, na.rm = na.rm)
+
+  return(test)
+}
+
+#' Error message for isCountsOrZeros
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(isCountsOrZeros) <- function(call, env) {
+  paste0("values in ", deparse(call$x), " are not counts (a positive integers) or zeros.")
+}
+
+#' Check if object is character vector or NULL
+#'
+#' \code{isCharacterOrNULL} checks if object is character vector or NULL.
+#'
+#' @param x object to test.
+#'
+#' @return Logical indicating if object is character vector or NULL
+#'
+isCharacterOrNULL <- function(x) {
+    test <- is.character(x) | is.null(x)
+
+  return(test)
+}
+
+#' Error message for isCharacterOrNULL
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(isCharacterOrNULL) <- function(call, env) {
+  paste0(deparse(call$x), " is not a character vector or NULL.")
+}
+
+#' Check if object is number or NULL
+#'
+#' \code{isNumberOrNULL} checks if object is number (a length one numeric
+#' vector) or NULL.
+#'
+#' @param x object to test.
+#'
+#' @return Logical indicating if object is number or NULL
+#'
+#' @importFrom assertthat is.number
+#'
+isNumberOrNULL <- function(x) {
+    test <- is.number(x) | is.null(x)
+
+  return(test)
+}
+
+#' Error message for isNumberOrNULL
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(isNumberOrNULL) <- function(call, env) {
+  paste0(deparse(call$x),
+         " is not number (a length one numeric vector) or NULL."
+  )
+}
+
+#' Check if object is string or NULL
+#'
+#' \code{isStringOrNULL} checks if object is string (a length one character
+#' vector) or NULL.
+#'
+#' @param x object to test.
+#'
+#' @return Logical indicating if object is string or NULL
+#'
+#' @importFrom assertthat is.string
+#'
+isStringOrNULL <- function(x) {
+    test <- is.string(x) | is.null(x)
+
+  return(test)
+}
+
+#' Error message for isStringOrNULL
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(isStringOrNULL) <- function(call, env) {
+  paste0(deparse(call$x),
+         " is not a string (a length one character vector) or NULL."
+  )
+}
+
+#' Check if string matches one of possible values
+#'
+#' \code{stringMatches} checks if string is equal to one of the choices.
+#'
+#' @param x string to test.
+#' @param choice Character vector with possible values for \code{x}.
+#'
+#' @return Logical indicating if \code{x} matches one of the strings in
+#'   \code{choice}.
+#'
+stringMatches <- function(x, choice) {
+    test <- x %in% choice
+
+  return(test)
+}
+
+#' Error message for stringMatches
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(stringMatches) <- function(call, env) {
+  paste0(deparse(call$x),
+         ' should be one of ',
+         deparse(call$choice),
+         '.'
   )
 }

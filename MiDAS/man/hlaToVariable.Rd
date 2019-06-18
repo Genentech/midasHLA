@@ -4,7 +4,7 @@
 \alias{hlaToVariable}
 \title{Converts hla calls data frame according to match table}
 \usage{
-hlaToVariable(hla_calls, dictionary, nacols.rm = TRUE)
+hlaToVariable(hla_calls, dictionary, reduce = TRUE, nacols.rm = TRUE)
 }
 \arguments{
 \item{hla_calls}{Data frame containing HLA allele calls, as return by
@@ -13,6 +13,9 @@ hlaToVariable(hla_calls, dictionary, nacols.rm = TRUE)
 \item{dictionary}{Path to the file containing HLA allele numbers matchings or
 data frame providing this information. See details for further
 explanations.}
+
+\item{reduce}{logical indicating if function should try to reduce alleles
+resolution when no matching is found. See details for more details.}
 
 \item{nacols.rm}{logical indicating if result columns that contain only
 \code{NA} should be removed.}
@@ -26,6 +29,11 @@ Data frame of hla numbers converted to additional variables according
 based on match table (dictionary).
 }
 \details{
+\code{reduce} controls if conversion should happen in a greedy way, such that
+if some hla numbers cannot be converted, thier resolution is reduced by 2 and
+another attempt is taken. This iterative process stops when alleles cannot be
+further reduced or all have been successfully converted.
+
 \code{dictionary} file should be a tsv format with header and two columns.
 First column should hold allele numbers and second corresponding additional
 variables. Optionally a data frame formatted in the same manner can be passed

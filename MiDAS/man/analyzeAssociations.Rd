@@ -53,8 +53,7 @@ object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
 
 ## test for alleles associations
 analyzeAssociations(object = object,
-                    variables = c("B*14:02", "DRB1*11:01"),
-                    correction = "BH"
+                    variables = c("B*14:02", "DRB1*11:01")
 )
 
 }
