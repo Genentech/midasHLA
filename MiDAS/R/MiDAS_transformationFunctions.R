@@ -155,13 +155,21 @@ hlaToAAVariation <- function(hla_calls,
 #' \code{dictionary} file should be a tsv format with header and two columns.
 #' First column should hold allele numbers and second corresponding additional
 #' variables. Optionally a data frame formatted in the same manner can be passed
-#' insted.
+#' instead.
 #'
 #' \code{dictionary} parameter can be also used to access matchings files
 #' shipped with the package. They can be referred to by using one of following
 #' strings: "2digit_A-allele_expression", "2digit_C-allele_expression",
 #' "4digit_allele_Ggroup", "4digit_B-allele_Bw", "4digit_C-allele_C1-2",
 #' "4digit_supertype".
+#'
+#' \code{"4digit_allele_Ggroup"} HLA alleles can be re-coded in G groups,
+#' which defines amino acid identity only in the exons relevant for peptide
+#' binding. Note that alleles "DRB1*01:01:01" and "DRB1*01:16" were matched with
+#' more than one G group, this ambiguity was removed by deleting matching with
+#' "DRB5*01:01:01G" group. Moreover in the original match file there were alleles
+#' named "DPA*...", here they are renamed to "DPA1*..." to adhere with HLA
+#' nomenclature.
 #'
 #' @inheritParams checkHlaCallsFormat
 #' @inheritParams convertAlleleToVariable
