@@ -336,7 +336,7 @@ checkAdditionalData <- function(data_frame,
                data_frame_name, hla_calls_name
              )
       ),
-      see_if(any(hla_calls[, 1] %in% data_frame[, 1]),
+      see_if(any(hla_calls[, 1, drop = TRUE] %in% data_frame[, 1, drop = TRUE]),
              msg = sprintf(
                "IDs in %s doesn't match IDs in %s",
                data_frame_name, hla_calls_name
