@@ -307,47 +307,47 @@ test_that("MiDAS associations are analyzed properly", {
                "analysis_type should be one of \"hla_alleles\", \"aa_level\", \"expression_levels\", \"allele_groups\", \"custom\"."
   )
 
-  expect_error(analyzeMiDASData(object, conditional = 1),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", conditional = 1),
                "conditional is not a flag \\(a length one logical vector\\)."
   )
 
-  expect_error(analyzeMiDASData(object, variables = 1),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", variables = 1),
                "variables is not a character vector or NULL."
   )
 
-  expect_error(analyzeMiDASData(object, variables = "thief"),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", variables = "thief"),
                "thief can not be found in object data"
   )
 
-  expect_error(analyzeMiDASData(object, frequency_cutoff = "foo"),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", frequency_cutoff = "foo"),
                "frequency_cutoff is not number \\(a length one numeric vector\\) or NULL."
   )
 
-  expect_error(analyzeMiDASData(object, pvalue_cutoff = "foo"),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", pvalue_cutoff = "foo"),
                "pvalue_cutoff is not number \\(a length one numeric vector\\) or NULL."
   )
 
-  expect_error(analyzeMiDASData(object, correction = NA),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", correction = NA),
                "correction is not a string \\(a length one character vector\\)."
   )
 
-  expect_error(analyzeMiDASData(object, logistic = "NA"),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", logistic = "NA"),
                "logistic is not a flag \\(a length one logical vector\\) or NULL."
   )
 
-  expect_error(analyzeMiDASData(object, binary_phenotype = "NA"),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", binary_phenotype = "NA"),
                "binary_phenotype is not a flag \\(a length one logical vector\\) or NULL."
   )
 
-  expect_error(analyzeMiDASData(object, th = "NA"),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", th = "NA"),
                "th is not a number \\(a length one numeric vector\\)."
   )
 
-  expect_error(analyzeMiDASData(object, rss_th = "NA"),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", rss_th = "NA"),
                "rss_th is not a number \\(a length one numeric vector\\)."
   )
 
-  expect_error(analyzeMiDASData(object, kable_output = "NA"),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", kable_output = "NA"),
                "kable_output is not a flag \\(a length one logical vector\\)."
   )
 
