@@ -392,7 +392,7 @@ prepareHlaData <- function(hla_calls,
 #' @importFrom magrittr %>% %<>%
 #'
 #' @export
-analyzeMiDASData <- function(object,
+analyzeMiDASData <- function(object, # we will need to pass inheritance_model here as well in countsToFreq as a optional arg
                              analysis_type = c("hla_alleles", "aa_level", "expression_levels",  "allele_groups", "custom"),
                              conditional = FALSE,
                              variables = NULL,
@@ -456,9 +456,18 @@ analyzeMiDASData <- function(object,
   }
 
   # Filter variables on frequency cutoff
+  mask_noncounts <- object_data %>%
+    select(variables) %>%
+    vapply(X = .,
+           FUN = function(col) isNumericGT(col, 2) | ! isCountsOrZeros(col),
+           FUN.VALUE = logical(1)
+    )
+  ncts_vars <- variables[mask_noncounts]
+  cts_vars <- variables[! mask_noncounts]
+
   frequency_cutoff <- ifelse(is.null(frequency_cutoff), 0, frequency_cutoff)
   variables_freq <- object_data %>%
-    select("ID",!! variables) %>%
+    select("ID",!! cts_vars) %>%
     getCountsFrequencies() %>%
     rename(Ntotal = .data$Counts, Ntotal.frequency = .data$Freq) %>%
     filter(.data$Ntotal > frequency_cutoff |
@@ -466,9 +475,11 @@ analyzeMiDASData <- function(object,
     filter(.data$Ntotal.frequency > frequency_cutoff |
              frequency_cutoff >= 1)
 
+  variables <- c(ncts_vars, variables_freq$term)
+
   if (conditional) {
     results <- analyzeConditionalAssociations(object,
-                                              variables = variables_freq$term,
+                                              variables = variables,
                                               correction = correction,
                                               th = th,
                                               rss_th = rss_th,
@@ -494,7 +505,7 @@ analyzeMiDASData <- function(object,
   if (binary_phenotype) {
     results <- object_data %>%
       filter(.data[[!! pheno_var]] == 1) %>%
-      select("ID", !! variables) %>%
+      select("ID", !! cts_vars) %>%
       getCountsFrequencies() %>%
       rename(Npositive = .data$Counts,
              Npositive.frequency = .data$Freq) %>%
@@ -502,7 +513,7 @@ analyzeMiDASData <- function(object,
 
     results <- object_data %>%
       filter(.data[[!! pheno_var]] != 1) %>%
-      select("ID", !! variables) %>%
+      select("ID", !! cts_vars) %>%
       getCountsFrequencies() %>%
       rename(Nnegative = .data$Counts,
              Nnegative.frequency = .data$Freq) %>%
