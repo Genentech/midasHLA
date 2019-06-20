@@ -319,6 +319,9 @@ reduceHlaCalls <- function(hla_calls,
 #'   are coded as \code{1}. In \code{"recessive"} model homozygotes are coded as
 #'   \code{1} and all other as \code{0}. In \code{"additive"} model homozygotes
 #'   are coded as \code{2} and heterozygotes as \code{1}.
+#' @param check_hla_format Logical indicating if \code{hla_calls} format should
+#'   be checked. This is usefull if one wants use \code{hlaCallsToCounts} with
+#'   input not adhering to HLA nomenclature standards.
 #'
 #' @return Data frame containing counts of HLA alleles counted according to
 #'   specified model.
@@ -328,14 +331,14 @@ reduceHlaCalls <- function(hla_calls,
 #' hla_calls <- readHlaCalls(file)
 #' hlaCallsToCounts(hla_calls, inheritance_model = "additive")
 #'
-#' @importFrom assertthat assert_that is.string
+#' @importFrom assertthat assert_that is.flag is.string
 #' @importFrom qdapTools mtabulate
 #'
 #' @export
 hlaCallsToCounts <- function(hla_calls,
-                             inheritance_model = c("dominant", "recessive", "additive")) {
+                             inheritance_model = c("dominant", "recessive", "additive"),
+                             check_hla_format = TRUE) {
   assert_that(
-    checkHlaCallsFormat(hla_calls),
     is.string(inheritance_model),
     see_if(
       pmatch(inheritance_model,
@@ -343,8 +346,13 @@ hlaCallsToCounts <- function(hla_calls,
              nomatch = 0
       ) != 0,
       msg = "inheritance_model should be one of 'dominant', 'recessive', 'additive'"
-    )
+    ),
+    is.flag(check_hla_format)
   )
+
+  if (check_hla_format) {
+    assert_that(checkHlaCallsFormat(hla_calls))
+  }
 
   inheritance_model <- match.arg(inheritance_model)
 
@@ -705,7 +713,7 @@ formatResults <- function(results,
   }
 
   results %<>%
-    kable(format = format, digits = 50) %>%
+    kable(format = format, digits = 50) %>% # TODO empty results throw corrupted data.frame warning
     add_header_above(header = header)
 
   if (format == "html") {
