@@ -320,7 +320,7 @@ reduceHlaCalls <- function(hla_calls,
 #'   \code{1} and all other as \code{0}. In \code{"additive"} model homozygotes
 #'   are coded as \code{2} and heterozygotes as \code{1}.
 #' @param check_hla_format Logical indicating if \code{hla_calls} format should
-#'   be checked. This is usefull if one wants use \code{hlaCallsToCounts} with
+#'   be checked. This is useful if one wants to use \code{hlaCallsToCounts} with
 #'   input not adhering to HLA nomenclature standards.
 #'
 #' @return Data frame containing counts of HLA alleles counted according to
@@ -784,8 +784,8 @@ getCountsFrequencies <- function(counts_table) {
 #'
 #' \link{formatAssociationsResults} formats results table to specified
 #' format. It uses \link{formatResults} with prespecifed arguments to return
-#' nice table depending on type of analysis and model type. This function is
-#' indendet only to be used internally by \link{analyzeMiDASData}.
+#' nice table depending on the type of analysis and model type. This function is
+#' intended only to be used internally by \link{analyzeMiDASData}.
 #'
 #' @inheritParams formatResults
 #' @param type String specifying type of analysis from which \code{results} were

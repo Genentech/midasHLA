@@ -5,8 +5,9 @@
 \title{Prepare HLA calls data for statistical analysis}
 \usage{
 prepareMiDASData(hla_calls, ..., analysis_type = c("hla_allele",
-  "aa_level", "expression_levels", "allele_groups", "custom"),
-  inheritance_model = "additive", indels = TRUE, unkchar = FALSE)
+  "aa_level", "expression_levels", "allele_g_group", "allele_supertypes",
+  "allele_groups", "custom"), inheritance_model = "additive",
+  indels = TRUE, unkchar = FALSE)
 }
 \arguments{
 \item{hla_calls}{Data frame containing HLA allele calls, as return by
@@ -25,21 +26,42 @@ named \code{ID}. Those should correspond to \code{ID} column in
 \code{hla_calls}.
 
 \code{analysis_type} specifies type of analysis for which \code{hla_calls}
-should be prepared. For \code{"hla_allele"} analysis \code{hla_calls} are
-transformed into counts under \code{inheritance_model} of choice (this is
-done with \link{hlaCallsToCounts}). In \code{"aa_level"} input
-\code{hla_calls} are first converted to amino acid level, taking only variable
-positions under consideration. Than variable amino acid positions are
-transformed to counts under \code{inheritance_model} of choice (this is done
-with \link{aaVariationToCounts}). For \code{"expression_levels"} input
-\code{hla_calls} are transformed to expression levels using all possible
-expression dictionaries shipped with package (this is done using
+should be prepared:
+
+\code{"hla_allele"} - \code{hla_calls} are transformed into counts  under
+\code{inheritance_model} of choice (this is done with
+\link{hlaCallsToCounts}).
+
+\code{"aa_level"} - \code{hla_calls} are first converted to amino acid level,
+taking only variable positions under consideration. Than variable amino acid
+positions are transformed to counts under \code{inheritance_model} of choice
+(this is done with \link{aaVariationToCounts}).
+
+\code{"expression_levels"} - \code{hla_calls} are transformed to expression
+levels using expression dictionaries shipped with package (this is done using
 \link{hlaToVariable}). The expression levels from both alleles are than
-summed into single variable for each translated HLA gene. For
-\code{"allele_groups"} HLA alleles are transformed to HLA alleles groups
-using all possible groups dictionaries shipped with package (this is done
-using \link{hlaToVariable}). \code{"custom"} will not transform
-\code{hla_calls} and only joins it with additional data(\code{...}).}
+summed into single variable for each translated HLA gene.
+
+\code{"allele_g_group"} - \code{hla_calls} are transformed to HLA alleles
+groups using G group dictionary shipped with package (this is done using
+\link{hlaToVariable}). Than those are transformed to counts under
+\code{inheritance_model} of choice (this is done with
+\link{hlaCallsToCounts}).
+
+\code{"allele_supertypes"} - \code{hla_calls} are transformed to HLA alleles
+groups using supertypes dictionary shipped with package (this is done using
+\link{hlaToVariable}). Than those are transformed to counts under
+\code{inheritance_model} of choice (this is done with
+\link{hlaCallsToCounts}).
+
+\code{"allele_groups"} - \code{hla_calls} are transformed to HLA alleles
+groups using Bw4/6 and C1/2 groups dictionaries shipped with package (this is
+done using \link{hlaToVariable}). Than those are transformed to counts under
+\code{inheritance_model} of choice (this is done with
+\link{hlaCallsToCounts}).
+
+\code{"custom"} - will not transform \code{hla_calls} and only joins it with
+additional data(\code{...}).}
 
 \item{inheritance_model}{String specifying inheritance model to use.
 Available choices are \code{"dominant"}, \code{"recessive"},
