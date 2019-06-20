@@ -636,7 +636,7 @@ listMiDASDictionaries <- function(full.names = FALSE) {
 isNumericGT <- function(x, y, na.rm = TRUE) {
   test <- vapply(x, is.numeric, logical(1))
   test <- ifelse(test, x > y, test)
-  test <- all(test, na.rm = na.rm)
+  test <- any(test, na.rm = na.rm)
 
   return(test)
 }
