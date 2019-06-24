@@ -241,7 +241,7 @@ test_that("HLA data is properly formatted", {
   )
 })
 
-test_that("HLA allele associations are analyzed properly", {
+test_that("MiDAS associations are analyzed properly", {
   hla_calls_file <-
     system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(hla_calls_file)
@@ -254,6 +254,7 @@ test_that("HLA allele associations are analyzed properly", {
 
   object <- lm(OS_DIED ~ AGE + SEX, data = midas_data)
   res <- analyzeMiDASData(object,
+                          analysis_type = "hla_alleles",
                           variables = c("A*01:01", "A*02:01"),
                           kable_output = FALSE
   )
@@ -274,6 +275,7 @@ test_that("HLA allele associations are analyzed properly", {
   expect_equal(as.data.frame(res), as.data.frame(test_res)) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
 
   res <- analyzeMiDASData(object,
+                          analysis_type = "hla_alleles",
                           conditional = TRUE,
                           kable_output = FALSE
   )
@@ -297,55 +299,233 @@ test_that("HLA allele associations are analyzed properly", {
 
   # Tests for checkStatisticalModel errors are ommitted here
 
-  expect_error(analyzeMiDASData(object, conditional = 1),
+  expect_error(analyzeMiDASData(object, analysis_type = 1),
+               "analysis_type is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(analyzeMiDASData(object, analysis_type = "a"),
+               "analysis_type should be one of \"hla_alleles\", \"aa_level\", \"expression_levels\", \"allele_groups\", \"custom\"."
+  )
+
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", conditional = 1),
                "conditional is not a flag \\(a length one logical vector\\)."
   )
 
-  expect_error(analyzeMiDASData(object, variables = 1),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", variables = 1),
                "variables is not a character vector or NULL."
   )
 
-  expect_error(analyzeMiDASData(object, variables = "thief"),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", variables = "thief"),
                "thief can not be found in object data"
   )
 
-  expect_error(analyzeMiDASData(object, frequency_cutoff = "foo"),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", frequency_cutoff = "foo"),
                "frequency_cutoff is not number \\(a length one numeric vector\\) or NULL."
   )
 
-  expect_error(analyzeMiDASData(object, pvalue_cutoff = "foo"),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", pvalue_cutoff = "foo"),
                "pvalue_cutoff is not number \\(a length one numeric vector\\) or NULL."
   )
 
-  expect_error(analyzeMiDASData(object, correction = NA),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", correction = NA),
                "correction is not a string \\(a length one character vector\\)."
   )
 
-  expect_error(analyzeMiDASData(object, th = "NA"),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", logistic = "NA"),
+               "logistic is not a flag \\(a length one logical vector\\) or NULL."
+  )
+
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", binary_phenotype = "NA"),
+               "binary_phenotype is not a flag \\(a length one logical vector\\) or NULL."
+  )
+
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", th = "NA"),
                "th is not a number \\(a length one numeric vector\\)."
   )
 
-  expect_error(analyzeMiDASData(object, rss_th = "NA"),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", rss_th = "NA"),
                "rss_th is not a number \\(a length one numeric vector\\)."
   )
 
-  expect_error(analyzeMiDASData(object, kable_output = "NA"),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", kable_output = "NA"),
                "kable_output is not a flag \\(a length one logical vector\\)."
   )
 
-  expect_error(analyzeMiDASData(object, type = 1),
-               "type is not a string \\(a length one character vector\\)."
-  )
-
-  expect_error(analyzeMiDASData(object, type = "a"),
-               "type should be one of c\\(\"hla_alleles\", \"aa_level\", \"expression_levels\"\\)."
-  )
-
-  expect_error(analyzeMiDASData(object, format = 1),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", format = 1),
                "format is not a string \\(a length one character vector\\)."
   )
 
-  expect_error(analyzeMiDASData(object, format = "pdf"),
-               "format should be one of c\\(\"html\", \"latex\"\\)."
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", format = "pdf"),
+               "format should be one of \"html\", \"latex\"."
+  )
+})
+
+test_that("MiDAS data is prepared properly", {
+  rleft_join <- function(init, ...) {
+    Reduce(function(...)
+      dplyr::left_join(..., by = "ID"),
+      x = list(...),
+      init = init)
+  }
+
+  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(hla_calls_file)
+  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
+  covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
+  covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
+
+  # hla_allele
+  midas_hla_allele <-
+    prepareMiDASData(hla_calls,
+                     pheno,
+                     covar,
+                     analysis_type = "hla_allele",
+                     inheritance_model = "additive")
+  midas_hla_allele_test <-
+    hlaCallsToCounts(hla_calls, inheritance_model = "additive")
+  midas_hla_allele_test <- rleft_join(midas_hla_allele_test, pheno, covar)
+  expect_equal(midas_hla_allele, midas_hla_allele_test)
+
+  # aa_level
+  midas_aa_level <- prepareMiDASData(hla_calls,
+                                     pheno,
+                                     covar,
+                                     analysis_type = "aa_level",
+                                     inheritance_model = "additive")
+  midas_aa_level_test <- hlaToAAVariation(hla_calls)
+  midas_aa_level_test <-
+    aaVariationToCounts(midas_aa_level_test, inheritance_model = "additive")
+  midas_aa_level_test <- rleft_join(midas_aa_level_test, pheno, covar)
+  expect_equal(midas_aa_level, midas_aa_level_test)
+
+  # expression_levels
+  midas_expression_levels <- prepareMiDASData(hla_calls,
+                                              pheno,
+                                              covar,
+                                              analysis_type = "expression_levels",
+                                              inheritance_model = "additive")
+  expression_dicts <- grep("expression", listMiDASDictionaries(), value = TRUE)
+  midas_expression_levels_test <- Reduce(
+    f = function(...) dplyr::left_join(..., by = "ID"),
+    x = lapply(expression_dicts, function(x) {
+      expr <- hlaToVariable(hla_calls = hla_calls, dictionary = x)
+      expr$sum <- rowSums(expr[, -1, drop = FALSE])
+      gene <- gsub("_1", "", colnames(expr)[2])
+      expr <- expr[, c("ID", "sum")]
+      colnames(expr) <- c("ID", paste0("expression_", gene))
+      expr
+    })
+  )
+  midas_expression_levels_test <-
+    rleft_join(midas_expression_levels_test, pheno, covar)
+  expect_equal(midas_expression_levels, midas_expression_levels_test)
+
+  # allele_g_group
+  midas_allele_groups <- prepareMiDASData(hla_calls,
+                                          pheno,
+                                          covar,
+                                          analysis_type = "allele_g_group",
+                                          inheritance_model = "additive")
+  midas_allele_groups_test <-
+    hlaToVariable(hla_calls, dictionary = "4digit_allele_Ggroup")
+  midas_allele_groups_test <-
+    hlaCallsToCounts(midas_allele_groups_test, inheritance_model = "additive")
+  midas_allele_groups_test <- rleft_join(midas_allele_groups_test, pheno, covar)
+  expect_equal(midas_allele_groups, midas_allele_groups_test)
+
+  # allele_supertypes
+  midas_allele_supertypes <- prepareMiDASData(hla_calls,
+                                          pheno,
+                                          covar,
+                                          analysis_type = "allele_supertypes",
+                                          inheritance_model = "additive")
+  test_midas_allele_supertypes <-
+    hlaToVariable(hla_calls, dictionary = "4digit_supertype")
+  test_midas_allele_supertypes <-
+    hlaCallsToCounts(
+      test_midas_allele_supertypes,
+      inheritance_model = "additive",
+      check_hla_format = FALSE
+    )
+  test_midas_allele_supertypes <-
+    rleft_join(test_midas_allele_supertypes, pheno, covar)
+  test_midas_allele_supertypes <-
+    subset(test_midas_allele_supertypes, select = - Unclassified)
+  expect_equal(midas_allele_supertypes, test_midas_allele_supertypes)
+
+  # allele_groups
+  midas_allele_groups <- prepareMiDASData(hla_calls,
+                                              pheno,
+                                              covar,
+                                              analysis_type = "allele_groups",
+                                              inheritance_model = "additive")
+  allele_groups_lib <- c("4digit_B-allele_Bw", "4digit_C-allele_C1-2")
+  test_midas_allele_group <- Reduce(
+    f = function(...) left_join(..., by = "ID"),
+    x = lapply(allele_groups_lib, hlaToVariable, hla_calls = hla_calls)
+  )
+  test_midas_allele_group <-
+    hlaCallsToCounts(
+      test_midas_allele_group,
+      inheritance_model = "additive",
+      check_hla_format = FALSE
+    )
+  test_midas_allele_group <-
+    rleft_join(test_midas_allele_group, pheno, covar)
+  expect_equal(midas_allele_groups, test_midas_allele_group)
+
+  # custom
+  midas_custom <- prepareMiDASData(hla_calls,
+                                   pheno,
+                                   covar,
+                                   analysis_type = "custom",
+                                   inheritance_model = "additive")
+  midas_custom_test <- rleft_join(hla_calls, pheno, covar)
+  expect_equal(midas_custom, midas_custom_test)
+
+  # test for checkHlaCallsFormat are ommitted here
+
+  expect_error(
+    prepareMiDASData(hla_calls, analysis_type = 1),
+    "analysis_type is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(
+    prepareMiDASData(hla_calls, analysis_type = "foo"),
+    "analysis_type should be one of \"hla_allele\", \"aa_level\", \"expression_levels\", \"allele_g_group\", \"allele_supertypes\", \"allele_groups\", \"custom\"."
+  )
+
+  expect_error(
+    prepareMiDASData(hla_calls, analysis_type = "hla_allele", inheritance_model = 1),
+    "inheritance_model is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(
+    prepareMiDASData(hla_calls, analysis_type = "hla_allele", inheritance_model = "bar"),
+    "inheritance_model should be one of \"dominant\", \"recessive\", \"additive\"."
+  )
+
+  expect_error(
+    prepareMiDASData(hla_calls, analysis_type = "hla_allele", indels = "no"),
+    "indels is not a flag \\(a length one logical vector\\)."
+  )
+
+  expect_error(
+    prepareMiDASData(hla_calls, analysis_type = "hla_allele", unkchar = "nope"),
+    "unkchar is not a flag \\(a length one logical vector\\)."
+  )
+
+  # checkAdditionalData on ... argument are ommitted here
+
+  expect_error(
+    prepareMiDASData(hla_calls[, c("ID", "DMA_1", "DMA_2")], analysis_type = "expression_levels"),
+    "no expression levels were found for input hla_calls"
+  )
+
+  # this is ill due to ggroups matches problem there is one more above, when groups are fixed this will start to fail so uncomment and remove linies as needed
+  expect_error(
+    prepareMiDASData(hla_calls[, c("ID", "DOB_1", "DOB_2")], analysis_type = "allele_groups"),
+    "no allele could be assigned to allele groups for input hla_calls"
   )
 })

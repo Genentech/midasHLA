@@ -177,7 +177,8 @@ hlaToAAVariation <- function(hla_calls,
 #' instead.
 #'
 #' \code{dictionary} can be also used to access matchings files shipped with the
-#' package. They can be referred to by using one of the following strings:
+#' package. They can be referred to by using one of the following strings (to
+#' list available dictionaries use \link{listMiDASDictionaries}):
 #'
 #' \code{"2digit_A-allele_expression"} reference data to impute expression
 #' levels for HLA-A alleles.
@@ -230,18 +231,13 @@ hlaToVariable <- function(hla_calls,
                           reduce = TRUE,
                           nacols.rm = TRUE) {
   assert_that(
-    is.data.frame(hla_calls),
     checkHlaCallsFormat(hla_calls),
     is.flag(reduce),
     is.flag(nacols.rm)
   )
 
   if (is.string(dictionary)) {
-    lib <- list.files(
-      path = system.file("extdata", package = "MiDAS"),
-      pattern = "^Match_.*txt$"
-    )
-    lib <- gsub("^Match_", "", gsub(".txt$", "", lib))
+    lib <- listMiDASDictionaries()
     if (dictionary %in% lib) {
       if (dictionary == "4digit_B-allele_Bw") {
         warn("In ambiguous cases Bw4 will be assigned! See documentation for more details.")
@@ -276,7 +272,7 @@ hlaToVariable <- function(hla_calls,
   if (nacols.rm) {
     variable <- Filter(function(x) ! all(is.na(x)), variable)
   }
-  variable <- cbind(hla_calls[, 1], variable)
+  variable <- cbind(hla_calls[, 1], variable, stringsAsFactors = FALSE)
   colnames(variable) <- c("ID", colnames(variable[, -1]))
   return(variable)
 }
@@ -323,6 +319,9 @@ reduceHlaCalls <- function(hla_calls,
 #'   are coded as \code{1}. In \code{"recessive"} model homozygotes are coded as
 #'   \code{1} and all other as \code{0}. In \code{"additive"} model homozygotes
 #'   are coded as \code{2} and heterozygotes as \code{1}.
+#' @param check_hla_format Logical indicating if \code{hla_calls} format should
+#'   be checked. This is useful if one wants to use \code{hlaCallsToCounts} with
+#'   input not adhering to HLA nomenclature standards.
 #'
 #' @return Data frame containing counts of HLA alleles counted according to
 #'   specified model.
@@ -332,14 +331,14 @@ reduceHlaCalls <- function(hla_calls,
 #' hla_calls <- readHlaCalls(file)
 #' hlaCallsToCounts(hla_calls, inheritance_model = "additive")
 #'
-#' @importFrom assertthat assert_that is.string
+#' @importFrom assertthat assert_that is.flag is.string
 #' @importFrom qdapTools mtabulate
 #'
 #' @export
 hlaCallsToCounts <- function(hla_calls,
-                             inheritance_model = c("dominant", "recessive", "additive")) {
+                             inheritance_model = c("dominant", "recessive", "additive"),
+                             check_hla_format = TRUE) {
   assert_that(
-    checkHlaCallsFormat(hla_calls),
     is.string(inheritance_model),
     see_if(
       pmatch(inheritance_model,
@@ -347,8 +346,13 @@ hlaCallsToCounts <- function(hla_calls,
              nomatch = 0
       ) != 0,
       msg = "inheritance_model should be one of 'dominant', 'recessive', 'additive'"
-    )
+    ),
+    is.flag(check_hla_format)
   )
+
+  if (check_hla_format) {
+    assert_that(checkHlaCallsFormat(hla_calls))
+  }
 
   inheritance_model <- match.arg(inheritance_model)
 
@@ -423,7 +427,7 @@ getHlaFrequencies <- function(hla_calls) {
 #'
 #' @inheritParams hlaCallsToCounts
 #' @param aa_variation Data frame holding amino acid variation data as returned
-#'   by \link{hlaToVariable}.
+#'   by \link{hlaToAAVariation}.
 #'
 #' @return Data frame containing counts of amino acids at specific positions
 #'   counted according to specified model.
@@ -709,13 +713,13 @@ formatResults <- function(results,
   }
 
   results %<>%
-    kable(format = format, digits = 50) %>%
+    kable(format = format, digits = 50) %>% # TODO empty results throw corrupted data.frame warning
     add_header_above(header = header)
 
   if (format == "html") {
     results %<>%
-      scroll_box(width = "100%", height = "200px", fixed_thead = TRUE) %>%
-      kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+      kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+      scroll_box(width = "100%", height = "200px")
   }
 
   return(results)
@@ -747,6 +751,7 @@ formatResults <- function(results,
 #' getCountsFrequencies(hla_counts)
 #'
 #' @importFrom assertthat assert_that
+#' @importFrom formattable percent
 #'
 #' @export
 getCountsFrequencies <- function(counts_table) {
@@ -768,7 +773,7 @@ getCountsFrequencies <- function(counts_table) {
   counts_df <- data.frame(
     term = colnames(counts_table),
     Counts = counts_sums,
-    Freq = counts_freq,
+    Freq = percent(counts_freq),
     stringsAsFactors = FALSE
   )
 
@@ -779,8 +784,8 @@ getCountsFrequencies <- function(counts_table) {
 #'
 #' \link{formatAssociationsResults} formats results table to specified
 #' format. It uses \link{formatResults} with prespecifed arguments to return
-#' nice table depending on type of analysis and model type. This function is
-#' indendet only to be used internally by \link{analyzeMiDASData}.
+#' nice table depending on the type of analysis and model type. This function is
+#' intended only to be used internally by \link{analyzeMiDASData}.
 #'
 #' @inheritParams formatResults
 #' @param type String specifying type of analysis from which \code{results} were
@@ -810,7 +815,7 @@ formatAssociationsResults <- function(results,
   assert_that(
     is.string(type),
     stringMatches(type,
-                  choice = c("hla_alleles", "aa_level", "expression_levels")
+                  choice = c("hla_alleles", "aa_level", "expression_levels", "allele_groups", "custom")
     ),
     is.string(response_variable),
     is.flag(logistic),
@@ -834,6 +839,7 @@ formatAssociationsResults <- function(results,
                        "hla_alleles" = "allele",
                        "aa_level" = "aa",
                        "expression_levels" = "allele",
+                       "allele_groups" = "allele group",
                        "term"
   )
   select_cols <- unlist(list2(
@@ -863,11 +869,11 @@ formatAssociationsResults <- function(results,
                     "hla_alleles" = "HLA allelic associations",
                     "aa_level" = "HLA AA associations",
                     "expression_levels" = "HLA expression level associations",
+                    "allele_groups" = "HLA alleles groups associations",
                     "Associations results"
   )
 
   results %<>%
-    mutate_at(vars(ends_with(".frequency")), ~ . * 100) %>%
     formatResults(
       filter_by = filter_by,
       arrange_by = "p.value",

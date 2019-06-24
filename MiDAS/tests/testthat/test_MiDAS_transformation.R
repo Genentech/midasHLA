@@ -38,7 +38,17 @@ test_that("HLA calls table is converted to additional variables", {
   )
   hla_calls <- readHlaCalls(hla_calls)
   hla_supertypes <- hlaToVariable(hla_calls, dictionary = "4digit_supertype")
-  load(system.file("extdata", "test_hla_supertypes.RData", package = "MiDAS"))
+  test_hla_supertypes <-
+    lapply(
+      hla_calls[,-1],
+      convertAlleleToVariable,
+      dictionary = system.file("extdata", "Match_4digit_supertype.txt", package = "MiDAS")
+    )
+  na_mask <- vapply(test_hla_supertypes, function(x) all(is.na(x)), FUN.VALUE = logical(1))
+  test_hla_supertypes <- test_hla_supertypes[! na_mask]
+  test_hla_supertypes <- do.call(cbind, test_hla_supertypes)
+  test_hla_supertypes <-
+    cbind(hla_calls[, 1, drop = FALSE], test_hla_supertypes, stringsAsFactors = FALSE)
   expect_equal(hla_supertypes, test_hla_supertypes)
 
   expect_error(
@@ -81,6 +91,26 @@ test_that("HLA calls table is converted to counts table", {
   hla_counts <- hlaCallsToCounts(hla_calls, inheritance_model = "additive")
   expect_equal(hla_counts, test_hla_counts[["additive"]])
 
+  # check if non HLA data frame can be properly processed
+  nonhla <-
+    data.frame(
+      ID = 1:2,
+      A_1 = c("a1", "a2"),
+      A_2 = c("a2", "a2"),
+      stringsAsFactors = FALSE
+    )
+  nonhla_counts <-
+    hlaCallsToCounts(nonhla,
+                     inheritance_model = "recessive",
+                     check_hla_format = FALSE)
+  expect_equal(nonhla_counts,
+               data.frame(
+                 ID = 1:2,
+                 a1 = c(0, 0),
+                 a2 = c(0, 1),
+                 stringsAsFactors = FALSE
+               ))
+
   expect_error(
     hlaCallsToCounts(c("A*01:01", "A*02:01"), inheritance_model = "additive"),
     "hla_calls is not a data frame"
@@ -94,6 +124,15 @@ test_that("HLA calls table is converted to counts table", {
   expect_error(
     hlaCallsToCounts(hla_calls, inheritance_model = "foo"),
     "inheritance_model should be one of 'dominant', 'recessive', 'additive'"
+  )
+
+  expect_error(
+    hlaCallsToCounts(
+      hla_calls,
+      inheritance_model = "additive",
+      check_hla_format = 1
+    ),
+    "check_hla_format is not a flag \\(a length one logical vector\\)."
   )
 })
 
@@ -293,7 +332,7 @@ test_that("results are formatted properly", {
                "format is not a string \\(a length one character vector\\).")
 
   expect_error(formatResults(res, format = "markdown"),
-               "format should be one of c\\(\"html\", \"latex\"\\).")
+               "format should be one of \"html\", \"latex\".")
 
   expect_error(formatResults(res, format ="html", header = 1),
                "header is not a string \\(a length one character vector\\) or NULL.")
@@ -308,6 +347,10 @@ test_that("counts are conveerted into frequencies", {
   colnames(hla_freq) <- c("allele", "Freq")
   rownames(hla_freq) <- NULL
   test_hla_freq <- getHlaFrequencies(hla_calls)
+  if (all(class(test_hla_freq$Freq) == c("formattable", "numeric"))) {
+    stop("other freq functions are already updated delete this fix")
+  }
+  test_hla_freq$Freq <- formattable::percent(test_hla_freq$Freq)
   expect_equal(hla_freq, test_hla_freq)
 
   expect_error(getCountsFrequencies("foo"), "counts_table is not a data frame")
@@ -330,7 +373,7 @@ test_that("results are formatted properly with preselected args", {
   )
 
   object <- stats::glm(R ~ 1, data = midas_data, family = stats::binomial)
-  res <- analyzeMiDASData(object, pvalue_cutoff = 1, kable_output = FALSE)
+  res <- analyzeMiDASData(object, analysis_type = "hla_alleles", pvalue_cutoff = 1, kable_output = FALSE)
   res <- rename(res, term = allele, estimate = odds.ratio)
   res_kable <- formatAssociationsResults(res)
   res_kable_test <- formatResults(res,
@@ -360,7 +403,7 @@ test_that("results are formatted properly with preselected args", {
   )
 
   expect_error(formatAssociationsResults(res, type = "foo"),
-               "type should be one of c\\(\"hla_alleles\", \"aa_level\", \"expression_levels\"\\)."
+               "type should be one of \"hla_alleles\", \"aa_level\", \"expression_levels\"."
   )
 
   expect_error(formatAssociationsResults(res, response_variable = 1),
@@ -380,6 +423,6 @@ test_that("results are formatted properly with preselected args", {
   )
 
   expect_error(formatAssociationsResults(res, format = "foo"),
-               "format should be one of c\\(\"html\", \"latex\"\\)."
+               "format should be one of \"html\", \"latex\"."
   )
 })

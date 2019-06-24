@@ -4,14 +4,21 @@
 \alias{analyzeMiDASData}
 \title{Analyze associations in MiDAS data}
 \usage{
-analyzeMiDASData(object, conditional = FALSE, variables = NULL,
-  frequency_cutoff = NULL, pvalue_cutoff = NULL, correction = "BH",
+analyzeMiDASData(object, analysis_type = c("hla_alleles", "aa_level",
+  "expression_levels", "allele_groups", "custom"), conditional = FALSE,
+  variables = NULL, frequency_cutoff = NULL, pvalue_cutoff = NULL,
+  correction = "BH", logistic = NULL, binary_phenotype = NULL,
   th = 0.05, rss_th = 1e-07, kable_output = TRUE,
-  type = "hla_alleles", format = getOption("knitr.table.format"))
+  format = getOption("knitr.table.format"))
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many
 others.}
+
+\item{analysis_type}{String indicating the type of analysis being performed,
+at this point it is only used for results formatting. Valid values are
+\code{"hla_alleles"}, \code{"aa_level"}, \code{"expression_levels"},
+\code{"allele_groups"}, \code{"custom"}.}
 
 \item{conditional}{Logical indicating if the analysis should be performed
 using stepwise conditional tests or not. See
@@ -34,6 +41,16 @@ included in output. If \code{NULL} cutoff of \code{0.05} on
 \item{correction}{String specifying multiple testing correction method. See
 details for further information.}
 
+\item{logistic}{Logical indicating if statistical model used is logistic (eg.
+\code{coxph}). If \code{NULL} function will try to figure this out. This is
+only used for results formatting.}
+
+\item{binary_phenotype}{Logical indicating if coefficient estimates should be
+exponentiated. This is typical for logistic and multinomial regressions,
+but a bad idea if there is no log or logit link. If \code{NULL} function
+will try to figure this out by testing if response is binary (\code{0} or
+\code{1}).}
+
 \item{th}{number specifying p-value threshold for a variable to be considered
 significant.}
 
@@ -46,19 +63,15 @@ behavior can be controlled using \code{rss_th}.}
 \item{kable_output}{Logical indicating if additionally results should be
   pretty printed in specified \code{format}.
 
-\code{variables} takes \code{NULL} as a default value. When specified as such
-column names of data frame associated with the \code{object} are used as
-variables for testing. This excludes first column which should corresponds
+\code{variables} takes \code{NULL} as a default value, than column names of
+data frame associated with the \code{object} are used as variables in
+association tests. This excludes first column which should corresponds
 to samples IDs as well as covariates and response variables defined in
 object formula.
 
 \code{correction} specifies p-value adjustment method to use, common choice
 is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
 \link[stats]{p.adjust}. Check there to get more details.}
-
-\item{type}{String specifying type of analysis from which \code{results} were
-produced. Possible values includes \code{'hla_alleles'}, \code{'aa_level'},
-\code{'expression_levels'}.}
 
 \item{format}{A character string. Possible values are \code{"latex"} and
 \code{"html"}.}
@@ -78,13 +91,14 @@ pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
 pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
 covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-midas_data <- prepareHlaData(hla_calls = hla_calls,
-                             pheno = pheno,
-                             covar = covar,
-                             inheritance_model = "additive"
+midas_data <- prepareMiDASData(hla_calls = hla_calls,
+                               pheno = pheno,
+                               covar = covar,
+                               analysis_type = "hla_allele",
+                               inheritance_model = "additive"
 )
 
 object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
-analyzeMiDASData(object)
+analyzeMiDASData(object, analysis_type = "hla_alleles")
 
 }

@@ -1,4 +1,13 @@
-## 0.0.0.9008 - 9/06/2019
+## 0.0.0.9011 - 21/06/2019
++ fixes allele_group preparation scheme, where before after conversion to groups 
+  there were no conversion to counts. Additionally now this scheme have been broken 
+  into three: allele_g_group, allele_supertypes, allele_group (Bw4/6, C1/2).
+
+## 0.0.0.9010 - 18/06/2019
++ introduces prepareMiDASData which transforms hla_calls according to predefined schemas, like
+  amino acid variation, expression level etc.
+
+## 0.0.0.9009 - 9/06/2019
 + adds script for conversion of HLA calls to VCF format
 + adds script for conversion of VCF to HLA calls
 

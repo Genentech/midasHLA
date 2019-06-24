@@ -336,7 +336,7 @@ checkAdditionalData <- function(data_frame,
                data_frame_name, hla_calls_name
              )
       ),
-      see_if(any(hla_calls[, 1] %in% data_frame[, 1]),
+      see_if(any(hla_calls[, 1, drop = TRUE] %in% data_frame[, 1, drop = TRUE]),
              msg = sprintf(
                "IDs in %s doesn't match IDs in %s",
                data_frame_name, hla_calls_name
@@ -564,8 +564,59 @@ stringMatches <- function(x, choice) {
 #'
 assertthat::on_failure(stringMatches) <- function(call, env) {
   paste0(deparse(call$x),
-         ' should be one of ',
-         deparse(call$choice),
-         '.'
+         ' should be one of "',
+         paste(eval(call$choice), collapse = '", "'),
+         '".'
   )
+}
+
+#' Check if object is flag or NULL
+#'
+#' \code{isFlagOrNULL} checks if object is flag (a length one logical vector) or
+#' NULL.
+#'
+#' @param x object to test.
+#'
+#' @return Logical indicating if object is flag or NULL
+#'
+#' @importFrom assertthat is.flag
+#'
+isFlagOrNULL <- function(x) {
+    test <- is.flag(x) || is.null(x)
+
+  return(test)
+}
+
+#' Error message for isFlagOrNULL
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(isFlagOrNULL) <- function(call, env) {
+  paste0(deparse(call$x),
+         " is not a flag (a length one logical vector) or NULL."
+  )
+}
+
+#' List HLA alleles dictionaries
+#'
+#' \code{listMiDASDictionaries} lists dictionaries shipped with MiDAS package.
+#'
+#' @param file.names Logical value. If FALSE, only the names of dictionaries are
+#' returned. If TRUE their file names are returned.
+#'
+#' @return Character vector with names of available HLA alleles dictionaries.
+#'
+#' @export
+listMiDASDictionaries <- function(file.names = FALSE) {
+  lib <- list.files(
+    path = system.file("extdata", package = "MiDAS"),
+    pattern = "^Match_.*.txt$",
+    full.names = file.names
+  )
+
+  if (! file.names) {
+    lib <- gsub("^Match_", "", gsub(".txt$", "", lib))
+  }
+
+  return(lib)
 }
