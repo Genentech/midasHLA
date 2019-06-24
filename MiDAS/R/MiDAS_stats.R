@@ -392,7 +392,7 @@ prepareHlaData <- function(hla_calls,
 #' @importFrom magrittr %>% %<>%
 #'
 #' @export
-analyzeMiDASData <- function(object, # we will need to pass inheritance_model here as well in countsToFreq as a optional arg
+analyzeMiDASData <- function(object,
                              analysis_type = c("hla_alleles", "aa_level", "expression_levels",  "allele_groups", "custom"),
                              conditional = FALSE,
                              variables = NULL,
@@ -452,22 +452,13 @@ analyzeMiDASData <- function(object, # we will need to pass inheritance_model he
     model_fun <- deparse(object_call[[1]])
     model_family <- deparse(object_call[["family"]])
     logistic <- grepl("coxph", model_fun) |
-       (grepl("glm", model_fun) & grepl("binomial", model_family))
+      (grepl("glm", model_fun) & grepl("binomial", model_family))
   }
 
   # Filter variables on frequency cutoff
-  mask_noncounts <- object_data %>%
-    select(variables) %>%
-    vapply(X = .,
-           FUN = function(col) isNumericGT(col, 2) | ! isCountsOrZeros(col),
-           FUN.VALUE = logical(1)
-    )
-  ncts_vars <- variables[mask_noncounts]
-  cts_vars <- variables[! mask_noncounts]
-
   frequency_cutoff <- ifelse(is.null(frequency_cutoff), 0, frequency_cutoff)
   variables_freq <- object_data %>%
-    select("ID",!! cts_vars) %>%
+    select("ID",!! variables) %>%
     getCountsFrequencies() %>%
     rename(Ntotal = .data$Counts, Ntotal.frequency = .data$Freq) %>%
     filter(.data$Ntotal > frequency_cutoff |
@@ -475,11 +466,9 @@ analyzeMiDASData <- function(object, # we will need to pass inheritance_model he
     filter(.data$Ntotal.frequency > frequency_cutoff |
              frequency_cutoff >= 1)
 
-  variables <- c(ncts_vars, variables_freq$term)
-
   if (conditional) {
     results <- analyzeConditionalAssociations(object,
-                                              variables = variables,
+                                              variables = variables_freq$term,
                                               correction = correction,
                                               th = th,
                                               rss_th = rss_th,
@@ -505,7 +494,7 @@ analyzeMiDASData <- function(object, # we will need to pass inheritance_model he
   if (binary_phenotype) {
     results <- object_data %>%
       filter(.data[[!! pheno_var]] == 1) %>%
-      select("ID", !! cts_vars) %>%
+      select("ID", !! variables) %>%
       getCountsFrequencies() %>%
       rename(Npositive = .data$Counts,
              Npositive.frequency = .data$Freq) %>%
@@ -513,7 +502,7 @@ analyzeMiDASData <- function(object, # we will need to pass inheritance_model he
 
     results <- object_data %>%
       filter(.data[[!! pheno_var]] != 1) %>%
-      select("ID", !! cts_vars) %>%
+      select("ID", !! variables) %>%
       getCountsFrequencies() %>%
       rename(Nnegative = .data$Counts,
              Nnegative.frequency = .data$Freq) %>%
@@ -625,6 +614,7 @@ analyzeMiDASData <- function(object, # we will need to pass inheritance_model he
 #' @importFrom magrittr %>% %<>%
 #' @importFrom rlang .data !!!
 #' @importFrom tidyr gather spread
+#' @importFrom Hmisc label label<-
 #'
 #' @export
 prepareMiDASData <- function(hla_calls,
@@ -633,7 +623,7 @@ prepareMiDASData <- function(hla_calls,
                              inheritance_model = "additive",
                              indels = TRUE,
                              unkchar = FALSE
-                             ) {
+) {
   assert_that(
     checkHlaCallsFormat(hla_calls),
     is.string(analysis_type),
@@ -664,6 +654,8 @@ prepareMiDASData <- function(hla_calls,
       inheritance_model = inheritance_model
     )
 
+    label(midas_data[-1], self = FALSE) <- rep("hla_allele", ncol(midas_data) - 1)
+
   } else if (analysis_type == "aa_level") {
     midas_data <- hlaToAAVariation(
       hla_calls = hla_calls,
@@ -671,6 +663,8 @@ prepareMiDASData <- function(hla_calls,
       unkchar = unkchar
     ) %>%
       aaVariationToCounts(inheritance_model = inheritance_model)
+
+    label(midas_data[-1], self = FALSE) <- rep("aa_level", ncol(midas_data) - 1)
 
   } else if (analysis_type == "expression_levels") {
     lib <- listMiDASDictionaries()
@@ -692,6 +686,11 @@ prepareMiDASData <- function(hla_calls,
       summarise_all(funs(sum)) %>%
       spread(.data$expression, .data$value, sep = "_")
 
+    label(midas_data[-1], self = FALSE) <- rep(
+      x = "expression_levels",
+      ncol(midas_data) - 1
+    )
+
   } else if (analysis_type == "allele_g_group") {
     lib <- "4digit_allele_Ggroup"
     midas_data <- hlaToVariable(hla_calls = hla_calls, dictionary = lib)
@@ -704,6 +703,11 @@ prepareMiDASData <- function(hla_calls,
     midas_data <- hlaCallsToCounts(
       hla_calls = midas_data,
       inheritance_model = inheritance_model
+    )
+
+    label(midas_data[-1], self = FALSE) <- rep(
+      x = "allele_g_group",
+      ncol(midas_data) - 1
     )
 
   } else if (analysis_type == "allele_supertypes") {
@@ -723,6 +727,11 @@ prepareMiDASData <- function(hla_calls,
     ) %>%
       select(-"Unclassified")
 
+    label(midas_data[-1], self = FALSE) <- rep(
+      x = "allele_supertypes",
+      ncol(midas_data) - 1
+    )
+
   } else if (analysis_type == "allele_groups") {
     lib <- c("4digit_B-allele_Bw", "4digit_C-allele_C1-2")
     midas_data <- Reduce(
@@ -739,6 +748,11 @@ prepareMiDASData <- function(hla_calls,
       hla_calls = midas_data,
       inheritance_model = inheritance_model,
       check_hla_format = FALSE
+    )
+
+    label(midas_data[-1], self = FALSE) <- rep(
+      x = "allele_groups",
+      ncol(midas_data) - 1
     )
 
   } else {

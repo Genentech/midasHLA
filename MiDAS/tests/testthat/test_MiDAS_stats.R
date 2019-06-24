@@ -384,6 +384,8 @@ test_that("MiDAS data is prepared properly", {
                      inheritance_model = "additive")
   midas_hla_allele_test <-
     hlaCallsToCounts(hla_calls, inheritance_model = "additive")
+  Hmisc::label(midas_hla_allele_test[-1], self = FALSE) <-
+    rep("hla_allele", ncol(midas_hla_allele_test) - 1)
   midas_hla_allele_test <- rleft_join(midas_hla_allele_test, pheno, covar)
   expect_equal(midas_hla_allele, midas_hla_allele_test)
 
@@ -396,6 +398,8 @@ test_that("MiDAS data is prepared properly", {
   midas_aa_level_test <- hlaToAAVariation(hla_calls)
   midas_aa_level_test <-
     aaVariationToCounts(midas_aa_level_test, inheritance_model = "additive")
+  Hmisc::label(midas_aa_level_test[-1], self = FALSE) <-
+    rep("aa_level", ncol(midas_aa_level_test) - 1)
   midas_aa_level_test <- rleft_join(midas_aa_level_test, pheno, covar)
   expect_equal(midas_aa_level, midas_aa_level_test)
 
@@ -417,6 +421,8 @@ test_that("MiDAS data is prepared properly", {
       expr
     })
   )
+  Hmisc::label(midas_expression_levels_test[-1], self = FALSE) <-
+    rep("expression_levels", ncol(midas_expression_levels_test) - 1)
   midas_expression_levels_test <-
     rleft_join(midas_expression_levels_test, pheno, covar)
   expect_equal(midas_expression_levels, midas_expression_levels_test)
@@ -431,6 +437,8 @@ test_that("MiDAS data is prepared properly", {
     hlaToVariable(hla_calls, dictionary = "4digit_allele_Ggroup")
   midas_allele_groups_test <-
     hlaCallsToCounts(midas_allele_groups_test, inheritance_model = "additive")
+  Hmisc::label(midas_allele_groups_test[-1], self = FALSE) <-
+    rep("allele_g_group", ncol(midas_allele_groups_test) - 1)
   midas_allele_groups_test <- rleft_join(midas_allele_groups_test, pheno, covar)
   expect_equal(midas_allele_groups, midas_allele_groups_test)
 
@@ -448,6 +456,8 @@ test_that("MiDAS data is prepared properly", {
       inheritance_model = "additive",
       check_hla_format = FALSE
     )
+  Hmisc::label(test_midas_allele_supertypes[-1], self = FALSE) <-
+    rep("allele_supertypes", ncol(test_midas_allele_supertypes) - 1)
   test_midas_allele_supertypes <-
     rleft_join(test_midas_allele_supertypes, pheno, covar)
   test_midas_allele_supertypes <-
@@ -471,6 +481,8 @@ test_that("MiDAS data is prepared properly", {
       inheritance_model = "additive",
       check_hla_format = FALSE
     )
+  Hmisc::label(test_midas_allele_group[-1], self = FALSE) <-
+    rep("allele_groups", ncol(test_midas_allele_group) - 1)
   test_midas_allele_group <-
     rleft_join(test_midas_allele_group, pheno, covar)
   expect_equal(midas_allele_groups, test_midas_allele_group)
