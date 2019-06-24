@@ -4,11 +4,11 @@
 \alias{listMiDASDictionaries}
 \title{List HLA alleles dictionaries}
 \usage{
-listMiDASDictionaries(full.names = FALSE)
+listMiDASDictionaries(file.names = FALSE)
 }
 \arguments{
-\item{full.names}{Logical value. If FALSE, only the names of dictionaries are
-returned. If TRUE thier file names are returned.}
+\item{file.names}{Logical value. If FALSE, only the names of dictionaries are
+returned. If TRUE their file names are returned.}
 }
 \value{
 Character vector with names of available HLA alleles dictionaries.

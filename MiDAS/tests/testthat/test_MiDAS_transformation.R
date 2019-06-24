@@ -91,6 +91,26 @@ test_that("HLA calls table is converted to counts table", {
   hla_counts <- hlaCallsToCounts(hla_calls, inheritance_model = "additive")
   expect_equal(hla_counts, test_hla_counts[["additive"]])
 
+  # check if non HLA data frame can be properly processed
+  nonhla <-
+    data.frame(
+      ID = 1:2,
+      A_1 = c("a1", "a2"),
+      A_2 = c("a2", "a2"),
+      stringsAsFactors = FALSE
+    )
+  nonhla_counts <-
+    hlaCallsToCounts(nonhla,
+                     inheritance_model = "recessive",
+                     check_hla_format = FALSE)
+  expect_equal(nonhla_counts,
+               data.frame(
+                 ID = 1:2,
+                 a1 = c(0, 0),
+                 a2 = c(0, 1),
+                 stringsAsFactors = FALSE
+               ))
+
   expect_error(
     hlaCallsToCounts(c("A*01:01", "A*02:01"), inheritance_model = "additive"),
     "hla_calls is not a data frame"
@@ -104,6 +124,15 @@ test_that("HLA calls table is converted to counts table", {
   expect_error(
     hlaCallsToCounts(hla_calls, inheritance_model = "foo"),
     "inheritance_model should be one of 'dominant', 'recessive', 'additive'"
+  )
+
+  expect_error(
+    hlaCallsToCounts(
+      hla_calls,
+      inheritance_model = "additive",
+      check_hla_format = 1
+    ),
+    "check_hla_format is not a flag \\(a length one logical vector\\)."
   )
 })
 

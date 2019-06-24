@@ -421,23 +421,59 @@ test_that("MiDAS data is prepared properly", {
     rleft_join(midas_expression_levels_test, pheno, covar)
   expect_equal(midas_expression_levels, midas_expression_levels_test)
 
-  # allele_groups
+  # allele_g_group
   midas_allele_groups <- prepareMiDASData(hla_calls,
                                           pheno,
                                           covar,
-                                          analysis_type = "allele_groups",
+                                          analysis_type = "allele_g_group",
                                           inheritance_model = "additive")
-  groups_dicts <-
-    grep("expression",
-         listMiDASDictionaries(),
-         value = TRUE,
-         invert = TRUE)
-  midas_allele_groups_test <- Reduce(
-    f = function(...) dplyr::left_join(..., by = "ID"),
-    x = lapply(groups_dicts, hlaToVariable, hla_calls = hla_calls)
-  )
+  midas_allele_groups_test <-
+    hlaToVariable(hla_calls, dictionary = "4digit_allele_Ggroup")
+  midas_allele_groups_test <-
+    hlaCallsToCounts(midas_allele_groups_test, inheritance_model = "additive")
   midas_allele_groups_test <- rleft_join(midas_allele_groups_test, pheno, covar)
   expect_equal(midas_allele_groups, midas_allele_groups_test)
+
+  # allele_supertypes
+  midas_allele_supertypes <- prepareMiDASData(hla_calls,
+                                          pheno,
+                                          covar,
+                                          analysis_type = "allele_supertypes",
+                                          inheritance_model = "additive")
+  test_midas_allele_supertypes <-
+    hlaToVariable(hla_calls, dictionary = "4digit_supertype")
+  test_midas_allele_supertypes <-
+    hlaCallsToCounts(
+      test_midas_allele_supertypes,
+      inheritance_model = "additive",
+      check_hla_format = FALSE
+    )
+  test_midas_allele_supertypes <-
+    rleft_join(test_midas_allele_supertypes, pheno, covar)
+  test_midas_allele_supertypes <-
+    subset(test_midas_allele_supertypes, select = - Unclassified)
+  expect_equal(midas_allele_supertypes, test_midas_allele_supertypes)
+
+  # allele_groups
+  midas_allele_groups <- prepareMiDASData(hla_calls,
+                                              pheno,
+                                              covar,
+                                              analysis_type = "allele_groups",
+                                              inheritance_model = "additive")
+  allele_groups_lib <- c("4digit_B-allele_Bw", "4digit_C-allele_C1-2")
+  test_midas_allele_group <- Reduce(
+    f = function(...) left_join(..., by = "ID"),
+    x = lapply(allele_groups_lib, hlaToVariable, hla_calls = hla_calls)
+  )
+  test_midas_allele_group <-
+    hlaCallsToCounts(
+      test_midas_allele_group,
+      inheritance_model = "additive",
+      check_hla_format = FALSE
+    )
+  test_midas_allele_group <-
+    rleft_join(test_midas_allele_group, pheno, covar)
+  expect_equal(midas_allele_groups, test_midas_allele_group)
 
   # custom
   midas_custom <- prepareMiDASData(hla_calls,
@@ -457,7 +493,7 @@ test_that("MiDAS data is prepared properly", {
 
   expect_error(
     prepareMiDASData(hla_calls, analysis_type = "foo"),
-    "analysis_type should be one of \"hla_allele\", \"aa_level\", \"expression_levels\", \"allele_groups\", \"custom\"."
+    "analysis_type should be one of \"hla_allele\", \"aa_level\", \"expression_levels\", \"allele_g_group\", \"allele_supertypes\", \"allele_groups\", \"custom\"."
   )
 
   expect_error(
@@ -489,8 +525,7 @@ test_that("MiDAS data is prepared properly", {
 
   # this is ill due to ggroups matches problem there is one more above, when groups are fixed this will start to fail so uncomment and remove linies as needed
   expect_error(
-    prepareMiDASData(hla_calls[, c("ID", "DMA_1", "DMA_2")], analysis_type = "allele_groups"),
-   # "no expression levels were found for input hla_calls"
-    "match table contains duplicated allele numbers"
+    prepareMiDASData(hla_calls[, c("ID", "DOB_1", "DOB_2")], analysis_type = "allele_groups"),
+    "no allele could be assigned to allele groups for input hla_calls"
   )
 })

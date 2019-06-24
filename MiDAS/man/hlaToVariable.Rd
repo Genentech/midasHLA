@@ -39,10 +39,9 @@ First column should hold allele numbers and second corresponding additional
 variables. Optionally a data frame formatted in the same manner can be passed
 instead.
 
-\code{dictionary} optional parameter that can be also used to access
-matchings files shipped with the package. They can be referred to by using
-one of the following strings (to list available dictionaries use
-\link{listMiDASDictionaries}):
+\code{dictionary} can be also used to access matchings files shipped with the
+package. They can be referred to by using one of the following strings (to
+list available dictionaries use \link{listMiDASDictionaries}):
 
 \code{"2digit_A-allele_expression"} reference data to impute expression
 levels for HLA-A alleles.
@@ -61,12 +60,16 @@ and C2.
 \code{"2digit_C-allele_expression"} reference data to impute expression
 levels for HLA-C alleles.
 
-\code{"4digit_allele_Ggroup"} HLA alleles can be re-coded in G groups,
-which defines amino acid identity only in the exons relevant for peptide
-binding.
-
 \code{"4digit_supertype"} A and B alleles can be assigned to so-called
 supertypes.
+
+\code{"4digit_allele_Ggroup"} HLA alleles can be re-coded in G groups,
+which defines amino acid identity only in the exons relevant for peptide
+binding. Note that alleles "DRB1*01:01:01" and "DRB1*01:16" were matched with
+more than one G group, this ambiguity was removed by deleting matching with
+"DRB5*01:01:01G" group. Moreover in the original match file there were alleles
+named "DPA*...", here they are renamed to "DPA1*..." to adhere with HLA
+nomenclature.
 }
 \examples{
 file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
