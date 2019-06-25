@@ -5,8 +5,8 @@
 \title{Prepare HLA calls data for statistical analysis}
 \usage{
 prepareMiDASData(hla_calls, ..., analysis_type = c("hla_allele",
-  "aa_level", "expression_levels", "allele_g_group", "allele_supertypes",
-  "allele_groups", "custom"), inheritance_model = "additive",
+  "aa_level", "expression_level", "allele_g_group", "allele_supertypes",
+  "allele_group", "custom"), inheritance_model = "additive",
   indels = TRUE, unkchar = FALSE)
 }
 \arguments{
@@ -18,7 +18,7 @@ observations or covariates.}
 
 \item{analysis_type}{String indicating analysis type for which data should be
   prepared. Valid choices are \code{"hla_allele"}, \code{"aa_level"},
-  \code{"expression_levels"}, \code{"allele_groups"}, \code{"custom"}. See
+  \code{"expression_level"}, \code{"allele_group"}, \code{"custom"}. See
   details for further explanations.
 
 \code{...} should be data frames with first column holding samples IDs and
@@ -37,7 +37,7 @@ taking only variable positions under consideration. Than variable amino acid
 positions are transformed to counts under \code{inheritance_model} of choice
 (this is done with \link{aaVariationToCounts}).
 
-\code{"expression_levels"} - \code{hla_calls} are transformed to expression
+\code{"expression_level"} - \code{hla_calls} are transformed to expression
 levels using expression dictionaries shipped with package (this is done using
 \link{hlaToVariable}). The expression levels from both alleles are than
 summed into single variable for each translated HLA gene.
@@ -54,7 +54,7 @@ groups using supertypes dictionary shipped with package (this is done using
 \code{inheritance_model} of choice (this is done with
 \link{hlaCallsToCounts}).
 
-\code{"allele_groups"} - \code{hla_calls} are transformed to HLA alleles
+\code{"allele_group"} - \code{hla_calls} are transformed to HLA alleles
 groups using Bw4/6 and C1/2 groups dictionaries shipped with package (this is
 done using \link{hlaToVariable}). Than those are transformed to counts under
 \code{inheritance_model} of choice (this is done with
@@ -92,6 +92,6 @@ pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
 pheno <- read.table(pheno_file, header = TRUE)
 covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 covar <- read.table(covar_file, header = TRUE)
-prepareMiDASData(hla_calls, pheno, covar, analysis_type = "expression_levels")
+prepareMiDASData(hla_calls, pheno, covar, analysis_type = "expression_level")
 
 }

@@ -4,11 +4,12 @@
 \alias{analyzeMiDASData}
 \title{Analyze associations in MiDAS data}
 \usage{
-analyzeMiDASData(object, analysis_type = c("hla_alleles", "aa_level",
-  "expression_levels", "allele_groups", "custom"), conditional = FALSE,
-  variables = NULL, frequency_cutoff = NULL, pvalue_cutoff = NULL,
-  correction = "BH", logistic = NULL, binary_phenotype = NULL,
-  th = 0.05, rss_th = 1e-07, kable_output = TRUE,
+analyzeMiDASData(object, analysis_type = c("hla_allele", "aa_level",
+  "expression_level", "allele_g_group", "allele_supertypes",
+  "allele_group", "custom"), conditional = FALSE, variables = NULL,
+  frequency_cutoff = NULL, pvalue_cutoff = NULL, correction = "BH",
+  logistic = NULL, binary_phenotype = NULL, th = 0.05,
+  rss_th = 1e-07, kable_output = TRUE,
   format = getOption("knitr.table.format"))
 }
 \arguments{
@@ -17,8 +18,8 @@ others.}
 
 \item{analysis_type}{String indicating the type of analysis being performed,
 at this point it is only used for results formatting. Valid values are
-\code{"hla_alleles"}, \code{"aa_level"}, \code{"expression_levels"},
-\code{"allele_groups"}, \code{"custom"}.}
+\code{"hla_allele"}, \code{"aa_level"}, \code{"expression_level"},
+\code{"allele_group"}, \code{"custom"}.}
 
 \item{conditional}{Logical indicating if the analysis should be performed
 using stepwise conditional tests or not. See
@@ -99,6 +100,6 @@ midas_data <- prepareMiDASData(hla_calls = hla_calls,
 )
 
 object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
-analyzeMiDASData(object, analysis_type = "hla_alleles")
+analyzeMiDASData(object, analysis_type = "hla_allele")
 
 }

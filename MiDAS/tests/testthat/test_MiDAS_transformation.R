@@ -373,9 +373,9 @@ test_that("results are formatted properly with preselected args", {
   )
 
   object <- stats::glm(R ~ 1, data = midas_data, family = stats::binomial)
-  res <- analyzeMiDASData(object, analysis_type = "hla_alleles", variables = c("A*01:01", "A*01:02"), pvalue_cutoff = 1, kable_output = FALSE)
+  res <- analyzeMiDASData(object, analysis_type = "hla_allele", variables = c("A*01:01", "A*01:02"), pvalue_cutoff = 1, kable_output = FALSE)
   res <- rename(res, term = allele, estimate = odds.ratio)
-  res_kable <- formatAssociationsResults(res)
+  res_kable <- formatAssociationsResults(res, type = "hla_allele")
   res_kable_test <- formatResults(res,
                                   filter_by = "p.adjusted <= 0.05",
                                   arrange_by = "p.value",
@@ -384,13 +384,7 @@ test_that("results are formatted properly with preselected args", {
                                     "estimate" = "estimate",
                                     "std.error",
                                     "p.value",
-                                    "p.adjusted",
-                                    "Ntotal",
-                                    "Ntotal (%)" = "Ntotal.frequency",
-                                    "N R=1" = "Npositive",
-                                    "N R=1 (%)" = "Npositive.frequency",
-                                    "N R=0" = "Nnegative",
-                                    "N R=0 (%)"= "Nnegative.frequency"
+                                    "p.adjusted"
   ),
                                   format = "html",
                                   header = "HLA allelic associations"
@@ -403,26 +397,26 @@ test_that("results are formatted properly with preselected args", {
   )
 
   expect_error(formatAssociationsResults(res, type = "foo"),
-               "type should be one of \"hla_alleles\", \"aa_level\", \"expression_levels\"."
+               "type should be one of \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertypes\", \"allele_group\", \"custom\"."
   )
 
-  expect_error(formatAssociationsResults(res, response_variable = 1),
+  expect_error(formatAssociationsResults(res, type = "hla_allele", response_variable = 1),
                "response_variable is not a string \\(a length one character vector\\)."
   )
 
-  expect_error(formatAssociationsResults(res, logistic = 1),
+  expect_error(formatAssociationsResults(res, type = "hla_allele", logistic = 1),
                "logistic is not a flag \\(a length one logical vector\\)."
   )
 
-  expect_error(formatAssociationsResults(res, pvalue_cutoff = "a"),
+  expect_error(formatAssociationsResults(res, type = "hla_allele", pvalue_cutoff = "a"),
                "pvalue_cutoff is not number \\(a length one numeric vector\\) or NULL."
   )
 
-  expect_error(formatAssociationsResults(res, format = 1),
+  expect_error(formatAssociationsResults(res, type = "hla_allele", format = 1),
                "format is not a string \\(a length one character vector\\)."
   )
 
-  expect_error(formatAssociationsResults(res, format = "foo"),
+  expect_error(formatAssociationsResults(res, type = "hla_allele", format = "foo"),
                "format should be one of \"html\", \"latex\"."
   )
 })
