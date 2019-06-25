@@ -373,7 +373,7 @@ test_that("results are formatted properly with preselected args", {
   )
 
   object <- stats::glm(R ~ 1, data = midas_data, family = stats::binomial)
-  res <- analyzeMiDASData(object, analysis_type = "hla_alleles", pvalue_cutoff = 1, kable_output = FALSE)
+  res <- analyzeMiDASData(object, analysis_type = "hla_alleles", variables = c("A*01:01", "A*01:02"), pvalue_cutoff = 1, kable_output = FALSE)
   res <- rename(res, term = allele, estimate = odds.ratio)
   res_kable <- formatAssociationsResults(res)
   res_kable_test <- formatResults(res,
