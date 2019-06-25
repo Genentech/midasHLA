@@ -620,23 +620,3 @@ listMiDASDictionaries <- function(file.names = FALSE) {
 
   return(lib)
 }
-
-#' Check if object is numeric and greater than value of choice
-#'
-#' \code{isNumericGT} Check if object is number and greater than value of
-#' choice.
-#'
-#' @inheritParams all
-#' @param x object to test.
-#' @param y value to test greater than condition against.
-#'
-#' @return Logical indicating if object is number and greater than value of
-#'   choice.
-#'
-isNumericGT <- function(x, y, na.rm = TRUE) {
-  test <- vapply(x, is.numeric, logical(1))
-  test <- ifelse(test, x > y, test)
-  test <- any(test, na.rm = na.rm)
-
-  return(test)
-}
