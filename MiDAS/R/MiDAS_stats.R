@@ -465,9 +465,14 @@ analyzeMiDASData <- function(object,
 
   # Filter variables on frequency cutoff
   variables_labels <- variables_labels[variables]
-  mask_noncounts <- variables_labels %in% c("expression_levels", "custom")
-  ncts_vars <- variables[mask_noncounts]
-  cts_vars <- variables[! mask_noncounts]
+  mask_counts <- variables_labels %in% c("hla_allele",
+                                         "aa_level",
+                                         "allele_g_group",
+                                         "allele_supertypes",
+                                         "allele_groups"
+  )
+  cts_vars <- variables[mask_counts]
+  ncts_vars <- variables[! mask_counts]
 
   if (length(cts_vars) != 0) {
     frequency_cutoff <- ifelse(is.null(frequency_cutoff), 0, frequency_cutoff)
