@@ -474,7 +474,7 @@ analyzeMiDASData <- function(object,
   cts_vars <- variables[mask_counts]
   ncts_vars <- variables[! mask_counts]
 
-  if (length(cts_vars) != 0) {
+  if (length(cts_vars)) {
     frequency_cutoff <- ifelse(is.null(frequency_cutoff), 0, frequency_cutoff)
     variables_freq <- object_data %>%
       select("ID",!! cts_vars) %>%
@@ -505,7 +505,7 @@ analyzeMiDASData <- function(object,
   }
 
   # Add frequency information to results table if there were any count variables
-  if (length(cts_vars) != 0) {
+  if (length(cts_vars)) {
     results <- left_join(x = results, y = variables_freq, by = "term")
   }
 
@@ -515,7 +515,7 @@ analyzeMiDASData <- function(object,
     binary_phenotype <- all(binary_phenotype, na.rm = TRUE)
   }
 
-  if (binary_phenotype & length(cts_vars) != 0) {
+  if (binary_phenotype & length(cts_vars)) {
     results <- object_data %>%
       filter(.data[[!! pheno_var]] == 1) %>%
       select("ID", !! cts_vars) %>%
