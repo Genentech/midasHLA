@@ -365,9 +365,9 @@ test_that("MiDAS associations are analyzed properly", {
 })
 
 test_that("MiDAS data is prepared properly", {
-  rleft_join <- function(init, ...) {
+  rleft_join <- function(init, ..., by = "ID") {
     Reduce(function(...)
-      dplyr::left_join(..., by = "ID"),
+      dplyr::left_join(..., by = by),
       x = list(...),
       init = init)
   }
@@ -432,19 +432,19 @@ test_that("MiDAS data is prepared properly", {
   expect_equal(midas_expression_levels, midas_expression_levels_test)
 
   # allele_g_group
-  midas_allele_groups <- prepareMiDASData(hla_calls,
+  midas_allele_g_group <- prepareMiDASData(hla_calls,
                                           pheno,
                                           covar,
                                           analysis_type = "allele_g_group",
                                           inheritance_model = "additive")
-  midas_allele_groups_test <-
+  midas_allele_g_group_test <-
     hlaToVariable(hla_calls, dictionary = "4digit_allele_Ggroup")
-  midas_allele_groups_test <-
-    hlaCallsToCounts(midas_allele_groups_test, inheritance_model = "additive")
-  Hmisc::label(midas_allele_groups_test[-1], self = FALSE) <-
-    rep("allele_g_group", ncol(midas_allele_groups_test) - 1)
-  midas_allele_groups_test <- rleft_join(midas_allele_groups_test, pheno, covar)
-  expect_equal(midas_allele_groups, midas_allele_groups_test)
+  midas_allele_g_group_test <-
+    hlaCallsToCounts(midas_allele_g_group_test, inheritance_model = "additive")
+  Hmisc::label(midas_allele_g_group_test[-1], self = FALSE) <-
+    rep("allele_g_group", ncol(midas_allele_g_group_test) - 1)
+  midas_allele_g_group_test <- rleft_join(midas_allele_g_group_test, pheno, covar)
+  expect_equal(midas_allele_g_group, midas_allele_g_group_test)
 
   # allele_supertypes
   midas_allele_supertypes <- prepareMiDASData(hla_calls,
@@ -500,16 +500,35 @@ test_that("MiDAS data is prepared properly", {
   midas_custom_test <- rleft_join(hla_calls, pheno, covar)
   expect_equal(midas_custom, midas_custom_test)
 
+  # check more analysis types at once
+  midas_multiple <- prepareMiDASData(hla_calls,
+                                     pheno,
+                                     covar,
+                                     analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertypes", "allele_group", "custom"),
+                                     inheritance_model = "additive")
+  midas_multiple_test <-
+    rleft_join(
+      midas_hla_allele,
+      midas_aa_level,
+      midas_expression_levels,
+      midas_allele_g_group,
+      midas_allele_supertypes,
+      midas_allele_groups,
+      midas_custom,
+      by = c("ID", "OS", "OS_DIED", "AGE", "SEX")
+    )
+  expect_equal(midas_custom, midas_custom_test)
+
   # test for checkHlaCallsFormat are ommitted here
 
   expect_error(
     prepareMiDASData(hla_calls, analysis_type = 1),
-    "analysis_type is not a string \\(a length one character vector\\)."
+    "analysis_type is not a character vector"
   )
 
   expect_error(
     prepareMiDASData(hla_calls, analysis_type = "foo"),
-    "analysis_type should be one of \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertypes\", \"allele_group\", \"custom\"."
+    "analysis_type should match values \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertypes\", \"allele_group\", \"custom\"."
   )
 
   expect_error(

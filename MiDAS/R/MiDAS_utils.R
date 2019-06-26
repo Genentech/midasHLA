@@ -620,3 +620,33 @@ listMiDASDictionaries <- function(file.names = FALSE) {
 
   return(lib)
 }
+
+#' Check if character matches one of possible values
+#'
+#' \code{characterMatches} checks if all elements of character matches values in
+#' choices.
+#'
+#' @param x character vector to test.
+#' @param choice Character vector with possible values for \code{x}.
+#'
+#' @return Logical indicating if \code{x} matches one of the values in
+#'   \code{choice}.
+#'
+characterMatches <- function(x, choice) {
+  test <- x %in% choice
+  test <- all(test)
+
+  return(test)
+}
+
+#' Error message for characterMatches
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(characterMatches) <- function(call, env) {
+  paste0(deparse(call$x),
+         ' should match values "',
+         paste(eval(call$choice), collapse = '", "'),
+         '".'
+  )
+}

@@ -650,8 +650,8 @@ prepareMiDASData <- function(hla_calls,
 ) {
   assert_that(
     checkHlaCallsFormat(hla_calls),
-    is.string(analysis_type),
-    stringMatches(
+    is.character(analysis_type),
+    characterMatches(
       x = analysis_type,
       choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertypes", "allele_group", "custom")
     ),
@@ -671,120 +671,134 @@ prepareMiDASData <- function(hla_calls,
     )
   }
 
+  midas_data <- hla_calls[, 1, drop = FALSE]
+
   # Process hla_calls based on analysis type
-  if (analysis_type == "hla_allele") {
-    midas_data <- hlaCallsToCounts(
+  if ("hla_allele" %in% analysis_type) {
+    hla_allele <- hlaCallsToCounts(
       hla_calls = hla_calls,
       inheritance_model = inheritance_model
     )
 
-    label(midas_data[-1], self = FALSE) <- rep("hla_allele", ncol(midas_data) - 1)
+    label(hla_allele[-1], self = FALSE) <- rep("hla_allele", ncol(hla_allele) - 1)
+    midas_data <- left_join(midas_data, hla_allele, by = "ID")
+  }
 
-  } else if (analysis_type == "aa_level") {
-    midas_data <- hlaToAAVariation(
+  if ("aa_level" %in% analysis_type) {
+    aa_level <- hlaToAAVariation(
       hla_calls = hla_calls,
       indels = indels,
       unkchar = unkchar
     ) %>%
       aaVariationToCounts(inheritance_model = inheritance_model)
 
-    label(midas_data[-1], self = FALSE) <- rep("aa_level", ncol(midas_data) - 1)
+    label(aa_level[-1], self = FALSE) <- rep("aa_level", ncol(aa_level) - 1)
+    midas_data <- left_join(midas_data, aa_level, by = "ID")
+  }
 
-  } else if (analysis_type == "expression_level") {
+  if ("expression_level" %in% analysis_type) {
     lib <- listMiDASDictionaries()
     lib <- grep("expression", lib, value = TRUE)
-    midas_data <- Reduce(
+    expression_level <- Reduce(
       f = function(...) left_join(..., by = "ID"),
       x = lapply(lib, hlaToVariable, hla_calls = hla_calls)
     )
 
     assert_that(
-      ncol(midas_data) > 1,
+      ncol(expression_level) > 1,
       msg = "no expression levels were found for input hla_calls"
     )
 
-    midas_data %<>%
+    expression_level %<>%
       gather("expression", "value", -c("ID")) %>%
       mutate(expression = gsub("_.*", "", .data$expression)) %>%
       group_by(!!! syms(c("ID", "expression"))) %>%
       summarise_all(funs(sum)) %>%
       spread(.data$expression, .data$value, sep = "_")
 
-    label(midas_data[-1], self = FALSE) <- rep(
+    label(expression_level[-1], self = FALSE) <- rep(
       x = "expression_level",
-      ncol(midas_data) - 1
+      ncol(expression_level) - 1
     )
+    midas_data <- left_join(midas_data, expression_level, by = "ID")
+  }
 
-  } else if (analysis_type == "allele_g_group") {
+  if ("allele_g_group" %in% analysis_type) {
     lib <- "4digit_allele_Ggroup"
-    midas_data <- hlaToVariable(hla_calls = hla_calls, dictionary = lib)
+    allele_g_group <- hlaToVariable(hla_calls = hla_calls, dictionary = lib)
 
     assert_that(
-      ncol(midas_data) > 1,
+      ncol(allele_g_group) > 1,
       msg = "no allele could be assigned to G group for input hla_calls"
     )
 
-    midas_data <- hlaCallsToCounts(
-      hla_calls = midas_data,
+    allele_g_group <- hlaCallsToCounts(
+      hla_calls = allele_g_group,
       inheritance_model = inheritance_model
     )
 
-    label(midas_data[-1], self = FALSE) <- rep(
+    label(allele_g_group[-1], self = FALSE) <- rep(
       x = "allele_g_group",
-      ncol(midas_data) - 1
+      ncol(allele_g_group) - 1
     )
+    midas_data <- left_join(midas_data, allele_g_group, by = "ID")
+  }
 
-  } else if (analysis_type == "allele_supertypes") {
+  if ("allele_supertypes" %in% analysis_type) {
     lib <- "4digit_supertype"
-    midas_data <- hlaToVariable(hla_calls = hla_calls, dictionary = lib)
+    allele_supertypes <- hlaToVariable(hla_calls = hla_calls, dictionary = lib)
 
 
     assert_that(
-      ncol(midas_data) > 1,
+      ncol(allele_supertypes) > 1,
       msg = "no allele could be assigned to supertype for input hla_calls"
     )
 
-    midas_data <- hlaCallsToCounts(
-      hla_calls = midas_data,
+    allele_supertypes <- hlaCallsToCounts(
+      hla_calls = allele_supertypes,
       inheritance_model = inheritance_model,
       check_hla_format = FALSE
     ) %>%
       select(-"Unclassified")
 
-    label(midas_data[-1], self = FALSE) <- rep(
+    label(allele_supertypes[-1], self = FALSE) <- rep(
       x = "allele_supertypes",
-      ncol(midas_data) - 1
+      ncol(allele_supertypes) - 1
     )
+    midas_data <- left_join(midas_data, allele_supertypes, by = "ID")
+  }
 
-  } else if (analysis_type == "allele_group") {
+  if ("allele_group" %in% analysis_type) {
     lib <- c("4digit_B-allele_Bw", "4digit_C-allele_C1-2")
-    midas_data <- Reduce(
+    allele_group <- Reduce(
       f = function(...) left_join(..., by = "ID"),
       x = lapply(lib, hlaToVariable, hla_calls = hla_calls)
     )
 
     assert_that(
-      ncol(midas_data) > 1,
+      ncol(allele_group) > 1,
       msg = "no allele could be assigned to allele groups for input hla_calls"
     )
 
-    midas_data <- hlaCallsToCounts(
-      hla_calls = midas_data,
+    allele_group <- hlaCallsToCounts(
+      hla_calls = allele_group,
       inheritance_model = inheritance_model,
       check_hla_format = FALSE
     )
 
-    label(midas_data[-1], self = FALSE) <- rep(
+    label(allele_group[-1], self = FALSE) <- rep(
       x = "allele_group",
-      ncol(midas_data) - 1
+      ncol(allele_group) - 1
     )
+    midas_data <- left_join(midas_data, allele_group, by = "ID")
+  }
 
-  } else {
-    midas_data <- hla_calls
+  if ("custom" %in% analysis_type) {
+    midas_data <- left_join(midas_data, hla_calls, by = "ID")
   }
 
   # join with additional_data
-  if (length(additional_data) != 0) {
+  if (length(additional_data)) {
     midas_data <- Reduce(
       f = function(...) left_join(..., by = "ID"),
       x = additional_data,
