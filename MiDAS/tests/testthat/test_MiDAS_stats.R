@@ -250,11 +250,15 @@ test_that("MiDAS associations are analyzed properly", {
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
   midas_data <<-
-    prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
+    prepareMiDASData(hla_calls,
+                     pheno,
+                     covar,
+                     analysis_type = "hla_allele",
+                     inheritance_model = "additive")
 
   object <- lm(OS_DIED ~ AGE + SEX, data = midas_data)
   res <- analyzeMiDASData(object,
-                          analysis_type = "hla_alleles",
+                          analysis_type = "hla_allele",
                           variables = c("A*01:01", "A*02:01"),
                           kable_output = FALSE
   )
@@ -275,7 +279,7 @@ test_that("MiDAS associations are analyzed properly", {
   expect_equal(as.data.frame(res), as.data.frame(test_res)) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
 
   res <- analyzeMiDASData(object,
-                          analysis_type = "hla_alleles",
+                          analysis_type = "hla_allele",
                           conditional = TRUE,
                           kable_output = FALSE
   )
@@ -304,58 +308,58 @@ test_that("MiDAS associations are analyzed properly", {
   )
 
   expect_error(analyzeMiDASData(object, analysis_type = "a"),
-               "analysis_type should be one of \"hla_alleles\", \"aa_level\", \"expression_levels\", \"allele_groups\", \"custom\"."
+               "analysis_type should be one of \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertypes\", \"allele_group\", \"custom\"."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", conditional = 1),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", conditional = 1),
                "conditional is not a flag \\(a length one logical vector\\)."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", variables = 1),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", variables = 1),
                "variables is not a character vector or NULL."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", variables = "thief"),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", variables = "thief"),
                "thief can not be found in object data"
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", frequency_cutoff = "foo"),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", frequency_cutoff = "foo"),
                "frequency_cutoff is not number \\(a length one numeric vector\\) or NULL."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", pvalue_cutoff = "foo"),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", pvalue_cutoff = "foo"),
                "pvalue_cutoff is not number \\(a length one numeric vector\\) or NULL."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", correction = NA),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", correction = NA),
                "correction is not a string \\(a length one character vector\\)."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", logistic = "NA"),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", logistic = "NA"),
                "logistic is not a flag \\(a length one logical vector\\) or NULL."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", binary_phenotype = "NA"),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", binary_phenotype = "NA"),
                "binary_phenotype is not a flag \\(a length one logical vector\\) or NULL."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", th = "NA"),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", th = "NA"),
                "th is not a number \\(a length one numeric vector\\)."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", rss_th = "NA"),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", rss_th = "NA"),
                "rss_th is not a number \\(a length one numeric vector\\)."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", kable_output = "NA"),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", kable_output = "NA"),
                "kable_output is not a flag \\(a length one logical vector\\)."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", format = 1),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", format = 1),
                "format is not a string \\(a length one character vector\\)."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_alleles", format = "pdf"),
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", format = "pdf"),
                "format should be one of \"html\", \"latex\"."
   )
 })
@@ -384,6 +388,8 @@ test_that("MiDAS data is prepared properly", {
                      inheritance_model = "additive")
   midas_hla_allele_test <-
     hlaCallsToCounts(hla_calls, inheritance_model = "additive")
+  Hmisc::label(midas_hla_allele_test[-1], self = FALSE) <-
+    rep("hla_allele", ncol(midas_hla_allele_test) - 1)
   midas_hla_allele_test <- rleft_join(midas_hla_allele_test, pheno, covar)
   expect_equal(midas_hla_allele, midas_hla_allele_test)
 
@@ -396,6 +402,8 @@ test_that("MiDAS data is prepared properly", {
   midas_aa_level_test <- hlaToAAVariation(hla_calls)
   midas_aa_level_test <-
     aaVariationToCounts(midas_aa_level_test, inheritance_model = "additive")
+  Hmisc::label(midas_aa_level_test[-1], self = FALSE) <-
+    rep("aa_level", ncol(midas_aa_level_test) - 1)
   midas_aa_level_test <- rleft_join(midas_aa_level_test, pheno, covar)
   expect_equal(midas_aa_level, midas_aa_level_test)
 
@@ -403,7 +411,7 @@ test_that("MiDAS data is prepared properly", {
   midas_expression_levels <- prepareMiDASData(hla_calls,
                                               pheno,
                                               covar,
-                                              analysis_type = "expression_levels",
+                                              analysis_type = "expression_level",
                                               inheritance_model = "additive")
   expression_dicts <- grep("expression", listMiDASDictionaries(), value = TRUE)
   midas_expression_levels_test <- Reduce(
@@ -417,6 +425,8 @@ test_that("MiDAS data is prepared properly", {
       expr
     })
   )
+  Hmisc::label(midas_expression_levels_test[-1], self = FALSE) <-
+    rep("expression_level", ncol(midas_expression_levels_test) - 1)
   midas_expression_levels_test <-
     rleft_join(midas_expression_levels_test, pheno, covar)
   expect_equal(midas_expression_levels, midas_expression_levels_test)
@@ -431,6 +441,8 @@ test_that("MiDAS data is prepared properly", {
     hlaToVariable(hla_calls, dictionary = "4digit_allele_Ggroup")
   midas_allele_groups_test <-
     hlaCallsToCounts(midas_allele_groups_test, inheritance_model = "additive")
+  Hmisc::label(midas_allele_groups_test[-1], self = FALSE) <-
+    rep("allele_g_group", ncol(midas_allele_groups_test) - 1)
   midas_allele_groups_test <- rleft_join(midas_allele_groups_test, pheno, covar)
   expect_equal(midas_allele_groups, midas_allele_groups_test)
 
@@ -448,6 +460,8 @@ test_that("MiDAS data is prepared properly", {
       inheritance_model = "additive",
       check_hla_format = FALSE
     )
+  Hmisc::label(test_midas_allele_supertypes[-1], self = FALSE) <-
+    rep("allele_supertypes", ncol(test_midas_allele_supertypes) - 1)
   test_midas_allele_supertypes <-
     rleft_join(test_midas_allele_supertypes, pheno, covar)
   test_midas_allele_supertypes <-
@@ -458,7 +472,7 @@ test_that("MiDAS data is prepared properly", {
   midas_allele_groups <- prepareMiDASData(hla_calls,
                                               pheno,
                                               covar,
-                                              analysis_type = "allele_groups",
+                                              analysis_type = "allele_group",
                                               inheritance_model = "additive")
   allele_groups_lib <- c("4digit_B-allele_Bw", "4digit_C-allele_C1-2")
   test_midas_allele_group <- Reduce(
@@ -471,6 +485,8 @@ test_that("MiDAS data is prepared properly", {
       inheritance_model = "additive",
       check_hla_format = FALSE
     )
+  Hmisc::label(test_midas_allele_group[-1], self = FALSE) <-
+    rep("allele_group", ncol(test_midas_allele_group) - 1)
   test_midas_allele_group <-
     rleft_join(test_midas_allele_group, pheno, covar)
   expect_equal(midas_allele_groups, test_midas_allele_group)
@@ -493,7 +509,7 @@ test_that("MiDAS data is prepared properly", {
 
   expect_error(
     prepareMiDASData(hla_calls, analysis_type = "foo"),
-    "analysis_type should be one of \"hla_allele\", \"aa_level\", \"expression_levels\", \"allele_g_group\", \"allele_supertypes\", \"allele_groups\", \"custom\"."
+    "analysis_type should be one of \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertypes\", \"allele_group\", \"custom\"."
   )
 
   expect_error(
@@ -519,13 +535,13 @@ test_that("MiDAS data is prepared properly", {
   # checkAdditionalData on ... argument are ommitted here
 
   expect_error(
-    prepareMiDASData(hla_calls[, c("ID", "DMA_1", "DMA_2")], analysis_type = "expression_levels"),
+    prepareMiDASData(hla_calls[, c("ID", "DMA_1", "DMA_2")], analysis_type = "expression_level"),
     "no expression levels were found for input hla_calls"
   )
 
   # this is ill due to ggroups matches problem there is one more above, when groups are fixed this will start to fail so uncomment and remove linies as needed
   expect_error(
-    prepareMiDASData(hla_calls[, c("ID", "DOB_1", "DOB_2")], analysis_type = "allele_groups"),
+    prepareMiDASData(hla_calls[, c("ID", "DOB_1", "DOB_2")], analysis_type = "allele_group"),
     "no allele could be assigned to allele groups for input hla_calls"
   )
 })

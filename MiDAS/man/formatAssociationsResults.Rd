@@ -4,7 +4,7 @@
 \alias{formatAssociationsResults}
 \title{Pretty format association analysis results}
 \usage{
-formatAssociationsResults(results, type = "hla_alleles",
+formatAssociationsResults(results, type = "hla_allele",
   response_variable = "R", logistic = FALSE, pvalue_cutoff = NULL,
   format = getOption("knitr.table.format"))
 }
@@ -12,8 +12,8 @@ formatAssociationsResults(results, type = "hla_alleles",
 \item{results}{Tibble as returned by \link{analyzeAssociations}.}
 
 \item{type}{String specifying type of analysis from which \code{results} were
-produced. Possible values includes \code{'hla_alleles'}, \code{'aa_level'},
-\code{'expression_levels'}.}
+produced. Possible values includes \code{'hla_allele'}, \code{'aa_level'},
+\code{'expression_level'}.}
 
 \item{response_variable}{String giving the name of response variable, it is
 used to produce binary phenotype column names.}

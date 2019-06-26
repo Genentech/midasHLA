@@ -1,3 +1,6 @@
+## 0.0.0.9012 - 25/06/2019
++ fixes analyzeMiDASData function crashing on float variables. Now frequency calculations are done only for properly labeled variables on midas_data.
+
 ## 0.0.0.9011 - 21/06/2019
 + fixes allele_group preparation scheme, where before after conversion to groups 
   there were no conversion to counts. Additionally now this scheme have been broken 

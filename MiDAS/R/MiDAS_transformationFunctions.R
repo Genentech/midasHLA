@@ -789,8 +789,8 @@ getCountsFrequencies <- function(counts_table) {
 #'
 #' @inheritParams formatResults
 #' @param type String specifying type of analysis from which \code{results} were
-#'   produced. Possible values includes \code{'hla_alleles'}, \code{'aa_level'},
-#'   \code{'expression_levels'}.
+#'   produced. Possible values includes \code{'hla_allele'}, \code{'aa_level'},
+#'   \code{'expression_level'}.
 #' @param response_variable String giving the name of response variable, it is
 #'   used to produce binary phenotype column names.
 #' @param logistic Logical indicating if statistical model is logistic. If set
@@ -807,7 +807,7 @@ getCountsFrequencies <- function(counts_table) {
 #' @importFrom rlang has_name list2 parse_expr warn !! :=
 #'
 formatAssociationsResults <- function(results,
-                                      type = "hla_alleles",
+                                      type = "hla_allele",
                                       response_variable = "R",
                                       logistic = FALSE,
                                       pvalue_cutoff = NULL,
@@ -815,7 +815,7 @@ formatAssociationsResults <- function(results,
   assert_that(
     is.string(type),
     stringMatches(type,
-                  choice = c("hla_alleles", "aa_level", "expression_levels", "allele_groups", "custom")
+                  choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertypes", "allele_group", "custom")
     ),
     is.string(response_variable),
     is.flag(logistic),
@@ -836,10 +836,12 @@ formatAssociationsResults <- function(results,
 
   estimate_name <- ifelse(logistic, "odds ratio", "estimate")
   term_name <- switch (type,
-                       "hla_alleles" = "allele",
+                       "hla_allele" = "allele",
                        "aa_level" = "aa",
-                       "expression_levels" = "allele",
-                       "allele_groups" = "allele group",
+                       "expression_level" = "allele",
+                       "allele_g_group" = "g group",
+                       "allele_supertypes" = "supertype",
+                       "allele_group" = "allele group",
                        "term"
   )
   select_cols <- unlist(list2(
@@ -866,10 +868,12 @@ formatAssociationsResults <- function(results,
 
 
   header <- switch (type,
-                    "hla_alleles" = "HLA allelic associations",
+                    "hla_allele" = "HLA allelic associations",
                     "aa_level" = "HLA AA associations",
-                    "expression_levels" = "HLA expression level associations",
-                    "allele_groups" = "HLA alleles groups associations",
+                    "expression_level" = "HLA expression level associations",
+                    "allele_g_group" = "HLA alleles G groups associations",
+                    "allele_supertypes" = "HLA alleles supertypes associations",
+                    "allele_group" = "HLA alleles groups associations",
                     "Associations results"
   )
 
