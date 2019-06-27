@@ -794,6 +794,10 @@ prepareMiDASData <- function(hla_calls,
   }
 
   if ("custom" %in% analysis_type) {
+    label(hla_calls[-1], self = FALSE) <- rep(
+      x = "custom",
+      ncol(hla_calls) - 1
+    )
     midas_data <- left_join(midas_data, hla_calls, by = "ID")
   }
 

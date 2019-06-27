@@ -498,6 +498,10 @@ test_that("MiDAS data is prepared properly", {
                                    analysis_type = "custom",
                                    inheritance_model = "additive")
   midas_custom_test <- rleft_join(hla_calls, pheno, covar)
+  gene_idx <-
+    ! colnames(midas_custom_test) %in% c("ID", "OS", "OS_DIED", "AGE", "SEX")
+  Hmisc::label(midas_custom_test[, gene_idx], self = FALSE) <-
+    rep("custom", sum(gene_idx))
   expect_equal(midas_custom, midas_custom_test)
 
   # check more analysis types at once
