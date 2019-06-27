@@ -521,7 +521,11 @@ test_that("MiDAS data is prepared properly", {
       midas_custom,
       by = c("ID", "OS", "OS_DIED", "AGE", "SEX")
     )
-  expect_equal(midas_custom, midas_custom_test)
+  # order of columns is different a bit expensive but just sort them
+  midas_multiple <- midas_multiple[, order(colnames(midas_multiple))]
+  midas_multiple_test <-
+    midas_multiple_test[, order(colnames(midas_multiple_test))]
+  expect_equal(midas_multiple, midas_multiple_test)
 
   # test for checkHlaCallsFormat are ommitted here
 
