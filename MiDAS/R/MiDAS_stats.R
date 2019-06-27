@@ -266,7 +266,7 @@ analyzeConditionalAssociations <- function(object,
 prepareHlaData <- function(hla_calls,
                            ...,
                            inheritance_model = "additive") {
-  warning("prepareHlaData is depreciated, please use prepareMiDASData instead.")
+  warning("prepareHlaData is deprecated, please use prepareMiDASData instead.")
   additional_data <- list(...)
   if (length(additional_data) == 0) {
     additional_data <- NULL
