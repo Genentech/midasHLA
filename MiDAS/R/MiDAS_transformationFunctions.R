@@ -815,7 +815,7 @@ formatAssociationsResults <- function(results,
   assert_that(
     is.string(type),
     stringMatches(type,
-                  choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertypes", "allele_group", "custom")
+                  choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "custom")
     ),
     is.string(response_variable),
     is.flag(logistic),
@@ -840,7 +840,7 @@ formatAssociationsResults <- function(results,
                        "aa_level" = "aa",
                        "expression_level" = "allele",
                        "allele_g_group" = "g group",
-                       "allele_supertypes" = "supertype",
+                       "allele_supertype" = "supertype",
                        "allele_group" = "allele group",
                        "term"
   )
@@ -872,7 +872,7 @@ formatAssociationsResults <- function(results,
                     "aa_level" = "HLA AA associations",
                     "expression_level" = "HLA expression level associations",
                     "allele_g_group" = "HLA alleles G groups associations",
-                    "allele_supertypes" = "HLA alleles supertypes associations",
+                    "allele_supertype" = "HLA alleles supertypes associations",
                     "allele_group" = "HLA alleles groups associations",
                     "Associations results"
   )

@@ -333,7 +333,7 @@ prepareHlaData <- function(hla_calls,
 #' @param analysis_type String indicating the type of analysis being performed,
 #'   at this point it is only used for results formatting. Valid values are
 #'   \code{"hla_allele"}, \code{"aa_level"}, \code{"expression_level"},
-#'   \code{"allele_g_group"}, \code{"allele_supertypes"}, \code{"allele_group"},
+#'   \code{"allele_g_group"}, \code{"allele_supertype"}, \code{"allele_group"},
 #'   \code{"custom"}.
 #' @param conditional Logical indicating if the analysis should be performed
 #'   using stepwise conditional tests or not. See
@@ -393,7 +393,7 @@ prepareHlaData <- function(hla_calls,
 #'
 #' @export
 analyzeMiDASData <- function(object,
-                             analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertypes", "allele_group"),
+                             analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
                              conditional = FALSE,
                              variables = NULL,
                              frequency_cutoff = NULL,
@@ -418,7 +418,7 @@ analyzeMiDASData <- function(object,
   assert_that(
     is.string(analysis_type),
     stringMatches(analysis_type,
-                  choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertypes", "allele_group")
+                  choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group")
     ),
     is.flag(conditional),
     isCharacterOrNULL(variables),
@@ -467,7 +467,7 @@ analyzeMiDASData <- function(object,
   mask_counts <- variables_labels %in% c("hla_allele",
                                          "aa_level",
                                          "allele_g_group",
-                                         "allele_supertypes",
+                                         "allele_supertype",
                                          "allele_group"
   )
   cts_vars <- variables[mask_counts]
@@ -553,7 +553,7 @@ analyzeMiDASData <- function(object,
                        "aa_level" = "aa",
                        "expression_level" = "allele",
                        "allele_g_group" = "g.group",
-                       "allele_supertypes" = "supertype",
+                       "allele_supertype" = "supertype",
                        "allele_group" = "allele.group",
                        "term"
   )
@@ -609,7 +609,7 @@ analyzeMiDASData <- function(object,
 #' \code{inheritance_model} of choice (this is done with
 #' \link{hlaCallsToCounts}).
 #'
-#' \code{"allele_supertypes"} - \code{hla_calls} are transformed to HLA alleles
+#' \code{"allele_supertype"} - \code{hla_calls} are transformed to HLA alleles
 #' groups using supertypes dictionary shipped with package (this is done using
 #' \link{hlaToVariable}). Than those are transformed to counts under
 #' \code{inheritance_model} of choice (this is done with
@@ -645,7 +645,7 @@ analyzeMiDASData <- function(object,
 #' @export
 prepareMiDASData <- function(hla_calls,
                              ...,
-                             analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertypes", "allele_group", "custom"),
+                             analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "custom"),
                              inheritance_model = "additive",
                              indels = TRUE,
                              unkchar = FALSE
@@ -655,7 +655,7 @@ prepareMiDASData <- function(hla_calls,
     is.character(analysis_type),
     characterMatches(
       x = analysis_type,
-      choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertypes", "allele_group", "custom")
+      choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "custom")
     ),
     is.string(inheritance_model),
     stringMatches(
@@ -746,28 +746,28 @@ prepareMiDASData <- function(hla_calls,
     midas_data <- left_join(midas_data, allele_g_group, by = "ID")
   }
 
-  if ("allele_supertypes" %in% analysis_type) {
+  if ("allele_supertype" %in% analysis_type) {
     lib <- "4digit_supertype"
-    allele_supertypes <- hlaToVariable(hla_calls = hla_calls, dictionary = lib)
+    allele_supertype <- hlaToVariable(hla_calls = hla_calls, dictionary = lib)
 
 
     assert_that(
-      ncol(allele_supertypes) > 1,
+      ncol(allele_supertype) > 1,
       msg = "no allele could be assigned to supertype for input hla_calls"
     )
 
-    allele_supertypes <- hlaCallsToCounts(
-      hla_calls = allele_supertypes,
+    allele_supertype <- hlaCallsToCounts(
+      hla_calls = allele_supertype,
       inheritance_model = inheritance_model,
       check_hla_format = FALSE
     ) %>%
       select(-"Unclassified")
 
-    label(allele_supertypes[-1], self = FALSE) <- rep(
-      x = "allele_supertypes",
-      ncol(allele_supertypes) - 1
+    label(allele_supertype[-1], self = FALSE) <- rep(
+      x = "allele_supertype",
+      ncol(allele_supertype) - 1
     )
-    midas_data <- left_join(midas_data, allele_supertypes, by = "ID")
+    midas_data <- left_join(midas_data, allele_supertype, by = "ID")
   }
 
   if ("allele_group" %in% analysis_type) {

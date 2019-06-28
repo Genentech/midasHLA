@@ -18,8 +18,9 @@ observations or covariates.}
 
 \item{analysis_type}{String indicating analysis type for which data should be
   prepared. Valid choices are \code{"hla_allele"}, \code{"aa_level"},
-  \code{"expression_level"}, \code{"allele_group"}, \code{"custom"}. See
-  details for further explanations.
+  \code{"expression_level"}, \code{"allele_group"}, \code{"custom"}. Each
+  prepared variable will be labeled with corresponding \code{analysis_type}.
+  See details for further explanations.
 
 \code{...} should be data frames with first column holding samples IDs and
 named \code{ID}. Those should correspond to \code{ID} column in
