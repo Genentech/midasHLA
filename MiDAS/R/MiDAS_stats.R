@@ -333,13 +333,14 @@ prepareHlaData <- function(hla_calls,
 #' @param analysis_type String indicating the type of analysis being performed,
 #'   at this point it is only used for results formatting. Valid values are
 #'   \code{"hla_allele"}, \code{"aa_level"}, \code{"expression_level"},
-#'   \code{"allele_group"}, \code{"custom"}.
+#'   \code{"allele_g_group"}, \code{"allele_supertypes"}, \code{"allele_group"},
+#'   \code{"custom"}.
 #' @param conditional Logical indicating if the analysis should be performed
 #'   using stepwise conditional tests or not. See
 #'   \link{analyzeConditionalAssociations} for more details.
 #' @param variables Character specifying variables to use in association tests
-#'   or \code{NULL}. If \code{NULL} all labeled variables in object data are
-#'   tested. See details for further information.
+#'   or \code{NULL}. If \code{NULL} variables are choosed based on
+#'   \code{analysis_type}.
 #' @param frequency_cutoff Number specifying threshold for inclusion of a
 #'   variable. If it's a number between 0 and 1 variables with frequency below
 #'   this number will not be considered during analysis. If it's greater or
@@ -394,7 +395,7 @@ prepareHlaData <- function(hla_calls,
 #'
 #' @export
 analyzeMiDASData <- function(object,
-                             analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertypes", "allele_group", "custom"),
+                             analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertypes", "allele_group"),
                              conditional = FALSE,
                              variables = NULL,
                              frequency_cutoff = NULL,
@@ -419,7 +420,7 @@ analyzeMiDASData <- function(object,
   assert_that(
     is.string(analysis_type),
     stringMatches(analysis_type,
-                  choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertypes", "allele_group", "custom")
+                  choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertypes", "allele_group")
     ),
     is.flag(conditional),
     isCharacterOrNULL(variables),
@@ -442,7 +443,7 @@ analyzeMiDASData <- function(object,
   )
 
   if (is.null(variables)) {
-    mask <- variables_labels != ""
+    mask <- variables_labels == analysis_type
     assert_that(any(mask, na.rm = TRUE),
                 msg = "Argument variable = NULL can be used only with labeled variables, make sure to use prepareMiDASData function for data preparation."
     )
@@ -464,7 +465,7 @@ analyzeMiDASData <- function(object,
   }
 
   # Filter variables on frequency cutoff
-  variables_labels <- variables_labels[variables]
+  variables_labels <- variables_labels[variables] # if variables != NULL select only corresponding labels
   mask_counts <- variables_labels %in% c("hla_allele",
                                          "aa_level",
                                          "allele_g_group",
@@ -553,6 +554,8 @@ analyzeMiDASData <- function(object,
                        "hla_allele" = "allele",
                        "aa_level" = "aa",
                        "expression_level" = "allele",
+                       "allele_g_group" = "g.group",
+                       "allele_supertypes" = "supertype",
                        "allele_group" = "allele.group",
                        "term"
   )
@@ -577,8 +580,9 @@ analyzeMiDASData <- function(object,
 #'   observations or covariates.
 #' @param analysis_type String indicating analysis type for which data should be
 #'   prepared. Valid choices are \code{"hla_allele"}, \code{"aa_level"},
-#'   \code{"expression_level"}, \code{"allele_group"}, \code{"custom"}. See
-#'   details for further explanations.
+#'   \code{"expression_level"}, \code{"allele_group"}, \code{"custom"}. Each
+#'   prerpared variables are labled with corresponding \code{analysis_type}
+#'   label. See details for further explanations.
 #'
 #' \code{...} should be data frames with first column holding samples IDs and
 #' named \code{ID}. Those should correspond to \code{ID} column in

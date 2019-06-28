@@ -250,13 +250,25 @@ test_that("MiDAS associations are analyzed properly", {
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
   midas_data <<-
-    prepareMiDASData(hla_calls,
-                     pheno,
-                     covar,
-                     analysis_type = "hla_allele",
-                     inheritance_model = "additive")
+    prepareMiDASData(
+      hla_calls,
+      pheno,
+      covar,
+      analysis_type = c(
+        "hla_allele",
+        "aa_level",
+        "expression_level",
+        "allele_g_group",
+        "allele_supertypes",
+        "allele_group",
+        "custom"
+      ),
+      inheritance_model = "additive"
+    )
 
   object <- lm(OS_DIED ~ AGE + SEX, data = midas_data)
+
+  # conditional FALSE
   res <- analyzeMiDASData(object,
                           analysis_type = "hla_allele",
                           variables = c("A*01:01", "A*02:01"),
@@ -278,14 +290,151 @@ test_that("MiDAS associations are analyzed properly", {
 
   expect_equal(as.data.frame(res), as.data.frame(test_res)) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
 
+  ## analysis_type = "hla_allele" variables = NULL
+  res <- analyzeMiDASData(object,
+                          analysis_type = "hla_allele",
+                          variables = NULL,
+                          kable_output = FALSE
+  )
+
+  test_variables <- colnames(midas_data[, label(midas_data) == "hla_allele"])
+  test_res <- analyzeAssociations(object, variables = test_variables)
+  test_variables <- test_res$term # constant variables are discarded
+  test_res <- dplyr::rename(test_res, allele = term)
+  variables_freq <- getCountsFrequencies(midas_data[, c("ID", test_variables)])
+  test_res$Ntotal <- variables_freq$Counts
+  test_res$Ntotal.frequency <- variables_freq$Freq
+  pos <- midas_data$OS_DIED == 1
+  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", test_variables)])
+  test_res$Npositive <- pos_freq$Counts
+  test_res$Npositive.frequency <- pos_freq$Freq
+  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", test_variables)])
+  test_res$Nnegative <- neg_freq$Counts
+  test_res$Nnegative.frequency <- neg_freq$Freq
+
+  expect_equal(as.data.frame(res), as.data.frame(test_res))
+
+
+  ## analysis_type = "aa_level" variables = NULL
+  res <- analyzeMiDASData(object,
+                          analysis_type = "aa_level",
+                          variables = NULL,
+                          kable_output = FALSE
+  )
+
+  test_variables <- colnames(midas_data[, label(midas_data) == "aa_level"])
+  test_res <- analyzeAssociations(object, variables = test_variables)
+  test_variables <- test_res$term # constant variables are discarded
+  test_res <- dplyr::rename(test_res, aa = term)
+  variables_freq <- getCountsFrequencies(midas_data[, c("ID", test_variables)])
+  test_res$Ntotal <- variables_freq$Counts
+  test_res$Ntotal.frequency <- variables_freq$Freq
+  pos <- midas_data$OS_DIED == 1
+  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", test_variables)])
+  test_res$Npositive <- pos_freq$Counts
+  test_res$Npositive.frequency <- pos_freq$Freq
+  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", test_variables)])
+  test_res$Nnegative <- neg_freq$Counts
+  test_res$Nnegative.frequency <- neg_freq$Freq
+
+  expect_equal(as.data.frame(res), as.data.frame(test_res))
+
+  ## analysis_type = "expression_level" variables = NULL
+  res <- analyzeMiDASData(object,
+                          analysis_type = "expression_level",
+                          variables = NULL,
+                          kable_output = FALSE
+  )
+
+  test_variables <- colnames(midas_data[, label(midas_data) == "expression_level"])
+  test_res <- analyzeAssociations(object, variables = test_variables)
+  test_variables <- test_res$term # constant variables are discarded
+  test_res <- dplyr::rename(test_res, allele = term)
+
+  expect_equal(as.data.frame(res), as.data.frame(test_res))
+
+  ## analysis_type = "allele_g_group" variables = NULL
+  res <- analyzeMiDASData(object,
+                          analysis_type = "allele_g_group",
+                          variables = NULL,
+                          kable_output = FALSE
+  )
+
+  test_variables <- colnames(midas_data[, label(midas_data) == "allele_g_group"])
+  test_res <- analyzeAssociations(object, variables = test_variables)
+  test_variables <- test_res$term # constant variables are discarded
+  test_res <- dplyr::rename(test_res, g.group = term)
+  variables_freq <- getCountsFrequencies(midas_data[, c("ID", test_variables)])
+  test_res$Ntotal <- variables_freq$Counts
+  test_res$Ntotal.frequency <- variables_freq$Freq
+  pos <- midas_data$OS_DIED == 1
+  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", test_variables)])
+  test_res$Npositive <- pos_freq$Counts
+  test_res$Npositive.frequency <- pos_freq$Freq
+  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", test_variables)])
+  test_res$Nnegative <- neg_freq$Counts
+  test_res$Nnegative.frequency <- neg_freq$Freq
+
+  expect_equal(as.data.frame(res), as.data.frame(test_res))
+
+  ## analysis_type = "allele_supertypes" variables = NULL
+  res <- analyzeMiDASData(object,
+                          analysis_type = "allele_supertypes",
+                          variables = NULL,
+                          kable_output = FALSE
+  )
+
+  test_variables <- colnames(midas_data[, label(midas_data) == "allele_supertypes"])
+  test_res <- analyzeAssociations(object, variables = test_variables)
+  test_variables <- test_res$term # constant variables are discarded
+  test_res <- dplyr::rename(test_res, supertype = term)
+  variables_freq <- getCountsFrequencies(midas_data[, c("ID", test_variables)])
+  test_res$Ntotal <- variables_freq$Counts
+  test_res$Ntotal.frequency <- variables_freq$Freq
+  pos <- midas_data$OS_DIED == 1
+  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", test_variables)])
+  test_res$Npositive <- pos_freq$Counts
+  test_res$Npositive.frequency <- pos_freq$Freq
+  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", test_variables)])
+  test_res$Nnegative <- neg_freq$Counts
+  test_res$Nnegative.frequency <- neg_freq$Freq
+
+  expect_equal(as.data.frame(res), as.data.frame(test_res))
+
+  ## analysis_type = "allele_group" variables = NULL
+  res <- analyzeMiDASData(object,
+                          analysis_type = "allele_group",
+                          variables = NULL,
+                          kable_output = FALSE
+  )
+
+  test_variables <- colnames(midas_data[, label(midas_data) == "allele_group"])
+  test_res <- analyzeAssociations(object, variables = test_variables)
+  test_variables <- test_res$term # constant variables are discarded
+  test_res <- dplyr::rename(test_res, allele.group = term)
+  variables_freq <- getCountsFrequencies(midas_data[, c("ID", test_variables)])
+  test_res$Ntotal <- variables_freq$Counts
+  test_res$Ntotal.frequency <- variables_freq$Freq
+  pos <- midas_data$OS_DIED == 1
+  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", test_variables)])
+  test_res$Npositive <- pos_freq$Counts
+  test_res$Npositive.frequency <- pos_freq$Freq
+  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", test_variables)])
+  test_res$Nnegative <- neg_freq$Counts
+  test_res$Nnegative.frequency <- neg_freq$Freq
+
+  expect_equal(as.data.frame(res), as.data.frame(test_res))
+
+  # conditional TRUE
   res <- analyzeMiDASData(object,
                           analysis_type = "hla_allele",
                           conditional = TRUE,
                           kable_output = FALSE
   )
 
+  test_variables <- colnames(midas_data[, label(midas_data) == "hla_allele"])
   test_res <-
-    analyzeConditionalAssociations(object, variables = colnames(midas_data)[-1], th = 0.05)
+    analyzeConditionalAssociations(object, variables = test_variables, th = 0.05)
   test_res <- dplyr::rename(test_res, allele = term)
   alleles <- test_res$allele
   variables_freq <- getCountsFrequencies(midas_data[, c("ID", alleles)])
@@ -308,7 +457,7 @@ test_that("MiDAS associations are analyzed properly", {
   )
 
   expect_error(analyzeMiDASData(object, analysis_type = "a"),
-               "analysis_type should be one of \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertypes\", \"allele_group\", \"custom\"."
+               "analysis_type should be one of \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertypes\", \"allele_group\"."
   )
 
   expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", conditional = 1),
