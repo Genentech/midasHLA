@@ -1,3 +1,6 @@
+## 0.0.0.9014 - 28/06/2019
++ in analyzeMiDASData now it is possible to specify both lower and upper threshold on frequency, before it was only lower.
+
 ## 0.0.0.9013 - 28/06/2019
 + prepareMiDASData now can accept multiple analysis types at once which allows to cerate data frames with all possible variables in one go
 + variables in data frame produced by prepareMiDASData are now labeled with corresponding analysis type
