@@ -5,7 +5,7 @@
 \title{Prepare HLA calls data for statistical analysis}
 \usage{
 prepareMiDASData(hla_calls, ..., analysis_type = c("hla_allele",
-  "aa_level", "expression_level", "allele_g_group", "allele_supertypes",
+  "aa_level", "expression_level", "allele_g_group", "allele_supertype",
   "allele_group", "custom"), inheritance_model = "additive",
   indels = TRUE, unkchar = FALSE)
 }
@@ -18,8 +18,9 @@ observations or covariates.}
 
 \item{analysis_type}{String indicating analysis type for which data should be
   prepared. Valid choices are \code{"hla_allele"}, \code{"aa_level"},
-  \code{"expression_level"}, \code{"allele_group"}, \code{"custom"}. See
-  details for further explanations.
+  \code{"expression_level"}, \code{"allele_group"}, \code{"custom"}. Each
+  prepared variable will be labeled with corresponding \code{analysis_type}.
+  See details for further explanations.
 
 \code{...} should be data frames with first column holding samples IDs and
 named \code{ID}. Those should correspond to \code{ID} column in
@@ -48,7 +49,7 @@ groups using G group dictionary shipped with package (this is done using
 \code{inheritance_model} of choice (this is done with
 \link{hlaCallsToCounts}).
 
-\code{"allele_supertypes"} - \code{hla_calls} are transformed to HLA alleles
+\code{"allele_supertype"} - \code{hla_calls} are transformed to HLA alleles
 groups using supertypes dictionary shipped with package (this is done using
 \link{hlaToVariable}). Than those are transformed to counts under
 \code{inheritance_model} of choice (this is done with

@@ -258,3 +258,12 @@ test_that("is flag or null", {
     "1 is not a flag \\(a length one logical vector\\) or NULL."
   )
 })
+
+test_that("character maches choices", {
+  expect_equal(characterMatches("foo", c("foo", "bar")), TRUE)
+
+  expect_error(
+    assertthat::assert_that(characterMatches("foo", "bar")),
+    '"foo" should match values "bar".'
+  )
+})
