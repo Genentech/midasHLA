@@ -450,6 +450,24 @@ test_that("MiDAS associations are analyzed properly", {
 
   expect_equal(as.data.frame(res), as.data.frame(test_res)) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
 
+  # Test lower and upper frequency thresholds
+  # %
+  res <- analyzeMiDASData(object, analysis_type = "hla_allele", lower_frequency_cutoff = 0.85, kable_output = FALSE)
+  freqs <- getHlaFrequencies(hla_calls)
+  expect_equal(res$allele, freqs$allele[freqs$Freq > 0.85 & freqs$Freq != 1])
+
+  res <- analyzeMiDASData(object, analysis_type = "hla_allele", upper_frequency_cutoff = 0.03, kable_output = FALSE)
+  expect_equal(res$allele, freqs$allele[freqs$Freq < 0.03 & freqs$Freq != 1])
+
+  # counts
+  counts <- prepareMiDASData(hla_calls, analysis_type = "hla_allele")
+  counts <- colSums(counts[-1])
+  res <- analyzeMiDASData(object, analysis_type = "hla_allele", lower_frequency_cutoff = 34, kable_output = FALSE)
+  expect_equal(res$allele, names(counts)[counts > 34 & freqs$Freq != 1])
+
+  res <- analyzeMiDASData(object, analysis_type = "hla_allele", upper_frequency_cutoff = 2, kable_output = FALSE)
+  expect_equal(res$allele, names(counts)[counts < 2 & freqs$Freq != 1])
+
   # Tests for checkStatisticalModel errors are ommitted here
 
   expect_error(analyzeMiDASData(object, analysis_type = 1),
@@ -472,8 +490,12 @@ test_that("MiDAS associations are analyzed properly", {
                "thief can not be found in object data"
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", frequency_cutoff = "foo"),
-               "frequency_cutoff is not number \\(a length one numeric vector\\) or NULL."
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", lower_frequency_cutoff = "foo"),
+               "lower_frequency_cutoff is not number \\(a length one numeric vector\\) or NULL."
+  )
+
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", upper_frequency_cutoff = "foo"),
+               "upper_frequency_cutoff is not number \\(a length one numeric vector\\) or NULL."
   )
 
   expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", pvalue_cutoff = "foo"),

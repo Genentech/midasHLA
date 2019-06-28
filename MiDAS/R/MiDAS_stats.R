@@ -341,10 +341,15 @@ prepareHlaData <- function(hla_calls,
 #' @param variables Character specifying variables to use in association tests
 #'   or \code{NULL}. If \code{NULL} variables are chosen based on
 #'   \code{analysis_type}.
-#' @param frequency_cutoff Number specifying threshold for inclusion of a
-#'   variable. If it's a number between 0 and 1 variables with frequency below
-#'   this number will not be considered during analysis. If it's greater or
-#'   equal 1 variables with number of counts less that this will not be
+#' @param lower_frequency_cutoff Number specifying lower threshold for inclusion
+#'   of a variable. If it's a number between 0 and 1 variables with frequency
+#'   below this number will not be considered during analysis. If it's greater
+#'   or equal 1 variables with number of counts less that this will not be
+#'   considered during analysis.
+#' @param lower_frequency_cutoff Number specifying upper threshold for inclusion
+#'   of a variable. If it's a number between 0 and 1 variables with frequency
+#'   above this number will not be considered during analysis. If it's greater
+#'   or equal 1 variables with number of counts greater that this will not be
 #'   considered during analysis.
 #' @param logistic Logical indicating if statistical model used is logistic (eg.
 #'   \code{coxph}). If \code{NULL} function will try to figure this out. This is
@@ -396,7 +401,8 @@ analyzeMiDASData <- function(object,
                              analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
                              conditional = FALSE,
                              variables = NULL,
-                             frequency_cutoff = NULL,
+                             lower_frequency_cutoff = NULL,
+                             upper_frequency_cutoff = NULL,
                              pvalue_cutoff = NULL,
                              correction = "BH",
                              logistic = NULL,
@@ -428,7 +434,8 @@ analyzeMiDASData <- function(object,
                     paste(variables[! test_vars], collapse = ", ")
       )
     ),
-    isNumberOrNULL(frequency_cutoff),
+    isNumberOrNULL(lower_frequency_cutoff),
+    isNumberOrNULL(upper_frequency_cutoff),
     isNumberOrNULL(pvalue_cutoff),
     is.string(correction),
     isFlagOrNULL(logistic),
@@ -474,15 +481,20 @@ analyzeMiDASData <- function(object,
   ncts_vars <- variables[! mask_counts]
 
   if (length(cts_vars)) {
-    frequency_cutoff <- ifelse(is.null(frequency_cutoff), 0, frequency_cutoff)
+    lower_frequency_cutoff <- ifelse(is.null(lower_frequency_cutoff), 0, lower_frequency_cutoff)
+    upper_frequency_cutoff <- ifelse(is.null(upper_frequency_cutoff), Inf, upper_frequency_cutoff)
     variables_freq <- object_data %>%
       select("ID",!! cts_vars) %>%
       getCountsFrequencies() %>%
       rename(Ntotal = .data$Counts, Ntotal.frequency = .data$Freq) %>%
-      filter(.data$Ntotal > frequency_cutoff |
-               frequency_cutoff < 1) %>%
-      filter(.data$Ntotal.frequency > frequency_cutoff |
-               frequency_cutoff >= 1)
+      filter(.data$Ntotal > lower_frequency_cutoff |
+               lower_frequency_cutoff < 1) %>%
+      filter(.data$Ntotal.frequency > lower_frequency_cutoff |
+               lower_frequency_cutoff >= 1) %>%
+      filter(.data$Ntotal < upper_frequency_cutoff |
+               upper_frequency_cutoff < 1) %>%
+      filter(.data$Ntotal.frequency < upper_frequency_cutoff |
+               upper_frequency_cutoff >= 1)
 
     variables <- c(ncts_vars, variables_freq$term)
   }
