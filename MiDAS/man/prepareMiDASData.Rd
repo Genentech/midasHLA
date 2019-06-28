@@ -5,7 +5,7 @@
 \title{Prepare HLA calls data for statistical analysis}
 \usage{
 prepareMiDASData(hla_calls, ..., analysis_type = c("hla_allele",
-  "aa_level", "expression_level", "allele_g_group", "allele_supertypes",
+  "aa_level", "expression_level", "allele_g_group", "allele_supertype",
   "allele_group", "custom"), inheritance_model = "additive",
   indels = TRUE, unkchar = FALSE)
 }
@@ -49,7 +49,7 @@ groups using G group dictionary shipped with package (this is done using
 \code{inheritance_model} of choice (this is done with
 \link{hlaCallsToCounts}).
 
-\code{"allele_supertypes"} - \code{hla_calls} are transformed to HLA alleles
+\code{"allele_supertype"} - \code{hla_calls} are transformed to HLA alleles
 groups using supertypes dictionary shipped with package (this is done using
 \link{hlaToVariable}). Than those are transformed to counts under
 \code{inheritance_model} of choice (this is done with

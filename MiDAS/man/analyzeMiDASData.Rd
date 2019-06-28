@@ -5,7 +5,7 @@
 \title{Analyze associations in MiDAS data}
 \usage{
 analyzeMiDASData(object, analysis_type = c("hla_allele", "aa_level",
-  "expression_level", "allele_g_group", "allele_supertypes",
+  "expression_level", "allele_g_group", "allele_supertype",
   "allele_group"), conditional = FALSE, variables = NULL,
   frequency_cutoff = NULL, pvalue_cutoff = NULL, correction = "BH",
   logistic = NULL, binary_phenotype = NULL, th = 0.05,
@@ -19,7 +19,7 @@ others.}
 \item{analysis_type}{String indicating the type of analysis being performed,
 at this point it is only used for results formatting. Valid values are
 \code{"hla_allele"}, \code{"aa_level"}, \code{"expression_level"},
-\code{"allele_g_group"}, \code{"allele_supertypes"}, \code{"allele_group"},
+\code{"allele_g_group"}, \code{"allele_supertype"}, \code{"allele_group"},
 \code{"custom"}.}
 
 \item{conditional}{Logical indicating if the analysis should be performed
