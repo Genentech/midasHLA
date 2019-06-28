@@ -1,3 +1,8 @@
+## 0.0.0.9013 - 28/06/2019
++ prepareMiDASData now can accept multiple analysis types at once which allows to cerate data frames with all possible variables in one go
++ variables in data frame produced by prepareMiDASData are now labeled with corresponding analysis type
++ analyzeMiDASData now under variables = NULL selects appropaite variables based on labels associated with midas_data
+
 ## 0.0.0.9012 - 25/06/2019
 + fixes analyzeMiDASData function crashing on float variables. Now frequency calculations are done only for properly labeled variables on midas_data.
 
