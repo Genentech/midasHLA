@@ -632,7 +632,9 @@ listMiDASDictionaries <- function(file.names = FALSE) {
 #' @return Logical indicating if \code{x} matches one of the values in
 #'   \code{choice}.
 #'
+#' @importFrom assertthat assert_that
 characterMatches <- function(x, choice) {
+  assert_that(is.character(x))
   test <- x %in% choice
   test <- all(test)
 
