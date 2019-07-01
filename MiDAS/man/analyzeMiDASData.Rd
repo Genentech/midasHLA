@@ -7,10 +7,10 @@
 analyzeMiDASData(object, analysis_type = c("hla_allele", "aa_level",
   "expression_level", "allele_g_group", "allele_supertype",
   "allele_group"), conditional = FALSE, variables = NULL,
-  frequency_cutoff = NULL, pvalue_cutoff = NULL, correction = "BH",
-  logistic = NULL, binary_phenotype = NULL, th = 0.05,
-  rss_th = 1e-07, kable_output = TRUE,
-  format = getOption("knitr.table.format"))
+  lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL,
+  pvalue_cutoff = NULL, correction = "BH", logistic = NULL,
+  binary_phenotype = NULL, th = 0.05, rss_th = 1e-07,
+  kable_output = TRUE, format = getOption("knitr.table.format"))
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many
@@ -30,10 +30,10 @@ using stepwise conditional tests or not. See
 or \code{NULL}. If \code{NULL} variables are chosen based on
 \code{analysis_type}.}
 
-\item{frequency_cutoff}{Number specifying threshold for inclusion of a
-variable. If it's a number between 0 and 1 variables with frequency below
-this number will not be considered during analysis. If it's greater or
-equal 1 variables with number of counts less that this will not be
+\item{lower_frequency_cutoff}{Number specifying lower threshold for inclusion
+of a variable. If it's a number between 0 and 1 variables with frequency
+below this number will not be considered during analysis. If it's greater
+or equal 1 variables with number of counts less that this will not be
 considered during analysis.}
 
 \item{pvalue_cutoff}{Number specifying p-value cutoff for results to be
@@ -74,6 +74,12 @@ is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
 
 \item{format}{A character string. Possible values are \code{"latex"} and
 \code{"html"}.}
+
+\item{lower_frequency_cutoff}{Number specifying upper threshold for inclusion
+of a variable. If it's a number between 0 and 1 variables with frequency
+above this number will not be considered during analysis. If it's greater
+or equal 1 variables with number of counts greater that this will not be
+considered during analysis.}
 }
 \value{
 Tibble containing results for all tested variables.
