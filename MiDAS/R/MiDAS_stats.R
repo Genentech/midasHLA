@@ -333,8 +333,7 @@ prepareHlaData <- function(hla_calls,
 #' @param analysis_type String indicating the type of analysis being performed,
 #'   at this point it is only used for results formatting. Valid values are
 #'   \code{"hla_allele"}, \code{"aa_level"}, \code{"expression_level"},
-#'   \code{"allele_g_group"}, \code{"allele_supertype"}, \code{"allele_group"},
-#'   \code{"custom"}.
+#'   \code{"allele_g_group"}, \code{"allele_supertype"}, \code{"allele_group"}.
 #' @param conditional Logical indicating if the analysis should be performed
 #'   using stepwise conditional tests or not. See
 #'   \link{analyzeConditionalAssociations} for more details.
