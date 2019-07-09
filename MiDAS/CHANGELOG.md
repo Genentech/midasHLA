@@ -1,3 +1,7 @@
+## 0.0.0.9013 - 10/07/2019
++ adds kirHaplotypeToCounts for converting KIR halplotypes to genes counts
++ adds readKirCalls that allows parsing KIR haplotypes calls output by kpi (https://github.com/droe-nmdp/kpi)
+
 ## 0.0.0.9013 - 28/06/2019
 + prepareMiDASData now can accept multiple analysis types at once which allows to cerate data frames with all possible variables in one go
 + variables in data frame produced by prepareMiDASData are now labeled with corresponding analysis type
