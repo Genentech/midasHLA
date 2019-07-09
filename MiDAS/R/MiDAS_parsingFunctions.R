@@ -230,6 +230,82 @@ readHlaAlignments <- function(file,
   return(aln)
 }
 
-readKirTypes <- function() {
+#' Reads data table with KIR haplotypes calls
+#'
+#' \code{readKirCalls} reads table with KIR haplotypes calls from file.
+#'
+#' Input file have to be a tsv formatted table with two columns and header.
+#' First column should contain samples IDs, second column should hold
+#' corresponding KIR haplotypes.
+#'
+#' @inheritParams kirHaplotypeToCounts
+#' @param file Path to input file.
+#' @param counts Logical flag indicating if KIR haplotypes should be converted
+#'   to gene counts.
+#'
+#' @return Data frame containing KIR haplotypes calls or corresponding gene
+#'   counts.
+#'
+#' @examples
+#' file <- system.file("extdata", "KIR_output_example.txt", package = "MiDAS")
+#' readKirCalls(file)
+#'
+#' @importFrom assertthat assert_that is.flag is.readable see_if
+#' @importFrom stats na.omit
+#'
+#' @export
+readKirCalls <- function(file,
+                         hap_dict = system.file("extdata", "kir_hapset.tsv", package = "MiDAS"),
+                         counts = TRUE,
+                         binary = TRUE) {
+  assert_that(
+    is.readable(file),
+    is.readable(hap_dict),
+    is.flag(counts),
+    is.flag(binary)
+  )
 
+  kir_calls <- read.table(file = file,
+                          header = TRUE,
+                          sep = "\t",
+                          na.strings = c("", "NA"),
+                          stringsAsFactors = FALSE
+  )
+  assert_that(
+    see_if(ncol(kir_calls) == 2,
+           msg = sprintf(
+             fmt = "KIR haplotypes calls table should have 2 columns, not %i",
+             ncol(kir_calls)
+           )
+    ),
+    see_if(
+      all(is_hap <- grepl("^[0-9+|/]+$", na.omit(kir_calls[, 2, drop = TRUE]))),
+      msg = sprintf(
+        fmt = "rows %s of input file contains unexpected characters",
+        paste(which(! is_hap), collapse = ", ")
+      )
+    )
+  )
+
+  if (counts) {
+    haplotypes <- kir_calls[, 2, drop = TRUE]
+    kir_counts <- kirHaplotypeToCounts(
+      x = haplotypes,
+      hap_dict = hap_dict,
+      binary = binary
+    )
+    i <- ncol(kir_counts) + 1
+    kir_counts[, i] <- kir_calls[! is.na(haplotypes), 1, drop = TRUE]
+    kir_calls <- merge(x = kir_calls,
+                       y = kir_counts,
+                       by.x = 1,
+                       by.y = i,
+                       all.x = TRUE,
+                       sort = TRUE
+    )
+    # drop columns holding haplotypes
+    kir_calls <- kir_calls[, -2:-3, drop = FALSE]
+  }
+
+  return(kir_calls)
 }

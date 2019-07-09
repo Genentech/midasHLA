@@ -664,7 +664,7 @@ assertthat::on_failure(characterMatches) <- function(call, env) {
 #'   more information.
 #' @param binary Logical flag indicating if haplotypes should be converted only
 #'   to gene presence / absence indicators. At this point this is the only way
-#'   that allows unabigous conversion.
+#'   that allows unambiguous conversion.
 #'
 #' \code{hap_dict} have to be a \code{tsv} file with first column holding KIR
 #' haplotypes and gene counts in others. File should have header with first
