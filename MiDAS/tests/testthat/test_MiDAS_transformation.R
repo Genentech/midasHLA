@@ -363,7 +363,7 @@ test_that("counts are conveerted into frequencies", {
 })
 
 test_that("results are formatted properly with preselected args", {
-  midas_data <<- data.frame( # in one of the tests above midas_data is assigned as global variable, this leads to unexpected behaviour!
+  midas_data <- data.frame(
     ID = c(1, 2),
     "A*01:01" = c(0, 2),
     "A*01:02" = c(2, 0),
@@ -373,6 +373,7 @@ test_that("results are formatted properly with preselected args", {
   )
 
   object <- stats::glm(R ~ 1, data = midas_data, family = stats::binomial)
+  object$call$data <- midas_data
   res <- analyzeMiDASData(object, analysis_type = "hla_allele", variables = c("A*01:01", "A*01:02"), pvalue_cutoff = 1, kable_output = FALSE)
   res <- rename(res, term = allele, estimate = odds.ratio)
   res_kable <- formatAssociationsResults(res, type = "hla_allele")
