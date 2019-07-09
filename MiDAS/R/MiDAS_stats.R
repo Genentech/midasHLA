@@ -410,7 +410,6 @@ analyzeMiDASData <- function(object,
                              rss_th = 1e-07,
                              kable_output = TRUE,
                              format = getOption("knitr.table.format")) {
-
   assert_that(
     checkStatisticalModel(object)
   )
@@ -824,4 +823,80 @@ prepareMiDASData <- function(hla_calls,
   }
 
   return(midas_data)
+}
+
+#'
+#' @examples
+#' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(hla_calls_file)
+#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+#' pheno <- read.table(pheno_file, header = TRUE)
+#' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
+#' covar <- read.table(covar_file, header = TRUE)
+#' MiDAS(model = coxph(Surv(OS, OS_DIED) ~ AGE + SEX),
+#'       hla_calls = hla_calls,
+#'       pheno = pheno,
+#'       covar = covar,
+#'       analysis_type = "hla_allele",
+#'       inheritance_model = "additive"
+#' )
+#'
+#' @importFrom assertthat assert_that has_name
+#' @importFrom dplyr filter
+#' @importFrom pryr modify_call standardise_call
+#' @importFrom rlang enexpr
+#'
+#' @export
+MiDAS <- function(model,
+                  hla_calls,
+                  ...,
+                  analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+                  inheritance_model = "additive",
+                  indels = TRUE,
+                  unkchar = FALSE,
+                  conditional = FALSE,
+                  variables = NULL,
+                  lower_frequency_cutoff = NULL,
+                  upper_frequency_cutoff = NULL,
+                  pvalue_cutoff = NULL,
+                  correction = "BH",
+                  logistic = NULL,
+                  binary_phenotype = NULL,
+                  th = 0.05,
+                  rss_th = 1e-07,
+                  kable_output = TRUE,
+                  format = getOption("knitr.table.format")) {
+  midas_data <- prepareMiDASData(hla_calls = hla_calls,
+                                 ... = ...,
+                                 analysis_type = analysis_type,
+                                 inheritance_model = inheritance_model,
+                                 indels = indels,
+                                 unkchar = unkchar
+  )
+
+  # filter from midas_data entries with NA phenotype
+  cl <- enexpr(model)
+  cl <- standardise_call(cl)
+  assert_that(assertthat::has_name(cl, "formula"))
+  pheno_var <- all.vars(cl)[1]
+  midas_data <- filter(midas_data, ! is.na(midas_data[[pheno_var]]))
+
+  cl <- modify_call(cl, list(data = midas_data)) # makes that cl$data is a data.frame...
+  object <- eval(cl)
+
+  analyzeMiDASData(object = object,
+                   analysis_type = analysis_type,
+                   conditional = conditional,
+                   variables = variables,
+                   lower_frequency_cutoff = lower_frequency_cutoff,
+                   upper_frequency_cutoff = upper_frequency_cutoff,
+                   pvalue_cutoff = pvalue_cutoff,
+                   correction = correction,
+                   logistic = logistic,
+                   binary_phenotype = binary_phenotype,
+                   th = th,
+                   rss_th = rss_th,
+                   kable_output = kable_output,
+                   format = format
+  )
 }
