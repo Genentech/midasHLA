@@ -333,8 +333,7 @@ prepareHlaData <- function(hla_calls,
 #' @param analysis_type String indicating the type of analysis being performed,
 #'   at this point it is only used for results formatting. Valid values are
 #'   \code{"hla_allele"}, \code{"aa_level"}, \code{"expression_level"},
-#'   \code{"allele_g_group"}, \code{"allele_supertype"}, \code{"allele_group"},
-#'   \code{"custom"}.
+#'   \code{"allele_g_group"}, \code{"allele_supertype"}, \code{"allele_group"}.
 #' @param conditional Logical indicating if the analysis should be performed
 #'   using stepwise conditional tests or not. See
 #'   \link{analyzeConditionalAssociations} for more details.
@@ -346,7 +345,7 @@ prepareHlaData <- function(hla_calls,
 #'   below this number will not be considered during analysis. If it's greater
 #'   or equal 1 variables with number of counts less that this will not be
 #'   considered during analysis.
-#' @param lower_frequency_cutoff Number specifying upper threshold for inclusion
+#' @param upper_frequency_cutoff Number specifying upper threshold for inclusion
 #'   of a variable. If it's a number between 0 and 1 variables with frequency
 #'   above this number will not be considered during analysis. If it's greater
 #'   or equal 1 variables with number of counts greater that this will not be
@@ -411,7 +410,6 @@ analyzeMiDASData <- function(object,
                              rss_th = 1e-07,
                              kable_output = TRUE,
                              format = getOption("knitr.table.format")) {
-
   assert_that(
     checkStatisticalModel(object)
   )
@@ -825,4 +823,186 @@ prepareMiDASData <- function(hla_calls,
   }
 
   return(midas_data)
+}
+
+#' Transform and analyze MiDAS data set
+#'
+#' \code{MiDAS} combines the functionality of \link{prepareMiDASData} and
+#' \link{analyzeMiDASData} functions.
+#'
+#' @inheritParams analyzeMiDASData
+#' @inheritParams prepareMiDASData
+#' @param model Call specifying statistical model function to use. Should
+#'   specify at least function name and \code{formula}. See examples.
+#' @param midas_results Object of class \code{MiDAS} such as one returned by
+#'   \link{MiDAS} function.
+#'
+#' @return Results for all tested variables contained in object of class
+#'   \code{MiDAS} that inherits from \code{tibble}. It behaves as ordinary
+#'   \code{tibble}, but additionally stores \code{hla_calls}, \code{midas_data}
+#'   and \code{call} under corresponding attributes.
+#'
+#' @examples
+#' library(survival)
+#'
+#' # load raw data
+#' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(hla_calls_file)
+#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+#' pheno <- read.table(pheno_file, header = TRUE)
+#' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
+#' covar <- read.table(covar_file, header = TRUE)
+#'
+#' # MiDAS perform two actions; transform data to specified type and evaluate
+#' # statistical model for given analysis type or variables.
+#' # Once transformed data can be reused...
+#'
+#' # transform data to HLA allele and HLA expression levels
+#' # calculate results on HLA allele level
+#' midas_results <- MiDAS(model = coxph(Surv(OS, OS_DIED) ~ AGE + SEX),
+#'                        hla_calls = hla_calls,
+#'                        pheno = pheno,
+#'                        covar = covar,
+#'                        analysis_type =  c("hla_allele", "expression_level"),
+#'                        inheritance_model = "additive"
+#' )
+#'
+#' # reuse previously transformed data
+#' # calculate results on HLA expression level
+#' midas_results <- MiDAS(model = coxph(Surv(OS, OS_DIED) ~ AGE + SEX),
+#'                        midas_results = midas_results,
+#'                        pheno = pheno,
+#'                        covar = covar,
+#'                        analysis_type =  "expression_level",
+#'                        inheritance_model = "additive"
+#' )
+#'
+#' @importFrom assertthat assert_that is.flag is.number is.string
+#' @importFrom dplyr filter
+#' @importFrom pryr modify_call standardise_call
+#' @importFrom rlang enexpr has_name
+#'
+#' @export
+MiDAS <- function(model,
+                  midas_results = NULL,
+                  hla_calls = NULL,
+                  ...,
+                  analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+                  inheritance_model = "additive",
+                  indels = TRUE,
+                  unkchar = FALSE,
+                  conditional = FALSE,
+                  variables = NULL,
+                  lower_frequency_cutoff = NULL,
+                  upper_frequency_cutoff = NULL,
+                  pvalue_cutoff = NULL,
+                  correction = "BH",
+                  logistic = NULL,
+                  binary_phenotype = NULL,
+                  th = 0.05,
+                  rss_th = 1e-07,
+                  kable_output = TRUE,
+                  format = getOption("knitr.table.format")) {
+  assert_that(
+    # model get asserted after evaluation
+    isClassOrNULL(midas_results, "MiDAS"),
+    #isDataFrameOrNULL(hla_calls), # make checkHlaCallsFormat accept nulls?
+    is.character(analysis_type),
+    characterMatches(
+      x = analysis_type,
+      choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group")
+    ),
+    is.string(inheritance_model),
+    stringMatches(inheritance_model, c("dominant", "recessive", "additive")),
+    is.flag(indels),
+    is.flag(unkchar),
+    is.flag(conditional),
+    isCharacterOrNULL(variables),
+    isNumberOrNULL(lower_frequency_cutoff),
+    isNumberOrNULL(upper_frequency_cutoff),
+    isNumberOrNULL(pvalue_cutoff),
+    is.string(correction),
+    isFlagOrNULL(logistic),
+    isFlagOrNULL(binary_phenotype),
+    is.number(th),
+    is.number(rss_th),
+    is.flag(kable_output),
+    is.string(format),
+    stringMatches(format, c("html", "latex"))
+  )
+
+  # prepare data
+  if (! missing(midas_results)) {
+    hla_calls <- attr(midas_results, "hla_calls")
+    old_midas_data <- attr(midas_results, "midas_data")
+    old_types <- labels(old_midas_data)
+    analysis_type <- analysis_type[! analysis_type %in% old_types]
+
+    if (length(analysis_type)) {
+      new_midas_data <- prepareMiDASData(hla_calls = hla_calls,
+                                         ... = ...,
+                                         analysis_type = analysis_type,
+                                         inheritance_model = inheritance_model,
+                                         indels = indels,
+                                         unkchar = unkchar
+      )
+
+      # remove duplicated additional data
+      new_cols <-  which(! colnames(new_midas_data) %in% colnames(old_midas_data))
+      new_cols <- c(1, new_cols) # add ID column
+      new_midas_data <- new_midas_data[, new_cols, drop = FALSE]
+
+      midas_data <- left_join(old_midas_data, new_midas_data, by = "ID")
+    } else {
+      midas_data <- old_midas_data
+    }
+  } else {
+    midas_data <- prepareMiDASData(hla_calls = hla_calls,
+                                   ... = ...,
+                                   analysis_type = analysis_type,
+                                   inheritance_model = inheritance_model,
+                                   indels = indels,
+                                   unkchar = unkchar
+    )
+  }
+
+  # filter from midas_data entries with NA phenotype
+  cl <- enexpr(model)
+  cl <- standardise_call(cl)
+  assert_that(has_name(cl, "formula"))
+  pheno_var <- all.vars(cl)[1]
+  midas_data <- filter(midas_data, ! is.na(midas_data[[pheno_var]]))
+
+  # create statistical object
+  cl <- modify_call(cl, list(data = midas_data)) # makes that cl$data is a data.frame...
+  object <- eval(cl)
+
+  # analyze data
+  midas_result <- analyzeMiDASData(
+    object = object,
+    analysis_type = analysis_type[1], # pass only first specifed analysis_type
+    conditional = conditional,
+    variables = variables,
+    lower_frequency_cutoff = lower_frequency_cutoff,
+    upper_frequency_cutoff = upper_frequency_cutoff,
+    pvalue_cutoff = pvalue_cutoff,
+    correction = correction,
+    logistic = logistic,
+    binary_phenotype = binary_phenotype,
+    th = th,
+    rss_th = rss_th,
+    kable_output = kable_output,
+    format = format
+  )
+
+  # create MiDAS object
+  ## this should be later changed with proper fuctions for creating ,checking, setting ...
+  midas_result <- structure(midas_result,
+                            hla_calls = hla_calls,
+                            midas_data = midas_data,
+                            call = match.call(),
+                            class = c("MiDAS", "tbl_df", "tbl", "data.frame")
+  )
+
+  return(midas_result)
 }

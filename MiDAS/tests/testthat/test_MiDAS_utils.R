@@ -151,8 +151,11 @@ test_that("HLA statistical models are updated properly", {
   covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
   midas_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
   coxmod <- coxph(Surv(OS, OS_DIED) ~ 1, data = midas_data)
+  coxmod$call$data <- midas_data
+  coxmod_test <- coxph(Surv(OS, OS_DIED) ~ `A*01:01`, data = midas_data)
+  coxmod_test$call$data <- midas_data
   expect_equal(updateModel(coxmod, "A*01:01"),
-               coxph(Surv(OS, OS_DIED) ~ `A*01:01`, data = midas_data)
+               coxmod_test
   )
 
   expect_error(updateModel(coxmod, 1),
@@ -265,5 +268,15 @@ test_that("character maches choices", {
   expect_error(
     assertthat::assert_that(characterMatches("foo", "bar")),
     '"foo" should match values "bar".'
+  )
+})
+
+test_that("is class or null", {
+  expect_equal(isClassOrNULL("foo", "character"), TRUE)
+  expect_equal(isClassOrNULL(NULL, "character"), TRUE)
+
+  expect_error(
+    assertthat::assert_that(isClassOrNULL("foo", "bar")),
+    "\"foo\" must be an instance of \"bar\" or NULL."
   )
 })

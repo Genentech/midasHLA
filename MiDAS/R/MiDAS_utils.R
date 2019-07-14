@@ -652,3 +652,33 @@ assertthat::on_failure(characterMatches) <- function(call, env) {
          '".'
   )
 }
+
+#' Check if object is of class x or null
+#'
+#' \code{isClassOrNULL} checks if object is an instance of a specified class or
+#' is null.
+#'
+#' @param x object to test.
+#' @param class String specifying class to test.
+#'
+#' @return Logical indicating if \code{x} is an instance of \code{class}.
+#'
+#' @importFrom assertthat assert_that
+#' @importFrom methods is
+isClassOrNULL <- function(x, class) {
+  test <- is(x, class) | is.null(x)
+
+  return(test)
+}
+
+#' Error message for isClassOrNULL
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(isClassOrNULL) <- function(call, env) {
+  paste0(deparse(call$x),
+         " must be an instance of ",
+         deparse(call$class),
+         " or NULL."
+  )
+}
