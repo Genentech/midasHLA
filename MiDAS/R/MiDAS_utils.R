@@ -655,11 +655,11 @@ assertthat::on_failure(characterMatches) <- function(call, env) {
 
 #' Check if object is of class x or null
 #'
-#' \code{isClassOrNULL} checks if object is instance of specified class or is
-#' null.
+#' \code{isClassOrNULL} checks if object is an instance of a specified class or
+#' is null.
 #'
 #' @param x object to test.
-#' @param class String specifing class to test.
+#' @param class String specifying class to test.
 #'
 #' @return Logical indicating if \code{x} is an instance of \code{class}.
 #'

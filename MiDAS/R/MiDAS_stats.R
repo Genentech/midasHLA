@@ -827,7 +827,7 @@ prepareMiDASData <- function(hla_calls,
 
 #' Transform and analyze MiDAS data set
 #'
-#' \code{MiDAS} combines functionality of \link{prepareMiDASData} and
+#' \code{MiDAS} combines the functionality of \link{prepareMiDASData} and
 #' \link{analyzeMiDASData} functions.
 #'
 #' @inheritParams analyzeMiDASData
