@@ -745,3 +745,324 @@ test_that("MiDAS data is prepared properly", {
     "no allele could be assigned to allele groups for input hla_calls"
   )
 })
+
+test_that("MiDAS data is prepared and analyzed properly", {
+  library(survival)
+
+  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(hla_calls_file)
+  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+  pheno <- read.table(pheno_file, header = TRUE)
+  covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
+  covar <- read.table(covar_file, header = TRUE)
+
+  midas_results <- MiDAS(model = coxph(Surv(OS, OS_DIED) ~ AGE + SEX),
+                         hla_calls = hla_calls,
+                         pheno = pheno,
+                         covar = covar,
+                         analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+                         inheritance_model = "additive",
+                         kable_output = FALSE
+  )
+
+  # prepared properly
+  midas_data <- attr(midas_results, "midas_data")
+  midas_data_test <- prepareMiDASData(
+    hla_calls = hla_calls,
+    pheno = pheno,
+    covar = covar,
+    analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+    inheritance_model = "additive"
+  )
+  expect_equal(midas_data, midas_data_test)
+
+  ## when reused
+  midas_results_reused <- MiDAS(model = coxph(Surv(OS, OS_DIED) ~ AGE + SEX),
+                                midas_results = midas_results,
+                                pheno = pheno,
+                                covar = covar,
+                                analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+                                inheritance_model = "additive",
+                                kable_output = FALSE
+  )
+  midas_data <- attr(midas_results_reused, "midas_data")
+  expect_equal(midas_data, midas_data_test)
+
+  # analyzed properly
+  midas_results <- MiDAS(model = coxph(Surv(OS, OS_DIED) ~ AGE + SEX),
+                         hla_calls = hla_calls,
+                         pheno = pheno,
+                         covar = covar,
+                         analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+                         inheritance_model = "additive",
+                         kable_output = FALSE
+  )
+
+  object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data_test)
+  object$call$data <- midas_data_test
+  midas_results_test <- analyzeMiDASData(
+    object = object,
+    analysis_type = "hla_allele",
+    kable_output = FALSE
+  )
+  midas_results_test <- structure(midas_results_test,
+                                  hla_calls = hla_calls,
+                                  midas_data = midas_data_test,
+                                  call = attr(midas_results, "call"))
+  expect_equal(as.data.frame(midas_results), as.data.frame(midas_results_test))
+
+
+  expect_error(
+    MiDAS(model = coxph(Surv(OS, OS_DIED) ~ AGE + SEX),
+          midas_results = "foo",
+          pheno = pheno,
+          covar = covar,
+          analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+          inheritance_model = "additive",
+          kable_output = FALSE
+    ),
+    "midas_results must be an instance of \"MiDAS\" or NULL."
+  )
+
+  expect_error(
+    MiDAS(model = coxph(Surv(OS, OS_DIED) ~ AGE + SEX),
+          hla_calls = hla_calls,
+          pheno = pheno,
+          covar = covar,
+          analysis_type = 1,
+          inheritance_model = "additive",
+          kable_output = FALSE
+    ),
+    "analysis_type is not a character vector"
+  )
+
+  expect_error(
+    MiDAS(model = coxph(Surv(OS, OS_DIED) ~ AGE + SEX),
+          hla_calls = hla_calls,
+          pheno = pheno,
+          covar = covar,
+          analysis_type = "foo",
+          inheritance_model = "additive",
+          kable_output = FALSE
+    ),
+    "analysis_type should match values \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\"."
+  )
+
+  expect_error(
+    MiDAS(model = coxph(Surv(OS, OS_DIED) ~ AGE + SEX),
+          hla_calls = hla_calls,
+          pheno = pheno,
+          covar = covar,
+          analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+          inheritance_model = 1,
+          kable_output = FALSE
+    ),
+    "inheritance_model is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(
+    MiDAS(model = coxph(Surv(OS, OS_DIED) ~ AGE + SEX),
+          hla_calls = hla_calls,
+          pheno = pheno,
+          covar = covar,
+          analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+          inheritance_model = "foo",
+          kable_output = FALSE
+    ),
+    "inheritance_model should be one of \"dominant\", \"recessive\", \"additive\"."
+  )
+
+  expect_error(
+    MiDAS(model = coxph(Surv(OS, OS_DIED) ~ AGE + SEX),
+          hla_calls = hla_calls,
+          pheno = pheno,
+          covar = covar,
+          analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+          inheritance_model = "additive",
+          indels = "foo",
+          kable_output = FALSE
+    ),
+    "indels is not a flag \\(a length one logical vector\\)."
+  )
+
+  expect_error(
+    MiDAS(model = coxph(Surv(OS, OS_DIED) ~ AGE + SEX),
+          hla_calls = hla_calls,
+          pheno = pheno,
+          covar = covar,
+          analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+          inheritance_model = "additive",
+          unkchar = "bar",
+          kable_output = FALSE
+    ),
+    "unkchar is not a flag \\(a length one logical vector\\)."
+  )
+
+  expect_error(
+    MiDAS(model = coxph(Surv(OS, OS_DIED) ~ AGE + SEX),
+          hla_calls = hla_calls,
+          pheno = pheno,
+          covar = covar,
+          analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+          inheritance_model = "additive",
+          conditional = "bar",
+          kable_output = FALSE
+    ),
+    "conditional is not a flag \\(a length one logical vector\\)."
+  )
+
+  expect_error(
+    MiDAS(model = coxph(Surv(OS, OS_DIED) ~ AGE + SEX),
+          hla_calls = hla_calls,
+          pheno = pheno,
+          covar = covar,
+          analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+          inheritance_model = "additive",
+          variables = FALSE,
+          kable_output = FALSE
+    ),
+    "variables is not a character vector or NULL."
+  )
+
+  expect_error(
+    MiDAS(model = coxph(Surv(OS, OS_DIED) ~ AGE + SEX),
+          hla_calls = hla_calls,
+          pheno = pheno,
+          covar = covar,
+          analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+          inheritance_model = "additive",
+          lower_frequency_cutoff = "foo",
+          kable_output = FALSE
+    ),
+    "lower_frequency_cutoff is not number \\(a length one numeric vector\\) or NULL."
+  )
+
+  expect_error(
+    MiDAS(model = coxph(Surv(OS, OS_DIED) ~ AGE + SEX),
+          hla_calls = hla_calls,
+          pheno = pheno,
+          covar = covar,
+          analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+          inheritance_model = "additive",
+          upper_frequency_cutoff = "foo",
+          kable_output = FALSE
+    ),
+    "upper_frequency_cutoff is not number \\(a length one numeric vector\\) or NULL."
+  )
+
+  expect_error(
+    MiDAS(model = coxph(Surv(OS, OS_DIED) ~ AGE + SEX),
+          hla_calls = hla_calls,
+          pheno = pheno,
+          covar = covar,
+          analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+          inheritance_model = "additive",
+          pvalue_cutoff = "foo",
+          kable_output = FALSE
+    ),
+    "pvalue_cutoff is not number \\(a length one numeric vector\\) or NULL."
+  )
+
+  expect_error(
+    MiDAS(model = coxph(Surv(OS, OS_DIED) ~ AGE + SEX),
+          hla_calls = hla_calls,
+          pheno = pheno,
+          covar = covar,
+          analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+          inheritance_model = "additive",
+          correction = TRUE,
+          kable_output = FALSE
+    ),
+    "correction is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(
+    MiDAS(model = coxph(Surv(OS, OS_DIED) ~ AGE + SEX),
+          hla_calls = hla_calls,
+          pheno = pheno,
+          covar = covar,
+          analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+          inheritance_model = "additive",
+          logistic = "foo",
+          kable_output = FALSE
+    ),
+    "logistic is not a flag \\(a length one logical vector\\) or NULL."
+  )
+
+  expect_error(
+    MiDAS(model = coxph(Surv(OS, OS_DIED) ~ AGE + SEX),
+          hla_calls = hla_calls,
+          pheno = pheno,
+          covar = covar,
+          analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+          inheritance_model = "additive",
+          binary_phenotype = "foo",
+          kable_output = FALSE
+    ),
+    "binary_phenotype is not a flag \\(a length one logical vector\\) or NULL."
+  )
+
+  expect_error(
+    MiDAS(model = coxph(Surv(OS, OS_DIED) ~ AGE + SEX),
+          hla_calls = hla_calls,
+          pheno = pheno,
+          covar = covar,
+          analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+          inheritance_model = "additive",
+          th = "foo",
+          kable_output = FALSE
+    ),
+    "th is not a number \\(a length one numeric vector\\)."
+  )
+
+  expect_error(
+    MiDAS(model = coxph(Surv(OS, OS_DIED) ~ AGE + SEX),
+          hla_calls = hla_calls,
+          pheno = pheno,
+          covar = covar,
+          analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+          inheritance_model = "additive",
+          rss_th = "foo",
+          kable_output = FALSE
+    ),
+    "rss_th is not a number \\(a length one numeric vector\\)."
+  )
+
+  expect_error(
+    MiDAS(model = coxph(Surv(OS, OS_DIED) ~ AGE + SEX),
+          hla_calls = hla_calls,
+          pheno = pheno,
+          covar = covar,
+          analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+          inheritance_model = "additive",
+          kable_output = "foo"
+    ),
+    "kable_output is not a flag \\(a length one logical vector\\)."
+  )
+
+  expect_error(
+    MiDAS(model = coxph(Surv(OS, OS_DIED) ~ AGE + SEX),
+          hla_calls = hla_calls,
+          pheno = pheno,
+          covar = covar,
+          analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+          inheritance_model = "additive",
+          kable_output = FALSE,
+          format = TRUE
+    ),
+    "format is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(
+    MiDAS(model = coxph(Surv(OS, OS_DIED) ~ AGE + SEX),
+          hla_calls = hla_calls,
+          pheno = pheno,
+          covar = covar,
+          analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+          inheritance_model = "additive",
+          kable_output = FALSE,
+          format = "pdf"
+    ),
+    "format should be one of \"html\", \"latex\"."
+  )
+})
