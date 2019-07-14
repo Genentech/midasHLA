@@ -740,7 +740,6 @@ test_that("MiDAS data is prepared properly", {
     "no expression levels were found for input hla_calls"
   )
 
-  # this is ill due to ggroups matches problem there is one more above, when groups are fixed this will start to fail so uncomment and remove linies as needed
   expect_error(
     prepareMiDASData(hla_calls[, c("ID", "DOB_1", "DOB_2")], analysis_type = "allele_group"),
     "no allele could be assigned to allele groups for input hla_calls"
