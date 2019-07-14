@@ -270,3 +270,13 @@ test_that("character maches choices", {
     '"foo" should match values "bar".'
   )
 })
+
+test_that("is class or null", {
+  expect_equal(isClassOrNULL("foo", "character"), TRUE)
+  expect_equal(isClassOrNULL(NULL, "character"), TRUE)
+
+  expect_error(
+    assertthat::assert_that(isClassOrNULL("foo", "bar")),
+    "\"foo\" must be an instance of \"bar\" or NULL."
+  )
+})
