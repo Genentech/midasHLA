@@ -683,7 +683,7 @@ assertthat::on_failure(characterMatches) <- function(call, env) {
 #'
 #' @export
 kirHaplotypeToCounts <- function(x,
-                                 hap_dict = system.file("extdata", "kir_hapset.tsv", package = "MiDAS"),
+                                 hap_dict = system.file("extdata", "Match_KIR_haplotype_genes.tsv", package = "MiDAS"),
                                  binary = TRUE) {
   assert_that(
     is.character(x),
