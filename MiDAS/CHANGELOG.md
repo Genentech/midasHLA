@@ -1,3 +1,7 @@
+## 0.0.0.9015 - 10/07/2019
++ adds kirHaplotypeToCounts for converting KIR halplotypes to genes counts
++ adds readKirCalls that allows parsing KIR haplotypes calls output by kpi (https://github.com/droe-nmdp/kpi)
+
 ## 0.0.0.9014 - 28/06/2019
 + in analyzeMiDASData now it is possible to specify both lower and upper threshold on frequency, before it was only lower.
 

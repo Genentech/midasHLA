@@ -652,3 +652,89 @@ assertthat::on_failure(characterMatches) <- function(call, env) {
          '".'
   )
 }
+
+#' Convert KIR haplotypes to gene level
+#'
+#' \code{kirHaplotypeToCounts} converts vector of KIR haplotypes to data frame
+#' of KIR genes counts.
+#'
+#' @param x Character vector specifying KIR haplotypes.
+#' @param hap_dict String specifying path to KIR haplotypes dictionary. By
+#'   default file shipped together with package is being used. See details for
+#'   more information.
+#' @param binary Logical flag indicating if haplotypes should be converted only
+#'   to gene presence / absence indicators. At this point this is the only way
+#'   that allows unambiguous conversion.
+#'
+#' \code{hap_dict} have to be a \code{tsv} file with first column holding KIR
+#' haplotypes and gene counts in others. File should have header with first
+#' column unnamed it is being used as row names.
+#'
+#' @return Data frame with haplotypes and corresponding gene counts. \code{NA}'s
+#'   in \code{x} are removed during conversion.
+#'
+#' @examples
+#' x <- c("1+3|16+3", "1+1", NA)
+#' kirHaplotypeToCounts(x)
+#'
+#' @importFrom assertthat assert_that is.flag is.readable see_if
+#' @importFrom stats na.omit
+#' @importFrom stringi stri_split_fixed
+#'
+#' @export
+kirHaplotypeToCounts <- function(x,
+                                 hap_dict = system.file("extdata", "kir_hapset.tsv", package = "MiDAS"),
+                                 binary = TRUE) {
+  assert_that(
+    is.character(x),
+    is.readable(hap_dict),
+    is.flag(binary)
+  )
+  hap_dict <- read.table(hap_dict)
+
+  x <- na.omit(x)
+  x_split <- stri_split_fixed(x, "|")
+  x_split_unlist <- unlist(x_split)
+
+  x_split_unlist_haps <- stri_split_fixed(x_split_unlist, pattern = "+")
+  assert_that(
+    all(haps_match <- vapply(
+      X = x_split_unlist_haps,
+      FUN = function(x) all(x %in% rownames(hap_dict)),
+      FUN.VALUE = logical(1)
+    )),
+    msg = sprintf(
+      fmt = "%s haplotype was not found in hap_dict",
+      paste(x_split_unlist[! haps_match], collapse = ", ")
+    )
+  )
+
+  counts <- do.call(cbind, x_split_unlist_haps)
+  counts <- apply(counts, 2, function(i) colSums(hap_dict[i, ]))
+  colnames(counts) <- x_split_unlist
+
+  if (binary) {
+    counts <- ifelse(counts > 1, 1, counts)
+  }
+
+  counts <- vapply(
+    X = x_split,
+    FUN = function(hap) {
+      hap <- counts[, hap, drop = FALSE]
+      if (ncol(hap) > 1) {
+        assert_that(
+          all(apply(hap, 2, function(col) all(col == hap[, 1]))),
+          msg = sprintf("haplotype %s can not be unambigously converted to counts", hap)
+        )
+      }
+      hap <- hap[, 1, drop = TRUE]
+      return(hap)
+    },
+    FUN.VALUE = numeric(length = ncol(hap_dict))
+  )
+  counts <- t(counts)
+  counts <- as.data.frame(counts, optional = TRUE, stringsAsFactors = FALSE)
+  counts <- cbind(haplotypes = x, counts)
+
+  return(counts)
+}
