@@ -159,7 +159,7 @@ test_that("HLA allele alignments are read properly", {
 })
 
 test_that("KIR haplotype calls are read properly", {
-  file <- system.file("extdata", "KIR_output_example.txt", package = "MiDAS")
+  file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
   kir_calls <- readKirCalls(file, counts = FALSE)
   kir_calls_test <- read.table(file = file,
                                header = TRUE,

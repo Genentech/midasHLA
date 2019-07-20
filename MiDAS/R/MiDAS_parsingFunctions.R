@@ -247,7 +247,7 @@ readHlaAlignments <- function(file,
 #'   counts.
 #'
 #' @examples
-#' file <- system.file("extdata", "KIR_output_example.txt", package = "MiDAS")
+#' file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
 #' readKirCalls(file)
 #'
 #' @importFrom assertthat assert_that is.flag is.readable see_if
