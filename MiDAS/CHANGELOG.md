@@ -1,3 +1,7 @@
+## 0.0.0.9016 - 20/07/2019
++ adds checkKirCountsFormat to assert KIR counts format
++ adds getHlaKirInteractions to get HLA - KIR interactions as new variables
+
 ## 0.0.0.9015 - 10/07/2019
 + adds kirHaplotypeToCounts for converting KIR halplotypes to genes counts
 + adds readKirCalls that allows parsing KIR haplotypes calls output by kpi (https://github.com/droe-nmdp/kpi)
