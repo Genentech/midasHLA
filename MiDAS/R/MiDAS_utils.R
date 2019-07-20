@@ -783,3 +783,43 @@ assertthat::on_failure(colnamesMatches) <- function(call, env) {
            paste(future_colnames, collapse = ", ")
   )
 }
+
+#' Assert kir counts data frame format
+#'
+#' \code{checkKirCountsFormat} asserts if kir counts data frame have proper
+#' format.
+#'
+#' @param kir_counts Data frame containing KIR genes counts, as return by
+#'   \code{\link{readKirCalls}} function.
+#'
+#' @return Logical indicating if \code{kir_counts} follows kir counts data frame
+#'   format. Otherwise raise error.
+#'
+#' @importFrom assertthat assert_that see_if
+#' @examples
+#' file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+#' kir_counts <- readKirCalls(file)
+#' checkKirCountsFormat(kir_counts)
+#'
+#' @export
+checkKirCountsFormat <- function(kir_counts) {
+  kir_counts_name <- deparse(substitute(kir_counts))
+  assert_that(
+    is.data.frame(kir_counts),
+    see_if(nrow(kir_counts) >= 1 & ncol(kir_counts) >= 2,
+            msg = paste0(kir_counts_name,
+                         " have to have at least 1 rows and 2 columns"
+            )
+    ),
+    see_if(! any(vapply(kir_counts, is.factor, logical(length = 1))),
+         msg = paste0(kir_counts_name, " can't contain factors")
+    )
+  )
+
+  kir_counts <- kir_counts[, 1, drop = FALSE]
+  assert_that(
+    colnamesMatches(kir_counts, "ID")
+  )
+
+  return(TRUE)
+}

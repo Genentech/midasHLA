@@ -294,3 +294,38 @@ test_that("KIR haplotypes are converted to gene counts", {
   expect_error(kirHaplotypeToCounts(x, binary = "yes"),
                "binary is not a flag \\(a length one logical vector\\).")
 })
+
+test_that("column names matches", {
+  df <- data.frame(a = 1:5, b = 1:5)
+  expect_equal(colnamesMatches(df, c("a", "b")), TRUE)
+
+  expect_error(
+    assertthat::assert_that(colnamesMatches(df, c("foo", "bar"))),
+    "Columns a, b in df should be named foo, bar"
+  )
+})
+
+test_that("KIR counts have proper format", {
+  file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  kir_counts <- readKirCalls(file)
+  expect_equal(checkKirCountsFormat(kir_counts), TRUE)
+
+  expect_error(
+    checkKirCountsFormat(kir_counts[, 1, drop = FALSE]),
+    "kir_counts\\[, 1, drop = FALSE\\] have to have at least 1 rows and 2 columns"
+  )
+
+  fake_kir_counts <- kir_counts
+  fake_kir_counts[, 1] <- as.factor(fake_kir_counts[, 1, drop = TRUE])
+  expect_error(
+    checkKirCountsFormat(fake_kir_counts),
+    "fake_kir_counts can't contain factors"
+  )
+
+  fake_kir_counts <- kir_counts
+  colnames(fake_kir_counts) <- c("FOO", colnames(fake_kir_counts)[-1])
+  expect_error(
+    checkKirCountsFormat(fake_kir_counts),
+    "Columns FOO in kir_counts should be named ID"
+  )
+})
