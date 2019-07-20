@@ -744,7 +744,7 @@ kirHaplotypeToCounts <- function(x,
 #' \code{colnamesMatches} checks columns of data frame are named as specified
 #'
 #' @param x Data frame vector to test.
-#' @param cols Orrdered character vector with values for \code{x} colnames
+#' @param cols Ordered character vector with values for \code{x} colnames
 #'   to test.
 #'
 #' @return Logical indicating if \code{x} colnames matches values in

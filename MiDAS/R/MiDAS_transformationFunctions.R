@@ -948,7 +948,9 @@ getHlaKirInteractions <- function(hla_calls,
   midas_dicts <- listMiDASDictionaries() %>%
     grep(pattern = "expression", x = ., value = TRUE, invert = TRUE)
   hla_variables <- Reduce(
-    f = function(x, y) left_join(x, hlaToVariable(hla_calls, dictionary = y), by = "ID"),
+    f = function(x, y) {
+      left_join(x, hlaToVariable(hla_calls, dictionary = y), by = "ID")
+    },
     x = midas_dicts,
     init = hla_calls
   )
