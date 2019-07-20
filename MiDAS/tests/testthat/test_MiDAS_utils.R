@@ -280,3 +280,30 @@ test_that("is class or null", {
     "\"foo\" must be an instance of \"bar\" or NULL."
   )
 })
+
+test_that("KIR haplotypes are converted to gene counts", {
+  x <- c("1+3|16+3", "1+1")
+  kir_hap <- kirHaplotypeToCounts(x)
+
+  hap_dict <- system.file("extdata", "kir_hapset.tsv", package = "MiDAS")
+  hap_dict <- read.table(hap_dict)
+  hap1 <- colSums(hap_dict[c("1", "3"), ])
+  hap1 <- ifelse(hap1 > 1, 1, hap1)
+  hap2 <- colSums(hap_dict[c("1", "1"), ])
+  hap2 <- ifelse(hap2 > 1, 1, hap2)
+  test_kir_hap <- rbind(hap1, hap2)
+  test_kir_hap <-
+    as.data.frame(test_kir_hap,
+                  optional = TRUE,
+                  stringsAsFactors = FALSE)
+  test_kir_hap <- cbind(haplotypes = x, test_kir_hap)
+  rownames(test_kir_hap) <- NULL
+
+  expect_equal(kir_hap, test_kir_hap)
+
+  expect_error(kirHaplotypeToCounts(1), "x is not a character vector")
+  expect_error(kirHaplotypeToCounts(x, hap_dict = "foo"),
+               "Path 'foo' does not exist")
+  expect_error(kirHaplotypeToCounts(x, binary = "yes"),
+               "binary is not a flag \\(a length one logical vector\\).")
+})
