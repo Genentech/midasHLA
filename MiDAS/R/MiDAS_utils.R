@@ -738,3 +738,48 @@ kirHaplotypeToCounts <- function(x,
 
   return(counts)
 }
+
+#' Check column names
+#'
+#' \code{colnamesMatches} checks columns of data frame are named as specified
+#'
+#' @param x Data frame vector to test.
+#' @param cols Orrdered character vector with values for \code{x} colnames
+#'   to test.
+#'
+#' @return Logical indicating if \code{x} colnames matches values in
+#'   \code{choice}.
+#'
+#' @importFrom assertthat assert_that
+colnamesMatches <- function(x, cols) {
+  assert_that(
+    is.data.frame(x),
+    see_if(ncol(x) == length(cols),
+           msg = sprintf(
+             "Number of columns in %s must equal number of values in cols",
+             deparse(substitute(x))
+           )
+    )
+  )
+
+  columns_names <- colnames(x)
+  columns_test <- columns_names == cols
+  test <- all(columns_test)
+
+  return(test)
+}
+
+#' Error message for colnamesMatches
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(colnamesMatches) <- function(call, env) {
+  curr_colnames <- colnames(eval(call$x, envir = env))
+  future_colnames <- eval(call$cols, envir = env)
+
+  sprintf("Columns %s in %s should be named %s",
+           paste(curr_colnames, collapse = ", "),
+           deparse(call$x),
+           paste(future_colnames, collapse = ", ")
+  )
+}
