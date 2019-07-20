@@ -946,7 +946,7 @@ getHlaKirInteractions <- function(hla_calls,
   # transform hla_calls to all possible variables and resolutions
   ## in practice only subset of variables could be used but this should be more time proof
   midas_dicts <- listMiDASDictionaries() %>%
-    grep(pattern = "expression", x = ., value = TRUE, invert = TRUE)
+    grep(pattern = "expression", value = TRUE, invert = TRUE)
   hla_variables <- Reduce(
     f = function(x, y) {
       left_join(x, hlaToVariable(hla_calls, dictionary = y), by = "ID")
@@ -961,7 +961,7 @@ getHlaKirInteractions <- function(hla_calls,
   while (hla_max_resolution > 2) {
     hla_variables <- hla_calls %>%
       reduceHlaCalls(resolution = hla_max_resolution - 2) %>%
-      left_join(hla_variables, ., by = "ID")
+      left_join(x = hla_variables, by = "ID")
     hla_max_resolution <- hla_max_resolution - 2
   }
 
@@ -979,17 +979,17 @@ getHlaKirInteractions <- function(hla_calls,
   )
   interaction_vars <- left_join(hla_variables, kir_counts, by = "ID")
   interactions <- interaction_vars[, -1, drop = FALSE] %>%
-    apply(., 1, function(row) {
+    apply(MARGIN = 1, FUN = function(row) {
       interactions_dict$HLA %in% row & interactions_dict$KIR %in% row
     }) %>%
-    apply(., 1, function(x) ifelse(x, 1, 0))
+    apply(MARGIN = 1, FUN = function(x) ifelse(x, 1, 0))
   colnames(interactions) <- paste(
     interactions_dict$HLA,
     interactions_dict$KIR,
     interactions_dict$Affinity,
     sep = "_"
   ) %>%
-    gsub("_$", "", .)
+    gsub(pattern = "_$", replacement = "")
   interactions <- cbind(hla_calls[, 1, drop = FALSE], interactions)
 
   return(interactions)
