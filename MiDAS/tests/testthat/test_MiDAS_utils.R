@@ -272,7 +272,7 @@ test_that("KIR haplotypes are converted to gene counts", {
   x <- c("1+3|16+3", "1+1")
   kir_hap <- kirHaplotypeToCounts(x)
 
-  hap_dict <- system.file("extdata", "Match_KIR_haplotype_genes.tsv", package = "MiDAS")
+  hap_dict <- system.file("extdata", "kir_hapset.tsv", package = "MiDAS")
   hap_dict <- read.table(hap_dict)
   hap1 <- colSums(hap_dict[c("1", "3"), ])
   hap1 <- ifelse(hap1 > 1, 1, hap1)
