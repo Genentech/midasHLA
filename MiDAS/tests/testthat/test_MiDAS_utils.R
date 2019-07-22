@@ -272,7 +272,7 @@ test_that("KIR haplotypes are converted to gene counts", {
   x <- c("1+3|16+3", "1+1")
   kir_hap <- kirHaplotypeToCounts(x)
 
-  hap_dict <- system.file("extdata", "kir_hapset.tsv", package = "MiDAS")
+  hap_dict <- system.file("extdata", "Match_KIR_haplotype_genes.tsv", package = "MiDAS")
   hap_dict <- read.table(hap_dict)
   hap1 <- colSums(hap_dict[c("1", "3"), ])
   hap1 <- ifelse(hap1 > 1, 1, hap1)
@@ -293,4 +293,39 @@ test_that("KIR haplotypes are converted to gene counts", {
                "Path 'foo' does not exist")
   expect_error(kirHaplotypeToCounts(x, binary = "yes"),
                "binary is not a flag \\(a length one logical vector\\).")
+})
+
+test_that("column names matches", {
+  df <- data.frame(a = 1:5, b = 1:5)
+  expect_equal(colnamesMatches(df, c("a", "b")), TRUE)
+
+  expect_error(
+    assertthat::assert_that(colnamesMatches(df, c("foo", "bar"))),
+    "Columns a, b in df should be named foo, bar"
+  )
+})
+
+test_that("KIR counts have proper format", {
+  file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  kir_counts <- readKirCalls(file)
+  expect_equal(checkKirCountsFormat(kir_counts), TRUE)
+
+  expect_error(
+    checkKirCountsFormat(kir_counts[, 1, drop = FALSE]),
+    "kir_counts\\[, 1, drop = FALSE\\] have to have at least 1 rows and 2 columns"
+  )
+
+  fake_kir_counts <- kir_counts
+  fake_kir_counts[, 1] <- as.factor(fake_kir_counts[, 1, drop = TRUE])
+  expect_error(
+    checkKirCountsFormat(fake_kir_counts),
+    "fake_kir_counts can't contain factors"
+  )
+
+  fake_kir_counts <- kir_counts
+  colnames(fake_kir_counts) <- c("FOO", colnames(fake_kir_counts)[-1])
+  expect_error(
+    checkKirCountsFormat(fake_kir_counts),
+    "Columns FOO in kir_counts should be named ID"
+  )
 })

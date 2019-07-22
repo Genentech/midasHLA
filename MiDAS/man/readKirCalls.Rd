@@ -4,8 +4,9 @@
 \alias{readKirCalls}
 \title{Reads data table with KIR haplotypes calls}
 \usage{
-readKirCalls(file, hap_dict = system.file("extdata", "kir_hapset.tsv",
-  package = "MiDAS"), counts = TRUE, binary = TRUE)
+readKirCalls(file, hap_dict = system.file("extdata",
+  "Match_KIR_haplotype_genes.tsv", package = "MiDAS"), counts = TRUE,
+  binary = TRUE)
 }
 \arguments{
 \item{file}{Path to input file.}
@@ -38,7 +39,7 @@ First column should contain samples IDs, second column should hold
 corresponding KIR haplotypes.
 }
 \examples{
-file <- system.file("extdata", "KIR_output_example.txt", package = "MiDAS")
+file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
 readKirCalls(file)
 
 }
