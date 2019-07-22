@@ -249,11 +249,15 @@ test_that("MiDAS associations are analyzed properly", {
   pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
+  kir_file <-
+    system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  kir_counts <- readKirCalls(kir_file, counts = TRUE)
   midas_data <<-
     prepareMiDASData(
       hla_calls,
       pheno,
       covar,
+      kir_counts = kir_counts,
       analysis_type = c(
         "hla_allele",
         "aa_level",
@@ -261,6 +265,7 @@ test_that("MiDAS associations are analyzed properly", {
         "allele_g_group",
         "allele_supertype",
         "allele_group",
+        "kir_genes",
         "custom"
       ),
       inheritance_model = "additive"
@@ -425,6 +430,29 @@ test_that("MiDAS associations are analyzed properly", {
 
   expect_equal(as.data.frame(res), as.data.frame(test_res))
 
+  ## analysis_type = "kir_genes" variables = NULL
+  res <- analyzeMiDASData(object,
+                          analysis_type = "kir_genes",
+                          variables = NULL,
+                          kable_output = FALSE
+  )
+  test_variables <- colnames(midas_data[, label(midas_data) == "kir_genes"])
+  test_res <- analyzeAssociations(object, variables = test_variables)
+  test_variables <- test_res$term # constant variables are discarded
+  test_res <- dplyr::rename(test_res, kir.gene = term)
+  variables_freq <- getCountsFrequencies(midas_data[, c("ID", test_variables)])
+  test_res$Ntotal <- variables_freq$Counts
+  test_res$Ntotal.frequency <- variables_freq$Freq
+  pos <- midas_data$OS_DIED == 1
+  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", test_variables)])
+  test_res$Npositive <- pos_freq$Counts
+  test_res$Npositive.frequency <- pos_freq$Freq
+  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", test_variables)])
+  test_res$Nnegative <- neg_freq$Counts
+  test_res$Nnegative.frequency <- neg_freq$Freq
+
+  expect_equal(as.data.frame(res), as.data.frame(test_res))
+
   # conditional TRUE
   res <- analyzeMiDASData(object,
                           analysis_type = "hla_allele",
@@ -475,7 +503,7 @@ test_that("MiDAS associations are analyzed properly", {
   )
 
   expect_error(analyzeMiDASData(object, analysis_type = "a"),
-               "analysis_type should be one of \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\"."
+               "analysis_type should be one of \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\"."
   )
 
   expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", conditional = 1),
@@ -762,6 +790,6 @@ test_that("MiDAS data is prepared properly", {
 
   expect_error(
     prepareMiDASData(hla_calls, analysis_type = "kir_genes"),
-    "\"kir_genes\" analysis type requires kir_counts argument to be specifed"
+    "\"kir_genes\" analysis type requires kir_counts argument to be specified"
   )
 })
