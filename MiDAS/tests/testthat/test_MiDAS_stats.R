@@ -662,6 +662,22 @@ test_that("MiDAS data is prepared properly", {
     rleft_join(test_midas_allele_group, pheno, covar)
   expect_equal(midas_allele_groups, test_midas_allele_group)
 
+  # kir_genes
+  kir_path <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  kir_counts <- readKirCalls(kir_path, counts = TRUE)
+  midas_kir_genes <- prepareMiDASData(hla_calls,
+                                      pheno,
+                                      covar,
+                                      kir_counts = kir_counts,
+                                      analysis_type = "kir_genes",
+                                      inheritance_model = "additive")
+  test_midas_kir_genes <- kir_counts
+  Hmisc::label(test_midas_kir_genes[-1], self = FALSE) <-
+    rep("kir_genes", ncol(kir_counts) - 1)
+  test_midas_kir_genes <-
+    rleft_join(hla_calls[, 1, drop = FALSE], test_midas_kir_genes, pheno, covar)
+  expect_equal(midas_kir_genes, test_midas_kir_genes)
+
   # custom
   midas_custom <- prepareMiDASData(hla_calls,
                                    pheno,
@@ -679,7 +695,8 @@ test_that("MiDAS data is prepared properly", {
   midas_multiple <- prepareMiDASData(hla_calls,
                                      pheno,
                                      covar,
-                                     analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "custom"),
+                                     kir_counts = kir_counts,
+                                     analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "custom"),
                                      inheritance_model = "additive")
   midas_multiple_test <-
     rleft_join(
@@ -689,6 +706,7 @@ test_that("MiDAS data is prepared properly", {
       midas_allele_g_group,
       midas_allele_supertype,
       midas_allele_groups,
+      midas_kir_genes,
       midas_custom,
       by = c("ID", "OS", "OS_DIED", "AGE", "SEX")
     )
@@ -707,7 +725,7 @@ test_that("MiDAS data is prepared properly", {
 
   expect_error(
     prepareMiDASData(hla_calls, analysis_type = "foo"),
-    "analysis_type should match values \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"custom\"."
+    "analysis_type should match values \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"custom\"."
   )
 
   expect_error(
@@ -737,9 +755,13 @@ test_that("MiDAS data is prepared properly", {
     "no expression levels were found for input hla_calls"
   )
 
-  # this is ill due to ggroups matches problem there is one more above, when groups are fixed this will start to fail so uncomment and remove linies as needed
   expect_error(
     prepareMiDASData(hla_calls[, c("ID", "DOB_1", "DOB_2")], analysis_type = "allele_group"),
     "no allele could be assigned to allele groups for input hla_calls"
+  )
+
+  expect_error(
+    prepareMiDASData(hla_calls, analysis_type = "kir_genes"),
+    "\"kir_genes\" analysis type requires kir_counts argument to be specifed"
   )
 })

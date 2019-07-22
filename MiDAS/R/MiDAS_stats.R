@@ -586,6 +586,8 @@ analyzeMiDASData <- function(object,
 #' @inheritParams checkHlaCallsFormat
 #' @inheritParams hlaCallsToCounts
 #' @inheritParams hlaToAAVariation
+#' @param kir_counts Data frame holding counts with KIR genes counts. Required
+#'   for \code{"kir_genes"} analysis type.
 #' @param ... Data frames holding additional variables like phenotypic
 #'   observations or covariates.
 #' @param analysis_type String indicating analysis type for which data should be
@@ -633,6 +635,8 @@ analyzeMiDASData <- function(object,
 #' \code{inheritance_model} of choice (this is done with
 #' \link{hlaCallsToCounts}).
 #'
+#' \code{"kir_genes"} - joins \code{kir_genes} with result data frame.
+#'
 #' \code{"custom"} - will not transform \code{hla_calls} and only joins it with
 #' additional data(\code{...}).
 #'
@@ -657,17 +661,19 @@ analyzeMiDASData <- function(object,
 #' @export
 prepareMiDASData <- function(hla_calls,
                              ...,
-                             analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "custom"),
+                             kir_counts = NULL,
+                             analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "custom"),
                              inheritance_model = "additive",
                              indels = TRUE,
                              unkchar = FALSE
 ) {
   assert_that(
     checkHlaCallsFormat(hla_calls),
+    checkKirCountsFormat(kir_counts, accept.null = TRUE),
     is.character(analysis_type),
     characterMatches(
       x = analysis_type,
-      choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "custom")
+      choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "custom")
     ),
     is.string(inheritance_model),
     stringMatches(
@@ -805,6 +811,19 @@ prepareMiDASData <- function(hla_calls,
       ncol(allele_group) - 1
     )
     midas_data <- left_join(midas_data, allele_group, by = "ID")
+  }
+
+  if ("kir_genes" %in% analysis_type) {
+    assert_that(
+      ! missing(kir_counts),
+      msg = "\"kir_genes\" analysis type requires kir_counts argument to be specified"
+    )
+
+    label(kir_counts[-1], self = FALSE) <- rep(
+      x = "kir_genes",
+      ncol(kir_counts) - 1
+    )
+    midas_data <- left_join(midas_data, kir_counts, by = "ID")
   }
 
   if ("custom" %in% analysis_type) {
