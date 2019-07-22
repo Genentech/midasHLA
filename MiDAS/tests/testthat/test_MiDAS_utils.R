@@ -310,6 +310,8 @@ test_that("KIR counts have proper format", {
   kir_counts <- readKirCalls(file)
   expect_equal(checkKirCountsFormat(kir_counts), TRUE)
 
+  expect_equal(checkKirCountsFormat(NULL, accept.null = TRUE), TRUE)
+
   expect_error(
     checkKirCountsFormat(kir_counts[, 1, drop = FALSE]),
     "kir_counts\\[, 1, drop = FALSE\\] have to have at least 1 rows and 2 columns"
