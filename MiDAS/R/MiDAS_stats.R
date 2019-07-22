@@ -346,7 +346,7 @@ prepareHlaData <- function(hla_calls,
 #'   below this number will not be considered during analysis. If it's greater
 #'   or equal 1 variables with number of counts less that this will not be
 #'   considered during analysis.
-#' @param lower_frequency_cutoff Number specifying upper threshold for inclusion
+#' @param upper_frequency_cutoff Number specifying upper threshold for inclusion
 #'   of a variable. If it's a number between 0 and 1 variables with frequency
 #'   above this number will not be considered during analysis. If it's greater
 #'   or equal 1 variables with number of counts greater that this will not be
