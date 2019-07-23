@@ -1,3 +1,7 @@
+## 0.0.0.9017 - 23/07/2019
++ adds kir_genes analysis type to prepareMiDASData and analyzeMiDASData
++ adds hla_kir_interactions analysis type to prepareMiDASData and analyzeMiDASData
+
 ## 0.0.0.9016 - 20/07/2019
 + adds checkKirCountsFormat to assert KIR counts format
 + adds getHlaKirInteractions to get HLA - KIR interactions as new variables
