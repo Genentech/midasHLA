@@ -792,7 +792,7 @@ getCountsFrequencies <- function(counts_table) {
 #'   produced. Possible values includes \code{'hla_allele'}, \code{'aa_level'},
 #'   \code{'expression_level'}, \code{'allele_g_group'},
 #'   \code{'allele_supertype'}, \code{'allele_group'}, \code{'kir_genes'},
-#'   \code{'custom'}.
+#'   \code{'hla_kir_interactions'}, \code{'custom'}.
 #' @param response_variable String giving the name of response variable, it is
 #'   used to produce binary phenotype column names.
 #' @param logistic Logical indicating if statistical model is logistic. If set
@@ -817,7 +817,7 @@ formatAssociationsResults <- function(results,
   assert_that(
     is.string(type),
     stringMatches(type,
-                  choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "custom")
+                  choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions", "custom")
     ),
     is.string(response_variable),
     is.flag(logistic),
@@ -845,6 +845,7 @@ formatAssociationsResults <- function(results,
                        "allele_supertype" = "supertype",
                        "allele_group" = "allele group",
                        "kir_genes" = "kir gene",
+                       "hla_kir_interactions" = "hla kir interaction",
                        "term"
   )
   select_cols <- unlist(list2(
@@ -878,6 +879,7 @@ formatAssociationsResults <- function(results,
                     "allele_supertype" = "HLA alleles supertypes associations",
                     "allele_group" = "HLA alleles groups associations",
                     "kir_genes" = "KIR genes associations",
+                    "hla_kir_interactions" = "HLA - KIR interaction associations",
                     "Associations results"
   )
 

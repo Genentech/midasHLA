@@ -334,7 +334,7 @@ prepareHlaData <- function(hla_calls,
 #'   at this point it is only used for results formatting. Valid values are
 #'   \code{"hla_allele"}, \code{"aa_level"}, \code{"expression_level"},
 #'   \code{"allele_g_group"}, \code{"allele_supertype"}, \code{"allele_group"},
-#'   \code{"kir_genes"}.
+#'   \code{"kir_genes"}, \code{"hla_kir_interactions"}.
 #' @param conditional Logical indicating if the analysis should be performed
 #'   using stepwise conditional tests or not. See
 #'   \link{analyzeConditionalAssociations} for more details.
@@ -398,7 +398,7 @@ prepareHlaData <- function(hla_calls,
 #'
 #' @export
 analyzeMiDASData <- function(object,
-                             analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes"),
+                             analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions"),
                              conditional = FALSE,
                              variables = NULL,
                              lower_frequency_cutoff = NULL,
@@ -424,7 +424,7 @@ analyzeMiDASData <- function(object,
   assert_that(
     is.string(analysis_type),
     stringMatches(analysis_type,
-                  choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes")
+                  choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions")
     ),
     is.flag(conditional),
     isCharacterOrNULL(variables),
@@ -476,7 +476,8 @@ analyzeMiDASData <- function(object,
                                          "allele_g_group",
                                          "allele_supertype",
                                          "allele_group",
-                                         "kir_genes"
+                                         "kir_genes",
+                                         "hla_kir_interactions"
   )
   cts_vars <- variables[mask_counts]
   ncts_vars <- variables[! mask_counts]
@@ -569,6 +570,7 @@ analyzeMiDASData <- function(object,
                        "allele_supertype" = "supertype",
                        "allele_group" = "allele.group",
                        "kir_genes" = "kir.gene",
+                       "hla_kir_interactions" = "hla.kir.interaction",
                        "term"
   )
 
