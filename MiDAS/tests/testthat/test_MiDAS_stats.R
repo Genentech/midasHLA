@@ -706,6 +706,27 @@ test_that("MiDAS data is prepared properly", {
     rleft_join(hla_calls[, 1, drop = FALSE], test_midas_kir_genes, pheno, covar)
   expect_equal(midas_kir_genes, test_midas_kir_genes)
 
+  # hla_kir_interactions
+  midas_hla_kir_interactions <- prepareMiDASData(
+    hla_calls,
+    pheno,
+    covar,
+    kir_counts = kir_counts,
+    analysis_type = "hla_kir_interactions",
+    inheritance_model = "additive"
+  )
+  test_midas_hla_kir_interactions <-
+    getHlaKirInteractions(hla_calls = hla_calls, kir_counts = kir_counts)
+  Hmisc::label(test_midas_hla_kir_interactions[-1], self = FALSE) <-
+    rep("hla_kir_interactions", ncol(test_midas_hla_kir_interactions) - 1)
+  test_midas_hla_kir_interactions <-
+    rleft_join(hla_calls[, 1, drop = FALSE],
+               test_midas_hla_kir_interactions,
+               pheno,
+               covar
+    )
+  expect_equal(midas_hla_kir_interactions, test_midas_hla_kir_interactions)
+
   # custom
   midas_custom <- prepareMiDASData(hla_calls,
                                    pheno,
@@ -753,7 +774,7 @@ test_that("MiDAS data is prepared properly", {
 
   expect_error(
     prepareMiDASData(hla_calls, analysis_type = "foo"),
-    "analysis_type should match values \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"custom\"."
+    "analysis_type should match values \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"hla_kir_interactions\", \"custom\"."
   )
 
   expect_error(
@@ -791,5 +812,10 @@ test_that("MiDAS data is prepared properly", {
   expect_error(
     prepareMiDASData(hla_calls, analysis_type = "kir_genes"),
     "\"kir_genes\" analysis type requires kir_counts argument to be specified"
+  )
+
+  expect_error(
+    prepareMiDASData(hla_calls, analysis_type = "hla_kir_interactions"),
+    "\"hla_kir_interactions\" analysis type requires kir_counts argument to be specified"
   )
 })

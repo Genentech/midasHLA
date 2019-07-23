@@ -639,6 +639,10 @@ analyzeMiDASData <- function(object,
 #'
 #' \code{"kir_genes"} - joins \code{kir_genes} with result data frame.
 #'
+#' \code{"hla_kir_interactions"} - \code{hla_calls} are processed with
+#' \code{kir_counts} into HLA - KIR interactions variables (see
+#' \link{getHlaKirInteractions} for more details).
+#'
 #' \code{"custom"} - will not transform \code{hla_calls} and only joins it with
 #' additional data(\code{...}).
 #'
@@ -664,7 +668,7 @@ analyzeMiDASData <- function(object,
 prepareMiDASData <- function(hla_calls,
                              ...,
                              kir_counts = NULL,
-                             analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "custom"),
+                             analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions", "custom"),
                              inheritance_model = "additive",
                              indels = TRUE,
                              unkchar = FALSE
@@ -675,7 +679,7 @@ prepareMiDASData <- function(hla_calls,
     is.character(analysis_type),
     characterMatches(
       x = analysis_type,
-      choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "custom")
+      choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions", "custom")
     ),
     is.string(inheritance_model),
     stringMatches(
@@ -826,6 +830,24 @@ prepareMiDASData <- function(hla_calls,
       ncol(kir_counts) - 1
     )
     midas_data <- left_join(midas_data, kir_counts, by = "ID")
+  }
+
+  if ("hla_kir_interactions" %in% analysis_type) {
+    assert_that(
+      ! missing(kir_counts),
+      msg = "\"hla_kir_interactions\" analysis type requires kir_counts argument to be specified"
+    )
+
+    hla_kir_interactions <- getHlaKirInteractions(
+      hla_calls = hla_calls,
+      kir_counts = kir_counts
+    )
+
+    label(hla_kir_interactions[-1], self = FALSE) <- rep(
+      x = "hla_kir_interactions",
+      ncol(hla_kir_interactions) - 1
+    )
+    midas_data <- left_join(midas_data, hla_kir_interactions, by = "ID")
   }
 
   if ("custom" %in% analysis_type) {
