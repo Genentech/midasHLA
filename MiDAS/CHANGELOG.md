@@ -1,3 +1,7 @@
+## 0.0.0.9017 - 20/07/2019
++ adds checkKirCountsFormat to assert KIR counts format
++ adds getHlaKirInteractions to get HLA - KIR interactions as new variables
+
 ## 0.0.0.9016 - 14/07/2019
 + add new function MiDAS that combines prepareMiDASData and analyzeMiDASData.
 + result returned by MiDAS stores its input hla_calls and transformed data in corresponding attributes allowing

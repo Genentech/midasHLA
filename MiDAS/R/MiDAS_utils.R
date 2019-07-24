@@ -713,7 +713,7 @@ assertthat::on_failure(isClassOrNULL) <- function(call, env) {
 #'
 #' @export
 kirHaplotypeToCounts <- function(x,
-                                 hap_dict = system.file("extdata", "kir_hapset.tsv", package = "MiDAS"),
+                                 hap_dict = system.file("extdata", "Match_KIR_haplotype_genes.tsv", package = "MiDAS"),
                                  binary = TRUE) {
   assert_that(
     is.character(x),
@@ -767,4 +767,89 @@ kirHaplotypeToCounts <- function(x,
   counts <- cbind(haplotypes = x, counts)
 
   return(counts)
+}
+
+#' Check column names
+#'
+#' \code{colnamesMatches} checks columns of data frame are named as specified
+#'
+#' @param x Data frame vector to test.
+#' @param cols Ordered character vector with values for \code{x} colnames
+#'   to test.
+#'
+#' @return Logical indicating if \code{x} colnames matches values in
+#'   \code{choice}.
+#'
+#' @importFrom assertthat assert_that
+colnamesMatches <- function(x, cols) {
+  assert_that(
+    is.data.frame(x),
+    see_if(ncol(x) == length(cols),
+           msg = sprintf(
+             "Number of columns in %s must equal number of values in cols",
+             deparse(substitute(x))
+           )
+    )
+  )
+
+  columns_names <- colnames(x)
+  columns_test <- columns_names == cols
+  test <- all(columns_test)
+
+  return(test)
+}
+
+#' Error message for colnamesMatches
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(colnamesMatches) <- function(call, env) {
+  curr_colnames <- colnames(eval(call$x, envir = env))
+  future_colnames <- eval(call$cols, envir = env)
+
+  sprintf("Columns %s in %s should be named %s",
+           paste(curr_colnames, collapse = ", "),
+           deparse(call$x),
+           paste(future_colnames, collapse = ", ")
+  )
+}
+
+#' Assert kir counts data frame format
+#'
+#' \code{checkKirCountsFormat} asserts if kir counts data frame have proper
+#' format.
+#'
+#' @param kir_counts Data frame containing KIR genes counts, as return by
+#'   \code{\link{readKirCalls}} function.
+#'
+#' @return Logical indicating if \code{kir_counts} follows kir counts data frame
+#'   format. Otherwise raise error.
+#'
+#' @importFrom assertthat assert_that see_if
+#' @examples
+#' file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+#' kir_counts <- readKirCalls(file)
+#' checkKirCountsFormat(kir_counts)
+#'
+#' @export
+checkKirCountsFormat <- function(kir_counts) {
+  kir_counts_name <- deparse(substitute(kir_counts))
+  assert_that(
+    is.data.frame(kir_counts),
+    see_if(nrow(kir_counts) >= 1 & ncol(kir_counts) >= 2,
+            msg = paste0(kir_counts_name,
+                         " have to have at least 1 rows and 2 columns"
+            )
+    ),
+    see_if(! any(vapply(kir_counts, is.factor, logical(length = 1))),
+         msg = paste0(kir_counts_name, " can't contain factors")
+    )
+  )
+
+  kir_counts <- kir_counts[, 1, drop = FALSE]
+  assert_that(
+    colnamesMatches(kir_counts, "ID")
+  )
+
+  return(TRUE)
 }
