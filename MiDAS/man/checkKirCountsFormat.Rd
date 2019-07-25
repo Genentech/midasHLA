@@ -4,11 +4,14 @@
 \alias{checkKirCountsFormat}
 \title{Assert kir counts data frame format}
 \usage{
-checkKirCountsFormat(kir_counts)
+checkKirCountsFormat(kir_counts, accept.null = FALSE)
 }
 \arguments{
 \item{kir_counts}{Data frame containing KIR genes counts, as return by
 \code{\link{readKirCalls}} function.}
+
+\item{accept.null}{Logical indicating if NULL \code{kir_counts} should be
+accepted.}
 }
 \value{
 Logical indicating if \code{kir_counts} follows kir counts data frame

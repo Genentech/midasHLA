@@ -398,7 +398,7 @@ test_that("results are formatted properly with preselected args", {
   )
 
   expect_error(formatAssociationsResults(res, type = "foo"),
-               "type should be one of \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"custom\"."
+               "type should be one of \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"hla_kir_interactions\", \"custom\"."
   )
 
   expect_error(formatAssociationsResults(res, type = "hla_allele", response_variable = 1),

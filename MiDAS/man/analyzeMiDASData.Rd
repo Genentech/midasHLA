@@ -5,12 +5,13 @@
 \title{Analyze associations in MiDAS data}
 \usage{
 analyzeMiDASData(object, analysis_type = c("hla_allele", "aa_level",
-  "expression_level", "allele_g_group", "allele_supertype",
-  "allele_group"), conditional = FALSE, variables = NULL,
-  lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL,
-  pvalue_cutoff = NULL, correction = "BH", logistic = NULL,
-  binary_phenotype = NULL, th = 0.05, rss_th = 1e-07,
-  kable_output = TRUE, format = getOption("knitr.table.format"))
+  "expression_level", "allele_g_group", "allele_supertype", "allele_group",
+  "kir_genes", "hla_kir_interactions"), conditional = FALSE,
+  variables = NULL, lower_frequency_cutoff = NULL,
+  upper_frequency_cutoff = NULL, pvalue_cutoff = NULL,
+  correction = "BH", logistic = NULL, binary_phenotype = NULL,
+  th = 0.05, rss_th = 1e-07, kable_output = TRUE,
+  format = getOption("knitr.table.format"))
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many
@@ -19,7 +20,8 @@ others.}
 \item{analysis_type}{String indicating the type of analysis being performed,
 at this point it is only used for results formatting. Valid values are
 \code{"hla_allele"}, \code{"aa_level"}, \code{"expression_level"},
-\code{"allele_g_group"}, \code{"allele_supertype"}, \code{"allele_group"}.}
+\code{"allele_g_group"}, \code{"allele_supertype"}, \code{"allele_group"},
+\code{"kir_genes"}, \code{"hla_kir_interactions"}.}
 
 \item{conditional}{Logical indicating if the analysis should be performed
 using stepwise conditional tests or not. See

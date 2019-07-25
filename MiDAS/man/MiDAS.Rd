@@ -30,7 +30,8 @@ observations or covariates.}
 \item{analysis_type}{String indicating the type of analysis being performed,
 at this point it is only used for results formatting. Valid values are
 \code{"hla_allele"}, \code{"aa_level"}, \code{"expression_level"},
-\code{"allele_g_group"}, \code{"allele_supertype"}, \code{"allele_group"}.}
+\code{"allele_g_group"}, \code{"allele_supertype"}, \code{"allele_group"},
+\code{"kir_genes"}, \code{"hla_kir_interactions"}.}
 
 \item{inheritance_model}{String specifying inheritance model to use.
 Available choices are \code{"dominant"}, \code{"recessive"},
