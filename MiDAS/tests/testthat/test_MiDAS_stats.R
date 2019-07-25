@@ -853,6 +853,8 @@ test_that("MiDAS data is prepared and analyzed properly", {
 
   hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(hla_calls_file)
+  kir_calls_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  kir_counts <- readKirCalls(kir_calls_file, counts = TRUE)
   pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
   pheno <- read.table(pheno_file, header = TRUE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
@@ -862,7 +864,8 @@ test_that("MiDAS data is prepared and analyzed properly", {
                          hla_calls = hla_calls,
                          pheno = pheno,
                          covar = covar,
-                         analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+                         kir_counts = kir_counts,
+                         analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions"),
                          inheritance_model = "additive",
                          kable_output = FALSE
   )
@@ -873,7 +876,8 @@ test_that("MiDAS data is prepared and analyzed properly", {
     hla_calls = hla_calls,
     pheno = pheno,
     covar = covar,
-    analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+    kir_counts = kir_counts,
+    analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions"),
     inheritance_model = "additive"
   )
   expect_equal(midas_data, midas_data_test)
@@ -883,7 +887,8 @@ test_that("MiDAS data is prepared and analyzed properly", {
                                 midas_results = midas_results,
                                 pheno = pheno,
                                 covar = covar,
-                                analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+                                kir_counts = kir_counts,
+                                analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions"),
                                 inheritance_model = "additive",
                                 kable_output = FALSE
   )
@@ -895,7 +900,8 @@ test_that("MiDAS data is prepared and analyzed properly", {
                          hla_calls = hla_calls,
                          pheno = pheno,
                          covar = covar,
-                         analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+                         kir_counts = kir_counts,
+                         analysis_type = c("hla_allele", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions"),
                          inheritance_model = "additive",
                          kable_output = FALSE
   )
@@ -909,6 +915,7 @@ test_that("MiDAS data is prepared and analyzed properly", {
   )
   midas_results_test <- structure(midas_results_test,
                                   hla_calls = hla_calls,
+                                  kir_counts = kir_counts,
                                   midas_data = midas_data_test,
                                   call = attr(midas_results, "call"))
   expect_equal(as.data.frame(midas_results), as.data.frame(midas_results_test))
@@ -947,7 +954,7 @@ test_that("MiDAS data is prepared and analyzed properly", {
           inheritance_model = "additive",
           kable_output = FALSE
     ),
-    "analysis_type should match values \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\"."
+    "analysis_type should match values \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"hla_kir_interactions\"."
   )
 
   expect_error(

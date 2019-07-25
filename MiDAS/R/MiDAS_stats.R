@@ -933,7 +933,8 @@ MiDAS <- function(model,
                   midas_results = NULL,
                   hla_calls = NULL,
                   ...,
-                  analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group"),
+                  kir_counts = NULL,
+                  analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions"),
                   inheritance_model = "additive",
                   indels = TRUE,
                   unkchar = FALSE,
@@ -953,10 +954,11 @@ MiDAS <- function(model,
     # model get asserted after evaluation
     isClassOrNULL(midas_results, "MiDAS"),
     #isDataFrameOrNULL(hla_calls), # make checkHlaCallsFormat accept nulls?
+    checkKirCountsFormat(kir_counts, accept.null = TRUE),
     is.character(analysis_type),
     characterMatches(
       x = analysis_type,
-      choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group")
+      choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions")
     ),
     is.string(inheritance_model),
     stringMatches(inheritance_model, c("dominant", "recessive", "additive")),
@@ -980,6 +982,7 @@ MiDAS <- function(model,
   # prepare data
   if (! missing(midas_results)) {
     hla_calls <- attr(midas_results, "hla_calls")
+    kir_counts <- attr(midas_results, "kir_counts")
     old_midas_data <- attr(midas_results, "midas_data")
     old_types <- labels(old_midas_data)
     analysis_type <- analysis_type[! analysis_type %in% old_types]
@@ -987,6 +990,7 @@ MiDAS <- function(model,
     if (length(analysis_type)) {
       new_midas_data <- prepareMiDASData(hla_calls = hla_calls,
                                          ... = ...,
+                                         kir_counts = kir_counts,
                                          analysis_type = analysis_type,
                                          inheritance_model = inheritance_model,
                                          indels = indels,
@@ -1005,6 +1009,7 @@ MiDAS <- function(model,
   } else {
     midas_data <- prepareMiDASData(hla_calls = hla_calls,
                                    ... = ...,
+                                   kir_counts = kir_counts,
                                    analysis_type = analysis_type,
                                    inheritance_model = inheritance_model,
                                    indels = indels,
@@ -1045,6 +1050,7 @@ MiDAS <- function(model,
   ## this should be later changed with proper fuctions for creating ,checking, setting ...
   midas_result <- structure(midas_result,
                             hla_calls = hla_calls,
+                            kir_counts = kir_counts,
                             midas_data = midas_data,
                             call = match.call(),
                             class = c("MiDAS", "tbl_df", "tbl", "data.frame")

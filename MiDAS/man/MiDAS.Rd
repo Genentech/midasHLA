@@ -5,14 +5,15 @@
 \title{Transform and analyze MiDAS data set}
 \usage{
 MiDAS(model, midas_results = NULL, hla_calls = NULL, ...,
-  analysis_type = c("hla_allele", "aa_level", "expression_level",
-  "allele_g_group", "allele_supertype", "allele_group"),
-  inheritance_model = "additive", indels = TRUE, unkchar = FALSE,
-  conditional = FALSE, variables = NULL,
-  lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL,
-  pvalue_cutoff = NULL, correction = "BH", logistic = NULL,
-  binary_phenotype = NULL, th = 0.05, rss_th = 1e-07,
-  kable_output = TRUE, format = getOption("knitr.table.format"))
+  kir_counts = NULL, analysis_type = c("hla_allele", "aa_level",
+  "expression_level", "allele_g_group", "allele_supertype", "allele_group",
+  "kir_genes", "hla_kir_interactions"), inheritance_model = "additive",
+  indels = TRUE, unkchar = FALSE, conditional = FALSE,
+  variables = NULL, lower_frequency_cutoff = NULL,
+  upper_frequency_cutoff = NULL, pvalue_cutoff = NULL,
+  correction = "BH", logistic = NULL, binary_phenotype = NULL,
+  th = 0.05, rss_th = 1e-07, kable_output = TRUE,
+  format = getOption("knitr.table.format"))
 }
 \arguments{
 \item{model}{Call specifying statistical model function to use. Should
@@ -26,6 +27,9 @@ specify at least function name and \code{formula}. See examples.}
 
 \item{...}{Data frames holding additional variables like phenotypic
 observations or covariates.}
+
+\item{kir_counts}{Data frame holding counts with KIR genes counts. Required
+for \code{"kir_genes"} analysis type.}
 
 \item{analysis_type}{String indicating the type of analysis being performed,
 at this point it is only used for results formatting. Valid values are
