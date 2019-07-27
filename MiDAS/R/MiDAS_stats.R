@@ -56,7 +56,8 @@ analyzeAssociations <- function(object,
     checkStatisticalModel(object)
   )
   object_call <- getCall(object)
-  object_data <- eval(object_call[["data"]], envir = parent.frame())
+  object_env <- attr(object$terms, ".Environment")
+  object_data <- eval(object_call[["data"]], envir = object_env)
   object_variables <- colnames(object_data)[-1]
 
   assert_that(
@@ -152,8 +153,9 @@ analyzeConditionalAssociations <- function(object,
     checkStatisticalModel(object)
   )
   object_call <- getCall(object)
-  object_formula <- eval(object_call[["formula"]], envir = parent.frame())
-  object_data <- eval(object_call[["data"]], envir = parent.frame())
+  object_env <- attr(object$terms, ".Environment")
+  object_formula <- eval(object_call[["formula"]], envir = object_env)
+  object_data <- eval(object_call[["data"]], envir = object_env)
   object_variables <- colnames(object_data)[-1]
 
   assert_that(
@@ -416,8 +418,9 @@ analyzeMiDASData <- function(object,
     checkStatisticalModel(object)
   )
   object_call <- getCall(object)
-  object_formula <- eval(object_call[["formula"]], envir = parent.frame())
-  object_data <- eval(object_call[["data"]], envir = parent.frame())
+  object_env <- attr(object$terms, ".Environment")
+  object_formula <- eval(object_call[["formula"]], envir = object_env)
+  object_data <- eval(object_call[["data"]], envir = object_env)
   object_variables <- colnames(object_data)[-1]
   variables_labels <- label(object_data[, -1])
 
