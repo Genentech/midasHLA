@@ -251,7 +251,7 @@ checkHlaCallsFormat <- function(hla_calls) {
   assert_that(
     is.data.frame(hla_calls),
     see_if(nrow(hla_calls) >= 1 & ncol(hla_calls) >= 2,
-           msg = "hla_calls have to have at least 1 rows and 2 columns"
+           msg = "hla_calls have to have at least 1 rows and 2 columns. Make sure the input file is in tsv format."
     ),
     see_if(! any(vapply(hla_calls, is.factor, logical(length = 1))),
            msg = "hla_calls can't contain factors"
@@ -259,8 +259,14 @@ checkHlaCallsFormat <- function(hla_calls) {
     see_if(! all(checkAlleleFormat(as.character(hla_calls[, 1])), na.rm = TRUE),
            msg = "first column of hla_calls should specify samples id"
     ),
-    see_if(all(checkAlleleFormat(unlist(hla_calls[, -1])), na.rm = TRUE),
-           msg = "values in hla_calls doesn't follow HLA numbers specification"
+    see_if(
+      all(
+        test_values <- checkAlleleFormat(unlist(hla_calls[, -1])), na.rm = TRUE
+      ),
+           msg = sprintf(
+             "values: %s in hla_calls doesn't follow HLA numbers specification",
+             paste(unlist(hla_calls[, -1])[! test_values], collapse = ", ")
+           )
     )
   )
 

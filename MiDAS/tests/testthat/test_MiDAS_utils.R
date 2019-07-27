@@ -108,7 +108,7 @@ test_that("HLA calls data frame have proper format", {
   )
 
   expect_error(checkHlaCallsFormat(fake_calls[, c(1, 1, 3)]),
-               "values in hla_calls doesn't follow HLA numbers specification"
+               "values: Sample1, Sample2, Sample3 in hla_calls doesn't follow HLA numbers specification"
   )
 })
 
