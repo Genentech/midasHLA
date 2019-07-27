@@ -1,3 +1,6 @@
+## 0.0.0.9016 - 27/07/2019
++ makes it possible to specify na.strings while reading HLA and KIR calls input files
+
 ## 0.0.0.9016 - 20/07/2019
 + adds checkKirCountsFormat to assert KIR counts format
 + adds getHlaKirInteractions to get HLA - KIR interactions as new variables
