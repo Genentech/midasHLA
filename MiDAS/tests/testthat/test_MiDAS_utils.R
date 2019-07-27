@@ -15,7 +15,6 @@ test_that("HLA allele numbers have proper format", {
                ),
                c(FALSE, FALSE, FALSE)
   )
-  expect_error(checkAlleleFormat(1), "allele is not a character vector")
 })
 
 test_that("HLA allele resolution is number of sets of digits * 2", {

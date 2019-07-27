@@ -27,7 +27,6 @@
 #' @importFrom stringi stri_detect_regex
 #' @export
 checkAlleleFormat <- function(allele) {
-  assert_that(is.character(allele))
   pattern <- "^[A-Z0-9]+[*][0-9]+(:[0-9]+){0,3}((?=G)(G|GG)|(N|L|S|C|A|Q)){0,1}$"
   is_correct <- stri_detect_regex(allele, pattern)
   return(is_correct)
