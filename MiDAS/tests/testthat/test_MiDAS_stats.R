@@ -188,7 +188,7 @@ test_that("HLA data is properly formatted", {
                    covar = small_covar,
                    inheritance_model = "additive"
     ),
-    "values in hla_calls doesn't follow HLA numbers specification"
+    "values: 1, 2, 1, 2 in hla_calls doesn't follow HLA numbers specification"
   )
 
   expect_error(

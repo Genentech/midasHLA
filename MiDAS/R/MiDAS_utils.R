@@ -257,16 +257,18 @@ checkHlaCallsFormat <- function(hla_calls) {
     ),
     see_if(! all(checkAlleleFormat(as.character(hla_calls[, 1])), na.rm = TRUE),
            msg = "first column of hla_calls should specify samples id"
-    ),
-    see_if(
-      all(
-        test_values <- checkAlleleFormat(unlist(hla_calls[, -1])), na.rm = TRUE
-      ),
-           msg = sprintf(
-             "values: %s in hla_calls doesn't follow HLA numbers specification",
-             paste(unlist(hla_calls[, -1])[! test_values], collapse = ", ")
-           )
     )
+  )
+
+  alleles <- unlist(hla_calls[, -1])
+  test_values <- checkAlleleFormat(alleles)
+  test_values <- test_values[! is.na(test_values)]
+  assert_that(
+      all(test_values),
+      msg = sprintf(
+        "values: %s in hla_calls doesn't follow HLA numbers specification",
+        paste(unlist(hla_calls[, -1])[! test_values], collapse = ", ")
+      )
   )
 
   return(TRUE)
