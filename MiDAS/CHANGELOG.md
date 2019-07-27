@@ -1,3 +1,6 @@
+## 0.0.0.9020 - 27/07/2019
++ adds human friendly erros in readHlaCalls
+
 ## 0.0.0.9016 - 27/07/2019
 + makes it possible to specify na.strings while reading HLA and KIR calls input files
 
