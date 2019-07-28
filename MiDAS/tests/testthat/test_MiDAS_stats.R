@@ -63,9 +63,12 @@ test_that("Stepwise conditional alleles subset selection", {
     prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
 
   object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
+
+  # keep = FALSE
   res <- analyzeConditionalAssociations(object,
                                         variables = c("B*14:02", "DRB1*11:01"),
-                                        th = 0.05)
+                                        th = 0.05,
+                                        keep = FALSE)
   res <- rapply(res, classes = "numeric", how = "replace", round, digits = 3)
 
   test_res <- tibble(term = c("B*14:02", "DRB1*11:01"),
@@ -79,6 +82,36 @@ test_that("Stepwise conditional alleles subset selection", {
                      covariates = c("", "B*14:02")
   )
 
+  expect_equal(res, test_res)
+
+  # keep = TRUE
+  res <- analyzeConditionalAssociations(object,
+                                        variables = c("B*14:02", "DRB1*11:01"),
+                                        th = 0.05,
+                                        keep = TRUE)
+  res <- rapply(res, classes = "numeric", how = "replace", round, digits = 3)
+  test_res <- list(
+    tibble(term = c("B*14:02", "DRB1*11:01"),
+           estimate = c(3.72, 1.956),
+           std.error = c(1.59, 0.960),
+           statistic = c(2.339, 2.038),
+           p.value = c(0.019, 0.042),
+           conf.low = c(0.603, 0.075),
+           conf.high = c(6.838, 3.838),
+           p.adjusted = c(0.039, 0.042),
+           covariates = c("", "")
+    ),
+    tibble(term = "DRB1*11:01",
+           estimate = 2.612,
+           std.error = 1.069,
+           statistic = 2.442,
+           p.value = 0.015,
+           conf.low = 0.516,
+           conf.high = 4.707,
+           p.adjusted = 0.015,
+           covariates = "B*14:02"
+    )
+  )
   expect_equal(res, test_res)
 
   # Tests for checkStatisticalModel errors are ommitted here

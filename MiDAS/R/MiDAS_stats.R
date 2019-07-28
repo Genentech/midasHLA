@@ -105,6 +105,9 @@ analyzeAssociations <- function(object,
 #' @inheritParams analyzeAssociations
 #' @param th number specifying p-value threshold for a variable to be considered
 #'   significant.
+#' @param keep logical flag indicating if the output should be a list of results
+#'   resulting from each selection step. Default is to return only the final
+#'   result.
 #' @param rss_th number specifying residual sum of squares threshold at which
 #'   function should stop adding additional variables. As the residual sum of
 #'   squares approaches \code{0} the perfect fit is obtained making further
@@ -146,6 +149,7 @@ analyzeConditionalAssociations <- function(object,
                                            variables,
                                            correction = "BH",
                                            th,
+                                           keep = FALSE,
                                            rss_th = 1e-07,
                                            exponentiate = FALSE) {
   assert_that(
@@ -166,6 +170,7 @@ analyzeConditionalAssociations <- function(object,
     ),
     is.string(correction),
     is.number(th),
+    is.flag(keep),
     is.number(rss_th),
     is.flag(exponentiate)
   )
@@ -213,17 +218,24 @@ analyzeConditionalAssociations <- function(object,
     prev_variables <- all.vars(prev_formula)
     new_variables <- variables[! variables %in% prev_variables]
 
-    results <- results[i_min, ]
     results$term <- gsub("`", "", results$term)
     best[[i]] <- results
     i <- i + 1
   }
 
-  if (length(best) == 0) {
-    warn("No significant variables found. Returning empty table.") # Tibble to be more precise?
-    results <- results[0, ]
+  if (keep) {
+    results <- best
   } else {
-    results <- bind_rows(best)
+    if (length(best) == 0) {
+      warn("No significant variables found. Returning empty table.") # Tibble to be more precise?
+      results <- results[0, ]
+    } else {
+      results <- lapply(best, function(res) {
+        i_min <- which.min(res[["p.value"]])
+        res[i_min, ]
+      })
+      results <- bind_rows(results)
+    }
   }
 
   return(results)
