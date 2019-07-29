@@ -249,11 +249,15 @@ test_that("MiDAS associations are analyzed properly", {
   pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
+  kir_file <-
+    system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  kir_counts <- readKirCalls(kir_file, counts = TRUE)
   midas_data <<-
     prepareMiDASData(
       hla_calls,
       pheno,
       covar,
+      kir_counts = kir_counts,
       analysis_type = c(
         "hla_allele",
         "aa_level",
@@ -261,6 +265,8 @@ test_that("MiDAS associations are analyzed properly", {
         "allele_g_group",
         "allele_supertype",
         "allele_group",
+        "kir_genes",
+        "hla_kir_interactions",
         "custom"
       ),
       inheritance_model = "additive"
@@ -425,6 +431,53 @@ test_that("MiDAS associations are analyzed properly", {
 
   expect_equal(as.data.frame(res), as.data.frame(test_res))
 
+  ## analysis_type = "kir_genes" variables = NULL
+  res <- analyzeMiDASData(object,
+                          analysis_type = "kir_genes",
+                          variables = NULL,
+                          kable_output = FALSE
+  )
+  test_variables <- colnames(midas_data[, label(midas_data) == "kir_genes"])
+  test_res <- analyzeAssociations(object, variables = test_variables)
+  test_variables <- test_res$term # constant variables are discarded
+  test_res <- dplyr::rename(test_res, kir.gene = term)
+  variables_freq <- getCountsFrequencies(midas_data[, c("ID", test_variables)])
+  test_res$Ntotal <- variables_freq$Counts
+  test_res$Ntotal.frequency <- variables_freq$Freq
+  pos <- midas_data$OS_DIED == 1
+  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", test_variables)])
+  test_res$Npositive <- pos_freq$Counts
+  test_res$Npositive.frequency <- pos_freq$Freq
+  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", test_variables)])
+  test_res$Nnegative <- neg_freq$Counts
+  test_res$Nnegative.frequency <- neg_freq$Freq
+
+  expect_equal(as.data.frame(res), as.data.frame(test_res))
+
+  ## analysis_type = "hla_kir_interactions" variables = NULL
+  res <- analyzeMiDASData(object,
+                          analysis_type = "hla_kir_interactions",
+                          variables = NULL,
+                          kable_output = FALSE
+  )
+  test_variables <-
+    colnames(midas_data[, label(midas_data) == "hla_kir_interactions"])
+  test_res <- analyzeAssociations(object, variables = test_variables)
+  test_variables <- test_res$term # constant variables are discarded
+  test_res <- dplyr::rename(test_res, hla.kir.interaction = term)
+  variables_freq <- getCountsFrequencies(midas_data[, c("ID", test_variables)])
+  test_res$Ntotal <- variables_freq$Counts
+  test_res$Ntotal.frequency <- variables_freq$Freq
+  pos <- midas_data$OS_DIED == 1
+  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", test_variables)])
+  test_res$Npositive <- pos_freq$Counts
+  test_res$Npositive.frequency <- pos_freq$Freq
+  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", test_variables)])
+  test_res$Nnegative <- neg_freq$Counts
+  test_res$Nnegative.frequency <- neg_freq$Freq
+
+  expect_equal(as.data.frame(res), as.data.frame(test_res))
+
   # conditional TRUE
   res <- analyzeMiDASData(object,
                           analysis_type = "hla_allele",
@@ -475,7 +528,7 @@ test_that("MiDAS associations are analyzed properly", {
   )
 
   expect_error(analyzeMiDASData(object, analysis_type = "a"),
-               "analysis_type should be one of \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\"."
+               "analysis_type should be one of \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"hla_kir_interactions\"."
   )
 
   expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", conditional = 1),
@@ -662,6 +715,43 @@ test_that("MiDAS data is prepared properly", {
     rleft_join(test_midas_allele_group, pheno, covar)
   expect_equal(midas_allele_groups, test_midas_allele_group)
 
+  # kir_genes
+  kir_path <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  kir_counts <- readKirCalls(kir_path, counts = TRUE)
+  midas_kir_genes <- prepareMiDASData(hla_calls,
+                                      pheno,
+                                      covar,
+                                      kir_counts = kir_counts,
+                                      analysis_type = "kir_genes",
+                                      inheritance_model = "additive")
+  test_midas_kir_genes <- kir_counts
+  Hmisc::label(test_midas_kir_genes[-1], self = FALSE) <-
+    rep("kir_genes", ncol(kir_counts) - 1)
+  test_midas_kir_genes <-
+    rleft_join(hla_calls[, 1, drop = FALSE], test_midas_kir_genes, pheno, covar)
+  expect_equal(midas_kir_genes, test_midas_kir_genes)
+
+  # hla_kir_interactions
+  midas_hla_kir_interactions <- prepareMiDASData(
+    hla_calls,
+    pheno,
+    covar,
+    kir_counts = kir_counts,
+    analysis_type = "hla_kir_interactions",
+    inheritance_model = "additive"
+  )
+  test_midas_hla_kir_interactions <-
+    getHlaKirInteractions(hla_calls = hla_calls, kir_counts = kir_counts)
+  Hmisc::label(test_midas_hla_kir_interactions[-1], self = FALSE) <-
+    rep("hla_kir_interactions", ncol(test_midas_hla_kir_interactions) - 1)
+  test_midas_hla_kir_interactions <-
+    rleft_join(hla_calls[, 1, drop = FALSE],
+               test_midas_hla_kir_interactions,
+               pheno,
+               covar
+    )
+  expect_equal(midas_hla_kir_interactions, test_midas_hla_kir_interactions)
+
   # custom
   midas_custom <- prepareMiDASData(hla_calls,
                                    pheno,
@@ -679,7 +769,8 @@ test_that("MiDAS data is prepared properly", {
   midas_multiple <- prepareMiDASData(hla_calls,
                                      pheno,
                                      covar,
-                                     analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "custom"),
+                                     kir_counts = kir_counts,
+                                     analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "custom"),
                                      inheritance_model = "additive")
   midas_multiple_test <-
     rleft_join(
@@ -689,6 +780,7 @@ test_that("MiDAS data is prepared properly", {
       midas_allele_g_group,
       midas_allele_supertype,
       midas_allele_groups,
+      midas_kir_genes,
       midas_custom,
       by = c("ID", "OS", "OS_DIED", "AGE", "SEX")
     )
@@ -707,7 +799,7 @@ test_that("MiDAS data is prepared properly", {
 
   expect_error(
     prepareMiDASData(hla_calls, analysis_type = "foo"),
-    "analysis_type should match values \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"custom\"."
+    "analysis_type should match values \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"hla_kir_interactions\", \"custom\"."
   )
 
   expect_error(
@@ -737,9 +829,18 @@ test_that("MiDAS data is prepared properly", {
     "no expression levels were found for input hla_calls"
   )
 
-  # this is ill due to ggroups matches problem there is one more above, when groups are fixed this will start to fail so uncomment and remove linies as needed
   expect_error(
     prepareMiDASData(hla_calls[, c("ID", "DOB_1", "DOB_2")], analysis_type = "allele_group"),
     "no allele could be assigned to allele groups for input hla_calls"
+  )
+
+  expect_error(
+    prepareMiDASData(hla_calls, analysis_type = "kir_genes"),
+    "\"kir_genes\" analysis type requires kir_counts argument to be specified"
+  )
+
+  expect_error(
+    prepareMiDASData(hla_calls, analysis_type = "hla_kir_interactions"),
+    "\"hla_kir_interactions\" analysis type requires kir_counts argument to be specified"
   )
 })
