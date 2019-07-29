@@ -794,6 +794,8 @@ assertthat::on_failure(colnamesMatches) <- function(call, env) {
 #'
 #' @param kir_counts Data frame containing KIR genes counts, as return by
 #'   \code{\link{readKirCalls}} function.
+#' @param accept.null Logical indicating if NULL \code{kir_counts} should be
+#'   accepted.
 #'
 #' @return Logical indicating if \code{kir_counts} follows kir counts data frame
 #'   format. Otherwise raise error.
@@ -805,24 +807,27 @@ assertthat::on_failure(colnamesMatches) <- function(call, env) {
 #' checkKirCountsFormat(kir_counts)
 #'
 #' @export
-checkKirCountsFormat <- function(kir_counts) {
-  kir_counts_name <- deparse(substitute(kir_counts))
-  assert_that(
-    is.data.frame(kir_counts),
-    see_if(nrow(kir_counts) >= 1 & ncol(kir_counts) >= 2,
-            msg = paste0(kir_counts_name,
-                         " have to have at least 1 rows and 2 columns"
-            )
-    ),
-    see_if(! any(vapply(kir_counts, is.factor, logical(length = 1))),
-         msg = paste0(kir_counts_name, " can't contain factors")
+checkKirCountsFormat <- function(kir_counts,
+                                 accept.null = FALSE) {
+  if (! (is.null(kir_counts) & accept.null)) {
+    kir_counts_name <- deparse(substitute(kir_counts))
+    assert_that(
+      is.data.frame(kir_counts),
+      see_if(nrow(kir_counts) >= 1 & ncol(kir_counts) >= 2,
+              msg = paste0(kir_counts_name,
+                           " have to have at least 1 rows and 2 columns"
+              )
+      ),
+      see_if(! any(vapply(kir_counts, is.factor, logical(length = 1))),
+           msg = paste0(kir_counts_name, " can't contain factors")
+      )
     )
-  )
 
-  kir_counts <- kir_counts[, 1, drop = FALSE]
-  assert_that(
-    colnamesMatches(kir_counts, "ID")
-  )
+    kir_counts <- kir_counts[, 1, drop = FALSE]
+      assert_that(
+        colnamesMatches(kir_counts, "ID")
+      )
+  }
 
   return(TRUE)
 }
