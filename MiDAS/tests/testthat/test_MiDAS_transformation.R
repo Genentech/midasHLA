@@ -363,7 +363,7 @@ test_that("counts are conveerted into frequencies", {
 })
 
 test_that("results are formatted properly with preselected args", {
-  midas_data <<- data.frame( # in one of the tests above midas_data is assigned as global variable, this leads to unexpected behaviour!
+  midas_data <- data.frame(
     ID = c(1, 2),
     "A*01:01" = c(0, 2),
     "A*01:02" = c(2, 0),

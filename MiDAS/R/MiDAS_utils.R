@@ -388,8 +388,9 @@ updateModel <- function(object, x, backquote = TRUE, collapse = " + ") {
     x <- paste0(". ~ . + ", paste(x, collapse = collapse))
   }
 
+  object_env <- attr(object$terms, ".Environment")
   new_object <- update(object = object, x, evaluate = FALSE)
-  new_object <- eval.parent(new_object)
+  new_object <- eval(new_object, envir = object_env)
 
   return(new_object)
 }
@@ -423,13 +424,15 @@ checkStatisticalModel <- function(object) { # TODO simplyfy output of this funct
     msg = "object have to have an attribute 'call'"
   )
 
-  object_formula <- eval(object_call[["formula"]])
+  object_env <- attr(object$terms, ".Environment")
+
+  object_formula <- eval(object_call[["formula"]], envir = object_env)
   assert_that(
     is_formula(object_formula),
     msg = "object have to be a model with defined formula"
   )
 
-  object_data <- eval(object_call[["data"]])
+  object_data <- eval(object_call[["data"]], envir = object_env)
   assert_that(
     ! is.null(object_data) & is.data.frame(object_data),
     msg = "object need to have data attribue defined"

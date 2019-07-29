@@ -1,3 +1,6 @@
+## 0.0.0.9018 - 27/07/2019
++ fixes a bug when models were accessed and updated in parent frame, making it error prone in more complex examples. Now modeels are evaluated in the enviorment they were created in (one defined in model$terms .Enviorment attribute.
+
 ## 0.0.0.9017 - 23/07/2019
 + adds kir_genes analysis type to prepareMiDASData and analyzeMiDASData
 + adds hla_kir_interactions analysis type to prepareMiDASData and analyzeMiDASData

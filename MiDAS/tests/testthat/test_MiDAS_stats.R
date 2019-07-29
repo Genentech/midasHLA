@@ -8,7 +8,7 @@ test_that("HLA allele associations are analyzed properly", {
   pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-  midas_data <<-
+  midas_data <-
     prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
 
   object <- lm(OS_DIED ~ AGE + SEX, data = midas_data)
@@ -59,7 +59,7 @@ test_that("Stepwise conditional alleles subset selection", {
   pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-  midas_data <<-
+  midas_data <-
     prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
 
   object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
@@ -252,7 +252,7 @@ test_that("MiDAS associations are analyzed properly", {
   kir_file <-
     system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
   kir_counts <- readKirCalls(kir_file, counts = TRUE)
-  midas_data <<-
+  midas_data <-
     prepareMiDASData(
       hla_calls,
       pheno,
