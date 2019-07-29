@@ -5,7 +5,7 @@
 \title{Stepwise conditional association analysis}
 \usage{
 analyzeConditionalAssociations(object, variables, correction = "BH", th,
-  rss_th = 1e-07, exponentiate = FALSE)
+  keep = FALSE, rss_th = 1e-07, exponentiate = FALSE)
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many
@@ -18,6 +18,10 @@ details for further information.}
 
 \item{th}{number specifying p-value threshold for a variable to be considered
 significant.}
+
+\item{keep}{logical flag indicating if the output should be a list of results
+resulting from each selection step. Default is to return only the final
+result.}
 
 \item{rss_th}{number specifying residual sum of squares threshold at which
 function should stop adding additional variables. As the residual sum of
