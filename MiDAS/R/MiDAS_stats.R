@@ -402,7 +402,7 @@ prepareHlaData <- function(hla_calls,
 #' analyzeMiDASData(object, analysis_type = "hla_allele")
 #'
 #' @importFrom assertthat assert_that is.flag is.number is.string
-#' @importFrom dplyr filter left_join select rename
+#' @importFrom dplyr bind_rows filter left_join select rename
 #' @importFrom stats getCall
 #' @importFrom rlang !! := .data
 #' @importFrom magrittr %>% %<>%
@@ -512,13 +512,19 @@ analyzeMiDASData <- function(object,
   }
 
   if (conditional) {
-    results <- analyzeConditionalAssociations(object,
-                                              variables = variables,
-                                              correction = correction,
-                                              th = th,
-                                              rss_th = rss_th,
-                                              exponentiate = logistic
+    results_iter <- analyzeConditionalAssociations(object,
+                                                   variables = variables,
+                                                   correction = correction,
+                                                   th = th,
+                                                   keep = TRUE,
+                                                   rss_th = rss_th,
+                                                   exponentiate = logistic
     )
+    results <- lapply(results_iter, function(res) {
+      i_min <- which.min(res[["p.value"]])
+      res[i_min, ]
+    })
+    results <- bind_rows(results)
   } else {
     results <- analyzeAssociations(object,
                                    variables = variables,
@@ -530,6 +536,13 @@ analyzeMiDASData <- function(object,
   # Add frequency information to results table if there were any count variables
   if (length(cts_vars)) {
     results <- left_join(x = results, y = variables_freq, by = "term")
+    if (conditional) {
+      results_iter <- lapply(
+        X = results_iter,
+        FUN = left_join,
+        y = variables_freq,
+        by = "term")
+    }
   }
 
   pheno_var <- all.vars(object_formula)[1]
@@ -539,21 +552,29 @@ analyzeMiDASData <- function(object,
   }
 
   if (binary_phenotype & length(cts_vars)) {
-    results <- object_data %>%
+    pos_freq <- object_data %>%
       filter(.data[[!! pheno_var]] == 1) %>%
       select("ID", !! cts_vars) %>%
       getCountsFrequencies() %>%
       rename(Npositive = .data$Counts,
-             Npositive.frequency = .data$Freq) %>%
-      left_join(x = results, by = "term")
+             Npositive.frequency = .data$Freq
+      )
+    results <- left_join(x = results, y = pos_freq, by = "term")
+    if (conditional) {
+      results_iter <- lapply(results_iter, left_join, y = pos_freq, by = "term")
+    }
 
-    results <- object_data %>%
+    neg_freq <- object_data %>%
       filter(.data[[!! pheno_var]] != 1) %>%
       select("ID", !! cts_vars) %>%
       getCountsFrequencies() %>%
       rename(Nnegative = .data$Counts,
-             Nnegative.frequency = .data$Freq) %>%
-      left_join(x = results, by = "term")
+             Nnegative.frequency = .data$Freq
+      )
+    results <- left_join(x = results,   y = neg_freq, by = "term")
+    if (conditional) {
+      results_iter <- lapply(results_iter, left_join, y = neg_freq, by = "term")
+    }
   }
 
   if (kable_output) {
@@ -582,8 +603,20 @@ analyzeMiDASData <- function(object,
                        "term"
   )
 
-  results %<>%
-    rename(!! term_name := .data$term, !! estimate_name := .data$estimate)
+  if (conditional) {
+    results <- lapply(
+      X = results_iter,
+      FUN = function(x) {
+        rename(.data = x,
+               !! term_name := .data$term,
+               !! estimate_name := .data$estimate
+        )
+      }
+    )
+  } else {
+    results %<>%
+     rename(!! term_name := .data$term, !! estimate_name := .data$estimate)
+  }
 
   return(results)
 }

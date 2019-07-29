@@ -466,22 +466,31 @@ test_that("MiDAS associations are analyzed properly", {
   )
 
   test_variables <- colnames(midas_data[, label(midas_data) == "hla_allele"])
-  test_res <-
-    analyzeConditionalAssociations(object, variables = test_variables, th = 0.05)
-  test_res <- dplyr::rename(test_res, allele = term)
-  alleles <- test_res$allele
+  test_res <- analyzeConditionalAssociations(object,
+                                             variables = test_variables,
+                                             th = 0.05,
+                                             keep = TRUE
+  )
+  test_res <- lapply(test_res, dplyr::rename, allele = term)
+  alleles <- lapply(test_res, `[`, "allele")
+  alleles <- unique(unlist(alleles))
   variables_freq <- getCountsFrequencies(midas_data[, c("ID", alleles)])
-  test_res$Ntotal <- variables_freq$Counts
-  test_res$Ntotal.frequency <- variables_freq$Freq
+  colnames(variables_freq) <- c("allele", "Ntotal", "Ntotal.frequency")
+  test_res <-
+    lapply(test_res, dplyr::left_join, y = variables_freq, by = "allele")
   pos <- midas_data$OS_DIED == 1
   pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", alleles)])
-  test_res$Npositive <- pos_freq$Counts
-  test_res$Npositive.frequency <- pos_freq$Freq
+  colnames(pos_freq) <- c("allele", "Npositive", "Npositive.frequency")
+  test_res <-
+    lapply(test_res, dplyr::left_join, y = pos_freq, by = "allele")
   neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", alleles)])
-  test_res$Nnegative <- neg_freq$Counts
-  test_res$Nnegative.frequency <- neg_freq$Freq
+  colnames(neg_freq) <- c("allele", "Nnegative", "Nnegative.frequency")
+  test_res <-
+    lapply(test_res, dplyr::left_join, y = neg_freq, by = "allele")
 
-  expect_equal(as.data.frame(res), as.data.frame(test_res)) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
+  res <- lapply(res, as.data.frame)
+  test_res <- lapply(test_res, as.data.frame)
+  expect_equal(res, test_res) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
 
   # Test lower and upper frequency thresholds
   # %
