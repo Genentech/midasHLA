@@ -4,9 +4,10 @@
 \alias{prepareMiDASData}
 \title{Prepare HLA calls data for statistical analysis}
 \usage{
-prepareMiDASData(hla_calls, ..., analysis_type = c("hla_allele",
-  "aa_level", "expression_level", "allele_g_group", "allele_supertype",
-  "allele_group", "custom"), inheritance_model = "additive",
+prepareMiDASData(hla_calls, ..., kir_counts = NULL,
+  analysis_type = c("hla_allele", "aa_level", "expression_level",
+  "allele_g_group", "allele_supertype", "allele_group", "kir_genes",
+  "hla_kir_interactions", "custom"), inheritance_model = "additive",
   indels = TRUE, unkchar = FALSE)
 }
 \arguments{
@@ -15,6 +16,9 @@ prepareMiDASData(hla_calls, ..., analysis_type = c("hla_allele",
 
 \item{...}{Data frames holding additional variables like phenotypic
 observations or covariates.}
+
+\item{kir_counts}{Data frame holding counts with KIR genes counts. Required
+for \code{"kir_genes"} analysis type.}
 
 \item{analysis_type}{String indicating analysis type for which data should be
   prepared. Valid choices are \code{"hla_allele"}, \code{"aa_level"},
@@ -60,6 +64,12 @@ groups using Bw4/6 and C1/2 groups dictionaries shipped with package (this is
 done using \link{hlaToVariable}). Than those are transformed to counts under
 \code{inheritance_model} of choice (this is done with
 \link{hlaCallsToCounts}).
+
+\code{"kir_genes"} - joins \code{kir_genes} with result data frame.
+
+\code{"hla_kir_interactions"} - \code{hla_calls} are processed with
+\code{kir_counts} into HLA - KIR interactions variables (see
+\link{getHlaKirInteractions} for more details).
 
 \code{"custom"} - will not transform \code{hla_calls} and only joins it with
 additional data(\code{...}).}

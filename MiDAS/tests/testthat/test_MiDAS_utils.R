@@ -15,7 +15,6 @@ test_that("HLA allele numbers have proper format", {
                ),
                c(FALSE, FALSE, FALSE)
   )
-  expect_error(checkAlleleFormat(1), "allele is not a character vector")
 })
 
 test_that("HLA allele resolution is number of sets of digits * 2", {
@@ -108,7 +107,7 @@ test_that("HLA calls data frame have proper format", {
   )
 
   expect_error(checkHlaCallsFormat(fake_calls[, c(1, 1, 3)]),
-               "values in hla_calls doesn't follow HLA numbers specification"
+               "values: Sample1, Sample2, Sample3 in hla_calls doesn't follow HLA numbers specification"
   )
 })
 
@@ -309,6 +308,8 @@ test_that("KIR counts have proper format", {
   file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
   kir_counts <- readKirCalls(file)
   expect_equal(checkKirCountsFormat(kir_counts), TRUE)
+
+  expect_equal(checkKirCountsFormat(NULL, accept.null = TRUE), TRUE)
 
   expect_error(
     checkKirCountsFormat(kir_counts[, 1, drop = FALSE]),

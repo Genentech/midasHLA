@@ -27,7 +27,6 @@
 #' @importFrom stringi stri_detect_regex
 #' @export
 checkAlleleFormat <- function(allele) {
-  assert_that(is.character(allele))
   pattern <- "^[A-Z0-9]+[*][0-9]+(:[0-9]+){0,3}((?=G)(G|GG)|(N|L|S|C|A|Q)){0,1}$"
   is_correct <- stri_detect_regex(allele, pattern)
   return(is_correct)
@@ -251,17 +250,25 @@ checkHlaCallsFormat <- function(hla_calls) {
   assert_that(
     is.data.frame(hla_calls),
     see_if(nrow(hla_calls) >= 1 & ncol(hla_calls) >= 2,
-           msg = "hla_calls have to have at least 1 rows and 2 columns"
+           msg = "hla_calls have to have at least 1 rows and 2 columns. Make sure the input file is in tsv format."
     ),
     see_if(! any(vapply(hla_calls, is.factor, logical(length = 1))),
            msg = "hla_calls can't contain factors"
     ),
     see_if(! all(checkAlleleFormat(as.character(hla_calls[, 1])), na.rm = TRUE),
            msg = "first column of hla_calls should specify samples id"
-    ),
-    see_if(all(checkAlleleFormat(unlist(hla_calls[, -1])), na.rm = TRUE),
-           msg = "values in hla_calls doesn't follow HLA numbers specification"
     )
+  )
+
+  alleles <- unlist(hla_calls[, -1])
+  test_values <- checkAlleleFormat(alleles)
+  test_values <- test_values[! is.na(test_values)]
+  assert_that(
+      all(test_values),
+      msg = sprintf(
+        "values: %s in hla_calls doesn't follow HLA numbers specification",
+        paste(unlist(hla_calls[, -1])[! test_values], collapse = ", ")
+      )
   )
 
   return(TRUE)
@@ -388,8 +395,9 @@ updateModel <- function(object, x, backquote = TRUE, collapse = " + ") {
     x <- paste0(". ~ . + ", paste(x, collapse = collapse))
   }
 
+  object_env <- attr(object$terms, ".Environment")
   new_object <- update(object = object, x, evaluate = FALSE)
-  new_object <- eval.parent(new_object)
+  new_object <- eval(new_object, envir = object_env)
 
   return(new_object)
 }
@@ -423,13 +431,15 @@ checkStatisticalModel <- function(object) { # TODO simplyfy output of this funct
     msg = "object have to have an attribute 'call'"
   )
 
-  object_formula <- eval(object_call[["formula"]])
+  object_env <- attr(object$terms, ".Environment")
+
+  object_formula <- eval(object_call[["formula"]], envir = object_env)
   assert_that(
     is_formula(object_formula),
     msg = "object have to be a model with defined formula"
   )
 
-  object_data <- eval(object_call[["data"]])
+  object_data <- eval(object_call[["data"]], envir = object_env)
   assert_that(
     ! is.null(object_data) & is.data.frame(object_data),
     msg = "object need to have data attribue defined"
@@ -791,6 +801,8 @@ assertthat::on_failure(colnamesMatches) <- function(call, env) {
 #'
 #' @param kir_counts Data frame containing KIR genes counts, as return by
 #'   \code{\link{readKirCalls}} function.
+#' @param accept.null Logical indicating if NULL \code{kir_counts} should be
+#'   accepted.
 #'
 #' @return Logical indicating if \code{kir_counts} follows kir counts data frame
 #'   format. Otherwise raise error.
@@ -802,24 +814,27 @@ assertthat::on_failure(colnamesMatches) <- function(call, env) {
 #' checkKirCountsFormat(kir_counts)
 #'
 #' @export
-checkKirCountsFormat <- function(kir_counts) {
-  kir_counts_name <- deparse(substitute(kir_counts))
-  assert_that(
-    is.data.frame(kir_counts),
-    see_if(nrow(kir_counts) >= 1 & ncol(kir_counts) >= 2,
-            msg = paste0(kir_counts_name,
-                         " have to have at least 1 rows and 2 columns"
-            )
-    ),
-    see_if(! any(vapply(kir_counts, is.factor, logical(length = 1))),
-         msg = paste0(kir_counts_name, " can't contain factors")
+checkKirCountsFormat <- function(kir_counts,
+                                 accept.null = FALSE) {
+  if (! (is.null(kir_counts) & accept.null)) {
+    kir_counts_name <- deparse(substitute(kir_counts))
+    assert_that(
+      is.data.frame(kir_counts),
+      see_if(nrow(kir_counts) >= 1 & ncol(kir_counts) >= 2,
+              msg = paste0(kir_counts_name,
+                           " have to have at least 1 rows and 2 columns"
+              )
+      ),
+      see_if(! any(vapply(kir_counts, is.factor, logical(length = 1))),
+           msg = paste0(kir_counts_name, " can't contain factors")
+      )
     )
-  )
 
-  kir_counts <- kir_counts[, 1, drop = FALSE]
-  assert_that(
-    colnamesMatches(kir_counts, "ID")
-  )
+    kir_counts <- kir_counts[, 1, drop = FALSE]
+      assert_that(
+        colnamesMatches(kir_counts, "ID")
+      )
+  }
 
   return(TRUE)
 }
