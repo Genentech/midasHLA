@@ -25,6 +25,10 @@ test_that("HLA allele calls are read properly", {
                "resolution is not a count \\(a single positive integer\\)"
   )
 
+  expect_error(readHlaCalls(file, na.strings = 1),
+               "na.strings is not a character vector"
+  )
+
   fake_calls <- data.frame(ID = c("Sample1", "Sample2", "Sample3"),
                            A_1 = c("A*01", "A*02", "A*03"),
                            A_2 = c("A*01", "B*02", "C*03")
@@ -195,6 +199,9 @@ test_that("KIR haplotype calls are read properly", {
 
   expect_error(readKirCalls(file, binary = "foo"),
                "binary is not a flag \\(a length one logical vector\\).")
+
+  expect_error(readKirCalls(file, na.strings = 1),
+               "na.strings is not a character vector")
 
   extracol_file <- tempfile()
   kir_calls <- readKirCalls(file, counts = FALSE)
