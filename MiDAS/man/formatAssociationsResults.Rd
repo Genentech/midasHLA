@@ -13,7 +13,9 @@ formatAssociationsResults(results, type = "hla_allele",
 
 \item{type}{String specifying type of analysis from which \code{results} were
 produced. Possible values includes \code{'hla_allele'}, \code{'aa_level'},
-\code{'expression_level'}.}
+\code{'expression_level'}, \code{'allele_g_group'},
+\code{'allele_supertype'}, \code{'allele_group'}, \code{'kir_genes'},
+\code{'hla_kir_interactions'}, \code{'custom'}.}
 
 \item{response_variable}{String giving the name of response variable, it is
 used to produce binary phenotype column names.}
