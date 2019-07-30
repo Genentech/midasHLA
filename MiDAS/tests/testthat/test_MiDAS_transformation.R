@@ -363,7 +363,7 @@ test_that("counts are conveerted into frequencies", {
 })
 
 test_that("results are formatted properly with preselected args", {
-  midas_data <<- data.frame( # in one of the tests above midas_data is assigned as global variable, this leads to unexpected behaviour!
+  midas_data <- data.frame(
     ID = c(1, 2),
     "A*01:01" = c(0, 2),
     "A*01:02" = c(2, 0),
@@ -397,7 +397,7 @@ test_that("results are formatted properly with preselected args", {
   )
 
   expect_error(formatAssociationsResults(res, type = "foo"),
-               "type should be one of \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"custom\"."
+               "type should be one of \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"hla_kir_interactions\", \"custom\"."
   )
 
   expect_error(formatAssociationsResults(res, type = "hla_allele", response_variable = 1),
