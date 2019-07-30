@@ -1,3 +1,6 @@
+## 0.0.0.9021 - 30/07/2019
++ changes the behaviour of analyzeMiDASData conditional = TRUE. Now it return list of results from all iterations and kables only best results from each iteration.
+
 ## 0.0.0.9016 - 20/07/2019
 + adds checkKirCountsFormat to assert KIR counts format
 + adds getHlaKirInteractions to get HLA - KIR interactions as new variables
