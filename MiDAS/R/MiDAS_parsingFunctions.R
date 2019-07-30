@@ -13,7 +13,7 @@
 #' \url{http://hla.alleles.org/nomenclature/naming.html}.
 #'
 #' @inheritParams reduceAlleleResolution
-#' @inheritParams read.table
+#' @inheritParams utils::read.table
 #' @param file Path to input file.
 #'
 #' @return Data frame containing HLA allele calls.
@@ -243,7 +243,7 @@ readHlaAlignments <- function(file,
 #' corresponding KIR haplotypes.
 #'
 #' @inheritParams kirHaplotypeToCounts
-#' @inheritParams read.table
+#' @inheritParams utils::read.table
 #' @param file Path to input file.
 #' @param counts Logical flag indicating if KIR haplotypes should be converted
 #'   to gene counts.
