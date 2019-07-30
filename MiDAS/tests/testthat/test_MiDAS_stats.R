@@ -511,10 +511,11 @@ test_that("MiDAS associations are analyzed properly", {
 
   expect_equal(as.data.frame(res), as.data.frame(test_res))
 
-  # conditional TRUE
+  # conditional TRUE keep TRUE
   res <- analyzeMiDASData(object,
                           analysis_type = "hla_allele",
                           conditional = TRUE,
+                          keep = TRUE,
                           kable_output = FALSE
   )
 
@@ -545,6 +546,35 @@ test_that("MiDAS associations are analyzed properly", {
   test_res <- lapply(test_res, as.data.frame)
   expect_equal(res, test_res) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
 
+  # conditional TRUE keep FALSE
+  res <- analyzeMiDASData(object,
+                          analysis_type = "hla_allele",
+                          conditional = TRUE,
+                          keep = FALSE,
+                          kable_output = FALSE
+  )
+
+  test_variables <- colnames(midas_data[, label(midas_data) == "hla_allele"])
+  test_res <- analyzeConditionalAssociations(object,
+                                             variables = test_variables,
+                                             th = 0.05,
+                                             keep = FALSE
+  )
+  test_variables <- test_res$term # constant variables are discarded
+  test_res <- dplyr::rename(test_res, allele = term)
+  variables_freq <- getCountsFrequencies(midas_data[, c("ID", test_variables)])
+  test_res$Ntotal <- variables_freq$Counts
+  test_res$Ntotal.frequency <- variables_freq$Freq
+  pos <- midas_data$OS_DIED == 1
+  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", test_variables)])
+  test_res$Npositive <- pos_freq$Counts
+  test_res$Npositive.frequency <- pos_freq$Freq
+  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", test_variables)])
+  test_res$Nnegative <- neg_freq$Counts
+  test_res$Nnegative.frequency <- neg_freq$Freq
+
+  expect_equal(as.data.frame(res), as.data.frame(test_res))
+
   # Test lower and upper frequency thresholds
   # %
   res <- analyzeMiDASData(object, analysis_type = "hla_allele", lower_frequency_cutoff = 0.85, kable_output = FALSE)
@@ -573,12 +603,16 @@ test_that("MiDAS associations are analyzed properly", {
                "analysis_type should be one of \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"hla_kir_interactions\"."
   )
 
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", variables = 1),
+               "variables is not a character vector or NULL."
+  )
+
   expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", conditional = 1),
                "conditional is not a flag \\(a length one logical vector\\)."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", variables = 1),
-               "variables is not a character vector or NULL."
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", keep = 1),
+               "keep is not a flag \\(a length one logical vector\\)."
   )
 
   expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", variables = "thief"),

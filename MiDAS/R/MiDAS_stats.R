@@ -413,8 +413,9 @@ prepareHlaData <- function(hla_calls,
 #' @export
 analyzeMiDASData <- function(object,
                              analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions"),
-                             conditional = FALSE,
                              variables = NULL,
+                             conditional = FALSE,
+                             keep = FALSE,
                              lower_frequency_cutoff = NULL,
                              upper_frequency_cutoff = NULL,
                              pvalue_cutoff = NULL,
@@ -441,8 +442,9 @@ analyzeMiDASData <- function(object,
     stringMatches(analysis_type,
                   choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions")
     ),
-    is.flag(conditional),
     isCharacterOrNULL(variables),
+    is.flag(conditional),
+    is.flag(keep),
     see_if(
       all(test_vars <- variables %in% object_variables) | is.null(variables),
       msg = sprintf("%s can not be found in object data",
@@ -577,7 +579,7 @@ analyzeMiDASData <- function(object,
              Nnegative.frequency = .data$Freq
       )
     results <- left_join(x = results,   y = neg_freq, by = "term")
-    if (conditional) {
+    if (conditional && keep) {
       results_iter <- lapply(results_iter, left_join, y = neg_freq, by = "term")
     }
   }
@@ -610,7 +612,7 @@ analyzeMiDASData <- function(object,
                        "term"
   )
 
-  if (conditional) {
+  if (conditional && keep) {
     results <- lapply(
       X = results_iter,
       FUN = function(x) {
