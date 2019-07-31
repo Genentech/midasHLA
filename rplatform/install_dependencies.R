@@ -15,18 +15,18 @@
 # 's:sha1' - github SHA1
 
 # Install packages using multiple cores
-#if (!require(parallel)) rp::installAndVerify(package = "parallel", requirement = "*")
-#options(Ncpus = parallel::detectCores())
-#
-#pkgs_to_install <- c(
+# if (!require(parallel)) rp::installAndVerify(package = "parallel", requirement = "*")
+# options(Ncpus = parallel::detectCores())
+
+# pkgs_to_install <- c(
 #  # Add your dependencies here
-#)
-#rp::installAndVerify(package = pkgs_to_install)
+# )
+# rp::installAndVerify(package = pkgs_to_install)
 
 # Or uncomment following and use desc::desc_get_deps() to extract dependencies from DESCRIPTION file
-deps <- desc::desc_get_deps(file.path("/mnt/vol", "MiDAS/DESCRIPTION"))
-rp::installAndVerify(install = install.packages,
-                     package = deps$package,
-                     requirement = deps$version)
-
-
+# deps <- desc::desc_get_deps(file.path("/mnt/vol", "MiDAS/DESCRIPTION"))
+# rp::installAndVerify(install = install.packages,
+#                      package = deps$package,
+#                      requirement = deps$version)
+rp::installDependencies(project.sources = "/mnt/vol", 
+                        dont.install = c())

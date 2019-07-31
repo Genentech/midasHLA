@@ -1,3 +1,6 @@
+## 0.0.0.9021 - 30/07/2019
++ changes the behaviour of analyzeMiDASData conditional = TRUE. Now it return list of results from all iterations and kables only best results from each iteration.
+
 ## 0.0.0.9020 - 27/07/2019
 + adds human friendly erros in readHlaCalls
 
@@ -10,7 +13,6 @@
 ## 0.0.0.9017 - 23/07/2019
 + adds kir_genes analysis type to prepareMiDASData and analyzeMiDASData
 + adds hla_kir_interactions analysis type to prepareMiDASData and analyzeMiDASData
->>>>>>> master
 
 ## 0.0.0.9016 - 20/07/2019
 + adds checkKirCountsFormat to assert KIR counts format

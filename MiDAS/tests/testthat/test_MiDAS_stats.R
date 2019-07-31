@@ -63,9 +63,12 @@ test_that("Stepwise conditional alleles subset selection", {
     prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
 
   object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
+
+  # keep = FALSE
   res <- analyzeConditionalAssociations(object,
                                         variables = c("B*14:02", "DRB1*11:01"),
-                                        th = 0.05)
+                                        th = 0.05,
+                                        keep = FALSE)
   res <- rapply(res, classes = "numeric", how = "replace", round, digits = 3)
 
   test_res <- tibble(term = c("B*14:02", "DRB1*11:01"),
@@ -79,6 +82,36 @@ test_that("Stepwise conditional alleles subset selection", {
                      covariates = c("", "B*14:02")
   )
 
+  expect_equal(res, test_res)
+
+  # keep = TRUE
+  res <- analyzeConditionalAssociations(object,
+                                        variables = c("B*14:02", "DRB1*11:01"),
+                                        th = 0.05,
+                                        keep = TRUE)
+  res <- rapply(res, classes = "numeric", how = "replace", round, digits = 3)
+  test_res <- list(
+    tibble(term = c("B*14:02", "DRB1*11:01"),
+           estimate = c(3.72, 1.956),
+           std.error = c(1.59, 0.960),
+           statistic = c(2.339, 2.038),
+           p.value = c(0.019, 0.042),
+           conf.low = c(0.603, 0.075),
+           conf.high = c(6.838, 3.838),
+           p.adjusted = c(0.039, 0.042),
+           covariates = c("", "")
+    ),
+    tibble(term = "DRB1*11:01",
+           estimate = 2.612,
+           std.error = 1.069,
+           statistic = 2.442,
+           p.value = 0.015,
+           conf.low = 0.516,
+           conf.high = 4.707,
+           p.adjusted = 0.015,
+           covariates = "B*14:02"
+    )
+  )
   expect_equal(res, test_res)
 
   # Tests for checkStatisticalModel errors are ommitted here
@@ -478,30 +511,69 @@ test_that("MiDAS associations are analyzed properly", {
 
   expect_equal(as.data.frame(res), as.data.frame(test_res))
 
-  # conditional TRUE
+  # conditional TRUE keep TRUE
   res <- analyzeMiDASData(object,
                           analysis_type = "hla_allele",
                           conditional = TRUE,
+                          keep = TRUE,
                           kable_output = FALSE
   )
 
   test_variables <- colnames(midas_data[, label(midas_data) == "hla_allele"])
-  test_res <-
-    analyzeConditionalAssociations(object, variables = test_variables, th = 0.05)
-  test_res <- dplyr::rename(test_res, allele = term)
-  alleles <- test_res$allele
+  test_res <- analyzeConditionalAssociations(object,
+                                             variables = test_variables,
+                                             th = 0.05,
+                                             keep = TRUE
+  )
+  test_res <- lapply(test_res, dplyr::rename, allele = term)
+  alleles <- lapply(test_res, `[`, "allele")
+  alleles <- unique(unlist(alleles))
   variables_freq <- getCountsFrequencies(midas_data[, c("ID", alleles)])
+  colnames(variables_freq) <- c("allele", "Ntotal", "Ntotal.frequency")
+  test_res <-
+    lapply(test_res, dplyr::left_join, y = variables_freq, by = "allele")
+  pos <- midas_data$OS_DIED == 1
+  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", alleles)])
+  colnames(pos_freq) <- c("allele", "Npositive", "Npositive.frequency")
+  test_res <-
+    lapply(test_res, dplyr::left_join, y = pos_freq, by = "allele")
+  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", alleles)])
+  colnames(neg_freq) <- c("allele", "Nnegative", "Nnegative.frequency")
+  test_res <-
+    lapply(test_res, dplyr::left_join, y = neg_freq, by = "allele")
+
+  res <- lapply(res, as.data.frame)
+  test_res <- lapply(test_res, as.data.frame)
+  expect_equal(res, test_res) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
+
+  # conditional TRUE keep FALSE
+  res <- analyzeMiDASData(object,
+                          analysis_type = "hla_allele",
+                          conditional = TRUE,
+                          keep = FALSE,
+                          kable_output = FALSE
+  )
+
+  test_variables <- colnames(midas_data[, label(midas_data) == "hla_allele"])
+  test_res <- analyzeConditionalAssociations(object,
+                                             variables = test_variables,
+                                             th = 0.05,
+                                             keep = FALSE
+  )
+  test_variables <- test_res$term # constant variables are discarded
+  test_res <- dplyr::rename(test_res, allele = term)
+  variables_freq <- getCountsFrequencies(midas_data[, c("ID", test_variables)])
   test_res$Ntotal <- variables_freq$Counts
   test_res$Ntotal.frequency <- variables_freq$Freq
   pos <- midas_data$OS_DIED == 1
-  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", alleles)])
+  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", test_variables)])
   test_res$Npositive <- pos_freq$Counts
   test_res$Npositive.frequency <- pos_freq$Freq
-  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", alleles)])
+  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", test_variables)])
   test_res$Nnegative <- neg_freq$Counts
   test_res$Nnegative.frequency <- neg_freq$Freq
 
-  expect_equal(as.data.frame(res), as.data.frame(test_res)) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
+  expect_equal(as.data.frame(res), as.data.frame(test_res))
 
   # Test lower and upper frequency thresholds
   # %
@@ -531,12 +603,16 @@ test_that("MiDAS associations are analyzed properly", {
                "analysis_type should be one of \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"hla_kir_interactions\"."
   )
 
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", variables = 1),
+               "variables is not a character vector or NULL."
+  )
+
   expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", conditional = 1),
                "conditional is not a flag \\(a length one logical vector\\)."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", variables = 1),
-               "variables is not a character vector or NULL."
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", keep = 1),
+               "keep is not a flag \\(a length one logical vector\\)."
   )
 
   expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", variables = "thief"),
