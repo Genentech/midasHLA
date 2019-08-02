@@ -262,12 +262,12 @@ checkHlaCallsFormat <- function(hla_calls) {
 
   alleles <- unlist(hla_calls[, -1])
   test_values <- checkAlleleFormat(alleles)
-  test_values <- test_values[! is.na(test_values)]
+  alleles <- alleles[! test_values & ! is.na(alleles)]
   assert_that(
-      all(test_values),
+      all(test_values, na.rm = TRUE),
       msg = sprintf(
         "values: %s in hla_calls doesn't follow HLA numbers specification",
-        paste(unlist(hla_calls[, -1])[! test_values], collapse = ", ")
+        paste(alleles, collapse = ", ")
       )
   )
 
