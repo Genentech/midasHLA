@@ -970,11 +970,11 @@ getHlaKirInteractions <- function(hla_calls,
       left_join(x = hla_variables, by = "ID")
     hla_max_resolution <- hla_max_resolution - 2
   }
-
-  # convert kir_counts to kir_calls
-  kir_counts[, -1] %<>%
-    colnames() %>%
-    lapply(function(kir) ifelse(kir_counts[, kir] > 0, kir, NA))
+  hla_variables <- hlaCallsToCounts(
+    hla_calls = hla_variables,
+    inheritance_model = "additive",
+    check_hla_format = FALSE
+  )
 
   # find hla - kir interactions
   interactions_dict <- read.table(
@@ -988,7 +988,7 @@ getHlaKirInteractions <- function(hla_calls,
     apply(MARGIN = 1, FUN = function(row) {
       interactions_dict$HLA %in% row & interactions_dict$KIR %in% row
     }) %>%
-    apply(MARGIN = 1, FUN = function(x) ifelse(x, 1, 0))
+    apply(MARGIN = 1, FUN = function(x) ifelse(x == 1, 1, 0))
   colnames(interactions) <- paste(
     interactions_dict$HLA,
     interactions_dict$KIR,
