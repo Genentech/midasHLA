@@ -24,9 +24,7 @@
 # rp::installAndVerify(package = pkgs_to_install)
 
 # Or uncomment following and use desc::desc_get_deps() to extract dependencies from DESCRIPTION file
-# deps <- desc::desc_get_deps(file.path("/mnt/vol", "MiDAS/DESCRIPTION"))
-# rp::installAndVerify(install = install.packages,
-#                      package = deps$package,
-#                      requirement = deps$version)
-rp::installDependencies(project.sources = "/mnt/vol", 
-                        dont.install = c())
+deps <- desc::desc_get_deps(file.path("/mnt/vol", "MiDAS/DESCRIPTION"))
+rp::installAndVerify(install = install.packages,
+                     package = deps$package,
+                     requirement = deps$version)
