@@ -269,11 +269,17 @@ hlaToVariable <- function(hla_calls,
     }
   }
 
+  # add dictionary prefix to column names
+  dict_prefix <- gsub(".txt$", "", gsub("^.*_", "", dictionary))
+  colnames(variable) <- paste0(dict_prefix, "_", colnames(variable))
+
   if (nacols.rm) {
     variable <- Filter(function(x) ! all(is.na(x)), variable)
   }
+
   variable <- cbind(hla_calls[, 1], variable, stringsAsFactors = FALSE)
   colnames(variable) <- c("ID", colnames(variable[, -1]))
+
   return(variable)
 }
 
@@ -378,6 +384,22 @@ hlaCallsToCounts <- function(hla_calls,
                        ),
                        "additive" = hla_counts # Do nothing this is default res
   )
+
+  # set 0 to NAs where appropiate
+  genes <- colnames(hla_calls[, -1, drop = FALSE])
+  origin_dict <- data.frame(
+    allele = unlist(hla_calls[, -1, drop = FALSE]),
+    gene = rep(genes, each = nrow(hla_calls)),
+    stringsAsFactors = FALSE
+  )
+  origin_dict <- origin_dict[! is.na(origin_dict$allele), ]
+  for (col in colnames(hla_counts)) {
+    origin <- origin_dict$gene[origin_dict$allele == col]
+    na_i <- hla_calls[, origin, drop = FALSE]
+    na_i <- is.na(na_i)
+    na_i <- rowSums(na_i) == ncol(na_i)
+    hla_counts[na_i, col] <- NA
+  }
 
   hla_counts <- cbind(ID = hla_calls[, 1, drop = FALSE],
                       hla_counts,
@@ -970,25 +992,37 @@ getHlaKirInteractions <- function(hla_calls,
       left_join(x = hla_variables, by = "ID")
     hla_max_resolution <- hla_max_resolution - 2
   }
-  hla_variables <- hlaCallsToCounts(
-    hla_calls = hla_variables,
-    inheritance_model = "additive",
-    check_hla_format = FALSE
+
+  hla_counts <- hlaCallsToCounts(hla_variables,
+                                 inheritance_model = "dominant",
+                                 check_hla_format = FALSE
   )
 
   # find hla - kir interactions
+  interaction_vars <- left_join(hla_counts, kir_counts, by = "ID")
+  vars <- colnames(interaction_vars[, -1, drop = FALSE])
   interactions_dict <- read.table(
     file = interactions_dict,
     sep = "\t",
     header = TRUE,
     stringsAsFactors = FALSE
   )
-  interaction_vars <- left_join(hla_variables, kir_counts, by = "ID")
-  interactions <- interaction_vars[, -1, drop = FALSE] %>%
-    apply(MARGIN = 1, FUN = function(row) {
-      interactions_dict$HLA %in% row & interactions_dict$KIR %in% row
-    }) %>%
-    apply(MARGIN = 1, FUN = function(x) ifelse(x == 1, 1, 0))
+
+  posible_interactions <- interactions_dict$HLA %in% vars &
+    interactions_dict$KIR %in% vars
+  interactions_dict <- interactions_dict[posible_interactions, ]
+
+  # assert that interactions_dict is not empty
+
+  interactions <- apply(
+    X = interactions_dict[, c("HLA", "KIR")],
+    MARGIN = 1,
+    FUN = function(row) {
+      x <- interaction_vars[, row[[1]]] + interaction_vars[, row[[2]]]
+      x <- ifelse(x == 1, 0, x)
+      x <- ifelse(x == 2, 1, x) # it is assumed that kir_calls are in dominant mode...
+    }
+  )
   colnames(interactions) <- paste(
     interactions_dict$HLA,
     interactions_dict$KIR,
