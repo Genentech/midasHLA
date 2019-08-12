@@ -385,7 +385,8 @@ test_that("MiDAS associations are analyzed properly", {
                           kable_output = FALSE
   )
 
-  test_variables <- colnames(midas_data[, label(midas_data) == "expression_level"])
+  test_variables <-
+    colnames(midas_data[, label(midas_data) == "expression_level", drop = FALSE])
   test_res <- analyzeAssociations(object, variables = test_variables)
   test_variables <- test_res$term # constant variables are discarded
   test_res <- dplyr::rename(test_res, allele = term)

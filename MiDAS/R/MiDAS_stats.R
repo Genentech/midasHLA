@@ -434,8 +434,10 @@ analyzeMiDASData <- function(object,
   object_env <- attr(object$terms, ".Environment")
   object_formula <- eval(object_call[["formula"]], envir = object_env)
   object_data <- eval(object_call[["data"]], envir = object_env)
+  # assert object data more than one column, etc
   object_variables <- colnames(object_data)[-1]
   variables_labels <- label(object_data[, -1])
+  # what happens if data is not labled?
 
   assert_that(
     is.string(analysis_type),
@@ -789,10 +791,10 @@ prepareMiDASData <- function(hla_calls,
 
     expression_level %<>%
       gather("expression", "value", -c("ID")) %>%
-      mutate(expression = gsub("_.*", "", .data$expression)) %>%
+      mutate(expression = gsub("_[12]", "", .data$expression)) %>%
       group_by(!!! syms(c("ID", "expression"))) %>%
       summarise_all(funs(sum)) %>%
-      spread(.data$expression, .data$value, sep = "_")
+      spread(.data$expression, .data$value, sep = NULL)
 
     label(expression_level[-1], self = FALSE) <- rep(
       x = "expression_level",
