@@ -17,7 +17,7 @@ MAINTAINER Maciej Migdal "maciej.migdal@contractors.roche.com"
 
 ## Define your system dependencies in this Dockerfile
 
-COPY rplatform/install_dependencies.R /mnt/vol/rplatform/install_dependencies.R
+COPY . /mnt/vol/
 RUN R -f /mnt/vol/rplatform/install_dependencies.R
 
 
