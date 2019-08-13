@@ -587,7 +587,7 @@ test_that("MiDAS associations are analyzed properly", {
 
   # counts
   counts <- prepareMiDASData(hla_calls, analysis_type = "hla_allele")
-  counts <- colSums(counts[-1])
+  counts <- colSums(counts[-1], na.rm = TRUE)
   res <- analyzeMiDASData(object, analysis_type = "hla_allele", lower_frequency_cutoff = 34, kable_output = FALSE)
   expect_equal(res$allele, names(counts)[counts > 34 & freqs$Freq != 1])
 
@@ -722,7 +722,7 @@ test_that("MiDAS data is prepared properly", {
       expr$sum <- rowSums(expr[, -1, drop = FALSE])
       gene <- gsub("_1", "", colnames(expr)[2])
       expr <- expr[, c("ID", "sum")]
-      colnames(expr) <- c("ID", paste0("expression_", gene))
+      colnames(expr) <- c("ID", gene)
       expr
     })
   )
