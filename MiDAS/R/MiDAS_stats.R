@@ -72,11 +72,31 @@ analyzeAssociations <- function(object,
     is.flag(exponentiate)
   )
 
-  results <- lapply(variables,
-                    updateModel,
-                    object = object,
-                    backquote = TRUE,
-                    collapse = " + "
+  results <- lapply(
+    X = variables,
+    FUN = function(x) {
+      new_object <- try(
+        expr = updateModel(
+          object = object,
+          x = x,
+          backquote = TRUE,
+          collapse = " + "
+        ),
+        silent = TRUE,
+        outFile = stdout()
+      )
+      if (class(new_object) == "try-error") {
+        msg <- attr(new_object, "condition")
+        msg <- msg$message
+        msg <- sprintf("Error occured while processing variable %s:\n\t%s",
+                       x, msg
+        )
+        warn(msg)
+        new_object <- object
+      }
+
+      return(new_object)
+    }
   )
 
   results <- lapply(results, tidy, exponentiate = exponentiate)
@@ -90,6 +110,10 @@ analyzeAssociations <- function(object,
 #  covariates <- formula(object)[[3]]
 #  covariates <- deparse(covariates)
 #  results$covariates <- covariates
+
+  if (nrow(results) == 0) {
+    warn("None of the variables could be tested. Returning empty table.")
+  }
 
   return(results)
 }
