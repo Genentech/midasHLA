@@ -19,7 +19,7 @@ Integer vector specifying alleles resolutions.
 numbers.
 }
 \details{
-HLA allele resolution can take following values: 2, 4, 6, 8.See
+HLA allele resolution can take the following values: 2, 4, 6, 8.See
 \url{http://hla.alleles.org/nomenclature/naming.html} for more details.
 }
 \examples{

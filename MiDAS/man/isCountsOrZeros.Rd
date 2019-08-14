@@ -10,7 +10,7 @@ isCountsOrZeros(x, na.rm = TRUE)
 \item{x}{Numeric vector or object that can be \code{unlist} to numeric
 vector.}
 
-\item{na.rm}{Logical indicating if \code{NA} values should be omited.}
+\item{na.rm}{Logical indicating if \code{NA} values should be omitted.}
 }
 \value{
 Logical indicating if provided vector contains only positive integers
