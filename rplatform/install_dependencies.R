@@ -27,4 +27,5 @@
 deps <- desc::desc_get_deps(file.path("/mnt/vol", "MiDAS/DESCRIPTION"))
 rp::installAndVerify(install = install.packages,
                      package = deps$package,
-                     requirement = deps$version)
+                     requirement = deps$version,
+		     dont.install = "R")
