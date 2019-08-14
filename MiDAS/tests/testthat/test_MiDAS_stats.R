@@ -621,15 +621,15 @@ test_that("MiDAS associations are analyzed properly", {
   )
 
   expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", lower_frequency_cutoff = "foo"),
-               "lower_frequency_cutoff is not number \\(a length one numeric vector\\) or NULL."
+               "lower_frequency_cutoff is not a number \\(a length one numeric vector\\) or NULL."
   )
 
   expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", upper_frequency_cutoff = "foo"),
-               "upper_frequency_cutoff is not number \\(a length one numeric vector\\) or NULL."
+               "upper_frequency_cutoff is not a number \\(a length one numeric vector\\) or NULL."
   )
 
   expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", pvalue_cutoff = "foo"),
-               "pvalue_cutoff is not number \\(a length one numeric vector\\) or NULL."
+               "pvalue_cutoff is not a number \\(a length one numeric vector\\) or NULL."
   )
 
   expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", correction = NA),

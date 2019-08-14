@@ -37,7 +37,7 @@ checkAlleleFormat <- function(allele) {
 #' \code{getAlleleResolution} returns the resolution of input HLA allele
 #' numbers.
 #'
-#' HLA allele resolution can take following values: 2, 4, 6, 8.See
+#' HLA allele resolution can take the following values: 2, 4, 6, 8.See
 #' \url{http://hla.alleles.org/nomenclature/naming.html} for more details.
 #'
 #' @inheritParams checkAlleleFormat
@@ -422,7 +422,7 @@ updateModel <- function(object, x, backquote = TRUE, collapse = " + ") {
 checkStatisticalModel <- function(object) { # TODO simplyfy output of this function; or something like object is not a stat model: potential problem bla bla
   assert_that(
     is.object(object),
-    msg = "object have to have the internal OBJECT bit set"
+    msg = "object is required to have the internal OBJECT bit set"
   )
 
   object_call <- getCall(object)
@@ -442,7 +442,7 @@ checkStatisticalModel <- function(object) { # TODO simplyfy output of this funct
   object_data <- eval(object_call[["data"]], envir = object_env)
   assert_that(
     ! is.null(object_data) & is.data.frame(object_data),
-    msg = "object need to have data attribue defined"
+    msg = "object need to have data attribute defined"
   )
 }
 
@@ -453,7 +453,7 @@ checkStatisticalModel <- function(object) { # TODO simplyfy output of this funct
 #'
 #' @param x Numeric vector or object that can be \code{unlist} to numeric
 #'   vector.
-#' @param na.rm Logical indicating if \code{NA} values should be omited.
+#' @param na.rm Logical indicating if \code{NA} values should be omitted.
 #'
 #' @return Logical indicating if provided vector contains only positive integers
 #'   or zeros.
@@ -521,7 +521,7 @@ isNumberOrNULL <- function(x) {
 #'
 assertthat::on_failure(isNumberOrNULL) <- function(call, env) {
   paste0(deparse(call$x),
-         " is not number (a length one numeric vector) or NULL."
+         " is not a number (a length one numeric vector) or NULL."
   )
 }
 

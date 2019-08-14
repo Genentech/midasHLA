@@ -167,7 +167,7 @@ hlaToAAVariation <- function(hla_calls,
 #' based on match table (dictionary).
 #'
 #' \code{reduce} controls if conversion should happen in a greedy way, such that
-#' if some hla numbers cannot be converted, thier resolution is reduced by 2 and
+#' if some hla numbers cannot be converted, their resolution is reduced by 2 and
 #' another attempt is taken. This iterative process stops when alleles cannot be
 #' further reduced or all have been successfully converted.
 #'
@@ -420,7 +420,7 @@ hlaCallsToCounts <- function(hla_calls,
 #'
 #' @inheritParams checkHlaCallsFormat
 #'
-#' @return Data frame containing the allele and its corresponding frequncies.
+#' @return Data frame containing the allele and its corresponding frequencies.
 #'
 #' @examples
 #' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")

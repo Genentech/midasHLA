@@ -411,7 +411,7 @@ test_that("results are formatted properly with preselected args", {
   )
 
   expect_error(formatAssociationsResults(res, type = "hla_allele", pvalue_cutoff = "a"),
-               "pvalue_cutoff is not number \\(a length one numeric vector\\) or NULL."
+               "pvalue_cutoff is not a number \\(a length one numeric vector\\) or NULL."
   )
 
   expect_error(formatAssociationsResults(res, type = "hla_allele", format = 1),

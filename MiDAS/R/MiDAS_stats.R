@@ -83,7 +83,7 @@ analyzeAssociations <- function(object,
       ),
       error = function(e) {
         msg <- sprintf(
-          "Error occured while processing variable %s:\n\t%s",
+          "Error occurred while processing variable %s:\n\t%s",
           x,
           conditionMessage(e)
         )
@@ -216,7 +216,7 @@ analyzeConditionalAssociations <- function(object,
         ),
         error = function(e) {
           msg <- sprintf(
-            "Error occured while processing variable %s:\n\t%s",
+            "Error occurred while processing variable %s:\n\t%s",
             x,
             conditionMessage(e)
           )
