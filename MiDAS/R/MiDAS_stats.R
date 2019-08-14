@@ -74,29 +74,24 @@ analyzeAssociations <- function(object,
 
   results <- lapply(
     X = variables,
-    FUN = function(x) {
-      new_object <- try(
-        expr = updateModel(
-          object = object,
-          x = x,
-          backquote = TRUE,
-          collapse = " + "
-        ),
-        silent = TRUE,
-        outFile = stdout()
-      )
-      if (class(new_object) == "try-error") {
-        msg <- attr(new_object, "condition")
-        msg <- msg$message
-        msg <- sprintf("Error occured while processing variable %s:\n\t%s",
-                       x, msg
+    FUN = function(x) tryCatch(
+      expr = updateModel(
+        object = object,
+        x = x,
+        backquote = TRUE,
+        collapse = " + "
+      ),
+      error = function(e) {
+        msg <- sprintf(
+          "Error occured while processing variable %s:\n\t%s",
+          x,
+          conditionMessage(e)
         )
         warn(msg)
-        new_object <- object
-      }
 
-      return(new_object)
-    }
+        return(object)
+      }
+    )
   )
 
   results <- lapply(results, tidy, exponentiate = exponentiate)
@@ -210,15 +205,30 @@ analyzeConditionalAssociations <- function(object,
   i <- 1
 
   while (length(new_variables) > 0) {
-    results <- map_dfr(
-      .x = new_variables,
-      .f = ~ tidy(updateModel(object = object,
-                              x = .,
-                              backquote = TRUE,
-                              collapse = " + "
-                  )
+    results <- lapply(
+      X = new_variables,
+      FUN = function(x) tryCatch(
+        expr = updateModel(
+          object = object,
+          x = x,
+          backquote = TRUE,
+          collapse = " + "
+        ),
+        error = function(e) {
+          msg <- sprintf(
+            "Error occured while processing variable %s:\n\t%s",
+            x,
+            conditionMessage(e)
+          )
+          warn(msg)
+
+          return(object)
+        }
       )
     )
+    results <- lapply(results, tidy, exponentiate = exponentiate)
+    results <- bind_rows(results)
+
     results <- results[results[["term"]] %in% backquote(new_variables), ]
     results$p.adjusted <- p.adjust(results[["p.value"]], correction)
     results <- results[! is.infinite(results[["p.value"]]), ]
@@ -565,6 +575,11 @@ analyzeMiDASData <- function(object,
                                    exponentiate = logistic
     )
   }
+
+  assert_that(
+    nrow(results) > 0,
+    msg = "Could not process any variables. Please check warning messages for more informations."
+  )
 
   # Add frequency information to results table if there were any count variables
   if (length(cts_vars)) {
