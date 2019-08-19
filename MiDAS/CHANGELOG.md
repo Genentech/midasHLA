@@ -1,3 +1,6 @@
+## 0.0.0.9021 - 19/08/2019
++ bahvior of variables argument in analyzeMiDASData is now changed, such that it can be used to supply additional variables to analyse that cannot be selected by analysis_type
+
 ## 0.0.0.9021 - 30/07/2019
 + changes the behaviour of analyzeMiDASData conditional = TRUE. Now it return list of results from all iterations and kables only best results from each iteration.
 
