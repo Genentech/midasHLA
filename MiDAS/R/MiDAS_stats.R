@@ -386,9 +386,8 @@ prepareHlaData <- function(hla_calls,
 #' @param conditional Logical indicating if the analysis should be performed
 #'   using stepwise conditional tests or not. See
 #'   \link{analyzeConditionalAssociations} for more details.
-#' @param variables Character specifying variables to use in association tests
-#'   or \code{NULL}. If \code{NULL} variables are chosen based on
-#'   \code{analysis_type}.
+#' @param variables Character specifying additional variables to use in
+#'   association tests except those choosen by \code{analysis_type}.
 #' @param lower_frequency_cutoff Number specifying lower threshold for inclusion
 #'   of a variable. If it's a number between 0 and 1 variables with frequency
 #'   below this number will not be considered during analysis. If it's greater
@@ -500,19 +499,18 @@ analyzeMiDASData <- function(object,
     stringMatches(format, choice = c("html", "latex"))
   )
 
-  if (is.null(variables)) {
-    mask <- variables_labels == analysis_type
-    assert_that(any(mask, na.rm = TRUE),
-                msg = "Argument variable = NULL can be used only with labeled variables, make sure to use prepareMiDASData function for data preparation."
-    )
+  mask <- variables_labels == analysis_type
+  assert_that(any(mask, na.rm = TRUE) || ! is.null(variables),
+              msg = "Argument variables = NULL can be used only with labeled variables, make sure to use prepareMiDASData function for data preparation."
+  )
+  mask <-  mask | object_variables %in% variables
 
-    mask <- (! object_variables %in% all.vars(object_formula)) & mask
-    variables <- object_variables[mask]
-    variables_labels <- variables_labels[mask]
-    assert_that(length(variables) != 0,
-                msg = "No new variables found in object data."
-    )
-  }
+  mask <- (! object_variables %in% all.vars(object_formula)) & mask
+  variables <- object_variables[mask]
+  variables_labels <- variables_labels[mask]
+  assert_that(length(variables) != 0,
+              msg = "No new variables found in object data."
+  )
 
   # guess if model used is logistic type
   if (is.null(logistic)) {

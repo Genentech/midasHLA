@@ -307,25 +307,27 @@ test_that("MiDAS associations are analyzed properly", {
 
   object <- lm(OS_DIED ~ AGE + SEX, data = midas_data)
 
-  # conditional FALSE
+  # conditional FALSE, analysis_type = "hla_allele", extra variables
   res <- analyzeMiDASData(object,
                           analysis_type = "hla_allele",
-                          variables = c("A*01:01", "A*02:01"),
+                          variables = c("expression_A", "expression_C"),
                           kable_output = FALSE
   )
 
-  test_res <- analyzeAssociations(object, variables = c("A*01:01", "A*02:01"))
+  test_variables <- colnames(midas_data[, label(midas_data) == "hla_allele"])
+  test_res <- analyzeAssociations(object, variables = c("expression_A", "expression_C", test_variables))
+  test_variables <- test_res$term[-1:-2] # constant variables are discarded
   test_res <- dplyr::rename(test_res, allele = term)
-  variables_freq <- getCountsFrequencies(midas_data[, c("ID", "A*01:01", "A*02:01")])
-  test_res$Ntotal <- variables_freq$Counts
-  test_res$Ntotal.frequency <- variables_freq$Freq
+  variables_freq <- getCountsFrequencies(midas_data[, c("ID", test_variables)])
+  test_res$Ntotal <- c(NA, NA, variables_freq$Counts)
+  test_res$Ntotal.frequency <- formattable::percent(c(NA, NA, variables_freq$Freq))
   pos <- midas_data$OS_DIED == 1
-  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", "A*01:01", "A*02:01")])
-  test_res$Npositive <- pos_freq$Counts
-  test_res$Npositive.frequency <- pos_freq$Freq
-  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", "A*01:01", "A*02:01")])
-  test_res$Nnegative <- neg_freq$Counts
-  test_res$Nnegative.frequency <- neg_freq$Freq
+  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", test_variables)])
+  test_res$Npositive <- c(NA, NA, pos_freq$Counts)
+  test_res$Npositive.frequency <- formattable::percent(c(NA, NA, pos_freq$Freq))
+  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", test_variables)])
+  test_res$Nnegative <- c(NA, NA, neg_freq$Counts)
+  test_res$Nnegative.frequency <- formattable::percent(c(NA, NA, neg_freq$Freq))
 
   expect_equal(as.data.frame(res), as.data.frame(test_res)) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
 
