@@ -166,14 +166,19 @@ hlaToAAVariation <- function(hla_calls,
 #' \code{hlaToVariable} converts hla calls data frame to additional variables
 #' based on match table (dictionary).
 #'
+#' \code{reduce} controls if conversion should happen in a greedy way, such that
+#' if some hla numbers cannot be converted, thier resolution is reduced by 2 and
+#' another attempt is taken. This iterative process stops when alleles cannot be
+#' further reduced or all have been successfully converted.
+#'
 #' \code{dictionary} file should be a tsv format with header and two columns.
 #' First column should hold allele numbers and second corresponding additional
 #' variables. Optionally a data frame formatted in the same manner can be passed
 #' instead.
 #'
-#' \code{dictionary} optional parameter that can be also used to access
-#' matchings files shipped with the package. They can be referred to by using
-#' one of the following strings:
+#' \code{dictionary} can be also used to access matchings files shipped with the
+#' package. They can be referred to by using one of the following strings (to
+#' list available dictionaries use \link{listMiDASDictionaries}):
 #'
 #' \code{"2digit_A-allele_expression"} reference data to impute expression
 #' levels for HLA-A alleles.
@@ -192,15 +197,21 @@ hlaToAAVariation <- function(hla_calls,
 #' \code{"2digit_C-allele_expression"} reference data to impute expression
 #' levels for HLA-C alleles.
 #'
-#' \code{"4digit_allele_Ggroup"} HLA alleles can be re-coded in G groups,
-#' which defines amino acid identity only in the exons relevant for peptide
-#' binding.
-#'
 #' \code{"4digit_supertype"} A and B alleles can be assigned to so-called
 #' supertypes.
 #'
+#' \code{"4digit_allele_Ggroup"} HLA alleles can be re-coded in G groups,
+#' which defines amino acid identity only in the exons relevant for peptide
+#' binding. Note that alleles "DRB1*01:01:01" and "DRB1*01:16" were matched with
+#' more than one G group, this ambiguity was removed by deleting matching with
+#' "DRB5*01:01:01G" group. Moreover in the original match file there were alleles
+#' named "DPA*...", here they are renamed to "DPA1*..." to adhere with HLA
+#' nomenclature.
+#'
 #' @inheritParams checkHlaCallsFormat
 #' @inheritParams convertAlleleToVariable
+#' @param reduce logical indicating if function should try to reduce alleles
+#'   resolution when no matching is found. See details for more details.
 #' @param nacols.rm logical indicating if result columns that contain only
 #'   \code{NA} should be removed.
 #'
@@ -217,21 +228,19 @@ hlaToAAVariation <- function(hla_calls,
 #' @export
 hlaToVariable <- function(hla_calls,
                           dictionary,
+                          reduce = TRUE,
                           nacols.rm = TRUE) {
   assert_that(
-    is.data.frame(hla_calls),
     checkHlaCallsFormat(hla_calls),
+    is.flag(reduce),
     is.flag(nacols.rm)
   )
+
   if (is.string(dictionary)) {
-    lib <- list.files(
-      path = system.file("extdata", package = "MiDAS"),
-      pattern = "^Match_.*txt$"
-    )
-    lib <- gsub("^Match_", "", gsub(".txt$", "", lib))
+    lib <- listMiDASDictionaries()
     if (dictionary %in% lib) {
       if (dictionary == "4digit_B-allele_Bw") {
-        warn("In ambigious cases Bw4 will be assigned! See documentation for more details.")
+        warn("In ambiguous cases Bw4 will be assigned! See documentation for more details.")
       }
       dictionary <- system.file(
         "extdata",
@@ -240,15 +249,30 @@ hlaToVariable <- function(hla_calls,
       )
     }
   }
+
   variable <- as.data.frame(
     lapply(hla_calls[, -1], convertAlleleToVariable, dictionary = dictionary),
     stringsAsFactors = FALSE,
     row.names = 1:nrow(hla_calls)
   )
+
+  if (reduce) {
+    max_resolution <- getAlleleResolution(unlist(hla_calls[, -1]))
+    max_resolution <- max(max_resolution, na.rm = TRUE)
+    while (any(is.na(variable)) & max_resolution > 2) {
+      max_resolution <- max_resolution - 2
+      hla_calls <- reduceHlaCalls(hla_calls, resolution = max_resolution)
+      variable[is.na(variable)] <- convertAlleleToVariable(
+        allele = hla_calls[, -1][is.na(variable)],
+        dictionary = dictionary
+      )
+    }
+  }
+
   if (nacols.rm) {
     variable <- Filter(function(x) ! all(is.na(x)), variable)
   }
-  variable <- cbind(hla_calls[, 1], variable)
+  variable <- cbind(hla_calls[, 1], variable, stringsAsFactors = FALSE)
   colnames(variable) <- c("ID", colnames(variable[, -1]))
   return(variable)
 }
@@ -295,6 +319,9 @@ reduceHlaCalls <- function(hla_calls,
 #'   are coded as \code{1}. In \code{"recessive"} model homozygotes are coded as
 #'   \code{1} and all other as \code{0}. In \code{"additive"} model homozygotes
 #'   are coded as \code{2} and heterozygotes as \code{1}.
+#' @param check_hla_format Logical indicating if \code{hla_calls} format should
+#'   be checked. This is useful if one wants to use \code{hlaCallsToCounts} with
+#'   input not adhering to HLA nomenclature standards.
 #'
 #' @return Data frame containing counts of HLA alleles counted according to
 #'   specified model.
@@ -304,14 +331,14 @@ reduceHlaCalls <- function(hla_calls,
 #' hla_calls <- readHlaCalls(file)
 #' hlaCallsToCounts(hla_calls, inheritance_model = "additive")
 #'
-#' @importFrom assertthat assert_that is.string
+#' @importFrom assertthat assert_that is.flag is.string
 #' @importFrom qdapTools mtabulate
 #'
 #' @export
 hlaCallsToCounts <- function(hla_calls,
-                             inheritance_model = c("dominant", "recessive", "additive")) {
+                             inheritance_model = c("dominant", "recessive", "additive"),
+                             check_hla_format = TRUE) {
   assert_that(
-    checkHlaCallsFormat(hla_calls),
     is.string(inheritance_model),
     see_if(
       pmatch(inheritance_model,
@@ -319,8 +346,13 @@ hlaCallsToCounts <- function(hla_calls,
              nomatch = 0
       ) != 0,
       msg = "inheritance_model should be one of 'dominant', 'recessive', 'additive'"
-    )
+    ),
+    is.flag(check_hla_format)
   )
+
+  if (check_hla_format) {
+    assert_that(checkHlaCallsFormat(hla_calls))
+  }
 
   inheritance_model <- match.arg(inheritance_model)
 
@@ -395,7 +427,7 @@ getHlaFrequencies <- function(hla_calls) {
 #'
 #' @inheritParams hlaCallsToCounts
 #' @param aa_variation Data frame holding amino acid variation data as returned
-#'   by \link{hlaToVariable}.
+#'   by \link{hlaToAAVariation}.
 #'
 #' @return Data frame containing counts of amino acids at specific positions
 #'   counted according to specified model.
@@ -590,4 +622,381 @@ countsToHlaCalls <- function(counts) {
   new_df <- cbind(ids, haplotypes, stringsAsFactors = FALSE)
 
   return(new_df)
+}
+
+#' Helper function for pretty formating statistical analysis results
+#'
+#' \code{formatResults} formats statistical analysis results table to html or
+#' latex format.
+#'
+#' @param results Tibble as returned by \link{analyzeAssociations}.
+#' @param filter_by Character specifying conditional expression used to filter
+#'   \code{results}, this is equivalent to \code{...} argument passed to
+#'   \link[dplyr]{filter} except it has to be a character vector.
+#' @param arrange_by Character specifying variable names to use for sorting.
+#'   Equivalent to \code{...} argument passed to \link[dplyr]{arrange}.
+#' @param select_cols Character specifying variable names that should be
+#'   included in the output table. Can be also used to rename selected
+#'   variables, see examples.
+#' @param format A character string. Possible values are \code{"latex"} and
+#'   \code{"html"}.
+#' @param header String specifying header for result table. If \code{NULL}
+#'   header is omitted.
+#'
+#' @return A character vector of the table source code.
+#'
+#' @examples
+#' hla_calls <- readHlaCalls(system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS"))
+#' hla_counts <- hlaCallsToCounts(hla_calls, inheritance_model = "additive")
+#' midas_data <- read.table(
+#'   system.file("extdata", "pheno_example.txt", package = "MiDAS"),
+#'   header = TRUE)
+#' midas_data <- dplyr::left_join(x = midas_data, y = hla_counts, by = "ID")
+#' object <- lm(OS ~ 1, data = midas_data)
+#' res <- analyzeAssociations(object, variables = colnames(midas_data)[-1])
+#' formatResults(res,
+#'               filter_by = c("p.value <= 0.05", "estimate > 0"),
+#'               arrange_by = c("p.value * estimate"),
+#'               select_cols = c("allele" = "term", "p.value"),
+#'               format = "html",
+#'               header = "HLA allelic associations")
+#'
+#' @importFrom assertthat assert_that
+#' @importFrom dplyr arrange filter select
+#' @importFrom knitr kable
+#' @importFrom kableExtra add_header_above kable_styling scroll_box
+#' @importFrom magrittr %>% %<>%
+#' @importFrom stats setNames
+#' @importFrom rlang parse_exprs .data
+#'
+#' @export
+formatResults <- function(results,
+                          filter_by = "p.value <= 0.05",
+                          arrange_by = "p.value",
+                          select_cols = c("term", "estimate", "std.error", "p.value", "p.adjusted"),
+                          format = c("html", "latex"),
+                          header = NULL
+                          ) {
+  assert_that(
+    is.character(filter_by),
+    is.character(arrange_by),
+    is.character(select_cols),
+    is.string(format),
+    stringMatches(format, choice = c("html", "latex")),
+    isStringOrNULL(header)
+  )
+
+  filter_by <- parse_exprs(filter_by)
+  arrange_by <- parse_exprs(arrange_by)
+  select_cols_quo <- parse_exprs(select_cols)
+  names(select_cols_quo) <- names(select_cols)
+
+  results %<>%
+    filter(!!! filter_by) %>%
+    arrange(!!! arrange_by) %>%
+    select(!!! select_cols_quo)
+
+  if (format == "html" & isTRUE(getOption("knitr.in.progress"))) {
+    results <-
+      rapply(
+        results,
+        f = gsub,
+        classes = "character",
+        how = "replace",
+        pattern = "(\\*)",
+        replacement = "\\\\\\1"
+      )
+  }
+
+  if (! (is.null(header) & format == "html")) {
+    header <- setNames(ncol(results), header) # Still if format is 'latex' and header = NULL the result is not visualy appealing, and without it gives error. Issue created on github: https://github.com/haozhu233/kableExtra/issues/387
+  }
+
+  results %<>%
+    kable(format = format, digits = 50) %>% # TODO empty results throw corrupted data.frame warning
+    add_header_above(header = header)
+
+  if (format == "html") {
+    results %<>%
+      kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+      scroll_box(width = "100%", height = "200px")
+  }
+
+  return(results)
+}
+
+#' Calculate variables frequencies
+#'
+#' \code{getCountsFrequencies} calculate variables frequencies based on counts
+#' table, such as produced by \link{hlaCallsToCounts}.
+#'
+#' Variables frequencies are counted in reference to sample size, depending on
+#' the inheritance model under which the counts table has been generated one
+#' might need to take under consideration both gene copies. Here sample size is
+#' assumed to be depended on both gene copies if any count is greater than
+#' \code{1} (`n / (2 * j)` where `n` is the number of term occurrences and `j`
+#' is the sample size). If this is not the case the sample size is taken as is
+#' (`n / j`).
+#'
+#' @param counts_table Data frame containing variables counts, such as produced
+#'   by \link{hlaCallsToCounts}.
+#'
+#' @return Data frame containing variables, its corresponding total counts
+#'   and frequencies.
+#'
+#' @examples
+#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(file)
+#' hla_counts <- hlaCallsToCounts(hla_calls, inheritance_model = "additive")
+#' getCountsFrequencies(hla_counts)
+#'
+#' @importFrom assertthat assert_that
+#' @importFrom formattable percent
+#'
+#' @export
+getCountsFrequencies <- function(counts_table) {
+  assert_that(
+    is.data.frame(counts_table),
+    see_if(colnames(counts_table)[1] == "ID",
+           msg = "first column of counts_table must be named ID"
+    )
+  )
+
+  counts_table <- counts_table[-1]
+  assert_that(isCountsOrZeros(counts_table))
+  counts_sums <- colSums(counts_table, na.rm = TRUE)
+
+  # Under additive inheritance model population size equals 2 * nrow(counts_table), in other cases it's 1 * nrow(counts_table)
+  pop_mul <- ifelse(max(counts_table, na.rm = TRUE) > 1, 2, 1)
+  counts_freq <- counts_sums / (pop_mul * nrow(counts_table))
+
+  counts_df <- data.frame(
+    term = colnames(counts_table),
+    Counts = counts_sums,
+    Freq = percent(counts_freq),
+    stringsAsFactors = FALSE
+  )
+
+  return(counts_df)
+}
+
+#' Pretty format association analysis results
+#'
+#' \link{formatAssociationsResults} formats results table to specified
+#' format. It uses \link{formatResults} with prespecifed arguments to return
+#' nice table depending on the type of analysis and model type. This function is
+#' intended only to be used internally by \link{analyzeMiDASData}.
+#'
+#' @inheritParams formatResults
+#' @param type String specifying type of analysis from which \code{results} were
+#'   produced. Possible values includes \code{'hla_allele'}, \code{'aa_level'},
+#'   \code{'expression_level'}, \code{'allele_g_group'},
+#'   \code{'allele_supertype'}, \code{'allele_group'}, \code{'kir_genes'},
+#'   \code{'hla_kir_interactions'}, \code{'custom'}.
+#' @param response_variable String giving the name of response variable, it is
+#'   used to produce binary phenotype column names.
+#' @param logistic Logical indicating if statistical model is logistic. If set
+#'  to \code{TRUE}, estimate will be renamed to odds ratio.
+#' @param pvalue_cutoff Number specifying p-value cutoff for results to be
+#'   included in output. If \code{NULL} cutoff of \code{0.05} on
+#'   \code{p.adjusted} value is used instead.
+#'
+#' @return A character vector with pretty formatted \code{results} table.
+#'
+#' @importFrom assertthat assert_that is.flag is.number is.string see_if
+#' @importFrom dplyr ends_with mutate_at vars
+#' @importFrom magrittr %>% %<>%
+#' @importFrom rlang has_name list2 parse_expr warn !! :=
+#'
+formatAssociationsResults <- function(results,
+                                      type = "hla_allele",
+                                      response_variable = "R",
+                                      logistic = FALSE,
+                                      pvalue_cutoff = NULL,
+                                      format = getOption("knitr.table.format")) {
+  assert_that(
+    is.string(type),
+    stringMatches(type,
+                  choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions", "custom")
+    ),
+    is.string(response_variable),
+    is.flag(logistic),
+    isNumberOrNULL(pvalue_cutoff),
+    is.string(format),
+    stringMatches(format, choice = c("html", "latex"))
+  )
+
+  filter_by <- ifelse(
+    test = is.null(pvalue_cutoff),
+    yes = "p.adjusted <= 0.05",
+    no = sprintf("p.value <= %f", pvalue_cutoff)
+  )
+  passed_filter <- eval(parse_expr(filter_by), envir = as.list(results))
+  if (! any(passed_filter, na.rm = TRUE)) {
+    warn(sprintf("None of the results meets filtering criteria: %s", filter_by))
+  }
+
+  estimate_name <- ifelse(logistic, "odds ratio", "estimate")
+  term_name <- switch (type,
+                       "hla_allele" = "allele",
+                       "aa_level" = "aa",
+                       "expression_level" = "allele",
+                       "allele_g_group" = "g group",
+                       "allele_supertype" = "supertype",
+                       "allele_group" = "allele group",
+                       "kir_genes" = "kir gene",
+                       "hla_kir_interactions" = "hla kir interaction",
+                       "term"
+  )
+  select_cols <- unlist(list2(
+    !! term_name := "term",
+    !! estimate_name := "estimate",
+    "std.error",
+    "p.value",
+    "p.adjusted",
+    "Ntotal",
+    "Ntotal (%)" = "Ntotal.frequency",
+    !! sprintf("N %s=1", response_variable) := "Npositive",
+    !! sprintf("N %s=1 (%%)", response_variable) := "Npositive.frequency",
+    !! sprintf("N %s=0", response_variable) := "Nnegative",
+    !! sprintf("N %s=0 (%%)", response_variable) := "Nnegative.frequency"
+  ))
+  present_cols <- has_name(results, select_cols)
+  assert_that(
+    sum(present_cols) != 0,
+    msg = sprintf("results does not contain any of the following columns: %s",
+                  paste(select_cols, collapse = ", ")
+    )
+  )
+  select_cols <- select_cols[present_cols]
+
+
+  header <- switch (type,
+                    "hla_allele" = "HLA allelic associations",
+                    "aa_level" = "HLA AA associations",
+                    "expression_level" = "HLA expression level associations",
+                    "allele_g_group" = "HLA alleles G groups associations",
+                    "allele_supertype" = "HLA alleles supertypes associations",
+                    "allele_group" = "HLA alleles groups associations",
+                    "kir_genes" = "KIR genes associations",
+                    "hla_kir_interactions" = "HLA - KIR interaction associations",
+                    "Associations results"
+  )
+
+  results %<>%
+    formatResults(
+      filter_by = filter_by,
+      arrange_by = "p.value",
+      select_cols = select_cols,
+      format = format,
+      header = header
+    )
+
+  return(results)
+}
+
+#' Get HLA - KIR interactions
+#'
+#' \code{getHlaKirInteractions} calculates binary presence-absence matrix of HLA
+#' - KIR interactions.
+#'
+#' @inheritParams checkHlaCallsFormat
+#' @param kir_counts Data frame containing KIR genes counts, as return by
+#'   \link{readKirCalls}.
+#' @param interactions_dict Path to the file containing HLA - KIR interactions
+#'   matchings. See details for further details.
+#'
+#' @return Data frame with binary presence-absence indicators for HLA - KIR
+#'   interactions.
+#'
+#' In order to be able to compare input data with \code{interactions_dict}
+#' \code{hla_calls} are first converted to variables such as G groups, using
+#' matching files shipped with the packages. Moreover \code{hla_calls} are also
+#' reduced to all possible resolutions.
+#'
+#' \code{interactions_dict} should be a tsv formatted file with following
+#' columns: HLA, KIR, Affinity, Type. The package is shipped with interactions
+#' file created based on Pende et al., 2019.
+#'
+#' @examples
+#' hla_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(hla_file)
+#' kir_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+#' kir_counts <- readKirCalls(kir_file, counts = TRUE)
+#' getHlaKirInteractions(hla_calls, kir_counts)
+#'
+#' @importFrom assertthat assert_that is.string
+#' @importFrom dplyr left_join
+#' @importFrom magrittr %>%
+#' @importFrom rlang warn
+#'
+#' @export
+getHlaKirInteractions <- function(hla_calls,
+                                  kir_counts,
+                                  interactions_dict = system.file("extdata", "Interactions_hla_kir.tsv", package = "MiDAS")) {
+  assert_that(
+    checkHlaCallsFormat(hla_calls),
+    checkKirCountsFormat(kir_counts),
+    is.string(interactions_dict)
+  )
+  id_matches <- hla_calls[, 1, drop = TRUE] %in% kir_counts[, 1, drop = TRUE] %>%
+    sum()
+  assert_that(id_matches > 0,
+              msg = "IDs in hla_calls doesn't match IDs in kir_counts"
+  )
+  if (nrow(hla_calls) != id_matches) {
+    msg <- sprintf("%i IDs in hla_calls matched IDs in kir_counts", id_matches)
+    warn(msg)
+  }
+
+  # transform hla_calls to all possible variables and resolutions
+  ## in practice only subset of variables could be used but this should be more time proof
+  midas_dicts <- listMiDASDictionaries() %>%
+    grep(pattern = "expression", value = TRUE, invert = TRUE)
+  hla_variables <- Reduce(
+    f = function(x, y) {
+      left_join(x, hlaToVariable(hla_calls, dictionary = y), by = "ID")
+    },
+    x = midas_dicts,
+    init = hla_calls
+  )
+  hla_max_resolution <- hla_calls[, -1] %>%
+    unlist() %>%
+    getAlleleResolution() %>%
+    max(na.rm = TRUE)
+  while (hla_max_resolution > 2) {
+    hla_variables <- hla_calls %>%
+      reduceHlaCalls(resolution = hla_max_resolution - 2) %>%
+      left_join(x = hla_variables, by = "ID")
+    hla_max_resolution <- hla_max_resolution - 2
+  }
+
+  # convert kir_counts to kir_calls
+  kir_counts[, -1] %<>%
+    colnames() %>%
+    lapply(function(kir) ifelse(kir_counts[, kir] > 0, kir, NA))
+
+  # find hla - kir interactions
+  interactions_dict <- read.table(
+    file = interactions_dict,
+    sep = "\t",
+    header = TRUE,
+    stringsAsFactors = FALSE
+  )
+  interaction_vars <- left_join(hla_variables, kir_counts, by = "ID")
+  interactions <- interaction_vars[, -1, drop = FALSE] %>%
+    apply(MARGIN = 1, FUN = function(row) {
+      interactions_dict$HLA %in% row & interactions_dict$KIR %in% row
+    }) %>%
+    apply(MARGIN = 1, FUN = function(x) ifelse(x, 1, 0))
+  colnames(interactions) <- paste(
+    interactions_dict$HLA,
+    interactions_dict$KIR,
+    interactions_dict$Affinity,
+    sep = "_"
+  ) %>%
+    gsub(pattern = "_$", replacement = "")
+  interactions <- cbind(hla_calls[, 1, drop = FALSE], interactions)
+
+  return(interactions)
 }

@@ -1,6 +1,57 @@
+## 0.0.0.9021 - 30/07/2019
++ changes the behaviour of analyzeMiDASData conditional = TRUE. Now it return list of results from all iterations and kables only best results from each iteration.
+
+## 0.0.0.9020 - 27/07/2019
++ adds human friendly erros in readHlaCalls
+
+## 0.0.0.9019 - 27/07/2019
++ makes it possible to specify na.strings while reading HLA and KIR calls input files
+
+## 0.0.0.9018 - 27/07/2019
++ fixes a bug when models were accessed and updated in parent frame, making it error prone in more complex examples. Now modeels are evaluated in the enviorment they were created in (one defined in model$terms .Enviorment attribute.
+
+## 0.0.0.9017 - 23/07/2019
++ adds kir_genes analysis type to prepareMiDASData and analyzeMiDASData
++ adds hla_kir_interactions analysis type to prepareMiDASData and analyzeMiDASData
+
+## 0.0.0.9016 - 20/07/2019
++ adds checkKirCountsFormat to assert KIR counts format
++ adds getHlaKirInteractions to get HLA - KIR interactions as new variables
+
+## 0.0.0.9015 - 10/07/2019
++ adds kirHaplotypeToCounts for converting KIR halplotypes to genes counts
++ adds readKirCalls that allows parsing KIR haplotypes calls output by kpi (https://github.com/droe-nmdp/kpi)
+
+## 0.0.0.9014 - 28/06/2019
++ in analyzeMiDASData now it is possible to specify both lower and upper threshold on frequency, before it was only lower.
+
+## 0.0.0.9013 - 28/06/2019
++ prepareMiDASData now can accept multiple analysis types at once which allows to cerate data frames with all possible variables in one go
++ variables in data frame produced by prepareMiDASData are now labeled with corresponding analysis type
++ analyzeMiDASData now under variables = NULL selects appropaite variables based on labels associated with midas_data
+
+## 0.0.0.9012 - 25/06/2019
++ fixes analyzeMiDASData function crashing on float variables. Now frequency calculations are done only for properly labeled variables on midas_data.
+
+## 0.0.0.9011 - 21/06/2019
++ fixes allele_group preparation scheme, where before after conversion to groups 
+  there were no conversion to counts. Additionally now this scheme have been broken 
+  into three: allele_g_group, allele_supertypes, allele_group (Bw4/6, C1/2).
+
+## 0.0.0.9010 - 18/06/2019
++ introduces prepareMiDASData which transforms hla_calls according to predefined schemas, like
+  amino acid variation, expression level etc.
+
+## 0.0.0.9009 - 9/06/2019
++ adds script for conversion of HLA calls to VCF format
++ adds script for conversion of VCF to HLA calls
+
 ## 0.0.0.9008 - 11/05/2019
 + introduces countsToHlaCalls that allows converting HLA counts table back to
   HLA calls data frame under additive inheritance model 
++ introduces analyzeMiDASData which is a higher level abstraction of analyzeConditionalAssociations 
+  and analyzeAssociations. It also pretty format results to kabled html or latex.
++ introduces formatResults that allows to format results to kabled html ir latex.
 
 ## 0.0.0.9007 - 8/05/2019
 + forwardConditionalSelection has been renamed to analyzeConditionalAssociations,

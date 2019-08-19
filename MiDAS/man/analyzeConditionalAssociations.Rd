@@ -4,8 +4,8 @@
 \alias{analyzeConditionalAssociations}
 \title{Stepwise conditional association analysis}
 \usage{
-analyzeConditionalAssociations(object, variables, th, rss_th = 1e-07,
-  exponentiate = FALSE)
+analyzeConditionalAssociations(object, variables, correction = "BH", th,
+  keep = FALSE, rss_th = 1e-07, exponentiate = FALSE)
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many
@@ -13,8 +13,15 @@ others.}
 
 \item{variables}{Character specifying variables to use in association tests.}
 
+\item{correction}{String specifying multiple testing correction method. See
+details for further information.}
+
 \item{th}{number specifying p-value threshold for a variable to be considered
 significant.}
+
+\item{keep}{logical flag indicating if the output should be a list of results
+resulting from each selection step. Default is to return only the final
+result.}
 
 \item{rss_th}{number specifying residual sum of squares threshold at which
 function should stop adding additional variables. As the residual sum of
@@ -32,7 +39,7 @@ is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
 \link[stats]{p.adjust}. Check there to get more details.}
 }
 \value{
-tibble with stepwise conditional testsing results.
+tibble with stepwise conditional testing results.
 }
 \description{
 \code{analyzeConditionalAssociations} performs stepwise conditional testing

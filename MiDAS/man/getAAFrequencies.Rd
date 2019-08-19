@@ -8,7 +8,7 @@ getAAFrequencies(aa_variation)
 }
 \arguments{
 \item{aa_variation}{Data frame holding amino acid variation data as returned
-by \link{hlaToVariable}.}
+by \link{hlaToAAVariation}.}
 }
 \value{
 Data frame containing the amino acids with positions and its

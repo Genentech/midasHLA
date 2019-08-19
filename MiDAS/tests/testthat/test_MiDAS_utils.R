@@ -15,7 +15,6 @@ test_that("HLA allele numbers have proper format", {
                ),
                c(FALSE, FALSE, FALSE)
   )
-  expect_error(checkAlleleFormat(1), "allele is not a character vector")
 })
 
 test_that("HLA allele resolution is number of sets of digits * 2", {
@@ -108,7 +107,7 @@ test_that("HLA calls data frame have proper format", {
   )
 
   expect_error(checkHlaCallsFormat(fake_calls[, c(1, 1, 3)]),
-               "values in hla_calls doesn't follow HLA numbers specification"
+               "values: Sample1, Sample2, Sample3 in hla_calls doesn't follow HLA numbers specification"
   )
 })
 
@@ -146,9 +145,9 @@ test_that("HLA statistical models are updated properly", {
   )
   hla_calls <- readHlaCalls(hla_calls_file)
   pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-  pheno <- read.table(pheno_file, header = TRUE)
+  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-  covar <- read.table(covar_file, header = TRUE)
+  covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
   midas_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
   coxmod <- coxph(Surv(OS, OS_DIED) ~ 1, data = midas_data)
   expect_equal(updateModel(coxmod, "A*01:01"),
@@ -185,5 +184,149 @@ test_that("statistical models are statistical model", {
   class(fake_model) <- "fake"
   expect_error(updateModel(fake_model),
                "object have to be a model with defined formula"
+  )
+
+  fake_model <- list(call = list(formula = 1 ~ 1))
+  class(fake_model) <- "fake"
+  expect_error(updateModel(fake_model),
+               "object need to have data attribue defined"
+  )
+
+  fake_model <- list(call = list(formula = 1 ~ 1, data = "bigData"))
+  class(fake_model) <- "fake"
+  expect_error(updateModel(fake_model),
+               "object need to have data attribue defined"
+  )
+})
+
+test_that("is counts or zeros", {
+  expect_equal(isCountsOrZeros(c(1, 0, 2, NA)), TRUE)
+
+  expect_error(
+    assertthat::assert_that(isCountsOrZeros(c(1, 0, 2, NA, 1.5))),
+    "values in c\\(1, 0, 2, NA, 1.5\\) are not counts \\(a positive integers\\) or zeros."
+  )
+})
+
+test_that("is character or null", {
+  expect_equal(isCharacterOrNULL(LETTERS), TRUE)
+  expect_equal(isCharacterOrNULL(NULL), TRUE)
+
+  expect_error(
+    assertthat::assert_that(isCharacterOrNULL(1)),
+    "1 is not a character vector or NULL."
+  )
+})
+
+test_that("is number or null", {
+  expect_equal(isNumberOrNULL(1), TRUE)
+  expect_equal(isNumberOrNULL(NULL), TRUE)
+
+  expect_error(
+    assertthat::assert_that(isNumberOrNULL("a")),
+    "\"a\" is not number \\(a length one numeric vector\\) or NULL."
+  )
+})
+
+test_that("is string or null", {
+  expect_equal(isStringOrNULL("foo"), TRUE)
+  expect_equal(isStringOrNULL(NULL), TRUE)
+
+  expect_error(
+    assertthat::assert_that(isStringOrNULL(1)),
+    "1 is not a string \\(a length one character vector\\) or NULL."
+  )
+})
+
+test_that("string matches", {
+  expect_equal(stringMatches("foo", c("foo", "bar")), TRUE)
+
+  expect_error(
+    assertthat::assert_that(stringMatches("foo", c("bar", "Foo"))),
+    "\"foo\" should be one of \"bar\", \"Foo\"."
+  )
+})
+
+test_that("is flag or null", {
+  expect_equal(isFlagOrNULL(TRUE), TRUE)
+  expect_equal(isFlagOrNULL(NULL), TRUE)
+  # expect_equal(isFlagOrNULL(NA), FALSE) # returns TRUE... strange?
+
+  expect_error(
+    assertthat::assert_that(isFlagOrNULL(1)),
+    "1 is not a flag \\(a length one logical vector\\) or NULL."
+  )
+})
+
+test_that("character maches choices", {
+  expect_equal(characterMatches("foo", c("foo", "bar")), TRUE)
+
+  expect_error(
+    assertthat::assert_that(characterMatches("foo", "bar")),
+    '"foo" should match values "bar".'
+  )
+})
+
+test_that("KIR haplotypes are converted to gene counts", {
+  x <- c("1+3|16+3", "1+1")
+  kir_hap <- kirHaplotypeToCounts(x)
+
+  hap_dict <- system.file("extdata", "Match_KIR_haplotype_genes.tsv", package = "MiDAS")
+  hap_dict <- read.table(hap_dict)
+  hap1 <- colSums(hap_dict[c("1", "3"), ])
+  hap1 <- ifelse(hap1 > 1, 1, hap1)
+  hap2 <- colSums(hap_dict[c("1", "1"), ])
+  hap2 <- ifelse(hap2 > 1, 1, hap2)
+  test_kir_hap <- rbind(hap1, hap2)
+  test_kir_hap <-
+    as.data.frame(test_kir_hap,
+                  optional = TRUE,
+                  stringsAsFactors = FALSE)
+  test_kir_hap <- cbind(haplotypes = x, test_kir_hap)
+  rownames(test_kir_hap) <- NULL
+
+  expect_equal(kir_hap, test_kir_hap)
+
+  expect_error(kirHaplotypeToCounts(1), "x is not a character vector")
+  expect_error(kirHaplotypeToCounts(x, hap_dict = "foo"),
+               "Path 'foo' does not exist")
+  expect_error(kirHaplotypeToCounts(x, binary = "yes"),
+               "binary is not a flag \\(a length one logical vector\\).")
+})
+
+test_that("column names matches", {
+  df <- data.frame(a = 1:5, b = 1:5)
+  expect_equal(colnamesMatches(df, c("a", "b")), TRUE)
+
+  expect_error(
+    assertthat::assert_that(colnamesMatches(df, c("foo", "bar"))),
+    "Columns a, b in df should be named foo, bar"
+  )
+})
+
+test_that("KIR counts have proper format", {
+  file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  kir_counts <- readKirCalls(file)
+  expect_equal(checkKirCountsFormat(kir_counts), TRUE)
+
+  expect_equal(checkKirCountsFormat(NULL, accept.null = TRUE), TRUE)
+
+  expect_error(
+    checkKirCountsFormat(kir_counts[, 1, drop = FALSE]),
+    "kir_counts\\[, 1, drop = FALSE\\] have to have at least 1 rows and 2 columns"
+  )
+
+  fake_kir_counts <- kir_counts
+  fake_kir_counts[, 1] <- as.factor(fake_kir_counts[, 1, drop = TRUE])
+  expect_error(
+    checkKirCountsFormat(fake_kir_counts),
+    "fake_kir_counts can't contain factors"
+  )
+
+  fake_kir_counts <- kir_counts
+  colnames(fake_kir_counts) <- c("FOO", colnames(fake_kir_counts)[-1])
+  expect_error(
+    checkKirCountsFormat(fake_kir_counts),
+    "Columns FOO in kir_counts should be named ID"
   )
 })

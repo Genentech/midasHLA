@@ -13,6 +13,7 @@
 #' \url{http://hla.alleles.org/nomenclature/naming.html}.
 #'
 #' @inheritParams reduceAlleleResolution
+#' @inheritParams utils::read.table
 #' @param file Path to input file.
 #'
 #' @return Data frame containing HLA allele calls.
@@ -29,14 +30,17 @@
 #' @importFrom utils read.table
 #' @export
 readHlaCalls <- function(file,
-                         resolution = 4) {
+                         resolution = 4,
+                         na.strings = "NA") {
   assert_that(is.readable(file),
-              is.count(resolution)
+              is.count(resolution),
+              is.character(na.strings)
   )
   hla_calls <- read.table(file,
                           header = TRUE,
                           sep = "\t",
-                          stringsAsFactors = FALSE
+                          stringsAsFactors = FALSE,
+                          na.strings = na.strings
   )
   assert_that(checkHlaCallsFormat(hla_calls))
 
@@ -228,4 +232,87 @@ readHlaAlignments <- function(file,
   }
 
   return(aln)
+}
+
+#' Reads data table with KIR haplotypes calls
+#'
+#' \code{readKirCalls} reads table with KIR haplotypes calls from file.
+#'
+#' Input file have to be a tsv formatted table with two columns and header.
+#' First column should contain samples IDs, second column should hold
+#' corresponding KIR haplotypes.
+#'
+#' @inheritParams kirHaplotypeToCounts
+#' @inheritParams utils::read.table
+#' @param file Path to input file.
+#' @param counts Logical flag indicating if KIR haplotypes should be converted
+#'   to gene counts.
+#'
+#' @return Data frame containing KIR haplotypes calls or corresponding gene
+#'   counts.
+#'
+#' @examples
+#' file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+#' readKirCalls(file)
+#'
+#' @importFrom assertthat assert_that is.flag is.readable see_if
+#' @importFrom stats na.omit
+#'
+#' @export
+readKirCalls <- function(file,
+                         hap_dict = system.file("extdata", "Match_KIR_haplotype_genes.tsv", package = "MiDAS"),
+                         counts = TRUE,
+                         binary = TRUE,
+                         na.strings = c("", "NA")) {
+  assert_that(
+    is.readable(file),
+    is.readable(hap_dict),
+    is.flag(counts),
+    is.flag(binary),
+    is.character(na.strings)
+  )
+
+  kir_calls <- read.table(file = file,
+                          header = TRUE,
+                          sep = "\t",
+                          stringsAsFactors = FALSE,
+                          na.strings = na.strings
+  )
+  assert_that(
+    see_if(ncol(kir_calls) == 2,
+           msg = sprintf(
+             fmt = "KIR haplotypes calls table should have 2 columns, not %i",
+             ncol(kir_calls)
+           )
+    ),
+    see_if(
+      all(is_hap <- grepl("^[0-9+|/]+$", na.omit(kir_calls[, 2, drop = TRUE]))),
+      msg = sprintf(
+        fmt = "rows %s of input file contains unexpected characters",
+        paste(which(! is_hap), collapse = ", ")
+      )
+    )
+  )
+
+  if (counts) {
+    haplotypes <- kir_calls[, 2, drop = TRUE]
+    kir_counts <- kirHaplotypeToCounts(
+      x = haplotypes,
+      hap_dict = hap_dict,
+      binary = binary
+    )
+    i <- ncol(kir_counts) + 1
+    kir_counts[, i] <- kir_calls[! is.na(haplotypes), 1, drop = TRUE]
+    kir_calls <- merge(x = kir_calls,
+                       y = kir_counts,
+                       by.x = 1,
+                       by.y = i,
+                       all.x = TRUE,
+                       sort = TRUE
+    )
+    # drop columns holding haplotypes
+    kir_calls <- kir_calls[, -2:-3, drop = FALSE]
+  }
+
+  return(kir_calls)
 }

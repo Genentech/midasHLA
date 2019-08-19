@@ -5,7 +5,7 @@
 \title{Transform HLA calls to counts table}
 \usage{
 hlaCallsToCounts(hla_calls, inheritance_model = c("dominant",
-  "recessive", "additive"))
+  "recessive", "additive"), check_hla_format = TRUE)
 }
 \arguments{
 \item{hla_calls}{Data frame containing HLA allele calls, as return by
@@ -17,6 +17,10 @@ Available choices are \code{"dominant"}, \code{"recessive"},
 are coded as \code{1}. In \code{"recessive"} model homozygotes are coded as
 \code{1} and all other as \code{0}. In \code{"additive"} model homozygotes
 are coded as \code{2} and heterozygotes as \code{1}.}
+
+\item{check_hla_format}{Logical indicating if \code{hla_calls} format should
+be checked. This is useful if one wants to use \code{hlaCallsToCounts} with
+input not adhering to HLA nomenclature standards.}
 }
 \value{
 Data frame containing counts of HLA alleles counted according to

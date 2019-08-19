@@ -27,7 +27,6 @@
 #' @importFrom stringi stri_detect_regex
 #' @export
 checkAlleleFormat <- function(allele) {
-  assert_that(is.character(allele))
   pattern <- "^[A-Z0-9]+[*][0-9]+(:[0-9]+){0,3}((?=G)(G|GG)|(N|L|S|C|A|Q)){0,1}$"
   is_correct <- stri_detect_regex(allele, pattern)
   return(is_correct)
@@ -251,17 +250,25 @@ checkHlaCallsFormat <- function(hla_calls) {
   assert_that(
     is.data.frame(hla_calls),
     see_if(nrow(hla_calls) >= 1 & ncol(hla_calls) >= 2,
-           msg = "hla_calls have to have at least 1 rows and 2 columns"
+           msg = "hla_calls have to have at least 1 rows and 2 columns. Make sure the input file is in tsv format."
     ),
     see_if(! any(vapply(hla_calls, is.factor, logical(length = 1))),
            msg = "hla_calls can't contain factors"
     ),
     see_if(! all(checkAlleleFormat(as.character(hla_calls[, 1])), na.rm = TRUE),
            msg = "first column of hla_calls should specify samples id"
-    ),
-    see_if(all(checkAlleleFormat(unlist(hla_calls[, -1])), na.rm = TRUE),
-           msg = "values in hla_calls doesn't follow HLA numbers specification"
     )
+  )
+
+  alleles <- unlist(hla_calls[, -1])
+  test_values <- checkAlleleFormat(alleles)
+  test_values <- test_values[! is.na(test_values)]
+  assert_that(
+      all(test_values),
+      msg = sprintf(
+        "values: %s in hla_calls doesn't follow HLA numbers specification",
+        paste(unlist(hla_calls[, -1])[! test_values], collapse = ", ")
+      )
   )
 
   return(TRUE)
@@ -336,7 +343,7 @@ checkAdditionalData <- function(data_frame,
                data_frame_name, hla_calls_name
              )
       ),
-      see_if(any(hla_calls[, 1] %in% data_frame[, 1]),
+      see_if(any(hla_calls[, 1, drop = TRUE] %in% data_frame[, 1, drop = TRUE]),
              msg = sprintf(
                "IDs in %s doesn't match IDs in %s",
                data_frame_name, hla_calls_name
@@ -388,8 +395,9 @@ updateModel <- function(object, x, backquote = TRUE, collapse = " + ") {
     x <- paste0(". ~ . + ", paste(x, collapse = collapse))
   }
 
+  object_env <- attr(object$terms, ".Environment")
   new_object <- update(object = object, x, evaluate = FALSE)
-  new_object <- eval.parent(new_object)
+  new_object <- eval(new_object, envir = object_env)
 
   return(new_object)
 }
@@ -413,19 +421,420 @@ updateModel <- function(object, x, backquote = TRUE, collapse = " + ") {
 #' @export
 checkStatisticalModel <- function(object) { # TODO simplyfy output of this function; or something like object is not a stat model: potential problem bla bla
   assert_that(
-    see_if(is.object(object),
-           msg = "object have to have the internal OBJECT bit set"
-    ),
-    {
-      object_call <- getCall(object)
-      if (! is.null(object_call)) {
-        object_formula <- eval(substitute(formula, env = as.list(object_call)))
-        see_if(is_formula(object_formula),
-               msg = "object have to be a model with defined formula"
-        )
-      } else {
-        structure(FALSE, msg = "object have to have an attribute 'call'")
-      }
-    }
+    is.object(object),
+    msg = "object have to have the internal OBJECT bit set"
   )
+
+  object_call <- getCall(object)
+  assert_that(
+    ! is.null(object_call),
+    msg = "object have to have an attribute 'call'"
+  )
+
+  object_env <- attr(object$terms, ".Environment")
+
+  object_formula <- eval(object_call[["formula"]], envir = object_env)
+  assert_that(
+    is_formula(object_formula),
+    msg = "object have to be a model with defined formula"
+  )
+
+  object_data <- eval(object_call[["data"]], envir = object_env)
+  assert_that(
+    ! is.null(object_data) & is.data.frame(object_data),
+    msg = "object need to have data attribue defined"
+  )
+}
+
+#' Check if vectors contains only counts or zeros
+#'
+#' \code{isCountsOrZeros} checks if vector contains only positive integers or
+#' zeros.
+#'
+#' @param x Numeric vector or object that can be \code{unlist} to numeric
+#'   vector.
+#' @param na.rm Logical indicating if \code{NA} values should be omited.
+#'
+#' @return Logical indicating if provided vector contains only positive integers
+#'   or zeros.
+#'
+#' @importFrom rlang is_integerish
+#'
+isCountsOrZeros <- function(x, na.rm = TRUE) {
+    x <- unlist(x)
+    test <- is_integerish(x) & x >= 0
+    test <- all(test, na.rm = na.rm)
+
+  return(test)
+}
+
+#' Error message for isCountsOrZeros
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(isCountsOrZeros) <- function(call, env) {
+  paste0("values in ", deparse(call$x), " are not counts (a positive integers) or zeros.")
+}
+
+#' Check if object is character vector or NULL
+#'
+#' \code{isCharacterOrNULL} checks if object is character vector or NULL.
+#'
+#' @param x object to test.
+#'
+#' @return Logical indicating if object is character vector or NULL
+#'
+isCharacterOrNULL <- function(x) {
+    test <- is.character(x) | is.null(x)
+
+  return(test)
+}
+
+#' Error message for isCharacterOrNULL
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(isCharacterOrNULL) <- function(call, env) {
+  paste0(deparse(call$x), " is not a character vector or NULL.")
+}
+
+#' Check if object is number or NULL
+#'
+#' \code{isNumberOrNULL} checks if object is number (a length one numeric
+#' vector) or NULL.
+#'
+#' @param x object to test.
+#'
+#' @return Logical indicating if object is number or NULL
+#'
+#' @importFrom assertthat is.number
+#'
+isNumberOrNULL <- function(x) {
+    test <- is.number(x) | is.null(x)
+
+  return(test)
+}
+
+#' Error message for isNumberOrNULL
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(isNumberOrNULL) <- function(call, env) {
+  paste0(deparse(call$x),
+         " is not number (a length one numeric vector) or NULL."
+  )
+}
+
+#' Check if object is string or NULL
+#'
+#' \code{isStringOrNULL} checks if object is string (a length one character
+#' vector) or NULL.
+#'
+#' @param x object to test.
+#'
+#' @return Logical indicating if object is string or NULL
+#'
+#' @importFrom assertthat is.string
+#'
+isStringOrNULL <- function(x) {
+    test <- is.string(x) | is.null(x)
+
+  return(test)
+}
+
+#' Error message for isStringOrNULL
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(isStringOrNULL) <- function(call, env) {
+  paste0(deparse(call$x),
+         " is not a string (a length one character vector) or NULL."
+  )
+}
+
+#' Check if string matches one of possible values
+#'
+#' \code{stringMatches} checks if string is equal to one of the choices.
+#'
+#' @param x string to test.
+#' @param choice Character vector with possible values for \code{x}.
+#'
+#' @return Logical indicating if \code{x} matches one of the strings in
+#'   \code{choice}.
+#'
+stringMatches <- function(x, choice) {
+    test <- x %in% choice
+
+  return(test)
+}
+
+#' Error message for stringMatches
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(stringMatches) <- function(call, env) {
+  paste0(deparse(call$x),
+         ' should be one of "',
+         paste(eval(call$choice), collapse = '", "'),
+         '".'
+  )
+}
+
+#' Check if object is flag or NULL
+#'
+#' \code{isFlagOrNULL} checks if object is flag (a length one logical vector) or
+#' NULL.
+#'
+#' @param x object to test.
+#'
+#' @return Logical indicating if object is flag or NULL
+#'
+#' @importFrom assertthat is.flag
+#'
+isFlagOrNULL <- function(x) {
+    test <- is.flag(x) || is.null(x)
+
+  return(test)
+}
+
+#' Error message for isFlagOrNULL
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(isFlagOrNULL) <- function(call, env) {
+  paste0(deparse(call$x),
+         " is not a flag (a length one logical vector) or NULL."
+  )
+}
+
+#' List HLA alleles dictionaries
+#'
+#' \code{listMiDASDictionaries} lists dictionaries shipped with MiDAS package.
+#'
+#' @param file.names Logical value. If FALSE, only the names of dictionaries are
+#' returned. If TRUE their file names are returned.
+#'
+#' @return Character vector with names of available HLA alleles dictionaries.
+#'
+#' @export
+listMiDASDictionaries <- function(file.names = FALSE) {
+  lib <- list.files(
+    path = system.file("extdata", package = "MiDAS"),
+    pattern = "^Match_.*.txt$",
+    full.names = file.names
+  )
+
+  if (! file.names) {
+    lib <- gsub("^Match_", "", gsub(".txt$", "", lib))
+  }
+
+  return(lib)
+}
+
+#' Check if character matches one of possible values
+#'
+#' \code{characterMatches} checks if all elements of character matches values in
+#' choices.
+#'
+#' @param x character vector to test.
+#' @param choice Character vector with possible values for \code{x}.
+#'
+#' @return Logical indicating if \code{x} matches one of the values in
+#'   \code{choice}.
+#'
+#' @importFrom assertthat assert_that
+characterMatches <- function(x, choice) {
+  assert_that(is.character(x))
+  test <- x %in% choice
+  test <- all(test)
+
+  return(test)
+}
+
+#' Error message for characterMatches
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(characterMatches) <- function(call, env) {
+  paste0(deparse(call$x),
+         ' should match values "',
+         paste(eval(call$choice), collapse = '", "'),
+         '".'
+  )
+}
+
+#' Convert KIR haplotypes to gene level
+#'
+#' \code{kirHaplotypeToCounts} converts vector of KIR haplotypes to data frame
+#' of KIR genes counts.
+#'
+#' @param x Character vector specifying KIR haplotypes.
+#' @param hap_dict String specifying path to KIR haplotypes dictionary. By
+#'   default file shipped together with package is being used. See details for
+#'   more information.
+#' @param binary Logical flag indicating if haplotypes should be converted only
+#'   to gene presence / absence indicators. At this point this is the only way
+#'   that allows unambiguous conversion.
+#'
+#' \code{hap_dict} have to be a \code{tsv} file with first column holding KIR
+#' haplotypes and gene counts in others. File should have header with first
+#' column unnamed it is being used as row names.
+#'
+#' @return Data frame with haplotypes and corresponding gene counts. \code{NA}'s
+#'   in \code{x} are removed during conversion.
+#'
+#' @examples
+#' x <- c("1+3|16+3", "1+1", NA)
+#' kirHaplotypeToCounts(x)
+#'
+#' @importFrom assertthat assert_that is.flag is.readable see_if
+#' @importFrom stats na.omit
+#' @importFrom stringi stri_split_fixed
+#'
+#' @export
+kirHaplotypeToCounts <- function(x,
+                                 hap_dict = system.file("extdata", "Match_KIR_haplotype_genes.tsv", package = "MiDAS"),
+                                 binary = TRUE) {
+  assert_that(
+    is.character(x),
+    is.readable(hap_dict),
+    is.flag(binary)
+  )
+  hap_dict <- read.table(hap_dict)
+
+  x <- na.omit(x)
+  x_split <- stri_split_fixed(x, "|")
+  x_split_unlist <- unlist(x_split)
+
+  x_split_unlist_haps <- stri_split_fixed(x_split_unlist, pattern = "+")
+  assert_that(
+    all(haps_match <- vapply(
+      X = x_split_unlist_haps,
+      FUN = function(x) all(x %in% rownames(hap_dict)),
+      FUN.VALUE = logical(1)
+    )),
+    msg = sprintf(
+      fmt = "%s haplotype was not found in hap_dict",
+      paste(x_split_unlist[! haps_match], collapse = ", ")
+    )
+  )
+
+  counts <- do.call(cbind, x_split_unlist_haps)
+  counts <- apply(counts, 2, function(i) colSums(hap_dict[i, ]))
+  colnames(counts) <- x_split_unlist
+
+  if (binary) {
+    counts <- ifelse(counts > 1, 1, counts)
+  }
+
+  counts <- vapply(
+    X = x_split,
+    FUN = function(hap) {
+      hap <- counts[, hap, drop = FALSE]
+      if (ncol(hap) > 1) {
+        assert_that(
+          all(apply(hap, 2, function(col) all(col == hap[, 1]))),
+          msg = sprintf("haplotype %s can not be unambigously converted to counts", hap)
+        )
+      }
+      hap <- hap[, 1, drop = TRUE]
+      return(hap)
+    },
+    FUN.VALUE = numeric(length = ncol(hap_dict))
+  )
+  counts <- t(counts)
+  counts <- as.data.frame(counts, optional = TRUE, stringsAsFactors = FALSE)
+  counts <- cbind(haplotypes = x, counts)
+
+  return(counts)
+}
+
+#' Check column names
+#'
+#' \code{colnamesMatches} checks columns of data frame are named as specified
+#'
+#' @param x Data frame vector to test.
+#' @param cols Ordered character vector with values for \code{x} colnames
+#'   to test.
+#'
+#' @return Logical indicating if \code{x} colnames matches values in
+#'   \code{choice}.
+#'
+#' @importFrom assertthat assert_that
+colnamesMatches <- function(x, cols) {
+  assert_that(
+    is.data.frame(x),
+    see_if(ncol(x) == length(cols),
+           msg = sprintf(
+             "Number of columns in %s must equal number of values in cols",
+             deparse(substitute(x))
+           )
+    )
+  )
+
+  columns_names <- colnames(x)
+  columns_test <- columns_names == cols
+  test <- all(columns_test)
+
+  return(test)
+}
+
+#' Error message for colnamesMatches
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(colnamesMatches) <- function(call, env) {
+  curr_colnames <- colnames(eval(call$x, envir = env))
+  future_colnames <- eval(call$cols, envir = env)
+
+  sprintf("Columns %s in %s should be named %s",
+           paste(curr_colnames, collapse = ", "),
+           deparse(call$x),
+           paste(future_colnames, collapse = ", ")
+  )
+}
+
+#' Assert kir counts data frame format
+#'
+#' \code{checkKirCountsFormat} asserts if kir counts data frame have proper
+#' format.
+#'
+#' @param kir_counts Data frame containing KIR genes counts, as return by
+#'   \code{\link{readKirCalls}} function.
+#' @param accept.null Logical indicating if NULL \code{kir_counts} should be
+#'   accepted.
+#'
+#' @return Logical indicating if \code{kir_counts} follows kir counts data frame
+#'   format. Otherwise raise error.
+#'
+#' @importFrom assertthat assert_that see_if
+#' @examples
+#' file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+#' kir_counts <- readKirCalls(file)
+#' checkKirCountsFormat(kir_counts)
+#'
+#' @export
+checkKirCountsFormat <- function(kir_counts,
+                                 accept.null = FALSE) {
+  if (! (is.null(kir_counts) & accept.null)) {
+    kir_counts_name <- deparse(substitute(kir_counts))
+    assert_that(
+      is.data.frame(kir_counts),
+      see_if(nrow(kir_counts) >= 1 & ncol(kir_counts) >= 2,
+              msg = paste0(kir_counts_name,
+                           " have to have at least 1 rows and 2 columns"
+              )
+      ),
+      see_if(! any(vapply(kir_counts, is.factor, logical(length = 1))),
+           msg = paste0(kir_counts_name, " can't contain factors")
+      )
+    )
+
+    kir_counts <- kir_counts[, 1, drop = FALSE]
+      assert_that(
+        colnamesMatches(kir_counts, "ID")
+      )
+  }
+
+  return(TRUE)
 }

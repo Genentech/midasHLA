@@ -4,7 +4,7 @@
 \alias{hlaToVariable}
 \title{Converts hla calls data frame according to match table}
 \usage{
-hlaToVariable(hla_calls, dictionary, nacols.rm = TRUE)
+hlaToVariable(hla_calls, dictionary, reduce = TRUE, nacols.rm = TRUE)
 }
 \arguments{
 \item{hla_calls}{Data frame containing HLA allele calls, as return by
@@ -13,6 +13,9 @@ hlaToVariable(hla_calls, dictionary, nacols.rm = TRUE)
 \item{dictionary}{Path to the file containing HLA allele numbers matchings or
 data frame providing this information. See details for further
 explanations.}
+
+\item{reduce}{logical indicating if function should try to reduce alleles
+resolution when no matching is found. See details for more details.}
 
 \item{nacols.rm}{logical indicating if result columns that contain only
 \code{NA} should be removed.}
@@ -26,14 +29,19 @@ Data frame of hla numbers converted to additional variables according
 based on match table (dictionary).
 }
 \details{
+\code{reduce} controls if conversion should happen in a greedy way, such that
+if some hla numbers cannot be converted, thier resolution is reduced by 2 and
+another attempt is taken. This iterative process stops when alleles cannot be
+further reduced or all have been successfully converted.
+
 \code{dictionary} file should be a tsv format with header and two columns.
 First column should hold allele numbers and second corresponding additional
 variables. Optionally a data frame formatted in the same manner can be passed
 instead.
 
-\code{dictionary} optional parameter that can be also used to access
-matchings files shipped with the package. They can be referred to by using
-one of the following strings:
+\code{dictionary} can be also used to access matchings files shipped with the
+package. They can be referred to by using one of the following strings (to
+list available dictionaries use \link{listMiDASDictionaries}):
 
 \code{"2digit_A-allele_expression"} reference data to impute expression
 levels for HLA-A alleles.
@@ -52,12 +60,16 @@ and C2.
 \code{"2digit_C-allele_expression"} reference data to impute expression
 levels for HLA-C alleles.
 
-\code{"4digit_allele_Ggroup"} HLA alleles can be re-coded in G groups,
-which defines amino acid identity only in the exons relevant for peptide
-binding.
-
 \code{"4digit_supertype"} A and B alleles can be assigned to so-called
 supertypes.
+
+\code{"4digit_allele_Ggroup"} HLA alleles can be re-coded in G groups,
+which defines amino acid identity only in the exons relevant for peptide
+binding. Note that alleles "DRB1*01:01:01" and "DRB1*01:16" were matched with
+more than one G group, this ambiguity was removed by deleting matching with
+"DRB5*01:01:01G" group. Moreover in the original match file there were alleles
+named "DPA*...", here they are renamed to "DPA1*..." to adhere with HLA
+nomenclature.
 }
 \examples{
 file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")

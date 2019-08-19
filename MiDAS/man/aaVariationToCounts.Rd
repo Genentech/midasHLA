@@ -9,7 +9,7 @@ aaVariationToCounts(aa_variation, inheritance_model = c("dominant",
 }
 \arguments{
 \item{aa_variation}{Data frame holding amino acid variation data as returned
-by \link{hlaToVariable}.}
+by \link{hlaToAAVariation}.}
 
 \item{inheritance_model}{String specifying inheritance model to use.
 Available choices are \code{"dominant"}, \code{"recessive"},
