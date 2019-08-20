@@ -30,7 +30,7 @@ based on match table (dictionary).
 }
 \details{
 \code{reduce} controls if conversion should happen in a greedy way, such that
-if some hla numbers cannot be converted, thier resolution is reduced by 2 and
+if some hla numbers cannot be converted, their resolution is reduced by 2 and
 another attempt is taken. This iterative process stops when alleles cannot be
 further reduced or all have been successfully converted.
 

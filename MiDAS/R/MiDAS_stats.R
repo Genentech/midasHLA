@@ -72,11 +72,26 @@ analyzeAssociations <- function(object,
     is.flag(exponentiate)
   )
 
-  results <- lapply(variables,
-                    updateModel,
-                    object = object,
-                    backquote = TRUE,
-                    collapse = " + "
+  results <- lapply(
+    X = variables,
+    FUN = function(x) tryCatch(
+      expr = updateModel(
+        object = object,
+        x = x,
+        backquote = TRUE,
+        collapse = " + "
+      ),
+      error = function(e) {
+        msg <- sprintf(
+          "Error occurred while processing variable %s:\n\t%s",
+          x,
+          conditionMessage(e)
+        )
+        warn(msg)
+
+        return(object)
+      }
+    )
   )
 
   results <- lapply(results, tidy, exponentiate = exponentiate)
@@ -90,6 +105,10 @@ analyzeAssociations <- function(object,
 #  covariates <- formula(object)[[3]]
 #  covariates <- deparse(covariates)
 #  results$covariates <- covariates
+
+  if (nrow(results) == 0) {
+    warn("None of the variables could be tested. Returning empty table.")
+  }
 
   return(results)
 }
@@ -186,15 +205,30 @@ analyzeConditionalAssociations <- function(object,
   i <- 1
 
   while (length(new_variables) > 0) {
-    results <- map_dfr(
-      .x = new_variables,
-      .f = ~ tidy(updateModel(object = object,
-                              x = .,
-                              backquote = TRUE,
-                              collapse = " + "
-                  )
+    results <- lapply(
+      X = new_variables,
+      FUN = function(x) tryCatch(
+        expr = updateModel(
+          object = object,
+          x = x,
+          backquote = TRUE,
+          collapse = " + "
+        ),
+        error = function(e) {
+          msg <- sprintf(
+            "Error occurred while processing variable %s:\n\t%s",
+            x,
+            conditionMessage(e)
+          )
+          warn(msg)
+
+          return(object)
+        }
       )
     )
+    results <- lapply(results, tidy, exponentiate = exponentiate)
+    results <- bind_rows(results)
+
     results <- results[results[["term"]] %in% backquote(new_variables), ]
     results$p.adjusted <- p.adjust(results[["p.value"]], correction)
     results <- results[! is.infinite(results[["p.value"]]), ]
@@ -433,8 +467,10 @@ analyzeMiDASData <- function(object,
   object_env <- attr(object$terms, ".Environment")
   object_formula <- eval(object_call[["formula"]], envir = object_env)
   object_data <- eval(object_call[["data"]], envir = object_env)
+  # assert object data more than one column, etc
   object_variables <- colnames(object_data)[-1]
   variables_labels <- label(object_data[, -1])
+  # what happens if data is not labled?
 
   assert_that(
     is.string(analysis_type),
@@ -537,6 +573,11 @@ analyzeMiDASData <- function(object,
                                    exponentiate = logistic
     )
   }
+
+  assert_that(
+    nrow(results) > 0,
+    msg = "Could not process any variables. Please check warning messages for more informations."
+  )
 
   # Add frequency information to results table if there were any count variables
   if (length(cts_vars)) {
@@ -787,10 +828,10 @@ prepareMiDASData <- function(hla_calls,
 
     expression_level %<>%
       gather("expression", "value", -c("ID")) %>%
-      mutate(expression = gsub("_.*", "", .data$expression)) %>%
+      mutate(expression = gsub("_[12]", "", .data$expression)) %>%
       group_by(!!! syms(c("ID", "expression"))) %>%
       summarise_all(funs(sum)) %>%
-      spread(.data$expression, .data$value, sep = "_")
+      spread(.data$expression, .data$value, sep = NULL)
 
     label(expression_level[-1], self = FALSE) <- rep(
       x = "expression_level",

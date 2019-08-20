@@ -387,7 +387,8 @@ test_that("MiDAS associations are analyzed properly", {
                           kable_output = FALSE
   )
 
-  test_variables <- colnames(midas_data[, label(midas_data) == "expression_level"])
+  test_variables <-
+    colnames(midas_data[, label(midas_data) == "expression_level", drop = FALSE])
   test_res <- analyzeAssociations(object, variables = test_variables)
   test_variables <- test_res$term # constant variables are discarded
   test_res <- dplyr::rename(test_res, allele = term)
@@ -588,7 +589,7 @@ test_that("MiDAS associations are analyzed properly", {
 
   # counts
   counts <- prepareMiDASData(hla_calls, analysis_type = "hla_allele")
-  counts <- colSums(counts[-1])
+  counts <- colSums(counts[-1], na.rm = TRUE)
   res <- analyzeMiDASData(object, analysis_type = "hla_allele", lower_frequency_cutoff = 34, kable_output = FALSE)
   expect_equal(res$allele, names(counts)[counts > 34 & freqs$Freq != 1])
 
@@ -622,15 +623,15 @@ test_that("MiDAS associations are analyzed properly", {
   )
 
   expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", lower_frequency_cutoff = "foo"),
-               "lower_frequency_cutoff is not number \\(a length one numeric vector\\) or NULL."
+               "lower_frequency_cutoff is not a number \\(a length one numeric vector\\) or NULL."
   )
 
   expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", upper_frequency_cutoff = "foo"),
-               "upper_frequency_cutoff is not number \\(a length one numeric vector\\) or NULL."
+               "upper_frequency_cutoff is not a number \\(a length one numeric vector\\) or NULL."
   )
 
   expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", pvalue_cutoff = "foo"),
-               "pvalue_cutoff is not number \\(a length one numeric vector\\) or NULL."
+               "pvalue_cutoff is not a number \\(a length one numeric vector\\) or NULL."
   )
 
   expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", correction = NA),
@@ -723,7 +724,7 @@ test_that("MiDAS data is prepared properly", {
       expr$sum <- rowSums(expr[, -1, drop = FALSE])
       gene <- gsub("_1", "", colnames(expr)[2])
       expr <- expr[, c("ID", "sum")]
-      colnames(expr) <- c("ID", paste0("expression_", gene))
+      colnames(expr) <- c("ID", gene)
       expr
     })
   )
