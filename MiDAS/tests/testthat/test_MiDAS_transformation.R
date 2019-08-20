@@ -47,6 +47,8 @@ test_that("HLA calls table is converted to additional variables", {
   na_mask <- vapply(test_hla_supertypes, function(x) all(is.na(x)), FUN.VALUE = logical(1))
   test_hla_supertypes <- test_hla_supertypes[! na_mask]
   test_hla_supertypes <- do.call(cbind, test_hla_supertypes)
+  colnames(test_hla_supertypes) <-
+    paste0("supertype_", colnames(test_hla_supertypes))
   test_hla_supertypes <-
     cbind(hla_calls[, 1, drop = FALSE], test_hla_supertypes, stringsAsFactors = FALSE)
   expect_equal(hla_supertypes, test_hla_supertypes)
@@ -410,7 +412,7 @@ test_that("results are formatted properly with preselected args", {
   )
 
   expect_error(formatAssociationsResults(res, type = "hla_allele", pvalue_cutoff = "a"),
-               "pvalue_cutoff is not number \\(a length one numeric vector\\) or NULL."
+               "pvalue_cutoff is not a number \\(a length one numeric vector\\) or NULL."
   )
 
   expect_error(formatAssociationsResults(res, type = "hla_allele", format = 1),

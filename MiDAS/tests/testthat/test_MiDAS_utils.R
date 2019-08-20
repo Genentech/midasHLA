@@ -176,7 +176,7 @@ test_that("statistical models are statistical model", {
   expect_equal(checkStatisticalModel(object), TRUE)
 
   expect_error(checkStatisticalModel(list(1)),
-               "object have to have the internal OBJECT bit set"
+               "object is required to have the internal OBJECT bit set"
   )
 
   expect_error(updateModel(speed ~ cars),
@@ -192,13 +192,13 @@ test_that("statistical models are statistical model", {
   fake_model <- list(call = list(formula = 1 ~ 1))
   class(fake_model) <- "fake"
   expect_error(updateModel(fake_model),
-               "object need to have data attribue defined"
+               "object need to have data attribute defined"
   )
 
   fake_model <- list(call = list(formula = 1 ~ 1, data = "bigData"))
   class(fake_model) <- "fake"
   expect_error(updateModel(fake_model),
-               "object need to have data attribue defined"
+               "object need to have data attribute defined"
   )
 })
 
@@ -227,7 +227,7 @@ test_that("is number or null", {
 
   expect_error(
     assertthat::assert_that(isNumberOrNULL("a")),
-    "\"a\" is not number \\(a length one numeric vector\\) or NULL."
+    "\"a\" is not a number \\(a length one numeric vector\\) or NULL."
   )
 })
 
