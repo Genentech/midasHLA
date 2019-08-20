@@ -106,6 +106,9 @@ analyzeAssociations <- function(object,
 #' @inheritParams analyzeAssociations
 #' @param th number specifying p-value threshold for a variable to be considered
 #'   significant.
+#' @param keep logical flag indicating if the output should be a list of results
+#'   resulting from each selection step. Default is to return only the final
+#'   result.
 #' @param rss_th number specifying residual sum of squares threshold at which
 #'   function should stop adding additional variables. As the residual sum of
 #'   squares approaches \code{0} the perfect fit is obtained making further
@@ -147,6 +150,7 @@ analyzeConditionalAssociations <- function(object,
                                            variables,
                                            correction = "BH",
                                            th,
+                                           keep = FALSE,
                                            rss_th = 1e-07,
                                            exponentiate = FALSE) {
   assert_that(
@@ -168,6 +172,7 @@ analyzeConditionalAssociations <- function(object,
     ),
     is.string(correction),
     is.number(th),
+    is.flag(keep),
     is.number(rss_th),
     is.flag(exponentiate)
   )
@@ -215,17 +220,24 @@ analyzeConditionalAssociations <- function(object,
     prev_variables <- all.vars(prev_formula)
     new_variables <- variables[! variables %in% prev_variables]
 
-    results <- results[i_min, ]
     results$term <- gsub("`", "", results$term)
     best[[i]] <- results
     i <- i + 1
   }
 
-  if (length(best) == 0) {
-    warn("No significant variables found. Returning empty table.") # Tibble to be more precise?
-    results <- results[0, ]
+  if (keep) {
+    results <- best
   } else {
-    results <- bind_rows(best)
+    if (length(best) == 0) {
+      warn("No significant variables found. Returning empty table.") # Tibble to be more precise?
+      results <- results[0, ]
+    } else {
+      results <- lapply(best, function(res) {
+        i_min <- which.min(res[["p.value"]])
+        res[i_min, ]
+      })
+      results <- bind_rows(results)
+    }
   }
 
   return(results)
@@ -340,9 +352,8 @@ prepareHlaData <- function(hla_calls,
 #' @param conditional Logical indicating if the analysis should be performed
 #'   using stepwise conditional tests or not. See
 #'   \link{analyzeConditionalAssociations} for more details.
-#' @param variables Character specifying variables to use in association tests
-#'   or \code{NULL}. If \code{NULL} variables are chosen based on
-#'   \code{analysis_type}.
+#' @param variables Character specifying additional variables to use in
+#'   association tests except those choosen by \code{analysis_type}.
 #' @param lower_frequency_cutoff Number specifying lower threshold for inclusion
 #'   of a variable. If it's a number between 0 and 1 variables with frequency
 #'   below this number will not be considered during analysis. If it's greater
@@ -392,7 +403,7 @@ prepareHlaData <- function(hla_calls,
 #' analyzeMiDASData(object, analysis_type = "hla_allele")
 #'
 #' @importFrom assertthat assert_that is.flag is.number is.string
-#' @importFrom dplyr filter left_join select rename
+#' @importFrom dplyr bind_rows filter left_join select rename
 #' @importFrom stats getCall
 #' @importFrom rlang !! := .data
 #' @importFrom magrittr %>% %<>%
@@ -401,8 +412,9 @@ prepareHlaData <- function(hla_calls,
 #' @export
 analyzeMiDASData <- function(object,
                              analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions"),
-                             conditional = FALSE,
                              variables = NULL,
+                             conditional = FALSE,
+                             keep = FALSE,
                              lower_frequency_cutoff = NULL,
                              upper_frequency_cutoff = NULL,
                              pvalue_cutoff = NULL,
@@ -428,8 +440,9 @@ analyzeMiDASData <- function(object,
     stringMatches(analysis_type,
                   choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions")
     ),
-    is.flag(conditional),
     isCharacterOrNULL(variables),
+    is.flag(conditional),
+    is.flag(keep),
     see_if(
       all(test_vars <- variables %in% object_variables) | is.null(variables),
       msg = sprintf("%s can not be found in object data",
@@ -449,19 +462,18 @@ analyzeMiDASData <- function(object,
     stringMatches(format, choice = c("html", "latex"))
   )
 
-  if (is.null(variables)) {
-    mask <- variables_labels == analysis_type
-    assert_that(any(mask, na.rm = TRUE),
-                msg = "Argument variable = NULL can be used only with labeled variables, make sure to use prepareMiDASData function for data preparation."
-    )
+  mask <- variables_labels == analysis_type
+  assert_that(any(mask, na.rm = TRUE) || ! is.null(variables),
+              msg = "Argument variables = NULL can be used only with labeled variables, make sure to use prepareMiDASData function for data preparation."
+  )
+  mask <-  mask | object_variables %in% variables
 
-    mask <- (! object_variables %in% all.vars(object_formula)) & mask
-    variables <- object_variables[mask]
-    variables_labels <- variables_labels[mask]
-    assert_that(length(variables) != 0,
-                msg = "No new variables found in object data."
-    )
-  }
+  mask <- (! object_variables %in% all.vars(object_formula)) & mask
+  variables <- object_variables[mask]
+  variables_labels <- variables_labels[mask]
+  assert_that(length(variables) != 0,
+              msg = "No new variables found in object data."
+  )
 
   # guess if model used is logistic type
   if (is.null(logistic)) {
@@ -504,13 +516,19 @@ analyzeMiDASData <- function(object,
   }
 
   if (conditional) {
-    results <- analyzeConditionalAssociations(object,
-                                              variables = variables,
-                                              correction = correction,
-                                              th = th,
-                                              rss_th = rss_th,
-                                              exponentiate = logistic
+    results_iter <- analyzeConditionalAssociations(object,
+                                                   variables = variables,
+                                                   correction = correction,
+                                                   th = th,
+                                                   keep = TRUE,
+                                                   rss_th = rss_th,
+                                                   exponentiate = logistic
     )
+    results <- lapply(results_iter, function(res) {
+      i_min <- which.min(res[["p.value"]])
+      res[i_min, ]
+    })
+    results <- bind_rows(results)
   } else {
     results <- analyzeAssociations(object,
                                    variables = variables,
@@ -522,6 +540,13 @@ analyzeMiDASData <- function(object,
   # Add frequency information to results table if there were any count variables
   if (length(cts_vars)) {
     results <- left_join(x = results, y = variables_freq, by = "term")
+    if (conditional) {
+      results_iter <- lapply(
+        X = results_iter,
+        FUN = left_join,
+        y = variables_freq,
+        by = "term")
+    }
   }
 
   pheno_var <- all.vars(object_formula)[1]
@@ -531,21 +556,29 @@ analyzeMiDASData <- function(object,
   }
 
   if (binary_phenotype & length(cts_vars)) {
-    results <- object_data %>%
+    pos_freq <- object_data %>%
       filter(.data[[!! pheno_var]] == 1) %>%
       select("ID", !! cts_vars) %>%
       getCountsFrequencies() %>%
       rename(Npositive = .data$Counts,
-             Npositive.frequency = .data$Freq) %>%
-      left_join(x = results, by = "term")
+             Npositive.frequency = .data$Freq
+      )
+    results <- left_join(x = results, y = pos_freq, by = "term")
+    if (conditional) {
+      results_iter <- lapply(results_iter, left_join, y = pos_freq, by = "term")
+    }
 
-    results <- object_data %>%
+    neg_freq <- object_data %>%
       filter(.data[[!! pheno_var]] != 1) %>%
       select("ID", !! cts_vars) %>%
       getCountsFrequencies() %>%
       rename(Nnegative = .data$Counts,
-             Nnegative.frequency = .data$Freq) %>%
-      left_join(x = results, by = "term")
+             Nnegative.frequency = .data$Freq
+      )
+    results <- left_join(x = results,   y = neg_freq, by = "term")
+    if (conditional && keep) {
+      results_iter <- lapply(results_iter, left_join, y = neg_freq, by = "term")
+    }
   }
 
   if (kable_output) {
@@ -576,8 +609,20 @@ analyzeMiDASData <- function(object,
                        "term"
   )
 
-  results %<>%
-    rename(!! term_name := .data$term, !! estimate_name := .data$estimate)
+  if (conditional && keep) {
+    results <- lapply(
+      X = results_iter,
+      FUN = function(x) {
+        rename(.data = x,
+               !! term_name := .data$term,
+               !! estimate_name := .data$estimate
+        )
+      }
+    )
+  } else {
+    results %<>%
+     rename(!! term_name := .data$term, !! estimate_name := .data$estimate)
+  }
 
   return(results)
 }

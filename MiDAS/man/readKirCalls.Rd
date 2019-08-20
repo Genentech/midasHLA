@@ -6,7 +6,7 @@
 \usage{
 readKirCalls(file, hap_dict = system.file("extdata",
   "Match_KIR_haplotype_genes.tsv", package = "MiDAS"), counts = TRUE,
-  binary = TRUE)
+  binary = TRUE, na.strings = c("", "NA"))
 }
 \arguments{
 \item{file}{Path to input file.}
@@ -25,6 +25,13 @@ to gene counts.}
 \code{hap_dict} have to be a \code{tsv} file with first column holding KIR
 haplotypes and gene counts in others. File should have header with first
 column unnamed it is being used as row names.}
+
+\item{na.strings}{a character vector of strings which are to be
+    interpreted as \code{\link{NA}} values.  Blank fields are also
+    considered to be missing values in logical, integer, numeric and
+    complex fields.  Note that the test happens \emph{after} 
+    white space is stripped from the input, so \code{na.strings} 
+    values may need their own white space stripped in advance.}
 }
 \value{
 Data frame containing KIR haplotypes calls or corresponding gene

@@ -13,6 +13,7 @@
 #' \url{http://hla.alleles.org/nomenclature/naming.html}.
 #'
 #' @inheritParams reduceAlleleResolution
+#' @inheritParams utils::read.table
 #' @param file Path to input file.
 #'
 #' @return Data frame containing HLA allele calls.
@@ -29,14 +30,17 @@
 #' @importFrom utils read.table
 #' @export
 readHlaCalls <- function(file,
-                         resolution = 4) {
+                         resolution = 4,
+                         na.strings = "NA") {
   assert_that(is.readable(file),
-              is.count(resolution)
+              is.count(resolution),
+              is.character(na.strings)
   )
   hla_calls <- read.table(file,
                           header = TRUE,
                           sep = "\t",
-                          stringsAsFactors = FALSE
+                          stringsAsFactors = FALSE,
+                          na.strings = na.strings
   )
   assert_that(checkHlaCallsFormat(hla_calls))
 
@@ -239,6 +243,7 @@ readHlaAlignments <- function(file,
 #' corresponding KIR haplotypes.
 #'
 #' @inheritParams kirHaplotypeToCounts
+#' @inheritParams utils::read.table
 #' @param file Path to input file.
 #' @param counts Logical flag indicating if KIR haplotypes should be converted
 #'   to gene counts.
@@ -257,19 +262,21 @@ readHlaAlignments <- function(file,
 readKirCalls <- function(file,
                          hap_dict = system.file("extdata", "Match_KIR_haplotype_genes.tsv", package = "MiDAS"),
                          counts = TRUE,
-                         binary = TRUE) {
+                         binary = TRUE,
+                         na.strings = c("", "NA")) {
   assert_that(
     is.readable(file),
     is.readable(hap_dict),
     is.flag(counts),
-    is.flag(binary)
+    is.flag(binary),
+    is.character(na.strings)
   )
 
   kir_calls <- read.table(file = file,
                           header = TRUE,
                           sep = "\t",
-                          na.strings = c("", "NA"),
-                          stringsAsFactors = FALSE
+                          stringsAsFactors = FALSE,
+                          na.strings = na.strings
   )
   assert_that(
     see_if(ncol(kir_calls) == 2,

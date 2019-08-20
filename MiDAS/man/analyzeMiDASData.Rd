@@ -6,8 +6,8 @@
 \usage{
 analyzeMiDASData(object, analysis_type = c("hla_allele", "aa_level",
   "expression_level", "allele_g_group", "allele_supertype", "allele_group",
-  "kir_genes", "hla_kir_interactions"), conditional = FALSE,
-  variables = NULL, lower_frequency_cutoff = NULL,
+  "kir_genes", "hla_kir_interactions"), variables = NULL,
+  conditional = FALSE, keep = FALSE, lower_frequency_cutoff = NULL,
   upper_frequency_cutoff = NULL, pvalue_cutoff = NULL,
   correction = "BH", logistic = NULL, binary_phenotype = NULL,
   th = 0.05, rss_th = 1e-07, kable_output = TRUE,
@@ -23,13 +23,16 @@ at this point it is only used for results formatting. Valid values are
 \code{"allele_g_group"}, \code{"allele_supertype"}, \code{"allele_group"},
 \code{"kir_genes"}, \code{"hla_kir_interactions"}.}
 
+\item{variables}{Character specifying additional variables to use in
+association tests except those choosen by \code{analysis_type}.}
+
 \item{conditional}{Logical indicating if the analysis should be performed
 using stepwise conditional tests or not. See
 \link{analyzeConditionalAssociations} for more details.}
 
-\item{variables}{Character specifying variables to use in association tests
-or \code{NULL}. If \code{NULL} variables are chosen based on
-\code{analysis_type}.}
+\item{keep}{logical flag indicating if the output should be a list of results
+resulting from each selection step. Default is to return only the final
+result.}
 
 \item{lower_frequency_cutoff}{Number specifying lower threshold for inclusion
 of a variable. If it's a number between 0 and 1 variables with frequency
