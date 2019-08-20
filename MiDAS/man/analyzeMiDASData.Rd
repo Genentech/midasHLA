@@ -23,9 +23,8 @@ at this point it is only used for results formatting. Valid values are
 \code{"allele_g_group"}, \code{"allele_supertype"}, \code{"allele_group"},
 \code{"kir_genes"}, \code{"hla_kir_interactions"}.}
 
-\item{variables}{Character specifying variables to use in association tests
-or \code{NULL}. If \code{NULL} variables are chosen based on
-\code{analysis_type}.}
+\item{variables}{Character specifying additional variables to use in
+association tests except those choosen by \code{analysis_type}.}
 
 \item{conditional}{Logical indicating if the analysis should be performed
 using stepwise conditional tests or not. See
