@@ -9,9 +9,9 @@ analyzeMiDASData(object, analysis_type = c("hla_allele", "aa_level",
   "kir_genes", "hla_kir_interactions"), variables = NULL,
   conditional = FALSE, keep = FALSE, lower_frequency_cutoff = NULL,
   upper_frequency_cutoff = NULL, pvalue_cutoff = NULL,
-  correction = "BH", logistic = NULL, binary_phenotype = NULL,
-  th = 0.05, rss_th = 1e-07, kable_output = TRUE,
-  format = getOption("knitr.table.format"))
+  correction = "bonferroni", logistic = NULL,
+  binary_phenotype = NULL, th = 0.05, rss_th = 1e-07,
+  kable_output = TRUE, format = getOption("knitr.table.format"))
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many

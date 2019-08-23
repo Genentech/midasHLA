@@ -99,7 +99,7 @@ test_that("Stepwise conditional alleles subset selection", {
            p.value = c(0.019, 0.042),
            conf.low = c(0.603, 0.075),
            conf.high = c(6.838, 3.838),
-           p.adjusted = c(0.039, 0.042),
+           p.adjusted = c(0.039, 0.083),
            covariates = c("", "")
     ),
     tibble(term = "DRB1*11:01",
