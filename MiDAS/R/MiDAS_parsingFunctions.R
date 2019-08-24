@@ -31,7 +31,7 @@
 #' @export
 readHlaCalls <- function(file,
                          resolution = 4,
-                         na.strings = "NA") {
+                         na.strings = c("Not typed", "-", "NA")) {
   assert_that(is.readable(file),
               is.count(resolution),
               is.character(na.strings)
