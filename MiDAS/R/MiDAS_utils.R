@@ -838,3 +838,30 @@ checkKirCountsFormat <- function(kir_counts,
 
   return(TRUE)
 }
+
+#' Check if object is count or NULL
+#'
+#' \code{isCountOrNULL} checks if object is a count (a single positive integer)
+#' or NULL.
+#'
+#' @param x object to test.
+#'
+#' @return Logical indicating if object is count or NULL
+#'
+#' @importFrom assertthat is.count
+#'
+isCountOrNULL <- function(x) {
+  test <- is.count(x) | is.null(x)
+
+  return(test)
+}
+
+#' Error message for isCountOrNULL
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(isCountOrNULL) <- function(call, env) {
+  paste0(deparse(call$x),
+         " is not a count (a single positive integer) or NULL."
+  )
+}
