@@ -9,9 +9,9 @@ analyzeMiDASData(object, analysis_type = c("hla_allele", "aa_level",
   "kir_genes", "hla_kir_interactions"), variables = NULL,
   conditional = FALSE, keep = FALSE, lower_frequency_cutoff = NULL,
   upper_frequency_cutoff = NULL, pvalue_cutoff = NULL,
-  correction = "BH", logistic = NULL, binary_phenotype = NULL,
-  th = 0.05, rss_th = 1e-07, kable_output = TRUE,
-  format = getOption("knitr.table.format"))
+  correction = "BH", n_correction = NULL, logistic = NULL,
+  binary_phenotype = NULL, th = 0.05, rss_th = 1e-07,
+  kable_output = TRUE, format = getOption("knitr.table.format"))
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many
@@ -52,6 +52,11 @@ included in output. If \code{NULL} cutoff of \code{0.05} on
 
 \item{correction}{String specifying multiple testing correction method. See
 details for further information.}
+
+\item{n_correction}{Integer specifying number of comparisons to consider
+during multiple testing correction calculations, must be at least equql to
+number of comparisons being made; only set this (to non-default) when you
+know what you are doing!}
 
 \item{logistic}{Logical indicating if statistical model used is logistic (eg.
 \code{coxph}). If \code{NULL} function will try to figure this out. This is
