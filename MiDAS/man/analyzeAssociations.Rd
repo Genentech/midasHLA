@@ -4,7 +4,7 @@
 \alias{analyzeAssociations}
 \title{Association analysis}
 \usage{
-analyzeAssociations(object, variables, correction = "BH",
+analyzeAssociations(object, variables, correction = "bonferroni",
   n_correction = NULL, exponentiate = FALSE)
 }
 \arguments{

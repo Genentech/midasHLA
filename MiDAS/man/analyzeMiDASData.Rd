@@ -9,7 +9,7 @@ analyzeMiDASData(object, analysis_type = c("hla_allele", "aa_level",
   "kir_genes", "hla_kir_interactions"), variables = NULL,
   conditional = FALSE, keep = FALSE, lower_frequency_cutoff = NULL,
   upper_frequency_cutoff = NULL, pvalue_cutoff = NULL,
-  correction = "BH", n_correction = NULL, logistic = NULL,
+  correction = "bonferroni", n_correction = NULL, logistic = NULL,
   binary_phenotype = NULL, th = 0.05, rss_th = 1e-07,
   kable_output = TRUE, format = getOption("knitr.table.format"))
 }

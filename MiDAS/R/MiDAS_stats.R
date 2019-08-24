@@ -54,7 +54,7 @@
 #' @export
 analyzeAssociations <- function(object,
                                 variables,
-                                correction = "BH",
+                                correction = "bonferroni",
                                 n_correction = NULL,
                                 exponentiate = FALSE) {
   assert_that(
@@ -182,7 +182,7 @@ analyzeAssociations <- function(object,
 #' @export
 analyzeConditionalAssociations <- function(object,
                                            variables,
-                                           correction = "BH",
+                                           correction = "bonferroni",
                                            n_correction = NULL,
                                            th,
                                            keep = FALSE,
@@ -480,7 +480,7 @@ analyzeMiDASData <- function(object,
                              lower_frequency_cutoff = NULL,
                              upper_frequency_cutoff = NULL,
                              pvalue_cutoff = NULL,
-                             correction = "BH",
+                             correction = "bonferroni",
                              n_correction = NULL,
                              logistic = NULL,
                              binary_phenotype = NULL,
