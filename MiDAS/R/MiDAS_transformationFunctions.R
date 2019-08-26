@@ -951,6 +951,7 @@ formatAssociationsResults <- function(results,
 #' @importFrom dplyr left_join
 #' @importFrom magrittr %>%
 #' @importFrom rlang warn
+#' @importFrom stringi stri_detect_regex
 #'
 #' @export
 getHlaKirInteractions <- function(hla_calls,
@@ -1008,8 +1009,27 @@ getHlaKirInteractions <- function(hla_calls,
     stringsAsFactors = FALSE
   )
 
-  posible_interactions <- interactions_dict$HLA %in% vars &
-    interactions_dict$KIR %in% vars
+  posible_interactions <- vapply(
+    X = interactions_dict$HLA,
+    FUN = function(pattern) {
+      any(
+        stri_detect_regex(str = vars, pattern = pattern, max_count = 1),
+        na.rm = TRUE
+      )
+    },
+    FUN.VALUE = logical(1)
+  ) &
+    vapply(
+      X = interactions_dict$KIR,
+      FUN = function(pattern) {
+        any(
+          stri_detect_regex(str = vars, pattern = pattern, max_count = 1),
+          na.rm = TRUE
+        )
+      },
+      FUN.VALUE = logical(1)
+    )
+
   interactions_dict <- interactions_dict[posible_interactions, ]
 
   # assert that interactions_dict is not empty
@@ -1018,18 +1038,20 @@ getHlaKirInteractions <- function(hla_calls,
     X = interactions_dict[, c("HLA", "KIR")],
     MARGIN = 1,
     FUN = function(row) {
-      x <- interaction_vars[, row[[1]]] + interaction_vars[, row[[2]]]
+      hla_col <- grep(pattern = paste0("^", row[[1]], "$"), x = colnames(interaction_vars))
+      hla_counts <- interaction_vars[, hla_col, drop = FALSE]
+      hla_na_i <- apply(hla_counts, 1, function(x) all(is.na(x)))
+      kir_col <- grep(pattern = paste0("^", row[[2]], "$"), x = colnames(interaction_vars))
+      kir_counts <- interaction_vars[, kir_col, drop = FALSE]
+      kir_na_i <- apply(kir_counts, 1, function(x) all(is.na(x)))
+      x <- rowSums(hla_counts, na.rm = TRUE) + rowSums(kir_counts, na.rm = TRUE)
+      x[hla_na_i | kir_na_i] <- NA
       x <- ifelse(x == 1, 0, x)
-      x <- ifelse(x == 2, 1, x) # it is assumed that kir_calls are in dominant mode...
+      x <- ifelse(x >= 2, 1, x) # it is assumed that kir_calls are in dominant mode..., >= is used here to handle more complex interactions like KIR3DL1_Bw4 + KIR3DL1_A*23 + KIR3DL1_A*24 + KIR3DL1_A*32
     }
   )
-  colnames(interactions) <- paste(
-    interactions_dict$HLA,
-    interactions_dict$KIR,
-    interactions_dict$Affinity,
-    sep = "_"
-  ) %>%
-    gsub(pattern = "_$", replacement = "")
+  colnames(interactions) <- interactions_dict$Name
+
   interactions <- cbind(hla_calls[, 1, drop = FALSE], interactions)
 
   return(interactions)
