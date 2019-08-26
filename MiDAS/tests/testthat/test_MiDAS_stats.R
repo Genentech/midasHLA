@@ -39,6 +39,11 @@ test_that("HLA allele associations are analyzed properly", {
   )
 
   expect_error(
+    analyzeAssociations(object, variables = "A*01:01", n_correction = 1.5),
+    "n_correction is not a count \\(a single positive integer\\) or NULL."
+  )
+
+  expect_error(
     analyzeAssociations(object, variables = "A*01:01", correction = 1),
     "correction is not a string \\(a length one character vector\\)."
   )
@@ -46,6 +51,15 @@ test_that("HLA allele associations are analyzed properly", {
   expect_error(
     analyzeAssociations(object, variables = "A*01:01", exponentiate = 1),
     "exponentiate is not a flag \\(a length one logical vector\\)."
+  )
+
+  expect_error(
+    analyzeAssociations(
+      object,
+      variables = c("A*01:01", "A*02:01"),
+      n_correction = 1
+    ),
+    "n_correction must be at least 2."
   )
 })
 
@@ -131,6 +145,11 @@ test_that("Stepwise conditional alleles subset selection", {
   )
 
   expect_error(
+    analyzeConditionalAssociations(object, variables =  "A*01:01", n_correction = "foo"),
+    "n_correction is not a count \\(a single positive integer\\) or NULL."
+  )
+
+  expect_error(
     analyzeConditionalAssociations(object, variables =  "A*01:01", th = "bar"),
     "th is not a number \\(a length one numeric vector\\)."
   )
@@ -153,6 +172,16 @@ test_that("Stepwise conditional alleles subset selection", {
       exponentiate = "yes"
     ),
     "exponentiate is not a flag \\(a length one logical vector\\)."
+  )
+
+  expect_error(
+    analyzeConditionalAssociations(
+      object,
+      variables =  c("B*14:02", "DRB1*11:01"),
+      th = 1,
+      n_correction = 1
+    ),
+    "n_correction must be at least 2."
   )
 })
 
@@ -636,6 +665,10 @@ test_that("MiDAS associations are analyzed properly", {
 
   expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", correction = NA),
                "correction is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", n_correction = "foo"),
+               "n_correction is not a count \\(a single positive integer\\) or NULL."
   )
 
   expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", logistic = "NA"),
