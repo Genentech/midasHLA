@@ -720,7 +720,7 @@ test_that("MiDAS data is prepared properly", {
   midas_expression_levels_test <- Reduce(
     f = function(...) dplyr::left_join(..., by = "ID"),
     x = lapply(expression_dicts, function(x) {
-      expr <- hlaToVariable(hla_calls = hla_calls, dictionary = x)
+      expr <- hlaToVariable(hla_calls = hla_calls, dictionary = x, na.value = NA)
       expr$sum <- rowSums(expr[, -1, drop = FALSE])
       gene <- gsub("_1", "", colnames(expr)[2])
       expr <- expr[, c("ID", "sum")]
@@ -743,7 +743,11 @@ test_that("MiDAS data is prepared properly", {
   midas_allele_g_group_test <-
     hlaToVariable(hla_calls, dictionary = "4digit_allele_Ggroup")
   midas_allele_g_group_test <-
-    hlaCallsToCounts(midas_allele_g_group_test, inheritance_model = "additive")
+    hlaCallsToCounts(
+      midas_allele_g_group_test,
+      inheritance_model = "additive",
+      check_hla_format = FALSE
+    )
   Hmisc::label(midas_allele_g_group_test[-1], self = FALSE) <-
     rep("allele_g_group", ncol(midas_allele_g_group_test) - 1)
   midas_allele_g_group_test <- rleft_join(midas_allele_g_group_test, pheno, covar)
@@ -777,7 +781,7 @@ test_that("MiDAS data is prepared properly", {
                                               covar,
                                               analysis_type = "allele_group",
                                               inheritance_model = "additive")
-  allele_groups_lib <- c("4digit_B-allele_Bw", "4digit_C-allele_C1-2")
+  allele_groups_lib <- c("4digit_B-allele_Bw", "alleles_Bw4+A23+A24+A32", "4digit_C-allele_C1-2")
   test_midas_allele_group <- Reduce(
     f = function(...) left_join(..., by = "ID"),
     x = lapply(allele_groups_lib, hlaToVariable, hla_calls = hla_calls)

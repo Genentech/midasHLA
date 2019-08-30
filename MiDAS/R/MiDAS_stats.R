@@ -818,7 +818,7 @@ prepareMiDASData <- function(hla_calls,
     lib <- grep("expression", lib, value = TRUE)
     expression_level <- Reduce(
       f = function(...) left_join(..., by = "ID"),
-      x = lapply(lib, hlaToVariable, hla_calls = hla_calls)
+      x = lapply(lib, hlaToVariable, hla_calls = hla_calls, na.value = NA)
     )
 
     assert_that(
@@ -842,7 +842,10 @@ prepareMiDASData <- function(hla_calls,
 
   if ("allele_g_group" %in% analysis_type) {
     lib <- "4digit_allele_Ggroup"
-    allele_g_group <- hlaToVariable(hla_calls = hla_calls, dictionary = lib)
+    allele_g_group <- hlaToVariable(hla_calls = hla_calls,
+                                    dictionary = lib,
+                                    na.value = 0
+    )
 
     assert_that(
       ncol(allele_g_group) > 1,
@@ -851,7 +854,8 @@ prepareMiDASData <- function(hla_calls,
 
     allele_g_group <- hlaCallsToCounts(
       hla_calls = allele_g_group,
-      inheritance_model = inheritance_model
+      inheritance_model = inheritance_model,
+      check_hla_format = FALSE
     )
 
     label(allele_g_group[-1], self = FALSE) <- rep(
@@ -863,8 +867,10 @@ prepareMiDASData <- function(hla_calls,
 
   if ("allele_supertype" %in% analysis_type) {
     lib <- "4digit_supertype"
-    allele_supertype <- hlaToVariable(hla_calls = hla_calls, dictionary = lib)
-
+    allele_supertype <- hlaToVariable(hla_calls = hla_calls,
+                                      dictionary = lib,
+                                      na.value = 0
+    )
 
     assert_that(
       ncol(allele_supertype) > 1,
@@ -886,10 +892,14 @@ prepareMiDASData <- function(hla_calls,
   }
 
   if ("allele_group" %in% analysis_type) {
-    lib <- c("4digit_B-allele_Bw", "4digit_C-allele_C1-2")
+    lib <- c(
+      "4digit_B-allele_Bw",
+      "alleles_Bw4+A23+A24+A32",
+      "4digit_C-allele_C1-2"
+    )
     allele_group <- Reduce(
       f = function(...) left_join(..., by = "ID"),
-      x = lapply(lib, hlaToVariable, hla_calls = hla_calls)
+      x = lapply(lib, hlaToVariable, hla_calls = hla_calls, na.value = 0)
     )
 
     assert_that(
