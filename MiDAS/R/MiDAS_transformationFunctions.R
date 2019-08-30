@@ -213,8 +213,8 @@ hlaToAAVariation <- function(hla_calls,
 #' @param reduce logical indicating if function should try to reduce alleles
 #'   resolution when no matching is found. See details for more details.
 #' @param na.value Vector of length one speciyfing value for alleles with
-#'   no values in dictionary. Deafult behaviour is to mark such instances with
-#'  \code{0}, however in some cases \code{NA} might be more aprioprate.
+#'   no values in dictionary. Default behaviour is to mark such instances with
+#'  \code{0}, however in some cases \code{NA} might be more appropriate.
 #' @param nacols.rm logical indicating if result columns that contain only
 #'   \code{NA} should be removed.
 #'

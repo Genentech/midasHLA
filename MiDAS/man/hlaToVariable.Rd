@@ -4,7 +4,8 @@
 \alias{hlaToVariable}
 \title{Converts hla calls data frame according to match table}
 \usage{
-hlaToVariable(hla_calls, dictionary, reduce = TRUE, nacols.rm = TRUE)
+hlaToVariable(hla_calls, dictionary, reduce = TRUE, na.value = 0,
+  nacols.rm = TRUE)
 }
 \arguments{
 \item{hla_calls}{Data frame containing HLA allele calls, as return by
@@ -16,6 +17,10 @@ explanations.}
 
 \item{reduce}{logical indicating if function should try to reduce alleles
 resolution when no matching is found. See details for more details.}
+
+\item{na.value}{Vector of length one speciyfing value for alleles with
+ no values in dictionary. Default behaviour is to mark such instances with
+\code{0}, however in some cases \code{NA} might be more appropriate.}
 
 \item{nacols.rm}{logical indicating if result columns that contain only
 \code{NA} should be removed.}
