@@ -5,7 +5,7 @@
 \title{Association analysis}
 \usage{
 analyzeAssociations(object, variables, correction = "bonferroni",
-  exponentiate = FALSE)
+  n_correction = NULL, exponentiate = FALSE)
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many
@@ -15,6 +15,11 @@ others.}
 
 \item{correction}{String specifying multiple testing correction method. See
 details for further information.}
+
+\item{n_correction}{Integer specifying number of comparisons to consider
+during multiple testing correction calculations, must be at least equql to
+number of comparisons being made; only set this (to non-default) when you
+know what you are doing!}
 
 \item{exponentiate}{Logical indicating whether or not to exponentiate the
   coefficient estimates. Internally this is passed to \link[broom]{tidy}.
