@@ -865,3 +865,64 @@ assertthat::on_failure(isCountOrNULL) <- function(call, env) {
          " is not a count (a single positive integer) or NULL."
   )
 }
+
+#'
+translateVector <- function(x,
+                            dictionary = "inst/extdata/test_Interactions_kir_haplotypes.tsv") {
+  dictionary <- read.table(file = dictionary,
+                           header = TRUE,
+                           sep = "\t",
+                           quote = "",
+                           stringsAsFactors = FALSE
+                           #strip.white = FALSE #?
+
+  )
+
+  type <- colnames(dictionary)[2]
+  var <- switch(
+    EXPR = type,
+    "Fixed" = {
+      pos <- match(
+        x = x,
+        table = dictionary[, "Fixed", drop = TRUE],
+        nomatch = 0
+      )
+      pos[pos == 0] <- NA
+      dictionary[pos, "Name", drop = TRUE]
+    },
+    "Expression" = {
+      expressions <- dictionary[, "Expression", drop = TRUE]
+      expressions <- gsub(
+        pattern = "\"([a-zA-z0-9*:]*)\"",
+        replacement = "any(stringi::stri_detect_fixed(str = x, pattern = \"\\1\"), na.rm = TRUE)",
+        x = expressions
+      )
+      expressions <- rlang::parse_exprs(expressions)
+      mask <- vapply(
+        X = expressions,
+        FUN = eval,
+        envir = list(x = x),
+        FUN.VALUE = logical(length = 1)
+      )
+      dictionary[mask, "Name", drop = TRUE]
+    }
+  )
+
+  return(var)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

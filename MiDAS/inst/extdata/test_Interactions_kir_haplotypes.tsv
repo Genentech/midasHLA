@@ -1,0 +1,7 @@
+Name	Expression
+cenBB	"KIR2DL2" && ! "KIR2DL3"
+cenAA	"KIR2DL3" && ! "KIR2DL2" && ! "KIR2D2S"
+cenAB	! ("KIR2DL2" && ! "KIR2DL3") && ! ("KIR2DL3" && ! "KIR2DL2" && ! "KIR2D2S")
+telAA	! "KIR2DS1" && ! "KIR3DS1"
+telBB	"KIR2DS1" && ! "KIR2DS4"
+telAB	! (! "KIR2DS1" && ! "KIR3DS1") && ! ("KIR2DS1" && ! "KIR2DS4")
