@@ -343,3 +343,13 @@ test_that("KIR counts have proper format", {
     "Columns FOO in kir_counts should be named ID"
   )
 })
+
+test_that("is count or null", {
+  expect_equal(isCountOrNULL(1), TRUE)
+  expect_equal(isCountOrNULL(NULL), TRUE)
+
+  expect_error(
+    assertthat::assert_that(isCountOrNULL(1.5)),
+    "1.5 is not a count \\(a single positive integer\\) or NULL."
+  )
+})

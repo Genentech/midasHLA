@@ -869,47 +869,29 @@ checkKirCountsFormat <- function(kir_counts,
   return(TRUE)
 }
 
-#' Tidy coxme
-#' Temporarly this function is shipped with MiDAS, source https://github.com/junkka/ehahelper
+#' Check if object is count or NULL
 #'
-#' Tidy method for coxme objects
+#' \code{isCountOrNULL} checks if object is a count (a single positive integer)
+#' or NULL.
 #'
-#' @param x coxme object
-#' @param exponentiate whether to report the estimate and
-#' confidence intervals on an exponential scale
-#' @param conf.int confidence level to be used for CI
-#' @param ... extra arguments, not used
-#' @export
-#' @import coxme
-#' @import broom
-#' @examples
-#' library(broom)
-#' library(coxme)
-#' fit <- coxme(Surv(y, uncens) ~ trt + (1|center), eortc)
-#' tidy(fit)
+#' @param x object to test.
 #'
+#' @return Logical indicating if object is count or NULL
+#'
+#' @importFrom assertthat is.count
+#'
+isCountOrNULL <- function(x) {
+  test <- is.count(x) | is.null(x)
 
-tidy.coxme <- function(x, exponentiate = FALSE, conf.int = 0.95, ...){
-  beta <- x$coefficients
-  nvar <- length(beta)
-  nfrail <- nrow(x$var) - nvar
-  nn <- c("estimate", "exp()", "std.error", "statistic", "p.value")
-  se <- sqrt(diag(as.matrix(x$var))[nfrail + 1:nvar])
-  z <- qnorm((1 + conf.int)/2, 0, 1)
-  ret <- data.frame(
-    "term" = names(beta),
-    "estimate" = beta,
-    "std.error" = se,
-    "statistic" = beta/se,
-    "p.value" = signif(1 - pchisq((beta/se)^2, 1), 2),
-    "conf.low" =  beta - z * se,
-    "conf.high" =  beta + z * se
+  return(test)
+}
+
+#' Error message for isCountOrNULL
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(isCountOrNULL) <- function(call, env) {
+  paste0(deparse(call$x),
+         " is not a count (a single positive integer) or NULL."
   )
-  if (exponentiate) {
-    ret$estimate <- exp(ret$estimate)
-    ret$conf.low <- exp(ret$conf.low)
-    ret$conf.high <- exp(ret$conf.high)
-  }
-  rownames(ret) <- c(1:nrow(ret))
-  ret
 }

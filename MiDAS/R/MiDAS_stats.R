@@ -7,6 +7,10 @@
 #' @param variables Character specifying variables to use in association tests.
 #' @param correction String specifying multiple testing correction method. See
 #'   details for further information.
+#' @param n_correction Integer specifying number of comparisons to consider
+#'   during multiple testing correction calculations, must be at least equql to
+#'   number of comparisons being made; only set this (to non-default) when you
+#'   know what you are doing!
 #' @param exponentiate Logical indicating whether or not to exponentiate the
 #'   coefficient estimates. Internally this is passed to \link[broom]{tidy}.
 #'   This is typical for logistic and multinomial regressions, but a bad idea if
@@ -51,6 +55,7 @@
 analyzeAssociations <- function(object,
                                 variables,
                                 correction = "bonferroni",
+                                n_correction = NULL,
                                 exponentiate = FALSE) {
   assert_that(
     checkStatisticalModel(object)
@@ -69,6 +74,7 @@ analyzeAssociations <- function(object,
       )
     ),
     is.string(correction),
+    isCountOrNULL(n_correction),
     is.flag(exponentiate)
   )
 
@@ -99,7 +105,16 @@ analyzeAssociations <- function(object,
   results$term <- gsub("`", "", results$term)
   results <- results[results$term %in% variables, ]
 
-  results$p.adjusted <- p.adjust(results$p.value, correction)
+  nc <- ifelse(is.null(n_correction), length(results$p.value), n_correction)
+  assert_that(
+    nc >= length(results$p.value),
+    msg = sprintf("n_correction must be at least %i.", length(results$p.value))
+  )
+  results$p.adjusted <- p.adjust(
+    p = results$p.value,
+    method = correction,
+    n = nc
+  )
 
 #  This covariates were added for consistiency with conditional analyze, now however that we are filtering covariates there it doesn't make much sense to keep those?
 #  covariates <- formula(object)[[3]]
@@ -168,6 +183,7 @@ analyzeAssociations <- function(object,
 analyzeConditionalAssociations <- function(object,
                                            variables,
                                            correction = "bonferroni",
+                                           n_correction = NULL,
                                            th,
                                            keep = FALSE,
                                            rss_th = 1e-07,
@@ -190,6 +206,7 @@ analyzeConditionalAssociations <- function(object,
       )
     ),
     is.string(correction),
+    isCountOrNULL(n_correction),
     is.number(th),
     is.flag(keep),
     is.number(rss_th),
@@ -230,7 +247,18 @@ analyzeConditionalAssociations <- function(object,
     results <- bind_rows(results)
 
     results <- results[results[["term"]] %in% backquote(new_variables), ]
-    results$p.adjusted <- p.adjust(results[["p.value"]], correction)
+
+    nc <- ifelse(is.null(n_correction), length(results$p.value), n_correction)
+    assert_that(
+      nc >= length(results$p.value),
+      msg = sprintf("n_correction must be at least %i.", length(results$p.value))
+    )
+    results$p.adjusted <- p.adjust(
+      p = results$p.value,
+      method = correction,
+      n = nc
+    )
+
     results <- results[! is.infinite(results[["p.value"]]), ]
 
     mask <- ! prev_variables %in% first_variables
@@ -453,6 +481,7 @@ analyzeMiDASData <- function(object,
                              upper_frequency_cutoff = NULL,
                              pvalue_cutoff = NULL,
                              correction = "bonferroni",
+                             n_correction = NULL,
                              logistic = NULL,
                              binary_phenotype = NULL,
                              th = 0.05,
@@ -489,6 +518,7 @@ analyzeMiDASData <- function(object,
     isNumberOrNULL(upper_frequency_cutoff),
     isNumberOrNULL(pvalue_cutoff),
     is.string(correction),
+    isCountOrNULL(n_correction),
     isFlagOrNULL(logistic),
     isFlagOrNULL(binary_phenotype),
     is.number(th),
@@ -555,6 +585,7 @@ analyzeMiDASData <- function(object,
     results_iter <- analyzeConditionalAssociations(object,
                                                    variables = variables,
                                                    correction = correction,
+                                                   n_correction = n_correction,
                                                    th = th,
                                                    keep = TRUE,
                                                    rss_th = rss_th,
@@ -569,6 +600,7 @@ analyzeMiDASData <- function(object,
     results <- analyzeAssociations(object,
                                    variables = variables,
                                    correction = correction,
+                                   n_correction = n_correction,
                                    exponentiate = logistic
     )
   }
@@ -1032,7 +1064,8 @@ MiDAS <- function(model,
                   lower_frequency_cutoff = NULL,
                   upper_frequency_cutoff = NULL,
                   pvalue_cutoff = NULL,
-                  correction = "BH",
+                  correction = "bonferroni",
+                  n_correction = NULL,
                   logistic = NULL,
                   binary_phenotype = NULL,
                   th = 0.05,
@@ -1059,6 +1092,7 @@ MiDAS <- function(model,
     isNumberOrNULL(upper_frequency_cutoff),
     isNumberOrNULL(pvalue_cutoff),
     is.string(correction),
+    isCountOrNULL(n_correction),
     isFlagOrNULL(logistic),
     isFlagOrNULL(binary_phenotype),
     is.number(th),

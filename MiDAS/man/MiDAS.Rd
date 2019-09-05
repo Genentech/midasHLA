@@ -11,9 +11,9 @@ MiDAS(model, midas_results = NULL, hla_calls = NULL, ...,
   indels = TRUE, unkchar = FALSE, conditional = FALSE,
   variables = NULL, lower_frequency_cutoff = NULL,
   upper_frequency_cutoff = NULL, pvalue_cutoff = NULL,
-  correction = "BH", logistic = NULL, binary_phenotype = NULL,
-  th = 0.05, rss_th = 1e-07, kable_output = TRUE,
-  format = getOption("knitr.table.format"))
+  correction = "bonferroni", n_correction = NULL, logistic = NULL,
+  binary_phenotype = NULL, th = 0.05, rss_th = 1e-07,
+  kable_output = TRUE, format = getOption("knitr.table.format"))
 }
 \arguments{
 \item{model}{Call specifying statistical model function to use. Should
@@ -54,9 +54,8 @@ should be treated as variability.}
 using stepwise conditional tests or not. See
 \link{analyzeConditionalAssociations} for more details.}
 
-\item{variables}{Character specifying variables to use in association tests
-or \code{NULL}. If \code{NULL} variables are chosen based on
-\code{analysis_type}.}
+\item{variables}{Character specifying additional variables to use in
+association tests except those choosen by \code{analysis_type}.}
 
 \item{lower_frequency_cutoff}{Number specifying lower threshold for inclusion
 of a variable. If it's a number between 0 and 1 variables with frequency
@@ -76,6 +75,11 @@ included in output. If \code{NULL} cutoff of \code{0.05} on
 
 \item{correction}{String specifying multiple testing correction method. See
 details for further information.}
+
+\item{n_correction}{Integer specifying number of comparisons to consider
+during multiple testing correction calculations, must be at least equql to
+number of comparisons being made; only set this (to non-default) when you
+know what you are doing!}
 
 \item{logistic}{Logical indicating if statistical model used is logistic (eg.
 \code{coxph}). If \code{NULL} function will try to figure this out. This is
