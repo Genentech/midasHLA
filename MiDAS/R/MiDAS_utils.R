@@ -684,7 +684,7 @@ assertthat::on_failure(characterMatches) <- function(call, env) {
 #'   in \code{x} are removed during conversion.
 #'
 #' @examples
-#' x <- c("1+3|16+3", "1+1", NA)
+#' x <- c(NA, "1+3|16+3", "1+1", NA)
 #' kirHaplotypeToCounts(x)
 #'
 #' @importFrom assertthat assert_that is.flag is.readable see_if
@@ -700,9 +700,9 @@ kirHaplotypeToCounts <- function(x,
     is.readable(hap_dict),
     is.flag(binary)
   )
-  hap_dict <- read.table(hap_dict)
+  hap_dict <- read.table(hap_dict, stringsAsFactors = FALSE)
 
-  x <- na.omit(x)
+  # x <- na.omit(x)
   x_split <- stri_split_fixed(x, "|")
   x_split_unlist <- unlist(x_split)
 
@@ -710,7 +710,7 @@ kirHaplotypeToCounts <- function(x,
   assert_that(
     all(haps_match <- vapply(
       X = x_split_unlist_haps,
-      FUN = function(x) all(x %in% rownames(hap_dict)),
+      FUN = function(x) all(na.omit(x) %in% rownames(hap_dict)),
       FUN.VALUE = logical(1)
     )),
     msg = sprintf(
@@ -730,10 +730,11 @@ kirHaplotypeToCounts <- function(x,
   counts <- vapply(
     X = x_split,
     FUN = function(hap) {
+      hap <- ifelse(is.na(hap), NA, hap) # class character NA cannot be used for columns indexing
       hap <- counts[, hap, drop = FALSE]
       if (ncol(hap) > 1) {
         assert_that(
-          all(apply(hap, 2, function(col) all(col == hap[, 1]))),
+          all(apply(hap, 2, function(col) all(col == hap[, 1])), na.rm = TRUE),
           msg = sprintf("haplotype %s can not be unambigously converted to counts", hap)
         )
       }
@@ -744,7 +745,7 @@ kirHaplotypeToCounts <- function(x,
   )
   counts <- t(counts)
   counts <- as.data.frame(counts, optional = TRUE, stringsAsFactors = FALSE)
-  counts <- cbind(haplotypes = x, counts)
+  counts <- cbind(haplotypes = x, counts, stringsAsFactors = FALSE)
 
   return(counts)
 }

@@ -282,7 +282,7 @@ test_that("KIR haplotypes are converted to gene counts", {
     as.data.frame(test_kir_hap,
                   optional = TRUE,
                   stringsAsFactors = FALSE)
-  test_kir_hap <- cbind(haplotypes = x, test_kir_hap)
+  test_kir_hap <- cbind(haplotypes = x, test_kir_hap, stringsAsFactors = FALSE)
   rownames(test_kir_hap) <- NULL
 
   expect_equal(kir_hap, test_kir_hap)

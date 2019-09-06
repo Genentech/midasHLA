@@ -31,7 +31,7 @@ Data frame with haplotypes and corresponding gene counts. \code{NA}'s
 of KIR genes counts.
 }
 \examples{
-x <- c("1+3|16+3", "1+1", NA)
+x <- c(NA, "1+3|16+3", "1+1", NA)
 kirHaplotypeToCounts(x)
 
 }

@@ -256,7 +256,8 @@ readHlaAlignments <- function(file,
 #' readKirCalls(file)
 #'
 #' @importFrom assertthat assert_that is.flag is.readable see_if
-#' @importFrom stats na.omit
+#' @importFrom dplyr left_join select
+#' @importFrom stats na.omit setNames
 #'
 #' @export
 readKirCalls <- function(file,
@@ -301,17 +302,20 @@ readKirCalls <- function(file,
       hap_dict = hap_dict,
       binary = binary
     )
-    i <- ncol(kir_counts) + 1
-    kir_counts[, i] <- kir_calls[! is.na(haplotypes), 1, drop = TRUE]
-    kir_calls <- merge(x = kir_calls,
-                       y = kir_counts,
-                       by.x = 1,
-                       by.y = i,
-                       all.x = TRUE,
-                       sort = TRUE
+
+    kir_calls <- left_join(
+      x = kir_calls,
+      y = kir_counts,
+      by = setNames(colnames(kir_counts)[1], colnames(kir_calls)[2]),
+      na_matches = "never"
     )
-    # drop columns holding haplotypes
-    kir_calls <- kir_calls[, -2:-3, drop = FALSE]
+
+    # If there are multiple matches between x and y, all combinations of the matches are returned.
+    kir_calls <- kir_calls[! duplicated(kir_calls[, 1, drop = TRUE]), ]
+    rownames(kir_calls) <- NULL
+
+    # discard haplotype designation from final table
+    kir_calls <- select(kir_calls, - !!colnames(kir_calls)[2])
   }
 
   return(kir_calls)
