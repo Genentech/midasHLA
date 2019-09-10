@@ -212,6 +212,9 @@ hlaToAAVariation <- function(hla_calls,
 #' @inheritParams convertAlleleToVariable
 #' @param reduce logical indicating if function should try to reduce alleles
 #'   resolution when no matching is found. See details for more details.
+#' @param na.value Vector of length one speciyfing value for alleles with
+#'   no values in dictionary. Default behaviour is to mark such instances with
+#'  \code{0}, however in some cases \code{NA} might be more appropriate.
 #' @param nacols.rm logical indicating if result columns that contain only
 #'   \code{NA} should be removed.
 #'
@@ -229,10 +232,12 @@ hlaToAAVariation <- function(hla_calls,
 hlaToVariable <- function(hla_calls,
                           dictionary,
                           reduce = TRUE,
+                          na.value = 0,
                           nacols.rm = TRUE) {
   assert_that(
     checkHlaCallsFormat(hla_calls),
     is.flag(reduce),
+    see_if(length(na.value) == 1, msg = "na.value length must equal 1."),
     is.flag(nacols.rm)
   )
 
@@ -253,7 +258,7 @@ hlaToVariable <- function(hla_calls,
   variable <- as.data.frame(
     lapply(hla_calls[, -1], convertAlleleToVariable, dictionary = dictionary),
     stringsAsFactors = FALSE,
-    row.names = 1:nrow(hla_calls)
+    row.names = NULL
   )
 
   if (reduce) {
@@ -273,8 +278,15 @@ hlaToVariable <- function(hla_calls,
   dict_prefix <- gsub(".txt$", "", gsub("^.*_", "", dictionary))
   colnames(variable) <- paste0(dict_prefix, "_", colnames(variable))
 
+  # set non-original NAs to 0
+  i <- is.na(variable) & ! is.na(hla_calls[, -1, drop = FALSE])
+
+  # get all na columns
+  j <- vapply(variable, function(x) ! all(is.na(x)), logical(length = 1))
+
+  variable[i] <- na.value
   if (nacols.rm) {
-    variable <- Filter(function(x) ! all(is.na(x)), variable)
+    variable <- variable[, j]
   }
 
   variable <- cbind(hla_calls[, 1], variable, stringsAsFactors = FALSE)
@@ -363,6 +375,25 @@ hlaCallsToCounts <- function(hla_calls,
   inheritance_model <- match.arg(inheritance_model)
 
   hla_counts <- hla_calls[, -1, drop = FALSE]
+  i <- do.call(
+    what = "cbind",
+    args = lapply(
+      X = hla_counts,
+      FUN = function(x) {
+        vapply(
+          X = x,
+          FUN = function(x) {
+            x <- suppressWarnings(as.numeric(x))
+            test <- ! is.na(x)
+
+            return(test)
+          },
+          FUN.VALUE = logical(length = 1)
+        )
+      }
+    )
+  )
+  hla_counts[i] <- NA
   hla_counts <- mtabulate(as.data.frame(t(hla_counts)))
   rownames(hla_counts) <- NULL
   hla_counts <- hla_counts[, order(colnames(hla_counts)), drop = FALSE]
@@ -951,6 +982,7 @@ formatAssociationsResults <- function(results,
 #' @importFrom dplyr left_join
 #' @importFrom magrittr %>%
 #' @importFrom rlang warn
+#' @importFrom stringi stri_detect_regex
 #'
 #' @export
 getHlaKirInteractions <- function(hla_calls,
@@ -1008,8 +1040,27 @@ getHlaKirInteractions <- function(hla_calls,
     stringsAsFactors = FALSE
   )
 
-  posible_interactions <- interactions_dict$HLA %in% vars &
-    interactions_dict$KIR %in% vars
+  posible_interactions <- vapply(
+    X = interactions_dict$HLA,
+    FUN = function(pattern) {
+      any(
+        stri_detect_regex(str = vars, pattern = pattern, max_count = 1),
+        na.rm = TRUE
+      )
+    },
+    FUN.VALUE = logical(1)
+  ) &
+    vapply(
+      X = interactions_dict$KIR,
+      FUN = function(pattern) {
+        any(
+          stri_detect_regex(str = vars, pattern = pattern, max_count = 1),
+          na.rm = TRUE
+        )
+      },
+      FUN.VALUE = logical(1)
+    )
+
   interactions_dict <- interactions_dict[posible_interactions, ]
 
   # assert that interactions_dict is not empty
@@ -1018,18 +1069,20 @@ getHlaKirInteractions <- function(hla_calls,
     X = interactions_dict[, c("HLA", "KIR")],
     MARGIN = 1,
     FUN = function(row) {
-      x <- interaction_vars[, row[[1]]] + interaction_vars[, row[[2]]]
+      hla_col <- grep(pattern = paste0("^", row[[1]], "$"), x = colnames(interaction_vars))
+      hla_counts <- interaction_vars[, hla_col, drop = FALSE]
+      hla_na_i <- apply(hla_counts, 1, function(x) all(is.na(x)))
+      kir_col <- grep(pattern = paste0("^", row[[2]], "$"), x = colnames(interaction_vars))
+      kir_counts <- interaction_vars[, kir_col, drop = FALSE]
+      kir_na_i <- apply(kir_counts, 1, function(x) all(is.na(x)))
+      x <- rowSums(hla_counts, na.rm = TRUE) + rowSums(kir_counts, na.rm = TRUE)
+      x[hla_na_i | kir_na_i] <- NA
       x <- ifelse(x == 1, 0, x)
-      x <- ifelse(x == 2, 1, x) # it is assumed that kir_calls are in dominant mode...
+      x <- ifelse(x >= 2, 1, x) # it is assumed that kir_calls are in dominant mode..., >= is used here to handle more complex interactions like KIR3DL1_Bw4 + KIR3DL1_A*23 + KIR3DL1_A*24 + KIR3DL1_A*32
     }
   )
-  colnames(interactions) <- paste(
-    interactions_dict$HLA,
-    interactions_dict$KIR,
-    interactions_dict$Affinity,
-    sep = "_"
-  ) %>%
-    gsub(pattern = "_$", replacement = "")
+  colnames(interactions) <- interactions_dict$Name
+
   interactions <- cbind(hla_calls[, 1, drop = FALSE], interactions)
 
   return(interactions)
