@@ -255,7 +255,7 @@ test_that("amino acids frequencies are calculated properly", {
   )
 })
 
-test_that("hla counts table can be rreverted to hla calls", {
+test_that("hla counts table can be reverted to hla calls", {
   hla_calls <- data.frame(ID = c("PAT1", "PAT2", "PAT3"),
                           A_1 = c("A*02:01", "A*02:01", "A*01:01"),
                           A_2 = c("A*02:01", "A*02:06", "A*24:02"),
@@ -461,5 +461,62 @@ test_that("HLA - KIR interactions are infered correctly", {
   expect_warning(
     getHlaKirInteractions(hla_calls, fake_kir_counts),
     "15 IDs in hla_calls matched IDs in kir_counts"
+  )
+})
+
+test_that("counts to variables conversion", {
+  file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  kir_counts <- readKirCalls(file)[1:2, ]
+  kir_haplotypes <- countsToVariables(kir_counts, "kir_haplotypes")
+  kir_haplotypes_test <- data.frame(
+    ID = c("PAT1", "PAT2"),
+    cenAA = c(0, 1),
+    cenBB = c(0, 0),
+    cenAB = c(1, 0),
+    telAA = c(1, 1),
+    telBB = c(0, 0),
+    telAB = c(0, 0),
+    stringsAsFactors = FALSE
+  )
+  expect_equal(kir_haplotypes, kir_haplotypes_test)
+
+  # works with a dictionary data frame
+  dictionary <- data.frame(
+    Name = c("cenAA", "cenAB", "telAA"),
+    Expression = c(
+      "KIR2DL3 & ! KIR2DL2 & ! KIR2DS2",
+      "! (KIR2DL2 & ! KIR2DL3) & ! (KIR2DL3 & ! KIR2DL2 & ! KIR2DS2)",
+      "! KIR2DS1 & ! KIR3DS1"
+   ),
+   stringsAsFactors = FALSE
+  )
+  kir_haplotypes <- countsToVariables(kir_counts, dictionary)
+  expect_equal(kir_haplotypes,
+               kir_haplotypes_test[, c("ID", "cenAA", "cenAB", "telAA")]
+  )
+
+  expect_error(
+    countsToVariables(iris),
+    "counts can't contain factors"
+  )
+
+  expect_error(
+    countsToVariables(kir_counts, na.value = 1:2),
+    "na.value length must equal 1."
+  )
+
+  expect_error(
+    countsToVariables(kir_counts, nacols.rm = 1),
+    "nacols.rm is not a flag \\(a length one logical vector\\)."
+  )
+
+  expect_error(
+    countsToVariables(kir_counts, dictionary = "foo"),
+    "Path 'foo' does not exist"
+  )
+
+  expect_error(
+    countsToVariables(kir_counts, dictionary = c("foo", "bar")),
+    "dictionary is not a data frame"
   )
 })

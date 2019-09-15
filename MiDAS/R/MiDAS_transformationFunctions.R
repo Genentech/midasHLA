@@ -1087,3 +1087,108 @@ getHlaKirInteractions <- function(hla_calls,
 
   return(interactions)
 }
+
+#' Converts counts data frame according to match table
+#'
+#' \code{countsToVariables} converts counts data frame to variables based on
+#' match table (dictionary).
+#'
+#' @inheritParams hlaToVariable
+#' @param counts Data frame with counts, such as returned by
+#'   \link{hlaCallsToCounts} function. First column should contain samples IDs,
+#'   following columns should contain counts (natural numbers including zero).
+#' @param dictionary Path to the file containing variable matchings or data frame providing
+#'   this information. See details for further explanations.
+#' @param na.value Vector of length one speciyfing value for variables for which no
+#'   matching is found in \code{counts}. Default behaviour is to mark such
+#'   instances with \code{NA}.
+#'
+#' @return Data frame of indicators for new variables, with \code{1} signaling
+#'   presence of variable and \code{0} absence.
+#'
+#' \code{dictionary} file should be a tsv format with header and two columns.
+#' First column should be named \code{"Name"} and hold variable name, second
+#' should be named \code{"Expression"} and hold expression used to identify
+#' variable (eg. ...). Optionally a data frame formatted in the same manner can
+#' be passed instead.
+#'
+#' Dictionaries shipped with package:
+#'
+#' \code{hla_kir_interactions} interactions based on Pende et al., 2019.
+#'
+#' \code{kir_haplotypes} kir haplotypes.
+#'
+#' @examples
+#' file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+#' kir_counts <- readKirCalls(file)
+#' countsToVariables(kir_counts, "kir_haplotypes")
+#'
+#' @importFrom assertthat assert_that is.flag is.string
+#' @importFrom rlang parse_exprs
+countsToVariables <- function(counts,
+                              dictionary,
+                              na.value = NA,
+                              nacols.rm = TRUE) {
+  assert_that(
+    checkKirCountsFormat(counts),
+    see_if(length(na.value) == 1, msg = "na.value length must equal 1."),
+    is.flag(nacols.rm)
+  )
+
+  if (is.string(dictionary)) {
+    pattern <- paste0("counts_", dictionary)
+    dict_path <- listMiDASDictionaries(pattern = pattern, file.names = TRUE)
+    if(length(dict_path) == 0) {
+      dict_path <- dictionary
+    }
+    assert_that(is.readable(dict_path))
+
+    dictionary <- read.table(
+      file = dict_path,
+      header = TRUE,
+      sep = "\t",
+      quote = "",
+      stringsAsFactors = FALSE
+    )
+  }
+
+  assert_that(
+    is.data.frame(dictionary),
+    colnamesMatches(x = dictionary, cols = c("Name", "Expression"))
+  )
+
+  expressions <- dictionary[, "Expression", drop = TRUE]
+  expressions <- parse_exprs(expressions)
+
+  variables <- lapply(
+    X = expressions,
+    FUN = function(expr) {
+      vars <- all.vars(expr)
+      if (all(has_name(counts, vars))) {
+        cl <- do.call(
+          what = substitute,
+          args = list(expr = expr, env = counts[, vars])
+        )
+        test <- eval(cl)
+      } else {
+        test <- rep(NA, nrow(counts))
+      }
+
+      test <- as.integer(test)
+      return(test)
+    }
+  )
+
+  res <- do.call(cbind, variables)
+  colnames(res) <- dictionary[, "Name", drop = TRUE]
+
+  # add ID column
+  res <- cbind(counts[, 1, drop = FALSE], res)
+
+  if (nacols.rm) {
+    mask_na <- vapply(res, function(x) ! all(is.na(x)), logical(length = 1))
+    res <- res[, mask_na, drop = FALSE]
+  }
+
+  return(res)
+}
