@@ -948,146 +948,6 @@ formatAssociationsResults <- function(results,
   return(results)
 }
 
-#' Get HLA - KIR interactions
-#'
-#' \code{getHlaKirInteractions} calculates binary presence-absence matrix of HLA
-#' - KIR interactions.
-#'
-#' @inheritParams checkHlaCallsFormat
-#' @param kir_counts Data frame containing KIR genes counts, as return by
-#'   \link{readKirCalls}.
-#' @param interactions_dict Path to the file containing HLA - KIR interactions
-#'   matchings. See details for further details.
-#'
-#' @return Data frame with binary presence-absence indicators for HLA - KIR
-#'   interactions.
-#'
-#' In order to be able to compare input data with \code{interactions_dict}
-#' \code{hla_calls} are first converted to variables such as G groups, using
-#' matching files shipped with the packages. Moreover \code{hla_calls} are also
-#' reduced to all possible resolutions.
-#'
-#' \code{interactions_dict} should be a tsv formatted file with following
-#' columns: HLA, KIR, Affinity, Type. The package is shipped with interactions
-#' file created based on Pende et al., 2019.
-#'
-#' @examples
-#' hla_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-#' hla_calls <- readHlaCalls(hla_file)
-#' kir_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
-#' kir_counts <- readKirCalls(kir_file, counts = TRUE)
-#' getHlaKirInteractions(hla_calls, kir_counts)
-#'
-#' @importFrom assertthat assert_that is.string
-#' @importFrom dplyr left_join
-#' @importFrom magrittr %>%
-#' @importFrom rlang warn
-#' @importFrom stringi stri_detect_regex
-#'
-#' @export
-getHlaKirInteractions <- function(hla_calls,
-                                  kir_counts,
-                                  interactions_dict = system.file("extdata", "Interactions_hla_kir.tsv", package = "MiDAS")) {
-  assert_that(
-    checkHlaCallsFormat(hla_calls),
-    checkKirCountsFormat(kir_counts),
-    is.string(interactions_dict)
-  )
-  id_matches <- hla_calls[, 1, drop = TRUE] %in% kir_counts[, 1, drop = TRUE] %>%
-    sum()
-  assert_that(id_matches > 0,
-              msg = "IDs in hla_calls doesn't match IDs in kir_counts"
-  )
-  if (nrow(hla_calls) != id_matches) {
-    msg <- sprintf("%i IDs in hla_calls matched IDs in kir_counts", id_matches)
-    warn(msg)
-  }
-
-  # transform hla_calls to all possible variables and resolutions
-  ## in practice only subset of variables could be used but this should be more time proof
-  midas_dicts <- listMiDASDictionaries() %>%
-    grep(pattern = "expression", value = TRUE, invert = TRUE)
-  hla_variables <- Reduce(
-    f = function(x, y) {
-      left_join(x, hlaToVariable(hla_calls, dictionary = y), by = "ID")
-    },
-    x = midas_dicts,
-    init = hla_calls
-  )
-  hla_max_resolution <- hla_calls[, -1] %>%
-    unlist() %>%
-    getAlleleResolution() %>%
-    max(na.rm = TRUE)
-  while (hla_max_resolution > 2) {
-    hla_variables <- hla_calls %>%
-      reduceHlaCalls(resolution = hla_max_resolution - 2) %>%
-      left_join(x = hla_variables, by = "ID")
-    hla_max_resolution <- hla_max_resolution - 2
-  }
-
-  hla_counts <- hlaCallsToCounts(hla_variables,
-                                 inheritance_model = "dominant",
-                                 check_hla_format = FALSE
-  )
-
-  # find hla - kir interactions
-  interaction_vars <- left_join(hla_counts, kir_counts, by = "ID")
-  vars <- colnames(interaction_vars[, -1, drop = FALSE])
-  interactions_dict <- read.table(
-    file = interactions_dict,
-    sep = "\t",
-    header = TRUE,
-    stringsAsFactors = FALSE
-  )
-
-  posible_interactions <- vapply(
-    X = interactions_dict$HLA,
-    FUN = function(pattern) {
-      any(
-        stri_detect_regex(str = vars, pattern = pattern, max_count = 1),
-        na.rm = TRUE
-      )
-    },
-    FUN.VALUE = logical(1)
-  ) &
-    vapply(
-      X = interactions_dict$KIR,
-      FUN = function(pattern) {
-        any(
-          stri_detect_regex(str = vars, pattern = pattern, max_count = 1),
-          na.rm = TRUE
-        )
-      },
-      FUN.VALUE = logical(1)
-    )
-
-  interactions_dict <- interactions_dict[posible_interactions, ]
-
-  # assert that interactions_dict is not empty
-
-  interactions <- apply(
-    X = interactions_dict[, c("HLA", "KIR")],
-    MARGIN = 1,
-    FUN = function(row) {
-      hla_col <- grep(pattern = paste0("^", row[[1]], "$"), x = colnames(interaction_vars))
-      hla_counts <- interaction_vars[, hla_col, drop = FALSE]
-      hla_na_i <- apply(hla_counts, 1, function(x) all(is.na(x)))
-      kir_col <- grep(pattern = paste0("^", row[[2]], "$"), x = colnames(interaction_vars))
-      kir_counts <- interaction_vars[, kir_col, drop = FALSE]
-      kir_na_i <- apply(kir_counts, 1, function(x) all(is.na(x)))
-      x <- rowSums(hla_counts, na.rm = TRUE) + rowSums(kir_counts, na.rm = TRUE)
-      x[hla_na_i | kir_na_i] <- NA
-      x <- ifelse(x == 1, 0, x)
-      x <- ifelse(x >= 2, 1, x) # it is assumed that kir_calls are in dominant mode..., >= is used here to handle more complex interactions like KIR3DL1_Bw4 + KIR3DL1_A*23 + KIR3DL1_A*24 + KIR3DL1_A*32
-    }
-  )
-  colnames(interactions) <- interactions_dict$Name
-
-  interactions <- cbind(hla_calls[, 1, drop = FALSE], interactions)
-
-  return(interactions)
-}
-
 #' Converts counts data frame according to match table
 #'
 #' \code{countsToVariables} converts counts data frame to variables based on
@@ -1191,4 +1051,92 @@ countsToVariables <- function(counts,
   }
 
   return(res)
+}
+
+#' Get HLA - KIR interactions
+#'
+#' \code{getHlaKirInteractions} calculates binary presence-absence matrix of HLA
+#' - KIR interactions.
+#'
+#' @inheritParams checkHlaCallsFormat
+#' @param kir_counts Data frame containing KIR genes counts, as return by
+#'   \link{readKirCalls}.
+#' @param interactions_dict Path to the file containing HLA - KIR interactions
+#'   matchings. See details for further details.
+#'
+#' @return Data frame with binary presence-absence indicators for HLA - KIR
+#'   interactions.
+#'
+#' In order to be able to compare input data with \code{interactions_dict}
+#' \code{hla_calls} are first converted to variables such as G groups, using
+#' matching files shipped with the packages. Moreover \code{hla_calls} are also
+#' reduced to all possible resolutions.
+#'
+#' \code{interactions_dict} should be a tsv formatted file with following
+#' columns: HLA, KIR, Affinity, Type. The package is shipped with interactions
+#' file created based on Pende et al., 2019.
+#'
+#' @examples
+#' hla_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(hla_file)
+#' kir_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+#' kir_counts <- readKirCalls(kir_file, counts = TRUE)
+#' getHlaKirInteractions(hla_calls, kir_counts)
+#'
+#' @importFrom assertthat assert_that is.string
+#' @importFrom dplyr left_join
+#' @importFrom magrittr %>%
+#' @importFrom rlang warn
+#' @importFrom stringi stri_detect_regex
+#'
+#' @export
+getHlaKirInteractions <- function(hla_calls,
+                                  kir_counts,
+                                  interactions_dict = system.file("extdata", "Match_counts_hla_kir_interactions.txt", package = "MiDAS")) {
+  assert_that(
+    checkHlaCallsFormat(hla_calls),
+    checkKirCountsFormat(kir_counts),
+    is.string(interactions_dict)
+  )
+  id_matches <- hla_calls[, 1, drop = TRUE] %in% kir_counts[, 1, drop = TRUE] %>%
+    sum()
+  assert_that(id_matches > 0,
+              msg = "IDs in hla_calls doesn't match IDs in kir_counts"
+  )
+  if (nrow(hla_calls) != id_matches) {
+    msg <- sprintf("%i IDs in hla_calls matched IDs in kir_counts", id_matches)
+    warn(msg)
+  }
+
+  # transform hla_calls to all possible variables and resolutions
+  ## in practice only subset of variables could be used but this should be more time proof
+  midas_dicts <- listMiDASDictionaries(pattern = "allele_") %>%
+    grep(pattern = "expression", value = TRUE, invert = TRUE)
+  hla_variables <- Reduce(
+    f = function(x, y) {
+      left_join(x, hlaToVariable(hla_calls, dictionary = y), by = "ID")
+    },
+    x = midas_dicts,
+    init = hla_calls
+  )
+  hla_max_resolution <- hla_calls[, -1] %>%
+    unlist() %>%
+    getAlleleResolution() %>%
+    max(na.rm = TRUE)
+  while (hla_max_resolution > 2) {
+    hla_variables <- hla_calls %>%
+      reduceHlaCalls(resolution = hla_max_resolution - 2) %>%
+      left_join(x = hla_variables, by = "ID")
+    hla_max_resolution <- hla_max_resolution - 2
+  }
+
+  hla_counts <- hlaCallsToCounts(hla_variables,
+                                 inheritance_model = "dominant",
+                                 check_hla_format = FALSE
+  )
+
+  counts <- left_join(hla_counts, kir_counts, by = "ID")
+  interactions <- countsToVariables(counts, dictionary = interactions_dict)
+
+  return(interactions)
 }

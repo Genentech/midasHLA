@@ -432,38 +432,6 @@ test_that("results are formatted properly with preselected args", {
   )
 })
 
-test_that("HLA - KIR interactions are infered correctly", {
-  hla_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(hla_file)
-  kir_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
-  kir_counts <- readKirCalls(kir_file, counts = TRUE)
-  hla_kir <- getHlaKirInteractions(hla_calls, kir_counts)
-  load(system.file("extdata", "test_hla_kir_interactions.Rdata", package = "MiDAS"))
-  expect_equal(hla_kir, test_hla_kir)
-
-  # checkHlaCallsFormat are omitted here
-  # checkKirCountsFormat are omitted here
-
-  expect_error(
-    getHlaKirInteractions(hla_calls, kir_counts, interactions_dict = 1),
-    "interactions_dict is not a string \\(a length one character vector\\)."
-  )
-
-  fake_kir_counts <- kir_counts
-  fake_kir_counts[, 1] <- paste0("foo", 1:nrow(kir_counts))
-  expect_error(
-    getHlaKirInteractions(hla_calls, fake_kir_counts),
-    "IDs in hla_calls doesn't match IDs in kir_counts"
-  )
-
-  fake_kir_counts <- kir_counts
-  fake_kir_counts[1:5, 1] <- paste0("foo", 1:5)
-  expect_warning(
-    getHlaKirInteractions(hla_calls, fake_kir_counts),
-    "15 IDs in hla_calls matched IDs in kir_counts"
-  )
-})
-
 test_that("counts to variables conversion", {
   file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
   kir_counts <- readKirCalls(file)[1:2, ]
@@ -519,4 +487,36 @@ test_that("counts to variables conversion", {
     countsToVariables(kir_counts, dictionary = c("foo", "bar")),
     "dictionary is not a data frame"
   )
+})
+
+test_that("HLA - KIR interactions are infered correctly", {
+  hla_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(hla_file)
+  kir_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  kir_counts <- readKirCalls(kir_file, counts = TRUE)
+  hla_kir <- getHlaKirInteractions(hla_calls, kir_counts)
+  load(system.file("extdata", "test_hla_kir_interactions.Rdata", package = "MiDAS"))
+  expect_equal(hla_kir, test_hla_kir)
+
+  # checkHlaCallsFormat are omitted here
+  # checkKirCountsFormat are omitted here
+
+  expect_error(
+    getHlaKirInteractions(hla_calls, kir_counts, interactions_dict = 1),
+    "interactions_dict is not a string \\(a length one character vector\\)."
+  )
+
+ fake_kir_counts <- kir_counts
+ fake_kir_counts[, 1] <- paste0("foo", 1:nrow(kir_counts))
+ expect_error(
+   getHlaKirInteractions(hla_calls, fake_kir_counts),
+   "IDs in hla_calls doesn't match IDs in kir_counts"
+ )
+
+ fake_kir_counts <- kir_counts
+ fake_kir_counts[1:5, 1] <- paste0("foo", 1:5)
+ expect_warning(
+  getHlaKirInteractions(hla_calls, fake_kir_counts),
+  "15 IDs in hla_calls matched IDs in kir_counts"
+ )
 })
