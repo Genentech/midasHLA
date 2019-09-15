@@ -223,7 +223,7 @@ convertAlleleToVariable <- function(allele,
            msg = "match table contains duplicated allele numbers")
   )
   dictionary <- setNames(dictionary[, 2], dictionary[, 1])
-  variable <- dictionary[allele]
+  variable <- dictionary[as.character(allele)] # for all NAs vectrors default type is logical; recycling mechanism leads to unwanted results
   names(variable) <- NULL
 
   return(variable)

@@ -286,10 +286,10 @@ hlaToVariable <- function(hla_calls,
 
   variable[i] <- na.value
   if (nacols.rm) {
-    variable <- variable[, j]
+    variable <- variable[, j, drop = FALSE]
   }
 
-  variable <- cbind(hla_calls[, 1], variable, stringsAsFactors = FALSE)
+  variable <- cbind(hla_calls[, 1, drop = FALSE], variable, stringsAsFactors = FALSE)
   colnames(variable) <- c("ID", colnames(variable[, -1]))
 
   return(variable)
