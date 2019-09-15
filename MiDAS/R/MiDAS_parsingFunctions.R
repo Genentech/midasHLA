@@ -261,7 +261,7 @@ readHlaAlignments <- function(file,
 #'
 #' @export
 readKirCalls <- function(file,
-                         hap_dict = system.file("extdata", "Match_KIR_haplotype_genes.tsv", package = "MiDAS"),
+                         hap_dict = system.file("extdata", "Match_counts_KIR_haplotype.txt", package = "MiDAS"),
                          counts = TRUE,
                          binary = TRUE,
                          na.strings = c("", "NA")) {

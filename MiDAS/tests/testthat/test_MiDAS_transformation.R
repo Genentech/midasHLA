@@ -37,12 +37,12 @@ test_that("HLA calls table is converted to additional variables", {
                            package = "MiDAS"
   )
   hla_calls <- readHlaCalls(hla_calls)
-  hla_supertypes <- hlaToVariable(hla_calls, dictionary = "4digit_supertype")
+  hla_supertypes <- hlaToVariable(hla_calls, dictionary = "allele_HLA_supertype")
   test_hla_supertypes <-
     lapply(
       hla_calls[,-1],
       convertAlleleToVariable,
-      dictionary = system.file("extdata", "Match_4digit_supertype.txt", package = "MiDAS")
+      dictionary = system.file("extdata", "Match_allele_HLA_supertype.txt", package = "MiDAS")
     )
   na_mask <- vapply(test_hla_supertypes, function(x) all(is.na(x)), FUN.VALUE = logical(1))
   test_hla_supertypes <- test_hla_supertypes[! na_mask]

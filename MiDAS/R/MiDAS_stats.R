@@ -873,7 +873,7 @@ prepareMiDASData <- function(hla_calls,
   }
 
   if ("allele_g_group" %in% analysis_type) {
-    lib <- "4digit_allele_Ggroup"
+    lib <- "allele_HLA_Ggroup"
     allele_g_group <- hlaToVariable(hla_calls = hla_calls,
                                     dictionary = lib,
                                     na.value = 0
@@ -898,7 +898,7 @@ prepareMiDASData <- function(hla_calls,
   }
 
   if ("allele_supertype" %in% analysis_type) {
-    lib <- "4digit_supertype"
+    lib <- "allele_HLA_supertype"
     allele_supertype <- hlaToVariable(hla_calls = hla_calls,
                                       dictionary = lib,
                                       na.value = 0
@@ -925,9 +925,9 @@ prepareMiDASData <- function(hla_calls,
 
   if ("allele_group" %in% analysis_type) {
     lib <- c(
-      "4digit_B-allele_Bw",
-      "alleles_Bw4+A23+A24+A32",
-      "4digit_C-allele_C1-2"
+      "allele_HLA-B_Bw",
+      "allele_HLA_Bw4+A23+A24+A32",
+      "allele_HLA-C_C1-2"
     )
     allele_group <- Reduce(
       f = function(...) left_join(..., by = "ID"),

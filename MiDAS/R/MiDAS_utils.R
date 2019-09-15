@@ -208,6 +208,7 @@ convertAlleleToVariable <- function(allele,
     dictionary <- read.table(
       file = dictionary,
       header = TRUE,
+      sep = "\t",
       stringsAsFactors = FALSE
     )
   }
@@ -621,7 +622,7 @@ assertthat::on_failure(isFlagOrNULL) <- function(call, env) {
 #' @export
 listMiDASDictionaries <- function(pattern = ".*",
                                   file.names = FALSE) {
-  pattern <- paste0("^Match_", pattern, ".txt$")
+  pattern <- paste0("^Match.*", pattern, ".*.txt$")
   lib <- list.files(
     path = system.file("extdata", package = "MiDAS"),
     pattern = pattern,
@@ -697,7 +698,7 @@ assertthat::on_failure(characterMatches) <- function(call, env) {
 #'
 #' @export
 kirHaplotypeToCounts <- function(x,
-                                 hap_dict = system.file("extdata", "Match_KIR_haplotype_genes.tsv", package = "MiDAS"),
+                                 hap_dict = system.file("extdata", "Match_counts_KIR_haplotype.txt", package = "MiDAS"),
                                  binary = TRUE) {
   assert_that(
     is.character(x),

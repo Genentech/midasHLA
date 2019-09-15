@@ -774,7 +774,7 @@ test_that("MiDAS data is prepared properly", {
                                           analysis_type = "allele_g_group",
                                           inheritance_model = "additive")
   midas_allele_g_group_test <-
-    hlaToVariable(hla_calls, dictionary = "4digit_allele_Ggroup")
+    hlaToVariable(hla_calls, dictionary = "allele_HLA_Ggroup")
   midas_allele_g_group_test <-
     hlaCallsToCounts(
       midas_allele_g_group_test,
@@ -793,7 +793,7 @@ test_that("MiDAS data is prepared properly", {
                                           analysis_type = "allele_supertype",
                                           inheritance_model = "additive")
   test_midas_allele_supertype <-
-    hlaToVariable(hla_calls, dictionary = "4digit_supertype")
+    hlaToVariable(hla_calls, dictionary = "allele_HLA_supertype")
   test_midas_allele_supertype <-
     hlaCallsToCounts(
       test_midas_allele_supertype,
@@ -814,7 +814,7 @@ test_that("MiDAS data is prepared properly", {
                                               covar,
                                               analysis_type = "allele_group",
                                               inheritance_model = "additive")
-  allele_groups_lib <- c("4digit_B-allele_Bw", "alleles_Bw4+A23+A24+A32", "4digit_C-allele_C1-2")
+  allele_groups_lib <- c("allele_HLA-B_Bw", "allele_HLA_Bw4+A23+A24+A32", "allele_HLA-C_C1-2")
   test_midas_allele_group <- Reduce(
     f = function(...) left_join(..., by = "ID"),
     x = lapply(allele_groups_lib, hlaToVariable, hla_calls = hla_calls)

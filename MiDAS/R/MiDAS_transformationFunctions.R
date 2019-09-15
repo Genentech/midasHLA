@@ -242,9 +242,9 @@ hlaToVariable <- function(hla_calls,
   )
 
   if (is.string(dictionary)) {
-    lib <- listMiDASDictionaries()
+    lib <- listMiDASDictionaries(pattern = "allele")
     if (dictionary %in% lib) {
-      if (dictionary == "4digit_B-allele_Bw") {
+      if (dictionary == "allele_HLA-B_Bw") {
         warn("In ambiguous cases Bw4 will be assigned! See documentation for more details.")
       }
       dictionary <- system.file(
