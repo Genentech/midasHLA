@@ -1,4 +1,7 @@
-## 0.0.0.9025 - 15/09/2019
+## 0.0.0.9027 - 15/09/2019
++ automated kabling of results from analyzeMiDASData function has been removed, this can be now done by separate call to formatResults function.
+
+## 0.0.0.9026 - 15/09/2019
 + changes dictionaties naming convention. Now alleles dictionaties are named Match_allele_HLA_name.txt
 + add new functionality for converting counts to variables, new dictionaries are named Match_counts_name.txt
 
