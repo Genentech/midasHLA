@@ -10,8 +10,7 @@ analyzeMiDASData(object, analysis_type = c("hla_allele", "aa_level",
   conditional = FALSE, keep = FALSE, lower_frequency_cutoff = NULL,
   upper_frequency_cutoff = NULL, pvalue_cutoff = NULL,
   correction = "bonferroni", n_correction = NULL, logistic = NULL,
-  binary_phenotype = NULL, th = 0.05, rss_th = 1e-07,
-  kable_output = TRUE, format = getOption("knitr.table.format"))
+  binary_phenotype = NULL, th = 0.05, rss_th = 1e-07)
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many
@@ -86,9 +85,6 @@ specified \code{analysis_type} are used in association tests.
 \code{correction} specifies p-value adjustment method to use, common choice
 is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
 \link[stats]{p.adjust}. Check there to get more details.}
-
-\item{format}{A character string. Possible values are \code{"latex"} and
-\code{"html"}.}
 }
 \value{
 Tibble containing results for all tested variables.
