@@ -395,9 +395,7 @@ analyzeMiDASData <- function(object,
                              logistic = NULL,
                              binary_phenotype = NULL,
                              th = 0.05,
-                             rss_th = 1e-07,
-                             kable_output = TRUE,
-                             format = getOption("knitr.table.format")) {
+                             rss_th = 1e-07) {
   assert_that(
     checkStatisticalModel(object)
   )
@@ -432,10 +430,7 @@ analyzeMiDASData <- function(object,
     isFlagOrNULL(logistic),
     isFlagOrNULL(binary_phenotype),
     is.number(th),
-    is.number(rss_th),
-    is.flag(kable_output),
-    is.string(format),
-    stringMatches(format, choice = c("html", "latex"))
+    is.number(rss_th)
   )
 
   mask <- variables_labels == analysis_type
@@ -562,20 +557,6 @@ analyzeMiDASData <- function(object,
     if (conditional && keep) {
       results_iter <- lapply(results_iter, left_join, y = neg_freq, by = "term")
     }
-  }
-
-  if (kable_output) {
-    response_variable <- deparse(object_formula[[2]])
-
-    preety_table <- formatAssociationsResults(
-      results,
-      type = analysis_type,
-      response_variable = response_variable,
-      logistic = logistic,
-      pvalue_cutoff = pvalue_cutoff,
-      format = format
-    )
-    print(preety_table)
   }
 
   # rename term and estimate to match preety_table

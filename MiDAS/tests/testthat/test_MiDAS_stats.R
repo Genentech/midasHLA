@@ -231,8 +231,7 @@ test_that("MiDAS associations are analyzed properly", {
   # conditional FALSE, analysis_type = "hla_allele", extra variables
   res <- analyzeMiDASData(object,
                           analysis_type = "hla_allele",
-                          variables = c("expression_A", "expression_C"),
-                          kable_output = FALSE
+                          variables = c("expression_A", "expression_C")
   )
 
   test_variables <- colnames(midas_data[, label(midas_data) == "hla_allele"])
@@ -255,8 +254,7 @@ test_that("MiDAS associations are analyzed properly", {
   ## analysis_type = "hla_allele" variables = NULL
   res <- analyzeMiDASData(object,
                           analysis_type = "hla_allele",
-                          variables = NULL,
-                          kable_output = FALSE
+                          variables = NULL
   )
 
   test_variables <- colnames(midas_data[, label(midas_data) == "hla_allele"])
@@ -280,8 +278,7 @@ test_that("MiDAS associations are analyzed properly", {
   ## analysis_type = "aa_level" variables = NULL
   res <- analyzeMiDASData(object,
                           analysis_type = "aa_level",
-                          variables = NULL,
-                          kable_output = FALSE
+                          variables = NULL
   )
 
   test_variables <- colnames(midas_data[, label(midas_data) == "aa_level"])
@@ -304,8 +301,7 @@ test_that("MiDAS associations are analyzed properly", {
   ## analysis_type = "expression_level" variables = NULL
   res <- analyzeMiDASData(object,
                           analysis_type = "expression_level",
-                          variables = NULL,
-                          kable_output = FALSE
+                          variables = NULL
   )
 
   test_variables <-
@@ -319,8 +315,7 @@ test_that("MiDAS associations are analyzed properly", {
   ## analysis_type = "allele_g_group" variables = NULL
   res <- analyzeMiDASData(object,
                           analysis_type = "allele_g_group",
-                          variables = NULL,
-                          kable_output = FALSE
+                          variables = NULL
   )
 
   test_variables <- colnames(midas_data[, label(midas_data) == "allele_g_group"])
@@ -343,8 +338,7 @@ test_that("MiDAS associations are analyzed properly", {
   ## analysis_type = "allele_supertype" variables = NULL
   res <- analyzeMiDASData(object,
                           analysis_type = "allele_supertype",
-                          variables = NULL,
-                          kable_output = FALSE
+                          variables = NULL
   )
 
   test_variables <- colnames(midas_data[, label(midas_data) == "allele_supertype"])
@@ -367,8 +361,7 @@ test_that("MiDAS associations are analyzed properly", {
   ## analysis_type = "allele_group" variables = NULL
   res <- analyzeMiDASData(object,
                           analysis_type = "allele_group",
-                          variables = NULL,
-                          kable_output = FALSE
+                          variables = NULL
   )
 
   test_variables <- colnames(midas_data[, label(midas_data) == "allele_group"])
@@ -391,8 +384,7 @@ test_that("MiDAS associations are analyzed properly", {
   ## analysis_type = "kir_genes" variables = NULL
   res <- analyzeMiDASData(object,
                           analysis_type = "kir_genes",
-                          variables = NULL,
-                          kable_output = FALSE
+                          variables = NULL
   )
   test_variables <- colnames(midas_data[, label(midas_data) == "kir_genes"])
   test_res <- analyzeAssociations(object, variables = test_variables)
@@ -414,8 +406,7 @@ test_that("MiDAS associations are analyzed properly", {
   ## analysis_type = "hla_kir_interactions" variables = NULL
   res <- analyzeMiDASData(object,
                           analysis_type = "hla_kir_interactions",
-                          variables = NULL,
-                          kable_output = FALSE
+                          variables = NULL
   )
   test_variables <-
     colnames(midas_data[, label(midas_data) == "hla_kir_interactions"])
@@ -439,8 +430,7 @@ test_that("MiDAS associations are analyzed properly", {
   res <- analyzeMiDASData(object,
                           analysis_type = "hla_allele",
                           conditional = TRUE,
-                          keep = TRUE,
-                          kable_output = FALSE
+                          keep = TRUE
   )
 
   test_variables <- colnames(midas_data[, label(midas_data) == "hla_allele"])
@@ -474,8 +464,7 @@ test_that("MiDAS associations are analyzed properly", {
   res <- analyzeMiDASData(object,
                           analysis_type = "hla_allele",
                           conditional = TRUE,
-                          keep = FALSE,
-                          kable_output = FALSE
+                          keep = FALSE
   )
 
   test_variables <- colnames(midas_data[, label(midas_data) == "hla_allele"])
@@ -501,20 +490,20 @@ test_that("MiDAS associations are analyzed properly", {
 
   # Test lower and upper frequency thresholds
   # %
-  res <- analyzeMiDASData(object, analysis_type = "hla_allele", lower_frequency_cutoff = 0.85, kable_output = FALSE)
+  res <- analyzeMiDASData(object, analysis_type = "hla_allele", lower_frequency_cutoff = 0.85)
   freqs <- getHlaFrequencies(hla_calls)
   expect_equal(res$allele, freqs$allele[freqs$Freq > 0.85 & freqs$Freq != 1])
 
-  res <- analyzeMiDASData(object, analysis_type = "hla_allele", upper_frequency_cutoff = 0.03, kable_output = FALSE)
+  res <- analyzeMiDASData(object, analysis_type = "hla_allele", upper_frequency_cutoff = 0.03)
   expect_equal(res$allele, freqs$allele[freqs$Freq < 0.03 & freqs$Freq != 1])
 
   # counts
   counts <- prepareMiDASData(hla_calls, analysis_type = "hla_allele")
   counts <- colSums(counts[-1], na.rm = TRUE)
-  res <- analyzeMiDASData(object, analysis_type = "hla_allele", lower_frequency_cutoff = 34, kable_output = FALSE)
+  res <- analyzeMiDASData(object, analysis_type = "hla_allele", lower_frequency_cutoff = 34)
   expect_equal(res$allele, names(counts)[counts > 34 & freqs$Freq != 1])
 
-  res <- analyzeMiDASData(object, analysis_type = "hla_allele", upper_frequency_cutoff = 2, kable_output = FALSE)
+  res <- analyzeMiDASData(object, analysis_type = "hla_allele", upper_frequency_cutoff = 2)
   expect_equal(res$allele, names(counts)[counts < 2 & freqs$Freq != 1])
 
   # Tests for checkStatisticalModel errors are ommitted here
@@ -577,18 +566,6 @@ test_that("MiDAS associations are analyzed properly", {
 
   expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", rss_th = "NA"),
                "rss_th is not a number \\(a length one numeric vector\\)."
-  )
-
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", kable_output = "NA"),
-               "kable_output is not a flag \\(a length one logical vector\\)."
-  )
-
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", format = 1),
-               "format is not a string \\(a length one character vector\\)."
-  )
-
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", format = "pdf"),
-               "format should be one of \"html\", \"latex\"."
   )
 })
 
