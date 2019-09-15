@@ -59,7 +59,8 @@ analyzeAssociations <- function(object,
                                 n_correction = NULL,
                                 exponentiate = FALSE) {
   assert_that(
-    checkStatisticalModel(object)
+    checkStatisticalModel(object),
+    hasTidyMethod(class(object)[1L])
   )
   object_call <- getCall(object)
   object_env <- attr(object$terms, ".Environment")
@@ -191,7 +192,8 @@ analyzeConditionalAssociations <- function(object,
                                            rss_th = 1e-07,
                                            exponentiate = FALSE) {
   assert_that(
-    checkStatisticalModel(object)
+    checkStatisticalModel(object),
+    hasTidyMethod(class(object)[1L])
   )
   object_call <- getCall(object)
   object_env <- attr(object$terms, ".Environment")
@@ -397,7 +399,8 @@ analyzeMiDASData <- function(object,
                              th = 0.05,
                              rss_th = 1e-07) {
   assert_that(
-    checkStatisticalModel(object)
+    checkStatisticalModel(object),
+    hasTidyMethod(class(object)[1L])
   )
   object_call <- getCall(object)
   object_env <- attr(object$terms, ".Environment")

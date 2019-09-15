@@ -369,3 +369,13 @@ test_that("is true or false", {
     "1.5 is not a flag \\(a length one logical vector\\)."
   )
 })
+
+test_that("tidy method exists", {
+  expect_equal(hasTidyMethod("lm"), TRUE)
+  expect_equal(hasTidyMethod("foo"), FALSE)
+
+  expect_error(
+    assertthat::assert_that(hasTidyMethod("bar")),
+    "tidy function for object of class \"bar\" could not be found."
+  )
+})

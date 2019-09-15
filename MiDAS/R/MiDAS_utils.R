@@ -928,3 +928,31 @@ assertthat::on_failure(isTRUEorFALSE) <- function(call, env) {
          " is not a flag (a length one logical vector)."
   )
 }
+
+#' Check if tidy method for class exist
+#'
+#' \code{hasTidyMethod} checks if there is tidy method for given class.
+#'
+#' @param class Object class.
+#'
+#' @return Logical indicating if there is tidy method for given class.
+#'
+#' @importFrom utils methods
+#'
+hasTidyMethod <- function(class) {
+  cl_fun <- paste0("tidy.", class)
+  test <- cl_fun %in% methods("tidy")
+
+  return(test)
+}
+
+#' Error message for hasTidyMethod
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(hasTidyMethod) <- function(call, env) {
+  paste0("tidy function for object of class ",
+         deparse(call$class),
+         " could not be found."
+  )
+}
