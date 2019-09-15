@@ -613,14 +613,18 @@ assertthat::on_failure(isFlagOrNULL) <- function(call, env) {
 #'
 #' @param file.names Logical value. If FALSE, only the names of dictionaries are
 #' returned. If TRUE their file names are returned.
+#' @param pattern String used to match dictionary names, it can be a regular
+#'   expression.
 #'
 #' @return Character vector with names of available HLA alleles dictionaries.
 #'
 #' @export
-listMiDASDictionaries <- function(file.names = FALSE) {
+listMiDASDictionaries <- function(pattern = ".*",
+                                  file.names = FALSE) {
+  pattern <- paste0("^Match_", pattern, ".txt$")
   lib <- list.files(
     path = system.file("extdata", package = "MiDAS"),
-    pattern = "^Match_.*.txt$",
+    pattern = pattern,
     full.names = file.names
   )
 
