@@ -1,3 +1,6 @@
+## 0.0.0.9030 - 15/09/2019
++ add assert to test if there is appropiate tidy function available
+
 ## 0.0.0.9029 - 15/09/2019
 + fixes potential bug where NA is accepted as logical values in is.flag asserts
 
