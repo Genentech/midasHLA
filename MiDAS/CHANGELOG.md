@@ -1,3 +1,9 @@
+## 0.0.0.9029 - 15/09/2019
++ fixes potential bug where NA is accepted as logical values in is.flag asserts
+
+## 0.0.0.9028 - 15/09/2019
++ fixes bug that was occuring when hla_calls passed to hlaToVariable contained NAs every where except one column.
+
 ## 0.0.0.9027 - 15/09/2019
 + automated kabling of results from analyzeMiDASData function has been removed, this can be now done by separate call to formatResults function.
 

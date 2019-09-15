@@ -1,6 +1,6 @@
 Package: MiDAS
 Title: R package for immunogenomics data handling and association analysis
-Version: 0.0.0.9027
+Version: 0.0.0.9029
 Authors@R: c(
   person("First", "Last", email = "first.last@example.com", role = c("aut", "cre")))
 Description: What the package does (one paragraph).
@@ -15,5 +15,5 @@ Imports:
     pryr (>= 0.1.4), methods
 Suggests:
     testthat (>= 2.0.1), seqinr (>= 3.4-5), survival (>= 2.43-3), vcfR (>= 1.8.0), 
-    ensembldb (>= 2.6.8), EnsDb.Hsapiens.v86 (>= 2.99.0)
+    ensembldb (>= 2.6.8), EnsDb.Hsapiens.v86 (>= 2.99.0), broom.mixed (>= 0.2.4)
 RoxygenNote: 6.1.1
