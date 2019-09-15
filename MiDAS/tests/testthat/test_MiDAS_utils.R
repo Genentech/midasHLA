@@ -258,7 +258,7 @@ test_that("string matches", {
 test_that("is flag or null", {
   expect_equal(isFlagOrNULL(TRUE), TRUE)
   expect_equal(isFlagOrNULL(NULL), TRUE)
-  # expect_equal(isFlagOrNULL(NA), FALSE) # returns TRUE... strange?
+  expect_equal(isFlagOrNULL(NA), FALSE)
 
   expect_error(
     assertthat::assert_that(isFlagOrNULL(1)),
@@ -356,5 +356,16 @@ test_that("is count or null", {
   expect_error(
     assertthat::assert_that(isCountOrNULL(1.5)),
     "1.5 is not a count \\(a single positive integer\\) or NULL."
+  )
+})
+
+test_that("is true or false", {
+  expect_equal(isTRUEorFALSE(TRUE), TRUE)
+  expect_equal(isTRUEorFALSE(FALSE), TRUE)
+  expect_equal(isTRUEorFALSE(NA), FALSE)
+
+  expect_error(
+    assertthat::assert_that(isTRUEorFALSE(1.5)),
+    "1.5 is not a flag \\(a length one logical vector\\)."
   )
 })

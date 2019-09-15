@@ -372,7 +372,7 @@ checkAdditionalData <- function(data_frame,
 #'
 #' @return Updated fit of input model.
 #'
-#' @importFrom assertthat assert_that is.flag is.string
+#' @importFrom assertthat assert_that is.string
 #' @importFrom stats update
 #' @importFrom purrr is_formula
 #'
@@ -387,7 +387,7 @@ updateModel <- function(object, x, backquote = TRUE, collapse = " + ") {
     see_if(is.character(x) | is_formula(x),
            msg = "x is not a character vector or formula"
     ),
-    is.flag(backquote),
+    isTRUEorFALSE(backquote),
     is.string(collapse)
   )
 
@@ -593,7 +593,7 @@ assertthat::on_failure(stringMatches) <- function(call, env) {
 #' @importFrom assertthat is.flag
 #'
 isFlagOrNULL <- function(x) {
-    test <- is.flag(x) || is.null(x)
+    test <- (is.flag(x) && ! is.na(x)) || is.null(x)
 
   return(test)
 }
@@ -722,7 +722,7 @@ assertthat::on_failure(isClassOrNULL) <- function(call, env) {
 #' x <- c(NA, "1+3|16+3", "1+1", NA)
 #' kirHaplotypeToCounts(x)
 #'
-#' @importFrom assertthat assert_that is.flag is.readable see_if
+#' @importFrom assertthat assert_that is.readable see_if
 #' @importFrom stats na.omit
 #' @importFrom stringi stri_split_fixed
 #'
@@ -733,7 +733,7 @@ kirHaplotypeToCounts <- function(x,
   assert_that(
     is.character(x),
     is.readable(hap_dict),
-    is.flag(binary)
+    isTRUEorFALSE(binary)
   )
   hap_dict <- read.table(hap_dict, stringsAsFactors = FALSE)
 
@@ -899,5 +899,32 @@ isCountOrNULL <- function(x) {
 assertthat::on_failure(isCountOrNULL) <- function(call, env) {
   paste0(deparse(call$x),
          " is not a count (a single positive integer) or NULL."
+  )
+}
+
+#' Check if object is TRUE or FALSE flag
+#'
+#' \code{isTRUEorFALSE} checks if object is a flag (a length one logical vector)
+#' except NA.
+#'
+#' @param x object to test.
+#'
+#' @return Logical indicating if object is TRUE or FALSE flag
+#'
+#' @importFrom assertthat is.flag
+#'
+isTRUEorFALSE <- function(x) {
+  test <- is.flag(x) && ! is.na(x)
+
+  return(test)
+}
+
+#' Error message for isTRUEorFALSE
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(isTRUEorFALSE) <- function(call, env) {
+  paste0(deparse(call$x),
+         " is not a flag (a length one logical vector)."
   )
 }

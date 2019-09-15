@@ -47,7 +47,7 @@
 #'                     variables = c("B*14:02", "DRB1*11:01")
 #' )
 #'
-#' @importFrom assertthat assert_that see_if is.flag is.string
+#' @importFrom assertthat assert_that see_if is.string
 #' @importFrom broom tidy
 #' @importFrom dplyr bind_rows
 #' @importFrom stats p.adjust
@@ -76,7 +76,7 @@ analyzeAssociations <- function(object,
     ),
     is.string(correction),
     isCountOrNULL(n_correction),
-    is.flag(exponentiate)
+    isTRUEorFALSE(exponentiate)
   )
 
   results <- lapply(
@@ -175,7 +175,7 @@ analyzeAssociations <- function(object,
 #'                             rss_th = 1e-07
 #' )
 #'
-#' @importFrom assertthat assert_that is.flag is.number is.string
+#' @importFrom assertthat assert_that is.number is.string
 #' @importFrom dplyr bind_rows tibble
 #' @importFrom purrr map_dfr
 #' @importFrom rlang warn
@@ -210,9 +210,9 @@ analyzeConditionalAssociations <- function(object,
     is.string(correction),
     isCountOrNULL(n_correction),
     is.number(th),
-    is.flag(keep),
+    isTRUEorFALSE(keep),
     is.number(rss_th),
-    is.flag(exponentiate)
+    isTRUEorFALSE(exponentiate)
   )
 
   prev_formula <- object_formula
@@ -374,7 +374,7 @@ analyzeConditionalAssociations <- function(object,
 #' object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
 #' analyzeMiDASData(object, analysis_type = "hla_allele")
 #'
-#' @importFrom assertthat assert_that is.flag is.number is.string
+#' @importFrom assertthat assert_that is.number is.string
 #' @importFrom dplyr bind_rows filter left_join select rename
 #' @importFrom stats getCall
 #' @importFrom rlang !! := .data
@@ -414,8 +414,8 @@ analyzeMiDASData <- function(object,
                   choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions")
     ),
     isCharacterOrNULL(variables),
-    is.flag(conditional),
-    is.flag(keep),
+    isTRUEorFALSE(conditional),
+    isTRUEorFALSE(keep),
     see_if(
       all(test_vars <- variables %in% object_variables) | is.null(variables),
       msg = sprintf("%s can not be found in object data",
@@ -670,7 +670,7 @@ analyzeMiDASData <- function(object,
 #' covar <- read.table(covar_file, header = TRUE)
 #' prepareMiDASData(hla_calls, pheno, covar, analysis_type = "expression_level")
 #'
-#' @importFrom assertthat assert_that is.flag is.string see_if
+#' @importFrom assertthat assert_that is.string see_if
 #' @importFrom dplyr funs group_by left_join mutate summarise_all syms
 #' @importFrom magrittr %>% %<>%
 #' @importFrom rlang .data !!!
@@ -699,8 +699,8 @@ prepareMiDASData <- function(hla_calls,
       x = inheritance_model,
       choice = c("dominant", "recessive", "additive")
     ),
-    is.flag(indels),
-    is.flag(unkchar)
+    isTRUEorFALSE(indels),
+    isTRUEorFALSE(unkchar)
   )
 
   additional_data <- list(...)
