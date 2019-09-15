@@ -43,7 +43,7 @@ test_that("Reduced HLA allele have desired resoulution", {
 })
 
 test_that("HLA allels are converted to additional variables", {
-  path <- system.file("extdata", "Match_4digit_supertype.txt", package = "MiDAS")
+  path <- system.file("extdata", "Match_allele_HLA_supertype.txt", package = "MiDAS")
   addvar <- convertAlleleToVariable(c("A*01:01", "A*02:01", "B*01", NA), dictionary = path)
   expect_equal(addvar, c("A01", "A02", NA, NA))
   dictionary <- read.table(path, header = TRUE, stringsAsFactors = FALSE)
@@ -284,7 +284,7 @@ test_that("KIR haplotypes are converted to gene counts", {
   x <- c("1+3|16+3", "1+1")
   kir_hap <- kirHaplotypeToCounts(x)
 
-  hap_dict <- system.file("extdata", "Match_KIR_haplotype_genes.tsv", package = "MiDAS")
+  hap_dict <- system.file("extdata", "Match_kir_haplotype_gene.txt", package = "MiDAS")
   hap_dict <- read.table(hap_dict)
   hap1 <- colSums(hap_dict[c("1", "3"), ])
   hap1 <- ifelse(hap1 > 1, 1, hap1)
@@ -295,7 +295,7 @@ test_that("KIR haplotypes are converted to gene counts", {
     as.data.frame(test_kir_hap,
                   optional = TRUE,
                   stringsAsFactors = FALSE)
-  test_kir_hap <- cbind(haplotypes = x, test_kir_hap)
+  test_kir_hap <- cbind(haplotypes = x, test_kir_hap, stringsAsFactors = FALSE)
   rownames(test_kir_hap) <- NULL
 
   expect_equal(kir_hap, test_kir_hap)

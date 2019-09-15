@@ -5,7 +5,7 @@
 \title{Convert KIR haplotypes to gene level}
 \usage{
 kirHaplotypeToCounts(x, hap_dict = system.file("extdata",
-  "Match_KIR_haplotype_genes.tsv", package = "MiDAS"), binary = TRUE)
+  "Match_kir_haplotype_gene.txt", package = "MiDAS"), binary = TRUE)
 }
 \arguments{
 \item{x}{Character vector specifying KIR haplotypes.}
@@ -31,7 +31,7 @@ Data frame with haplotypes and corresponding gene counts. \code{NA}'s
 of KIR genes counts.
 }
 \examples{
-x <- c("1+3|16+3", "1+1", NA)
+x <- c(NA, "1+3|16+3", "1+1", NA)
 kirHaplotypeToCounts(x)
 
 }
