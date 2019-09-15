@@ -79,6 +79,6 @@ nomenclature.
 \examples{
 file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 hla_calls <- readHlaCalls(file)
-hlaToVariable(hla_calls, dictionary = "4digit_supertype")
+hlaToVariable(hla_calls, dictionary = "allele_HLA_supertype")
 
 }

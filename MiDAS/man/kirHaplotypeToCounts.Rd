@@ -5,7 +5,7 @@
 \title{Convert KIR haplotypes to gene level}
 \usage{
 kirHaplotypeToCounts(x, hap_dict = system.file("extdata",
-  "Match_counts_KIR_haplotype.txt", package = "MiDAS"), binary = TRUE)
+  "Match_kir_haplotype_gene.txt", package = "MiDAS"), binary = TRUE)
 }
 \arguments{
 \item{x}{Character vector specifying KIR haplotypes.}

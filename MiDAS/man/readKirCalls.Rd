@@ -5,7 +5,7 @@
 \title{Reads data table with KIR haplotypes calls}
 \usage{
 readKirCalls(file, hap_dict = system.file("extdata",
-  "Match_counts_KIR_haplotype.txt", package = "MiDAS"), counts = TRUE,
+  "Match_kir_haplotype_gene.txt", package = "MiDAS"), counts = TRUE,
   binary = TRUE, na.strings = c("", "NA"))
 }
 \arguments{
