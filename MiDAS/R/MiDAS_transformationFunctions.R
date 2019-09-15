@@ -180,10 +180,10 @@ hlaToAAVariation <- function(hla_calls,
 #' package. They can be referred to by using one of the following strings (to
 #' list available dictionaries use \link{listMiDASDictionaries}):
 #'
-#' \code{"2digit_A-allele_expression"} reference data to impute expression
+#' \code{"allele_HLA-A_expression"} reference data to impute expression
 #' levels for HLA-A alleles.
 #'
-#' \code{"4digit_B-allele_Bw"} B alleles can be grouped in allele groups Bw4 and
+#' \code{"allele_HLA-B_Bw"} B alleles can be grouped in allele groups Bw4 and
 #' Bw6. In some cases HLA alleles containing Bw4 epitope, on nucleotide level
 #' actually carries a premature stop codon. Meaning that although on nucleotide
 #' level the allele would encode a Bw4 epitope it's not really there and it is
@@ -191,16 +191,16 @@ hlaToAAVariation <- function(hla_calls,
 #' distinguished from other Bw4 groups. Since alleles with premature stop codons
 #' are rare in those ambiguous cases those are assigned to Bw4 group.
 #'
-#' \code{"4digit_C-allele_C1-2"} C alleles can be grouped in allele groups C1
+#' \code{"allele_HLA-C_C1-2"} C alleles can be grouped in allele groups C1
 #' and C2.
 #'
-#' \code{"2digit_C-allele_expression"} reference data to impute expression
+#' \code{"allele_HLA-C_expression"} reference data to impute expression
 #' levels for HLA-C alleles.
 #'
-#' \code{"4digit_supertype"} A and B alleles can be assigned to so-called
+#' \code{"allele_HLA_supertype"} A and B alleles can be assigned to so-called
 #' supertypes.
 #'
-#' \code{"4digit_allele_Ggroup"} HLA alleles can be re-coded in G groups,
+#' \code{"allele_HLA_Ggroup"} HLA alleles can be re-coded in G groups,
 #' which defines amino acid identity only in the exons relevant for peptide
 #' binding. Note that alleles "DRB1*01:01:01" and "DRB1*01:16" were matched with
 #' more than one G group, this ambiguity was removed by deleting matching with
@@ -224,7 +224,7 @@ hlaToAAVariation <- function(hla_calls,
 #' @examples
 #' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(file)
-#' hlaToVariable(hla_calls, dictionary = "4digit_supertype")
+#' hlaToVariable(hla_calls, dictionary = "allele_HLA_supertype")
 #'
 #' @importFrom assertthat assert_that is.string is.flag see_if
 #' @importFrom rlang warn
@@ -985,6 +985,8 @@ formatAssociationsResults <- function(results,
 #'
 #' @importFrom assertthat assert_that is.flag is.string
 #' @importFrom rlang parse_exprs
+#'
+#' @export
 countsToVariables <- function(counts,
                               dictionary,
                               na.value = NA,
