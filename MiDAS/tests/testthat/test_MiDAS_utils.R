@@ -148,7 +148,12 @@ test_that("HLA statistical models are updated properly", {
   pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-  midas_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
+  midas_data <-
+    prepareMiDASData(hla_calls,
+                     pheno,
+                     covar,
+                     analysis_type = "hla_allele",
+                     inheritance_model = "additive")
   coxmod <- coxph(Surv(OS, OS_DIED) ~ 1, data = midas_data)
   coxmod$call$data <- midas_data
   coxmod_test <- coxph(Surv(OS, OS_DIED) ~ `A*01:01`, data = midas_data)

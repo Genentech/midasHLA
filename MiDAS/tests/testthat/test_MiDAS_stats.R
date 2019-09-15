@@ -9,7 +9,11 @@ test_that("HLA allele associations are analyzed properly", {
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
   midas_data <-
-    prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
+    prepareMiDASData(hla_calls,
+                     pheno,
+                     covar,
+                     analysis_type = "hla_allele",
+                     inheritance_model = "additive")
 
   object <- lm(OS_DIED ~ AGE + SEX, data = midas_data)
   #object$call$data <- midas_data
@@ -75,7 +79,11 @@ test_that("Stepwise conditional alleles subset selection", {
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
   midas_data <-
-    prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
+    prepareMiDASData(hla_calls,
+                     pheno,
+                     covar,
+                     analysis_type = "hla_allele",
+                     inheritance_model = "additive")
 
   object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
 
@@ -183,124 +191,6 @@ test_that("Stepwise conditional alleles subset selection", {
       n_correction = 1
     ),
     "n_correction must be at least 2."
-  )
-})
-
-test_that("HLA data is properly formatted", {
-  small_hla_calls <- data.frame(ID = 1:2,
-                                A_1 = c("A*01:01", "A*01:02"),
-                                A_2 = c("A*01:02", "A*01:01"),
-                                stringsAsFactors = FALSE
-  )
-  small_pheno <- data.frame(ID = 1:2, OS = c(123, 321), OS_DIED = c(0, 0))
-  small_covar <- data.frame(ID = 1:2, AGE = c(23, 24))
-  midas_data <- prepareHlaData(small_hla_calls, small_pheno, small_covar, inheritance_model = "additive")
-  expect_equal(midas_data,
-               data.frame(
-                 ID = c(1, 2),
-                 "A*01:01" = c(1, 1),
-                 "A*01:02" = c(1, 1),
-                 OS = c(123, 321),
-                 OS_DIED = c(0, 0),
-                 AGE = c(23, 24),
-                 check.names = FALSE
-               )
-  )
-
-  expect_error(
-    prepareHlaData(hla_calls = "foo",
-                   pheno = small_pheno,
-                   covar = small_covar,
-                   inheritance_model = "additive"
-    ),
-    "hla_calls is not a data frame"
-  )
-
-  expect_error(
-    prepareHlaData(hla_calls = data.frame(),
-                   pheno = small_pheno,
-                   covar = small_covar,
-                   inheritance_model = "additive"
-    ),
-    "hla_calls have to have at least 1 rows and 2 columns"
-  )
-
-  small_hla_calls_fac <- small_hla_calls
-  small_hla_calls_fac$A_1 <- as.factor(small_hla_calls_fac$A_1)
-  expect_error(
-    prepareHlaData(hla_calls = small_hla_calls_fac,
-                   pheno = small_pheno,
-                   covar = small_covar,
-                   inheritance_model = "additive"
-    ),
-    "hla_calls can't contain factors"
-  )
-
-  expect_error(
-    prepareHlaData(hla_calls = small_hla_calls[, 2:3],
-                   pheno = small_pheno,
-                   covar = small_covar,
-                   inheritance_model = "additive"
-    ),
-    "first column of hla_calls should specify samples id"
-  )
-
-  expect_error(
-    prepareHlaData(hla_calls = small_hla_calls[, c(1, 1, 1)],
-                   pheno = small_pheno,
-                   covar = small_covar,
-                   inheritance_model = "additive"
-    ),
-    "values: 1, 2, 1, 2 in hla_calls doesn't follow HLA numbers specification"
-  )
-
-  expect_error(
-    prepareHlaData(hla_calls = small_hla_calls,
-                   pheno = "foo",
-                   covar = small_covar,
-                   inheritance_model = "additive"
-    ),
-    "additional_data_frame have to be a data frame"
-  )
-
-  bad_pheno <- small_pheno
-  colnames(bad_pheno) <- LETTERS[1:ncol(bad_pheno)]
-  expect_error(
-    prepareHlaData(hla_calls = small_hla_calls,
-                   pheno = bad_pheno,
-                   covar = small_covar,
-                   inheritance_model = "additive"
-    ),
-    "first column in additional_data_frame must be named as first column in hla_calls"
-  )
-
-  bad_pheno <- small_pheno
-  bad_pheno$ID <- paste0("bad", bad_pheno$ID)
-  expect_error(
-    prepareHlaData(hla_calls = small_hla_calls,
-                   pheno = bad_pheno,
-                   covar = small_covar,
-                   inheritance_model = "additive"
-    ),
-    "IDs in additional_data_frame doesn't match IDs in hla_calls"
-  )
-
-  expect_error(
-    prepareHlaData(small_hla_calls,
-                   pheno = small_pheno,
-                   covar = small_covar,
-                   inheritance_model = 1
-    ),
-    "inheritance_model is not a string \\(a length one character vector\\)."
-  )
-
-  expect_error(
-    prepareHlaData(small_hla_calls,
-                   pheno = small_pheno,
-                   covar = small_covar,
-                   inheritance_model = "foo"
-    ),
-    "inheritance_model should be one of 'dominant', 'recessive', 'additive'"
   )
 })
 

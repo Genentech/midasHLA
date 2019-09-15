@@ -31,10 +31,11 @@
 #' pheno <- read.table(pheno_file, header = TRUE)
 #' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE)
-#' midas_data <- prepareHlaData(hla_calls = hla_calls,
-#'                              pheno = pheno,
-#'                              covar = covar,
-#'                              inheritance_model = "additive"
+#' midas_data <- prepareMiDASData(hla_calls = hla_calls,
+#'                                pheno = pheno,
+#'                                covar = covar,
+#'                                analysis_type = "hla_allele",
+#'                                inheritance_model = "additive"
 #' )
 #'
 #' # Cox proportional hazards regression model
@@ -159,9 +160,10 @@ analyzeAssociations <- function(object,
 #' pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
 #' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-#' midas_data <- prepareHlaData(hla_calls = hla_calls,
+#' midas_data <- prepareMiDASData(hla_calls = hla_calls,
 #'                              pheno = pheno,
 #'                              covar = covar,
+#'                              analysis_type = "hla_allele",
 #'                              inheritance_model = "additive"
 #' )
 #'
@@ -303,98 +305,6 @@ analyzeConditionalAssociations <- function(object,
   }
 
   return(results)
-}
-
-#' Prepare data for statistical analysis
-#'
-#' \code{prepareHlaData} binds HLA alleles calls data frame with additional data
-#' frames like phenotypic observations or covariates, creating an input data for
-#' further statistical analysis.
-#'
-#' @inheritParams checkHlaCallsFormat
-#' @inheritParams hlaCallsToCounts
-#' @param ... Data frames holding additional variables like phenotypic
-#'   observations or covariates.
-#'
-#' \code{...} should be data frames with first column holding samples IDs and
-#' named \code{ID}. Those should correspond to \code{ID} column in
-#' \code{hla_calls}.
-#'
-#' @return Data frame with hla counts and additional variables.
-#'
-#' @examples
-#' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-#' hla_calls <- readHlaCalls(hla_calls_file)
-#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-#' pheno <- read.table(pheno_file, header = TRUE)
-#' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-#' covar <- read.table(covar_file, header = TRUE)
-#' prepareHlaData(hla_calls = hla_calls,
-#'                pheno = pheno,
-#'                covar = covar,
-#'                inheritance_model = "additive"
-#' )
-#'
-#' @importFrom assertthat assert_that is.string see_if
-#' @importFrom dplyr left_join
-#'
-#' @export
-prepareHlaData <- function(hla_calls,
-                           ...,
-                           inheritance_model = "additive") {
-  warning("prepareHlaData is deprecated, please use prepareMiDASData instead.")
-  additional_data <- list(...)
-  if (length(additional_data) == 0) {
-    additional_data <- NULL
-  }
-
-  assert_that(
-    checkHlaCallsFormat(hla_calls),
-    all(
-      vapply(
-        X = additional_data,
-        FUN = function(x) {
-          additional_data_frame <- x
-          checkAdditionalData(additional_data_frame,
-                              hla_calls = hla_calls,
-                              accept.null = TRUE
-          )
-        },
-        FUN.VALUE = logical(1)
-      )
-    ),
-    see_if(
-      anyDuplicated(
-        c(
-          unique(unlist(hla_calls[, -1])),
-          unlist(lapply(
-            X = additional_data,
-            FUN = function(x) colnames(x)[-1]
-          ))
-        )
-      ) == 0,
-      msg = "column names in additional data are duplicated or overlap with alleles in hla_calls"
-    ),
-    is.string(inheritance_model),
-    see_if(
-      pmatch(inheritance_model,
-             table = c("dominant", "recessive", "additive"),
-             nomatch = 0
-      ) != 0,
-      msg = "inheritance_model should be one of 'dominant', 'recessive', 'additive'"
-    )
-  )
-
-  data <- hlaCallsToCounts(hla_calls,
-                           inheritance_model = inheritance_model
-  )
-  if (length(additional_data) != 0) {
-    for (i in 1:length(additional_data)) {
-      data <- left_join(data, additional_data[[i]], by = "ID")
-    }
-  }
-
-  return(data)
 }
 
 #' Analyze associations in MiDAS data

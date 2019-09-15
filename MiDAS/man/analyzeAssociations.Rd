@@ -46,10 +46,11 @@ pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
 pheno <- read.table(pheno_file, header = TRUE)
 covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 covar <- read.table(covar_file, header = TRUE)
-midas_data <- prepareHlaData(hla_calls = hla_calls,
-                             pheno = pheno,
-                             covar = covar,
-                             inheritance_model = "additive"
+midas_data <- prepareMiDASData(hla_calls = hla_calls,
+                               pheno = pheno,
+                               covar = covar,
+                               analysis_type = "hla_allele",
+                               inheritance_model = "additive"
 )
 
 # Cox proportional hazards regression model

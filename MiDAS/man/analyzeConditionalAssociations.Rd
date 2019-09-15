@@ -63,9 +63,10 @@ pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
 pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
 covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-midas_data <- prepareHlaData(hla_calls = hla_calls,
+midas_data <- prepareMiDASData(hla_calls = hla_calls,
                              pheno = pheno,
                              covar = covar,
+                             analysis_type = "hla_allele",
                              inheritance_model = "additive"
 )
 
