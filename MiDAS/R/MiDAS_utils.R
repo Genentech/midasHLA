@@ -184,7 +184,7 @@ getVariableAAPos <- function(alignment,
 #'   for expression values numeric vector will be returned.
 #'
 #' @examples
-#' dictionary <- system.file("extdata", "Match_4digit_supertype.txt", package = "MiDAS")
+#' dictionary <- system.file("extdata", "Match_allele_HLA_supertype.txt", package = "MiDAS")
 #' convertAlleleToVariable(c("A*01:01", "A*02:01"), dictionary = dictionary)
 #'
 #' @importFrom assertthat assert_that is.string is.readable see_if
