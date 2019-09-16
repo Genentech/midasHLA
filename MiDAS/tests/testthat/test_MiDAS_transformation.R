@@ -37,12 +37,12 @@ test_that("HLA calls table is converted to additional variables", {
                            package = "MiDAS"
   )
   hla_calls <- readHlaCalls(hla_calls)
-  hla_supertypes <- hlaToVariable(hla_calls, dictionary = "4digit_supertype")
+  hla_supertypes <- hlaToVariable(hla_calls, dictionary = "allele_HLA_supertype")
   test_hla_supertypes <-
     lapply(
       hla_calls[,-1],
       convertAlleleToVariable,
-      dictionary = system.file("extdata", "Match_4digit_supertype.txt", package = "MiDAS")
+      dictionary = system.file("extdata", "Match_allele_HLA_supertype.txt", package = "MiDAS")
     )
   na_mask <- vapply(test_hla_supertypes, function(x) all(is.na(x)), FUN.VALUE = logical(1))
   test_hla_supertypes <- test_hla_supertypes[! na_mask]
@@ -255,7 +255,7 @@ test_that("amino acids frequencies are calculated properly", {
   )
 })
 
-test_that("hla counts table can be rreverted to hla calls", {
+test_that("hla counts table can be reverted to hla calls", {
   hla_calls <- data.frame(ID = c("PAT1", "PAT2", "PAT3"),
                           A_1 = c("A*02:01", "A*02:01", "A*01:01"),
                           A_2 = c("A*02:01", "A*02:06", "A*24:02"),
@@ -432,6 +432,63 @@ test_that("results are formatted properly with preselected args", {
   )
 })
 
+test_that("counts to variables conversion", {
+  file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  kir_counts <- readKirCalls(file)[1:2, ]
+  kir_haplotypes <- countsToVariables(kir_counts, "kir_haplotypes")
+  kir_haplotypes_test <- data.frame(
+    ID = c("PAT1", "PAT2"),
+    cenAA = c(0, 1),
+    cenBB = c(0, 0),
+    cenAB = c(1, 0),
+    telAA = c(1, 1),
+    telBB = c(0, 0),
+    telAB = c(0, 0),
+    stringsAsFactors = FALSE
+  )
+  expect_equal(kir_haplotypes, kir_haplotypes_test)
+
+  # works with a dictionary data frame
+  dictionary <- data.frame(
+    Name = c("cenAA", "cenAB", "telAA"),
+    Expression = c(
+      "KIR2DL3 & ! KIR2DL2 & ! KIR2DS2",
+      "! (KIR2DL2 & ! KIR2DL3) & ! (KIR2DL3 & ! KIR2DL2 & ! KIR2DS2)",
+      "! KIR2DS1 & ! KIR3DS1"
+   ),
+   stringsAsFactors = FALSE
+  )
+  kir_haplotypes <- countsToVariables(kir_counts, dictionary)
+  expect_equal(kir_haplotypes,
+               kir_haplotypes_test[, c("ID", "cenAA", "cenAB", "telAA")]
+  )
+
+  expect_error(
+    countsToVariables(iris),
+    "counts can't contain factors"
+  )
+
+  expect_error(
+    countsToVariables(kir_counts, na.value = 1:2),
+    "na.value length must equal 1."
+  )
+
+  expect_error(
+    countsToVariables(kir_counts, nacols.rm = 1),
+    "nacols.rm is not a flag \\(a length one logical vector\\)."
+  )
+
+  expect_error(
+    countsToVariables(kir_counts, dictionary = "foo"),
+    "Path 'foo' does not exist"
+  )
+
+  expect_error(
+    countsToVariables(kir_counts, dictionary = c("foo", "bar")),
+    "dictionary is not a data frame"
+  )
+})
+
 test_that("HLA - KIR interactions are infered correctly", {
   hla_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(hla_file)
@@ -449,17 +506,17 @@ test_that("HLA - KIR interactions are infered correctly", {
     "interactions_dict is not a string \\(a length one character vector\\)."
   )
 
-  fake_kir_counts <- kir_counts
-  fake_kir_counts[, 1] <- paste0("foo", 1:nrow(kir_counts))
-  expect_error(
-    getHlaKirInteractions(hla_calls, fake_kir_counts),
-    "IDs in hla_calls doesn't match IDs in kir_counts"
-  )
+ fake_kir_counts <- kir_counts
+ fake_kir_counts[, 1] <- paste0("foo", 1:nrow(kir_counts))
+ expect_error(
+   getHlaKirInteractions(hla_calls, fake_kir_counts),
+   "IDs in hla_calls doesn't match IDs in kir_counts"
+ )
 
-  fake_kir_counts <- kir_counts
-  fake_kir_counts[1:5, 1] <- paste0("foo", 1:5)
-  expect_warning(
-    getHlaKirInteractions(hla_calls, fake_kir_counts),
-    "15 IDs in hla_calls matched IDs in kir_counts"
-  )
+ fake_kir_counts <- kir_counts
+ fake_kir_counts[1:5, 1] <- paste0("foo", 1:5)
+ expect_warning(
+  getHlaKirInteractions(hla_calls, fake_kir_counts),
+  "15 IDs in hla_calls matched IDs in kir_counts"
+ )
 })

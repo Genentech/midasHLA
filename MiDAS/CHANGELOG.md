@@ -1,9 +1,12 @@
+## 0.0.0.9025 - 15/09/2019
++ changes dictionaties naming convention. Now alleles dictionaties are named Match_allele_HLA_name.txt
++ add new functionality for converting counts to variables, new dictionaries are named Match_counts_name.txt
+
 ## 0.0.0.9025 - 30/08/2019
 + changes the behavior of hlaToVariable and hlaCallsToCounts. hlaToVariable now labels alleles not present in the dictionary with 0, this can be changed with na.value argument. The NAs that were already present in input hla_calls are preserved. hlaCallsToCounts ignores all values that can be converted to numeric - this way alleles that were not present in dictionary and are represented as 0 are not counted.
 
 ## 0.0.0.9024 - 24/08/2019
 + adds n_correction argument to analyzeAssociations, analyzeConditionalAssociations and analyzeMiDAS that can be used to pass n argument to p.adjusted calculations.
->>>>>>> master
 
 ## 0.0.0.9023 - 14/08/2019
 + fixes handling NAs when counting variables occurences. Previously presence of NA in any allele was ignored and all not observed alleles were treated as so. Now in cases when both alleles are NA this is reflected in counts. However if only one of the alleles is missing behaviour is still the same as previously. The described new behaviour is spread to hlaToVariable and getHlaKirInteractions functions.

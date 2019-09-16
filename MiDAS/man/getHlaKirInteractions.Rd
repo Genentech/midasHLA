@@ -5,8 +5,8 @@
 \title{Get HLA - KIR interactions}
 \usage{
 getHlaKirInteractions(hla_calls, kir_counts,
-  interactions_dict = system.file("extdata", "Interactions_hla_kir.tsv",
-  package = "MiDAS"))
+  interactions_dict = system.file("extdata",
+  "Match_counts_hla_kir_interactions.txt", package = "MiDAS"))
 }
 \arguments{
 \item{hla_calls}{Data frame containing HLA allele calls, as return by

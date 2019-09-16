@@ -175,20 +175,9 @@ test_that("KIR haplotype calls are read properly", {
 
   kir_calls <- readKirCalls(file)
   kir_counts_test <- kirHaplotypeToCounts(kir_calls_test[, 2, drop = TRUE])
-  i_na <- is.na(kir_calls_test[, 2, drop = TRUE])
-  kir_counts_test[, ncol(kir_counts_test) + 1] <-
-    kir_calls_test[! i_na, 1, drop = TRUE]
-  kir_calls_test <-
-    merge(
-      kir_calls_test,
-      kir_counts_test,
-      by.x = 1,
-      by.y = ncol(kir_counts_test),
-      all.x = TRUE,
-      sort = TRUE
-    )
-  kir_calls_test <- kir_calls_test[, -2:-3, drop = FALSE]
-  expect_equal(kir_calls, kir_calls_test)
+  kir_counts_test <- cbind(ID = kir_calls$ID, kir_counts_test[, -1], stringsAsFactors = FALSE)
+  rownames(kir_counts_test) <- NULL
+  expect_equal(kir_calls, kir_counts_test)
 
   expect_error(readKirCalls(file = "foo"), "Path 'foo' does not exist")
 
