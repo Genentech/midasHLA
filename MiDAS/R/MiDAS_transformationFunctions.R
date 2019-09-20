@@ -292,6 +292,10 @@ hlaToVariable <- function(hla_calls,
   variable <- cbind(hla_calls[, 1], variable, stringsAsFactors = FALSE)
   colnames(variable) <- c("ID", colnames(variable[, -1]))
 
+  if (ncol(variable) <= 1) {
+    warn("No new variables colud be found.")
+  }
+
   return(variable)
 }
 
