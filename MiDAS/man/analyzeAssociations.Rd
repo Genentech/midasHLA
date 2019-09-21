@@ -4,8 +4,8 @@
 \alias{analyzeAssociations}
 \title{Association analysis}
 \usage{
-analyzeAssociations(object, variables, correction = "BH",
-  exponentiate = FALSE)
+analyzeAssociations(object, variables, correction = "bonferroni",
+  n_correction = NULL, exponentiate = FALSE)
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many
@@ -15,6 +15,11 @@ others.}
 
 \item{correction}{String specifying multiple testing correction method. See
 details for further information.}
+
+\item{n_correction}{Integer specifying number of comparisons to consider
+during multiple testing correction calculations, must be at least equql to
+number of comparisons being made; only set this (to non-default) when you
+know what you are doing!}
 
 \item{exponentiate}{Logical indicating whether or not to exponentiate the
   coefficient estimates. Internally this is passed to \link[broom]{tidy}.
@@ -41,10 +46,11 @@ pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
 pheno <- read.table(pheno_file, header = TRUE)
 covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 covar <- read.table(covar_file, header = TRUE)
-midas_data <- prepareHlaData(hla_calls = hla_calls,
-                             pheno = pheno,
-                             covar = covar,
-                             inheritance_model = "additive"
+midas_data <- prepareMiDASData(hla_calls = hla_calls,
+                               pheno = pheno,
+                               covar = covar,
+                               analysis_type = "hla_allele",
+                               inheritance_model = "additive"
 )
 
 # Cox proportional hazards regression model

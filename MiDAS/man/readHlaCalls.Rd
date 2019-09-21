@@ -4,7 +4,8 @@
 \alias{readHlaCalls}
 \title{Reads data table with HLA allele calls}
 \usage{
-readHlaCalls(file, resolution = 4, na.strings = "NA")
+readHlaCalls(file, resolution = 4, na.strings = c("Not typed", "-",
+  "NA"))
 }
 \arguments{
 \item{file}{Path to input file.}

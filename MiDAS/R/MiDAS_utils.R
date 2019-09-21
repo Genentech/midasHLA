@@ -184,7 +184,7 @@ getVariableAAPos <- function(alignment,
 #'   for expression values numeric vector will be returned.
 #'
 #' @examples
-#' dictionary <- system.file("extdata", "Match_4digit_supertype.txt", package = "MiDAS")
+#' dictionary <- system.file("extdata", "Match_allele_HLA_supertype.txt", package = "MiDAS")
 #' convertAlleleToVariable(c("A*01:01", "A*02:01"), dictionary = dictionary)
 #'
 #' @importFrom assertthat assert_that is.string is.readable see_if
@@ -208,6 +208,7 @@ convertAlleleToVariable <- function(allele,
     dictionary <- read.table(
       file = dictionary,
       header = TRUE,
+      sep = "\t",
       stringsAsFactors = FALSE
     )
   }
@@ -222,7 +223,7 @@ convertAlleleToVariable <- function(allele,
            msg = "match table contains duplicated allele numbers")
   )
   dictionary <- setNames(dictionary[, 2], dictionary[, 1])
-  variable <- dictionary[allele]
+  variable <- dictionary[as.character(allele)] # for all NAs vectrors default type is logical; recycling mechanism leads to unwanted results
   names(variable) <- NULL
 
   return(variable)
@@ -371,7 +372,7 @@ checkAdditionalData <- function(data_frame,
 #'
 #' @return Updated fit of input model.
 #'
-#' @importFrom assertthat assert_that is.flag is.string
+#' @importFrom assertthat assert_that is.string
 #' @importFrom stats update
 #' @importFrom purrr is_formula
 #'
@@ -386,7 +387,7 @@ updateModel <- function(object, x, backquote = TRUE, collapse = " + ") {
     see_if(is.character(x) | is_formula(x),
            msg = "x is not a character vector or formula"
     ),
-    is.flag(backquote),
+    isTRUEorFALSE(backquote),
     is.string(collapse)
   )
 
@@ -592,7 +593,7 @@ assertthat::on_failure(stringMatches) <- function(call, env) {
 #' @importFrom assertthat is.flag
 #'
 isFlagOrNULL <- function(x) {
-    test <- is.flag(x) || is.null(x)
+    test <- (is.flag(x) && ! is.na(x)) || is.null(x)
 
   return(test)
 }
@@ -613,14 +614,18 @@ assertthat::on_failure(isFlagOrNULL) <- function(call, env) {
 #'
 #' @param file.names Logical value. If FALSE, only the names of dictionaries are
 #' returned. If TRUE their file names are returned.
+#' @param pattern String used to match dictionary names, it can be a regular
+#'   expression.
 #'
 #' @return Character vector with names of available HLA alleles dictionaries.
 #'
 #' @export
-listMiDASDictionaries <- function(file.names = FALSE) {
+listMiDASDictionaries <- function(pattern = ".*",
+                                  file.names = FALSE) {
+  pattern <- paste0("^Match.*", pattern, ".*.txt$")
   lib <- list.files(
     path = system.file("extdata", package = "MiDAS"),
-    pattern = "^Match_.*.txt$",
+    pattern = pattern,
     full.names = file.names
   )
 
@@ -663,6 +668,36 @@ assertthat::on_failure(characterMatches) <- function(call, env) {
   )
 }
 
+#' Check if object is of class x or null
+#'
+#' \code{isClassOrNULL} checks if object is an instance of a specified class or
+#' is null.
+#'
+#' @param x object to test.
+#' @param class String specifying class to test.
+#'
+#' @return Logical indicating if \code{x} is an instance of \code{class}.
+#'
+#' @importFrom assertthat assert_that
+#' @importFrom methods is
+isClassOrNULL <- function(x, class) {
+  test <- is(x, class) | is.null(x)
+
+  return(test)
+}
+
+#' Error message for isClassOrNULL
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(isClassOrNULL) <- function(call, env) {
+  paste0(deparse(call$x),
+         " must be an instance of ",
+         deparse(call$class),
+         " or NULL."
+  )
+}
+
 #' Convert KIR haplotypes to gene level
 #'
 #' \code{kirHaplotypeToCounts} converts vector of KIR haplotypes to data frame
@@ -684,25 +719,25 @@ assertthat::on_failure(characterMatches) <- function(call, env) {
 #'   in \code{x} are removed during conversion.
 #'
 #' @examples
-#' x <- c("1+3|16+3", "1+1", NA)
+#' x <- c(NA, "1+3|16+3", "1+1", NA)
 #' kirHaplotypeToCounts(x)
 #'
-#' @importFrom assertthat assert_that is.flag is.readable see_if
+#' @importFrom assertthat assert_that is.readable see_if
 #' @importFrom stats na.omit
 #' @importFrom stringi stri_split_fixed
 #'
 #' @export
 kirHaplotypeToCounts <- function(x,
-                                 hap_dict = system.file("extdata", "Match_KIR_haplotype_genes.tsv", package = "MiDAS"),
+                                 hap_dict = system.file("extdata", "Match_kir_haplotype_gene.txt", package = "MiDAS"),
                                  binary = TRUE) {
   assert_that(
     is.character(x),
     is.readable(hap_dict),
-    is.flag(binary)
+    isTRUEorFALSE(binary)
   )
-  hap_dict <- read.table(hap_dict)
+  hap_dict <- read.table(hap_dict, stringsAsFactors = FALSE)
 
-  x <- na.omit(x)
+  # x <- na.omit(x)
   x_split <- stri_split_fixed(x, "|")
   x_split_unlist <- unlist(x_split)
 
@@ -710,7 +745,7 @@ kirHaplotypeToCounts <- function(x,
   assert_that(
     all(haps_match <- vapply(
       X = x_split_unlist_haps,
-      FUN = function(x) all(x %in% rownames(hap_dict)),
+      FUN = function(x) all(na.omit(x) %in% rownames(hap_dict)),
       FUN.VALUE = logical(1)
     )),
     msg = sprintf(
@@ -730,10 +765,11 @@ kirHaplotypeToCounts <- function(x,
   counts <- vapply(
     X = x_split,
     FUN = function(hap) {
+      hap <- ifelse(is.na(hap), NA, hap) # class character NA cannot be used for columns indexing
       hap <- counts[, hap, drop = FALSE]
       if (ncol(hap) > 1) {
         assert_that(
-          all(apply(hap, 2, function(col) all(col == hap[, 1]))),
+          all(apply(hap, 2, function(col) all(col == hap[, 1])), na.rm = TRUE),
           msg = sprintf("haplotype %s can not be unambigously converted to counts", hap)
         )
       }
@@ -744,7 +780,7 @@ kirHaplotypeToCounts <- function(x,
   )
   counts <- t(counts)
   counts <- as.data.frame(counts, optional = TRUE, stringsAsFactors = FALSE)
-  counts <- cbind(haplotypes = x, counts)
+  counts <- cbind(haplotypes = x, counts, stringsAsFactors = FALSE)
 
   return(counts)
 }
@@ -837,4 +873,86 @@ checkKirCountsFormat <- function(kir_counts,
   }
 
   return(TRUE)
+}
+
+#' Check if object is count or NULL
+#'
+#' \code{isCountOrNULL} checks if object is a count (a single positive integer)
+#' or NULL.
+#'
+#' @param x object to test.
+#'
+#' @return Logical indicating if object is count or NULL
+#'
+#' @importFrom assertthat is.count
+#'
+isCountOrNULL <- function(x) {
+  test <- is.count(x) | is.null(x)
+
+  return(test)
+}
+
+#' Error message for isCountOrNULL
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(isCountOrNULL) <- function(call, env) {
+  paste0(deparse(call$x),
+         " is not a count (a single positive integer) or NULL."
+  )
+}
+
+#' Check if object is TRUE or FALSE flag
+#'
+#' \code{isTRUEorFALSE} checks if object is a flag (a length one logical vector)
+#' except NA.
+#'
+#' @param x object to test.
+#'
+#' @return Logical indicating if object is TRUE or FALSE flag
+#'
+#' @importFrom assertthat is.flag
+#'
+isTRUEorFALSE <- function(x) {
+  test <- is.flag(x) && ! is.na(x)
+
+  return(test)
+}
+
+#' Error message for isTRUEorFALSE
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(isTRUEorFALSE) <- function(call, env) {
+  paste0(deparse(call$x),
+         " is not a flag (a length one logical vector)."
+  )
+}
+
+#' Check if tidy method for class exist
+#'
+#' \code{hasTidyMethod} checks if there is tidy method for given class.
+#'
+#' @param class Object class.
+#'
+#' @return Logical indicating if there is tidy method for given class.
+#'
+#' @importFrom utils methods
+#'
+hasTidyMethod <- function(class) {
+  cl_fun <- paste0("tidy.", class)
+  test <- cl_fun %in% methods("tidy")
+
+  return(test)
+}
+
+#' Error message for hasTidyMethod
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(hasTidyMethod) <- function(call, env) {
+  paste0("tidy function for object of class ",
+         deparse(call$class),
+         " could not be found."
+  )
 }

@@ -43,7 +43,7 @@ test_that("Reduced HLA allele have desired resoulution", {
 })
 
 test_that("HLA allels are converted to additional variables", {
-  path <- system.file("extdata", "Match_4digit_supertype.txt", package = "MiDAS")
+  path <- system.file("extdata", "Match_allele_HLA_supertype.txt", package = "MiDAS")
   addvar <- convertAlleleToVariable(c("A*01:01", "A*02:01", "B*01", NA), dictionary = path)
   expect_equal(addvar, c("A01", "A02", NA, NA))
   dictionary <- read.table(path, header = TRUE, stringsAsFactors = FALSE)
@@ -148,10 +148,18 @@ test_that("HLA statistical models are updated properly", {
   pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-  midas_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
+  midas_data <-
+    prepareMiDASData(hla_calls,
+                     pheno,
+                     covar,
+                     analysis_type = "hla_allele",
+                     inheritance_model = "additive")
   coxmod <- coxph(Surv(OS, OS_DIED) ~ 1, data = midas_data)
+  coxmod$call$data <- midas_data
+  coxmod_test <- coxph(Surv(OS, OS_DIED) ~ `A*01:01`, data = midas_data)
+  coxmod_test$call$data <- midas_data
   expect_equal(updateModel(coxmod, "A*01:01"),
-               coxph(Surv(OS, OS_DIED) ~ `A*01:01`, data = midas_data)
+               coxmod_test
   )
 
   expect_error(updateModel(coxmod, 1),
@@ -250,7 +258,7 @@ test_that("string matches", {
 test_that("is flag or null", {
   expect_equal(isFlagOrNULL(TRUE), TRUE)
   expect_equal(isFlagOrNULL(NULL), TRUE)
-  # expect_equal(isFlagOrNULL(NA), FALSE) # returns TRUE... strange?
+  expect_equal(isFlagOrNULL(NA), FALSE)
 
   expect_error(
     assertthat::assert_that(isFlagOrNULL(1)),
@@ -267,11 +275,21 @@ test_that("character maches choices", {
   )
 })
 
+test_that("is class or null", {
+  expect_equal(isClassOrNULL("foo", "character"), TRUE)
+  expect_equal(isClassOrNULL(NULL, "character"), TRUE)
+
+  expect_error(
+    assertthat::assert_that(isClassOrNULL("foo", "bar")),
+    "\"foo\" must be an instance of \"bar\" or NULL."
+  )
+})
+
 test_that("KIR haplotypes are converted to gene counts", {
   x <- c("1+3|16+3", "1+1")
   kir_hap <- kirHaplotypeToCounts(x)
 
-  hap_dict <- system.file("extdata", "Match_KIR_haplotype_genes.tsv", package = "MiDAS")
+  hap_dict <- system.file("extdata", "Match_kir_haplotype_gene.txt", package = "MiDAS")
   hap_dict <- read.table(hap_dict)
   hap1 <- colSums(hap_dict[c("1", "3"), ])
   hap1 <- ifelse(hap1 > 1, 1, hap1)
@@ -282,7 +300,7 @@ test_that("KIR haplotypes are converted to gene counts", {
     as.data.frame(test_kir_hap,
                   optional = TRUE,
                   stringsAsFactors = FALSE)
-  test_kir_hap <- cbind(haplotypes = x, test_kir_hap)
+  test_kir_hap <- cbind(haplotypes = x, test_kir_hap, stringsAsFactors = FALSE)
   rownames(test_kir_hap) <- NULL
 
   expect_equal(kir_hap, test_kir_hap)
@@ -328,5 +346,36 @@ test_that("KIR counts have proper format", {
   expect_error(
     checkKirCountsFormat(fake_kir_counts),
     "Columns FOO in kir_counts should be named ID"
+  )
+})
+
+test_that("is count or null", {
+  expect_equal(isCountOrNULL(1), TRUE)
+  expect_equal(isCountOrNULL(NULL), TRUE)
+
+  expect_error(
+    assertthat::assert_that(isCountOrNULL(1.5)),
+    "1.5 is not a count \\(a single positive integer\\) or NULL."
+  )
+})
+
+test_that("is true or false", {
+  expect_equal(isTRUEorFALSE(TRUE), TRUE)
+  expect_equal(isTRUEorFALSE(FALSE), TRUE)
+  expect_equal(isTRUEorFALSE(NA), FALSE)
+
+  expect_error(
+    assertthat::assert_that(isTRUEorFALSE(1.5)),
+    "1.5 is not a flag \\(a length one logical vector\\)."
+  )
+})
+
+test_that("tidy method exists", {
+  expect_equal(hasTidyMethod("lm"), TRUE)
+  expect_equal(hasTidyMethod("foo"), FALSE)
+
+  expect_error(
+    assertthat::assert_that(hasTidyMethod("bar")),
+    "tidy function for object of class \"bar\" could not be found."
   )
 })

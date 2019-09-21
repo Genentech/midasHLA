@@ -4,8 +4,9 @@
 \alias{analyzeConditionalAssociations}
 \title{Stepwise conditional association analysis}
 \usage{
-analyzeConditionalAssociations(object, variables, correction = "BH", th,
-  keep = FALSE, rss_th = 1e-07, exponentiate = FALSE)
+analyzeConditionalAssociations(object, variables,
+  correction = "bonferroni", n_correction = NULL, th, keep = FALSE,
+  rss_th = 1e-07, exponentiate = FALSE)
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many
@@ -15,6 +16,11 @@ others.}
 
 \item{correction}{String specifying multiple testing correction method. See
 details for further information.}
+
+\item{n_correction}{Integer specifying number of comparisons to consider
+during multiple testing correction calculations, must be at least equql to
+number of comparisons being made; only set this (to non-default) when you
+know what you are doing!}
 
 \item{th}{number specifying p-value threshold for a variable to be considered
 significant.}
@@ -57,9 +63,10 @@ pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
 pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
 covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-midas_data <- prepareHlaData(hla_calls = hla_calls,
+midas_data <- prepareMiDASData(hla_calls = hla_calls,
                              pheno = pheno,
                              covar = covar,
+                             analysis_type = "hla_allele",
                              inheritance_model = "additive"
 )
 

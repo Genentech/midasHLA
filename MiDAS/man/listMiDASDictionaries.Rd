@@ -4,9 +4,12 @@
 \alias{listMiDASDictionaries}
 \title{List HLA alleles dictionaries}
 \usage{
-listMiDASDictionaries(file.names = FALSE)
+listMiDASDictionaries(pattern = ".*", file.names = FALSE)
 }
 \arguments{
+\item{pattern}{String used to match dictionary names, it can be a regular
+expression.}
+
 \item{file.names}{Logical value. If FALSE, only the names of dictionaries are
 returned. If TRUE their file names are returned.}
 }

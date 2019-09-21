@@ -31,7 +31,7 @@
 #' @export
 readHlaCalls <- function(file,
                          resolution = 4,
-                         na.strings = "NA") {
+                         na.strings = c("Not typed", "-", "NA")) {
   assert_that(is.readable(file),
               is.count(resolution),
               is.character(na.strings)
@@ -113,7 +113,7 @@ readHlaCalls <- function(file,
 #' @examples
 #' hla_alignments <- readHlaAlignments(gene = "A")
 #'
-#' @importFrom assertthat assert_that is.count is.flag is.readable is.string
+#' @importFrom assertthat assert_that is.count is.readable is.string
 #' @importFrom stringi stri_flatten stri_split_regex stri_sub
 #' @importFrom stringi stri_subset_fixed stri_read_lines stri_detect_regex
 #' @export
@@ -145,7 +145,7 @@ readHlaAlignments <- function(file,
     )
   }
   assert_that(
-    is.flag(trim),
+    isTRUEorFALSE(trim),
     is.string(unkchar),
     is.count(resolution)
   )
@@ -255,20 +255,21 @@ readHlaAlignments <- function(file,
 #' file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
 #' readKirCalls(file)
 #'
-#' @importFrom assertthat assert_that is.flag is.readable see_if
-#' @importFrom stats na.omit
+#' @importFrom assertthat assert_that is.readable see_if
+#' @importFrom dplyr left_join select
+#' @importFrom stats na.omit setNames
 #'
 #' @export
 readKirCalls <- function(file,
-                         hap_dict = system.file("extdata", "Match_KIR_haplotype_genes.tsv", package = "MiDAS"),
+                         hap_dict = system.file("extdata", "Match_kir_haplotype_gene.txt", package = "MiDAS"),
                          counts = TRUE,
                          binary = TRUE,
                          na.strings = c("", "NA")) {
   assert_that(
     is.readable(file),
     is.readable(hap_dict),
-    is.flag(counts),
-    is.flag(binary),
+    isTRUEorFALSE(counts),
+    isTRUEorFALSE(binary),
     is.character(na.strings)
   )
 
@@ -301,17 +302,20 @@ readKirCalls <- function(file,
       hap_dict = hap_dict,
       binary = binary
     )
-    i <- ncol(kir_counts) + 1
-    kir_counts[, i] <- kir_calls[! is.na(haplotypes), 1, drop = TRUE]
-    kir_calls <- merge(x = kir_calls,
-                       y = kir_counts,
-                       by.x = 1,
-                       by.y = i,
-                       all.x = TRUE,
-                       sort = TRUE
+
+    kir_calls <- left_join(
+      x = kir_calls,
+      y = kir_counts,
+      by = setNames(colnames(kir_counts)[1], colnames(kir_calls)[2]),
+      na_matches = "never"
     )
-    # drop columns holding haplotypes
-    kir_calls <- kir_calls[, -2:-3, drop = FALSE]
+
+    # If there are multiple matches between x and y, all combinations of the matches are returned.
+    kir_calls <- kir_calls[! duplicated(kir_calls[, 1, drop = TRUE]), ]
+    rownames(kir_calls) <- NULL
+
+    # discard haplotype designation from final table
+    kir_calls <- select(kir_calls, - !!colnames(kir_calls)[2])
   }
 
   return(kir_calls)

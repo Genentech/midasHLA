@@ -1,3 +1,25 @@
+## 0.0.0.9030 - 15/09/2019
++ add assert to test if there is appropiate tidy function available
+
+## 0.0.0.9029 - 15/09/2019
++ fixes potential bug where NA is accepted as logical values in is.flag asserts
+
+## 0.0.0.9028 - 15/09/2019
++ fixes bug that was occuring when hla_calls passed to hlaToVariable contained NAs every where except one column.
+
+## 0.0.0.9027 - 15/09/2019
++ automated kabling of results from analyzeMiDASData function has been removed, this can be now done by separate call to formatResults function.
+
+## 0.0.0.9026 - 15/09/2019
++ changes dictionaties naming convention. Now alleles dictionaties are named Match_allele_HLA_name.txt
++ add new functionality for converting counts to variables, new dictionaries are named Match_counts_name.txt
+
+## 0.0.0.9025 - 30/08/2019
++ changes the behavior of hlaToVariable and hlaCallsToCounts. hlaToVariable now labels alleles not present in the dictionary with 0, this can be changed with na.value argument. The NAs that were already present in input hla_calls are preserved. hlaCallsToCounts ignores all values that can be converted to numeric - this way alleles that were not present in dictionary and are represented as 0 are not counted.
+
+## 0.0.0.9024 - 24/08/2019
++ adds n_correction argument to analyzeAssociations, analyzeConditionalAssociations and analyzeMiDAS that can be used to pass n argument to p.adjusted calculations.
+
 ## 0.0.0.9023 - 14/08/2019
 + fixes handling NAs when counting variables occurences. Previously presence of NA in any allele was ignored and all not observed alleles were treated as so. Now in cases when both alleles are NA this is reflected in counts. However if only one of the alleles is missing behaviour is still the same as previously. The described new behaviour is spread to hlaToVariable and getHlaKirInteractions functions.
 
@@ -24,6 +46,11 @@
 + adds checkKirCountsFormat to assert KIR counts format
 + adds getHlaKirInteractions to get HLA - KIR interactions as new variables
 
+## 0.0.0.9016 - 14/07/2019
++ add new function MiDAS that combines prepareMiDASData and analyzeMiDASData.
++ result returned by MiDAS stores its input hla_calls and transformed data in corresponding attributes allowing
+  transformed data to be reused in subsequent analyzes.
+  
 ## 0.0.0.9015 - 10/07/2019
 + adds kirHaplotypeToCounts for converting KIR halplotypes to genes counts
 + adds readKirCalls that allows parsing KIR haplotypes calls output by kpi (https://github.com/droe-nmdp/kpi)
