@@ -6,11 +6,12 @@
 \usage{
 analyzeMiDASData(object, analysis_type = c("hla_allele", "aa_level",
   "expression_level", "allele_g_group", "allele_supertype", "allele_group",
-  "kir_genes", "hla_kir_interactions"), variables = NULL,
-  conditional = FALSE, keep = FALSE, lower_frequency_cutoff = NULL,
-  upper_frequency_cutoff = NULL, pvalue_cutoff = NULL,
-  correction = "bonferroni", n_correction = NULL, logistic = NULL,
-  binary_phenotype = NULL, th = 0.05, rss_th = 1e-07)
+  "kir_genes", "hla_kir_interactions"), pattern = NULL,
+  variables = NULL, conditional = FALSE, keep = FALSE,
+  lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL,
+  pvalue_cutoff = NULL, correction = "bonferroni",
+  n_correction = NULL, logistic = NULL, binary_phenotype = NULL,
+  th = 0.05, rss_th = 1e-07)
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many
@@ -21,6 +22,9 @@ at this point it is only used for results formatting. Valid values are
 \code{"hla_allele"}, \code{"aa_level"}, \code{"expression_level"},
 \code{"allele_g_group"}, \code{"allele_supertype"}, \code{"allele_group"},
 \code{"kir_genes"}, \code{"hla_kir_interactions"}.}
+
+\item{pattern}{Character string containing a regular expression that is used
+to further select test variables selected by \code{analysis_type}.}
 
 \item{variables}{Character specifying additional variables to use in
 association tests except those choosen by \code{analysis_type}.}
@@ -62,10 +66,17 @@ know what you are doing!}
 only used for results formatting.}
 
 \item{binary_phenotype}{Logical indicating if coefficient estimates should be
-exponentiated. This is typical for logistic and multinomial regressions,
-but a bad idea if there is no log or logit link. If \code{NULL} function
-will try to figure this out by testing if response is binary (\code{0} or
-\code{1}).}
+  exponentiated. This is typical for logistic and multinomial regressions,
+  but a bad idea if there is no log or logit link. If \code{NULL} function
+  will try to figure this out by testing if response is binary (\code{0} or
+  \code{1}).
+
+\code{variables} takes \code{NULL} as a default value, variables labeled with
+specified \code{analysis_type} are used in association tests.
+
+\code{correction} specifies p-value adjustment method to use, common choice
+is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
+\link[stats]{p.adjust}. Check there to get more details.}
 
 \item{th}{number specifying p-value threshold for a variable to be considered
 significant.}
@@ -75,16 +86,6 @@ function should stop adding additional variables. As the residual sum of
 squares approaches \code{0} the perfect fit is obtained making further
 attempts at variables selection nonsense, thus function is stopped. This
 behavior can be controlled using \code{rss_th}.}
-
-\item{kable_output}{Logical indicating if additionally results should be
-  pretty printed in specified \code{format}.
-
-\code{variables} takes \code{NULL} as a default value, variables labeled with
-specified \code{analysis_type} are used in association tests.
-
-\code{correction} specifies p-value adjustment method to use, common choice
-is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
-\link[stats]{p.adjust}. Check there to get more details.}
 }
 \value{
 Tibble containing results for all tested variables.
