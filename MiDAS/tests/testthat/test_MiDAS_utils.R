@@ -148,10 +148,18 @@ test_that("HLA statistical models are updated properly", {
   pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-  midas_data <- prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
+  midas_data <-
+    prepareMiDASData(hla_calls,
+                     pheno,
+                     covar,
+                     analysis_type = "hla_allele",
+                     inheritance_model = "additive")
   coxmod <- coxph(Surv(OS, OS_DIED) ~ 1, data = midas_data)
+  coxmod$call$data <- midas_data
+  coxmod_test <- coxph(Surv(OS, OS_DIED) ~ `A*01:01`, data = midas_data)
+  coxmod_test$call$data <- midas_data
   expect_equal(updateModel(coxmod, "A*01:01"),
-               coxph(Surv(OS, OS_DIED) ~ `A*01:01`, data = midas_data)
+               coxmod_test
   )
 
   expect_error(updateModel(coxmod, 1),
@@ -250,7 +258,7 @@ test_that("string matches", {
 test_that("is flag or null", {
   expect_equal(isFlagOrNULL(TRUE), TRUE)
   expect_equal(isFlagOrNULL(NULL), TRUE)
-  # expect_equal(isFlagOrNULL(NA), FALSE) # returns TRUE... strange?
+  expect_equal(isFlagOrNULL(NA), FALSE)
 
   expect_error(
     assertthat::assert_that(isFlagOrNULL(1)),
@@ -264,6 +272,16 @@ test_that("character maches choices", {
   expect_error(
     assertthat::assert_that(characterMatches("foo", "bar")),
     '"foo" should match values "bar".'
+  )
+})
+
+test_that("is class or null", {
+  expect_equal(isClassOrNULL("foo", "character"), TRUE)
+  expect_equal(isClassOrNULL(NULL, "character"), TRUE)
+
+  expect_error(
+    assertthat::assert_that(isClassOrNULL("foo", "bar")),
+    "\"foo\" must be an instance of \"bar\" or NULL."
   )
 })
 
@@ -338,5 +356,26 @@ test_that("is count or null", {
   expect_error(
     assertthat::assert_that(isCountOrNULL(1.5)),
     "1.5 is not a count \\(a single positive integer\\) or NULL."
+  )
+})
+
+test_that("is true or false", {
+  expect_equal(isTRUEorFALSE(TRUE), TRUE)
+  expect_equal(isTRUEorFALSE(FALSE), TRUE)
+  expect_equal(isTRUEorFALSE(NA), FALSE)
+
+  expect_error(
+    assertthat::assert_that(isTRUEorFALSE(1.5)),
+    "1.5 is not a flag \\(a length one logical vector\\)."
+  )
+})
+
+test_that("tidy method exists", {
+  expect_equal(hasTidyMethod("lm"), TRUE)
+  expect_equal(hasTidyMethod("foo"), FALSE)
+
+  expect_error(
+    assertthat::assert_that(hasTidyMethod("bar")),
+    "tidy function for object of class \"bar\" could not be found."
   )
 })

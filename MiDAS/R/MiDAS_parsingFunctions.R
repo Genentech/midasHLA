@@ -113,7 +113,7 @@ readHlaCalls <- function(file,
 #' @examples
 #' hla_alignments <- readHlaAlignments(gene = "A")
 #'
-#' @importFrom assertthat assert_that is.count is.flag is.readable is.string
+#' @importFrom assertthat assert_that is.count is.readable is.string
 #' @importFrom stringi stri_flatten stri_split_regex stri_sub
 #' @importFrom stringi stri_subset_fixed stri_read_lines stri_detect_regex
 #' @export
@@ -145,7 +145,7 @@ readHlaAlignments <- function(file,
     )
   }
   assert_that(
-    is.flag(trim),
+    isTRUEorFALSE(trim),
     is.string(unkchar),
     is.count(resolution)
   )
@@ -255,7 +255,7 @@ readHlaAlignments <- function(file,
 #' file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
 #' readKirCalls(file)
 #'
-#' @importFrom assertthat assert_that is.flag is.readable see_if
+#' @importFrom assertthat assert_that is.readable see_if
 #' @importFrom dplyr left_join select
 #' @importFrom stats na.omit setNames
 #'
@@ -268,8 +268,8 @@ readKirCalls <- function(file,
   assert_that(
     is.readable(file),
     is.readable(hap_dict),
-    is.flag(counts),
-    is.flag(binary),
+    isTRUEorFALSE(counts),
+    isTRUEorFALSE(binary),
     is.character(na.strings)
   )
 

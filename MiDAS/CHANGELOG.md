@@ -1,4 +1,16 @@
-## 0.0.0.9025 - 15/09/2019
+## 0.0.0.9030 - 15/09/2019
++ add assert to test if there is appropiate tidy function available
+
+## 0.0.0.9029 - 15/09/2019
++ fixes potential bug where NA is accepted as logical values in is.flag asserts
+
+## 0.0.0.9028 - 15/09/2019
++ fixes bug that was occuring when hla_calls passed to hlaToVariable contained NAs every where except one column.
+
+## 0.0.0.9027 - 15/09/2019
++ automated kabling of results from analyzeMiDASData function has been removed, this can be now done by separate call to formatResults function.
+
+## 0.0.0.9026 - 15/09/2019
 + changes dictionaties naming convention. Now alleles dictionaties are named Match_allele_HLA_name.txt
 + add new functionality for converting counts to variables, new dictionaries are named Match_counts_name.txt
 
@@ -34,6 +46,11 @@
 + adds checkKirCountsFormat to assert KIR counts format
 + adds getHlaKirInteractions to get HLA - KIR interactions as new variables
 
+## 0.0.0.9016 - 14/07/2019
++ add new function MiDAS that combines prepareMiDASData and analyzeMiDASData.
++ result returned by MiDAS stores its input hla_calls and transformed data in corresponding attributes allowing
+  transformed data to be reused in subsequent analyzes.
+  
 ## 0.0.0.9015 - 10/07/2019
 + adds kirHaplotypeToCounts for converting KIR halplotypes to genes counts
 + adds readKirCalls that allows parsing KIR haplotypes calls output by kpi (https://github.com/droe-nmdp/kpi)

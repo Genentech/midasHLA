@@ -9,9 +9,14 @@ test_that("HLA allele associations are analyzed properly", {
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
   midas_data <-
-    prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
+    prepareMiDASData(hla_calls,
+                     pheno,
+                     covar,
+                     analysis_type = "hla_allele",
+                     inheritance_model = "additive")
 
   object <- lm(OS_DIED ~ AGE + SEX, data = midas_data)
+  #object$call$data <- midas_data
   res <- analyzeAssociations(object,
                              variables = c("A*01:01", "A*02:01"),
                              correction = "BH"
@@ -74,7 +79,11 @@ test_that("Stepwise conditional alleles subset selection", {
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
   midas_data <-
-    prepareHlaData(hla_calls, pheno, covar, inheritance_model = "additive")
+    prepareMiDASData(hla_calls,
+                     pheno,
+                     covar,
+                     analysis_type = "hla_allele",
+                     inheritance_model = "additive")
 
   object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
 
@@ -185,124 +194,6 @@ test_that("Stepwise conditional alleles subset selection", {
   )
 })
 
-test_that("HLA data is properly formatted", {
-  small_hla_calls <- data.frame(ID = 1:2,
-                                A_1 = c("A*01:01", "A*01:02"),
-                                A_2 = c("A*01:02", "A*01:01"),
-                                stringsAsFactors = FALSE
-  )
-  small_pheno <- data.frame(ID = 1:2, OS = c(123, 321), OS_DIED = c(0, 0))
-  small_covar <- data.frame(ID = 1:2, AGE = c(23, 24))
-  midas_data <- prepareHlaData(small_hla_calls, small_pheno, small_covar, inheritance_model = "additive")
-  expect_equal(midas_data,
-               data.frame(
-                 ID = c(1, 2),
-                 "A*01:01" = c(1, 1),
-                 "A*01:02" = c(1, 1),
-                 OS = c(123, 321),
-                 OS_DIED = c(0, 0),
-                 AGE = c(23, 24),
-                 check.names = FALSE
-               )
-  )
-
-  expect_error(
-    prepareHlaData(hla_calls = "foo",
-                   pheno = small_pheno,
-                   covar = small_covar,
-                   inheritance_model = "additive"
-    ),
-    "hla_calls is not a data frame"
-  )
-
-  expect_error(
-    prepareHlaData(hla_calls = data.frame(),
-                   pheno = small_pheno,
-                   covar = small_covar,
-                   inheritance_model = "additive"
-    ),
-    "hla_calls have to have at least 1 rows and 2 columns"
-  )
-
-  small_hla_calls_fac <- small_hla_calls
-  small_hla_calls_fac$A_1 <- as.factor(small_hla_calls_fac$A_1)
-  expect_error(
-    prepareHlaData(hla_calls = small_hla_calls_fac,
-                   pheno = small_pheno,
-                   covar = small_covar,
-                   inheritance_model = "additive"
-    ),
-    "hla_calls can't contain factors"
-  )
-
-  expect_error(
-    prepareHlaData(hla_calls = small_hla_calls[, 2:3],
-                   pheno = small_pheno,
-                   covar = small_covar,
-                   inheritance_model = "additive"
-    ),
-    "first column of hla_calls should specify samples id"
-  )
-
-  expect_error(
-    prepareHlaData(hla_calls = small_hla_calls[, c(1, 1, 1)],
-                   pheno = small_pheno,
-                   covar = small_covar,
-                   inheritance_model = "additive"
-    ),
-    "values: 1, 2, 1, 2 in hla_calls doesn't follow HLA numbers specification"
-  )
-
-  expect_error(
-    prepareHlaData(hla_calls = small_hla_calls,
-                   pheno = "foo",
-                   covar = small_covar,
-                   inheritance_model = "additive"
-    ),
-    "additional_data_frame have to be a data frame"
-  )
-
-  bad_pheno <- small_pheno
-  colnames(bad_pheno) <- LETTERS[1:ncol(bad_pheno)]
-  expect_error(
-    prepareHlaData(hla_calls = small_hla_calls,
-                   pheno = bad_pheno,
-                   covar = small_covar,
-                   inheritance_model = "additive"
-    ),
-    "first column in additional_data_frame must be named as first column in hla_calls"
-  )
-
-  bad_pheno <- small_pheno
-  bad_pheno$ID <- paste0("bad", bad_pheno$ID)
-  expect_error(
-    prepareHlaData(hla_calls = small_hla_calls,
-                   pheno = bad_pheno,
-                   covar = small_covar,
-                   inheritance_model = "additive"
-    ),
-    "IDs in additional_data_frame doesn't match IDs in hla_calls"
-  )
-
-  expect_error(
-    prepareHlaData(small_hla_calls,
-                   pheno = small_pheno,
-                   covar = small_covar,
-                   inheritance_model = 1
-    ),
-    "inheritance_model is not a string \\(a length one character vector\\)."
-  )
-
-  expect_error(
-    prepareHlaData(small_hla_calls,
-                   pheno = small_pheno,
-                   covar = small_covar,
-                   inheritance_model = "foo"
-    ),
-    "inheritance_model should be one of 'dominant', 'recessive', 'additive'"
-  )
-})
-
 test_that("MiDAS associations are analyzed properly", {
   hla_calls_file <-
     system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
@@ -335,12 +226,12 @@ test_that("MiDAS associations are analyzed properly", {
     )
 
   object <- lm(OS_DIED ~ AGE + SEX, data = midas_data)
+  #object$call$data <- midas_data
 
   # conditional FALSE, analysis_type = "hla_allele", extra variables
   res <- analyzeMiDASData(object,
                           analysis_type = "hla_allele",
-                          variables = c("expression_A", "expression_C"),
-                          kable_output = FALSE
+                          variables = c("expression_A", "expression_C")
   )
 
   test_variables <- colnames(midas_data[, label(midas_data) == "hla_allele"])
@@ -363,8 +254,7 @@ test_that("MiDAS associations are analyzed properly", {
   ## analysis_type = "hla_allele" variables = NULL
   res <- analyzeMiDASData(object,
                           analysis_type = "hla_allele",
-                          variables = NULL,
-                          kable_output = FALSE
+                          variables = NULL
   )
 
   test_variables <- colnames(midas_data[, label(midas_data) == "hla_allele"])
@@ -388,8 +278,7 @@ test_that("MiDAS associations are analyzed properly", {
   ## analysis_type = "aa_level" variables = NULL
   res <- analyzeMiDASData(object,
                           analysis_type = "aa_level",
-                          variables = NULL,
-                          kable_output = FALSE
+                          variables = NULL
   )
 
   test_variables <- colnames(midas_data[, label(midas_data) == "aa_level"])
@@ -412,8 +301,7 @@ test_that("MiDAS associations are analyzed properly", {
   ## analysis_type = "expression_level" variables = NULL
   res <- analyzeMiDASData(object,
                           analysis_type = "expression_level",
-                          variables = NULL,
-                          kable_output = FALSE
+                          variables = NULL
   )
 
   test_variables <-
@@ -427,8 +315,7 @@ test_that("MiDAS associations are analyzed properly", {
   ## analysis_type = "allele_g_group" variables = NULL
   res <- analyzeMiDASData(object,
                           analysis_type = "allele_g_group",
-                          variables = NULL,
-                          kable_output = FALSE
+                          variables = NULL
   )
 
   test_variables <- colnames(midas_data[, label(midas_data) == "allele_g_group"])
@@ -451,8 +338,7 @@ test_that("MiDAS associations are analyzed properly", {
   ## analysis_type = "allele_supertype" variables = NULL
   res <- analyzeMiDASData(object,
                           analysis_type = "allele_supertype",
-                          variables = NULL,
-                          kable_output = FALSE
+                          variables = NULL
   )
 
   test_variables <- colnames(midas_data[, label(midas_data) == "allele_supertype"])
@@ -475,8 +361,7 @@ test_that("MiDAS associations are analyzed properly", {
   ## analysis_type = "allele_group" variables = NULL
   res <- analyzeMiDASData(object,
                           analysis_type = "allele_group",
-                          variables = NULL,
-                          kable_output = FALSE
+                          variables = NULL
   )
 
   test_variables <- colnames(midas_data[, label(midas_data) == "allele_group"])
@@ -499,8 +384,7 @@ test_that("MiDAS associations are analyzed properly", {
   ## analysis_type = "kir_genes" variables = NULL
   res <- analyzeMiDASData(object,
                           analysis_type = "kir_genes",
-                          variables = NULL,
-                          kable_output = FALSE
+                          variables = NULL
   )
   test_variables <- colnames(midas_data[, label(midas_data) == "kir_genes"])
   test_res <- analyzeAssociations(object, variables = test_variables)
@@ -522,8 +406,7 @@ test_that("MiDAS associations are analyzed properly", {
   ## analysis_type = "hla_kir_interactions" variables = NULL
   res <- analyzeMiDASData(object,
                           analysis_type = "hla_kir_interactions",
-                          variables = NULL,
-                          kable_output = FALSE
+                          variables = NULL
   )
   test_variables <-
     colnames(midas_data[, label(midas_data) == "hla_kir_interactions"])
@@ -547,8 +430,7 @@ test_that("MiDAS associations are analyzed properly", {
   res <- analyzeMiDASData(object,
                           analysis_type = "hla_allele",
                           conditional = TRUE,
-                          keep = TRUE,
-                          kable_output = FALSE
+                          keep = TRUE
   )
 
   test_variables <- colnames(midas_data[, label(midas_data) == "hla_allele"])
@@ -582,8 +464,7 @@ test_that("MiDAS associations are analyzed properly", {
   res <- analyzeMiDASData(object,
                           analysis_type = "hla_allele",
                           conditional = TRUE,
-                          keep = FALSE,
-                          kable_output = FALSE
+                          keep = FALSE
   )
 
   test_variables <- colnames(midas_data[, label(midas_data) == "hla_allele"])
@@ -609,20 +490,20 @@ test_that("MiDAS associations are analyzed properly", {
 
   # Test lower and upper frequency thresholds
   # %
-  res <- analyzeMiDASData(object, analysis_type = "hla_allele", lower_frequency_cutoff = 0.85, kable_output = FALSE)
+  res <- analyzeMiDASData(object, analysis_type = "hla_allele", lower_frequency_cutoff = 0.85)
   freqs <- getHlaFrequencies(hla_calls)
   expect_equal(res$allele, freqs$allele[freqs$Freq > 0.85 & freqs$Freq != 1])
 
-  res <- analyzeMiDASData(object, analysis_type = "hla_allele", upper_frequency_cutoff = 0.03, kable_output = FALSE)
+  res <- analyzeMiDASData(object, analysis_type = "hla_allele", upper_frequency_cutoff = 0.03)
   expect_equal(res$allele, freqs$allele[freqs$Freq < 0.03 & freqs$Freq != 1])
 
   # counts
   counts <- prepareMiDASData(hla_calls, analysis_type = "hla_allele")
   counts <- colSums(counts[-1], na.rm = TRUE)
-  res <- analyzeMiDASData(object, analysis_type = "hla_allele", lower_frequency_cutoff = 34, kable_output = FALSE)
+  res <- analyzeMiDASData(object, analysis_type = "hla_allele", lower_frequency_cutoff = 34)
   expect_equal(res$allele, names(counts)[counts > 34 & freqs$Freq != 1])
 
-  res <- analyzeMiDASData(object, analysis_type = "hla_allele", upper_frequency_cutoff = 2, kable_output = FALSE)
+  res <- analyzeMiDASData(object, analysis_type = "hla_allele", upper_frequency_cutoff = 2)
   expect_equal(res$allele, names(counts)[counts < 2 & freqs$Freq != 1])
 
   # Tests for checkStatisticalModel errors are ommitted here
@@ -685,18 +566,6 @@ test_that("MiDAS associations are analyzed properly", {
 
   expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", rss_th = "NA"),
                "rss_th is not a number \\(a length one numeric vector\\)."
-  )
-
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", kable_output = "NA"),
-               "kable_output is not a flag \\(a length one logical vector\\)."
-  )
-
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", format = 1),
-               "format is not a string \\(a length one character vector\\)."
-  )
-
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", format = "pdf"),
-               "format should be one of \"html\", \"latex\"."
   )
 })
 

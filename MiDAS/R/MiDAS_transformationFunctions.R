@@ -30,7 +30,7 @@
 #' hla_calls <- readHlaCalls(file)
 #' hlaToAAVariation(hla_calls)
 #'
-#' @importFrom assertthat assert_that see_if is.dir is.flag
+#' @importFrom assertthat assert_that see_if is.dir
 #' @importFrom stringi stri_split_fixed
 #' @export
 hlaToAAVariation <- function(hla_calls,
@@ -40,10 +40,10 @@ hlaToAAVariation <- function(hla_calls,
                              as_df = TRUE){
   assert_that(
     checkHlaCallsFormat(hla_calls),
-    is.flag(indels),
-    is.flag(unkchar),
+    isTRUEorFALSE(indels),
+    isTRUEorFALSE(unkchar),
     is.dir(alnpath),
-    is.flag(as_df)
+    isTRUEorFALSE(as_df)
   )
   ids <- hla_calls[, 1]
   hla_calls <- hla_calls[, -1]
@@ -226,7 +226,7 @@ hlaToAAVariation <- function(hla_calls,
 #' hla_calls <- readHlaCalls(file)
 #' hlaToVariable(hla_calls, dictionary = "allele_HLA_supertype")
 #'
-#' @importFrom assertthat assert_that is.string is.flag see_if
+#' @importFrom assertthat assert_that is.string see_if
 #' @importFrom rlang warn
 #' @export
 hlaToVariable <- function(hla_calls,
@@ -236,9 +236,9 @@ hlaToVariable <- function(hla_calls,
                           nacols.rm = TRUE) {
   assert_that(
     checkHlaCallsFormat(hla_calls),
-    is.flag(reduce),
+    isTRUEorFALSE(reduce),
     see_if(length(na.value) == 1, msg = "na.value length must equal 1."),
-    is.flag(nacols.rm)
+    isTRUEorFALSE(nacols.rm)
   )
 
   if (is.string(dictionary)) {
@@ -286,10 +286,10 @@ hlaToVariable <- function(hla_calls,
 
   variable[i] <- na.value
   if (nacols.rm) {
-    variable <- variable[, j]
+    variable <- variable[, j, drop = FALSE]
   }
 
-  variable <- cbind(hla_calls[, 1], variable, stringsAsFactors = FALSE)
+  variable <- cbind(hla_calls[, 1, drop = FALSE], variable, stringsAsFactors = FALSE)
   colnames(variable) <- c("ID", colnames(variable[, -1]))
 
   if (ncol(variable) <= 1) {
@@ -353,7 +353,7 @@ reduceHlaCalls <- function(hla_calls,
 #' hla_calls <- readHlaCalls(file)
 #' hlaCallsToCounts(hla_calls, inheritance_model = "additive")
 #'
-#' @importFrom assertthat assert_that is.flag is.string
+#' @importFrom assertthat assert_that is.string
 #' @importFrom qdapTools mtabulate
 #'
 #' @export
@@ -369,7 +369,7 @@ hlaCallsToCounts <- function(hla_calls,
       ) != 0,
       msg = "inheritance_model should be one of 'dominant', 'recessive', 'additive'"
     ),
-    is.flag(check_hla_format)
+    isTRUEorFALSE(check_hla_format)
   )
 
   if (check_hla_format) {
@@ -860,7 +860,7 @@ getCountsFrequencies <- function(counts_table) {
 #'
 #' @return A character vector with pretty formatted \code{results} table.
 #'
-#' @importFrom assertthat assert_that is.flag is.number is.string see_if
+#' @importFrom assertthat assert_that is.number is.string see_if
 #' @importFrom dplyr ends_with mutate_at vars
 #' @importFrom magrittr %>% %<>%
 #' @importFrom rlang has_name list2 parse_expr warn !! :=
@@ -877,7 +877,7 @@ formatAssociationsResults <- function(results,
                   choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions", "custom")
     ),
     is.string(response_variable),
-    is.flag(logistic),
+    isTRUEorFALSE(logistic),
     isNumberOrNULL(pvalue_cutoff),
     is.string(format),
     stringMatches(format, choice = c("html", "latex"))
@@ -987,7 +987,7 @@ formatAssociationsResults <- function(results,
 #' kir_counts <- readKirCalls(file)
 #' countsToVariables(kir_counts, "kir_haplotypes")
 #'
-#' @importFrom assertthat assert_that is.flag is.string
+#' @importFrom assertthat assert_that is.string
 #' @importFrom rlang parse_exprs
 #'
 #' @export
@@ -998,7 +998,7 @@ countsToVariables <- function(counts,
   assert_that(
     checkKirCountsFormat(counts),
     see_if(length(na.value) == 1, msg = "na.value length must equal 1."),
-    is.flag(nacols.rm)
+    isTRUEorFALSE(nacols.rm)
   )
 
   if (is.string(dictionary)) {

@@ -31,10 +31,11 @@
 #' pheno <- read.table(pheno_file, header = TRUE)
 #' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE)
-#' midas_data <- prepareHlaData(hla_calls = hla_calls,
-#'                              pheno = pheno,
-#'                              covar = covar,
-#'                              inheritance_model = "additive"
+#' midas_data <- prepareMiDASData(hla_calls = hla_calls,
+#'                                pheno = pheno,
+#'                                covar = covar,
+#'                                analysis_type = "hla_allele",
+#'                                inheritance_model = "additive"
 #' )
 #'
 #' # Cox proportional hazards regression model
@@ -46,7 +47,7 @@
 #'                     variables = c("B*14:02", "DRB1*11:01")
 #' )
 #'
-#' @importFrom assertthat assert_that see_if is.flag is.string
+#' @importFrom assertthat assert_that see_if is.string
 #' @importFrom broom tidy
 #' @importFrom dplyr bind_rows
 #' @importFrom stats p.adjust
@@ -58,7 +59,8 @@ analyzeAssociations <- function(object,
                                 n_correction = NULL,
                                 exponentiate = FALSE) {
   assert_that(
-    checkStatisticalModel(object)
+    checkStatisticalModel(object),
+    hasTidyMethod(class(object)[1L])
   )
   object_call <- getCall(object)
   object_env <- attr(object$terms, ".Environment")
@@ -75,7 +77,7 @@ analyzeAssociations <- function(object,
     ),
     is.string(correction),
     isCountOrNULL(n_correction),
-    is.flag(exponentiate)
+    isTRUEorFALSE(exponentiate)
   )
 
   results <- lapply(
@@ -159,9 +161,10 @@ analyzeAssociations <- function(object,
 #' pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
 #' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-#' midas_data <- prepareHlaData(hla_calls = hla_calls,
+#' midas_data <- prepareMiDASData(hla_calls = hla_calls,
 #'                              pheno = pheno,
 #'                              covar = covar,
+#'                              analysis_type = "hla_allele",
 #'                              inheritance_model = "additive"
 #' )
 #'
@@ -173,7 +176,7 @@ analyzeAssociations <- function(object,
 #'                             rss_th = 1e-07
 #' )
 #'
-#' @importFrom assertthat assert_that is.flag is.number is.string
+#' @importFrom assertthat assert_that is.number is.string
 #' @importFrom dplyr bind_rows tibble
 #' @importFrom purrr map_dfr
 #' @importFrom rlang warn
@@ -189,7 +192,8 @@ analyzeConditionalAssociations <- function(object,
                                            rss_th = 1e-07,
                                            exponentiate = FALSE) {
   assert_that(
-    checkStatisticalModel(object)
+    checkStatisticalModel(object),
+    hasTidyMethod(class(object)[1L])
   )
   object_call <- getCall(object)
   object_env <- attr(object$terms, ".Environment")
@@ -208,9 +212,9 @@ analyzeConditionalAssociations <- function(object,
     is.string(correction),
     isCountOrNULL(n_correction),
     is.number(th),
-    is.flag(keep),
+    isTRUEorFALSE(keep),
     is.number(rss_th),
-    is.flag(exponentiate)
+    isTRUEorFALSE(exponentiate)
   )
 
   prev_formula <- object_formula
@@ -305,98 +309,6 @@ analyzeConditionalAssociations <- function(object,
   return(results)
 }
 
-#' Prepare data for statistical analysis
-#'
-#' \code{prepareHlaData} binds HLA alleles calls data frame with additional data
-#' frames like phenotypic observations or covariates, creating an input data for
-#' further statistical analysis.
-#'
-#' @inheritParams checkHlaCallsFormat
-#' @inheritParams hlaCallsToCounts
-#' @param ... Data frames holding additional variables like phenotypic
-#'   observations or covariates.
-#'
-#' \code{...} should be data frames with first column holding samples IDs and
-#' named \code{ID}. Those should correspond to \code{ID} column in
-#' \code{hla_calls}.
-#'
-#' @return Data frame with hla counts and additional variables.
-#'
-#' @examples
-#' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-#' hla_calls <- readHlaCalls(hla_calls_file)
-#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-#' pheno <- read.table(pheno_file, header = TRUE)
-#' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-#' covar <- read.table(covar_file, header = TRUE)
-#' prepareHlaData(hla_calls = hla_calls,
-#'                pheno = pheno,
-#'                covar = covar,
-#'                inheritance_model = "additive"
-#' )
-#'
-#' @importFrom assertthat assert_that is.string see_if
-#' @importFrom dplyr left_join
-#'
-#' @export
-prepareHlaData <- function(hla_calls,
-                           ...,
-                           inheritance_model = "additive") {
-  warning("prepareHlaData is deprecated, please use prepareMiDASData instead.")
-  additional_data <- list(...)
-  if (length(additional_data) == 0) {
-    additional_data <- NULL
-  }
-
-  assert_that(
-    checkHlaCallsFormat(hla_calls),
-    all(
-      vapply(
-        X = additional_data,
-        FUN = function(x) {
-          additional_data_frame <- x
-          checkAdditionalData(additional_data_frame,
-                              hla_calls = hla_calls,
-                              accept.null = TRUE
-          )
-        },
-        FUN.VALUE = logical(1)
-      )
-    ),
-    see_if(
-      anyDuplicated(
-        c(
-          unique(unlist(hla_calls[, -1])),
-          unlist(lapply(
-            X = additional_data,
-            FUN = function(x) colnames(x)[-1]
-          ))
-        )
-      ) == 0,
-      msg = "column names in additional data are duplicated or overlap with alleles in hla_calls"
-    ),
-    is.string(inheritance_model),
-    see_if(
-      pmatch(inheritance_model,
-             table = c("dominant", "recessive", "additive"),
-             nomatch = 0
-      ) != 0,
-      msg = "inheritance_model should be one of 'dominant', 'recessive', 'additive'"
-    )
-  )
-
-  data <- hlaCallsToCounts(hla_calls,
-                           inheritance_model = inheritance_model
-  )
-  if (length(additional_data) != 0) {
-    for (i in 1:length(additional_data)) {
-      data <- left_join(data, additional_data[[i]], by = "ID")
-    }
-  }
-
-  return(data)
-}
-
 #' Analyze associations in MiDAS data
 #'
 #' \code{analyzeMiDASData} performs association analysis on MiDAS data using
@@ -464,7 +376,7 @@ prepareHlaData <- function(hla_calls,
 #' object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
 #' analyzeMiDASData(object, analysis_type = "hla_allele")
 #'
-#' @importFrom assertthat assert_that is.flag is.number is.string
+#' @importFrom assertthat assert_that is.number is.string
 #' @importFrom dplyr bind_rows filter left_join select rename
 #' @importFrom stats getCall
 #' @importFrom rlang !! := .data
@@ -485,12 +397,10 @@ analyzeMiDASData <- function(object,
                              logistic = NULL,
                              binary_phenotype = NULL,
                              th = 0.05,
-                             rss_th = 1e-07,
-                             kable_output = TRUE,
-                             format = getOption("knitr.table.format")) {
-
+                             rss_th = 1e-07) {
   assert_that(
-    checkStatisticalModel(object)
+    checkStatisticalModel(object),
+    hasTidyMethod(class(object)[1L])
   )
   object_call <- getCall(object)
   object_env <- attr(object$terms, ".Environment")
@@ -507,8 +417,8 @@ analyzeMiDASData <- function(object,
                   choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions")
     ),
     isCharacterOrNULL(variables),
-    is.flag(conditional),
-    is.flag(keep),
+    isTRUEorFALSE(conditional),
+    isTRUEorFALSE(keep),
     see_if(
       all(test_vars <- variables %in% object_variables) | is.null(variables),
       msg = sprintf("%s can not be found in object data",
@@ -523,10 +433,7 @@ analyzeMiDASData <- function(object,
     isFlagOrNULL(logistic),
     isFlagOrNULL(binary_phenotype),
     is.number(th),
-    is.number(rss_th),
-    is.flag(kable_output),
-    is.string(format),
-    stringMatches(format, choice = c("html", "latex"))
+    is.number(rss_th)
   )
 
   mask <- variables_labels == analysis_type
@@ -655,20 +562,6 @@ analyzeMiDASData <- function(object,
     }
   }
 
-  if (kable_output) {
-    response_variable <- deparse(object_formula[[2]])
-
-    preety_table <- formatAssociationsResults(
-      results,
-      type = analysis_type,
-      response_variable = response_variable,
-      logistic = logistic,
-      pvalue_cutoff = pvalue_cutoff,
-      format = format
-    )
-    print(preety_table)
-  }
-
   # rename term and estimate to match preety_table
   estimate_name <- ifelse(logistic, "odds.ratio", "estimate")
   term_name <- switch (analysis_type,
@@ -780,7 +673,7 @@ analyzeMiDASData <- function(object,
 #' covar <- read.table(covar_file, header = TRUE)
 #' prepareMiDASData(hla_calls, pheno, covar, analysis_type = "expression_level")
 #'
-#' @importFrom assertthat assert_that is.flag is.string see_if
+#' @importFrom assertthat assert_that is.string see_if
 #' @importFrom dplyr funs group_by left_join mutate summarise_all syms
 #' @importFrom magrittr %>% %<>%
 #' @importFrom rlang .data !!!
@@ -809,8 +702,8 @@ prepareMiDASData <- function(hla_calls,
       x = inheritance_model,
       choice = c("dominant", "recessive", "additive")
     ),
-    is.flag(indels),
-    is.flag(unkchar)
+    isTRUEorFALSE(indels),
+    isTRUEorFALSE(unkchar)
   )
 
   additional_data <- list(...)
