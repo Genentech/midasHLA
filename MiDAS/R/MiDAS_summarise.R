@@ -22,6 +22,7 @@
 #'
 #' @importFrom assertthat assert_that
 #' @importFrom dplyr group_by n summarise
+#' @importFrom formattable percent
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
 #'
@@ -79,12 +80,22 @@ summariseAAPosition <- function(hla_calls,
   )
 
   aa <- data.frame(
-    allele = alleles,
+    allele = gsub("[A-Z]+[0-9]*", "", alleles),
     residue = aln[alleles_wo_na, pos],
     stringsAsFactors = FALSE
   ) %>%
-    group_by(.data$allele, .data$residue) %>%
-    summarise(count = n(), frequency = .data$count / length(alleles)) %>%
+    group_by(.data$residue) %>%
+    summarise(
+      allele = paste(unique(allele), collapse = ", "),
+      count = n(),
+      frequency = percent(.data$count / length(alleles))
+    ) %>%
+    dplyr::select(
+      !! sprintf("HLA-%s (%i)", gsub("_", "", gene), pos) := residue,
+      !! sprintf("HLA-%s alleles", gsub("_", "", gene)) := allele,
+      count,
+      frequency
+    ) %>%
     as.data.frame()
 
   return(aa)

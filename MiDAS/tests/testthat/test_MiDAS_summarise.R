@@ -6,11 +6,12 @@ test_that("summarize amino acid position", {
   aa_sum <- summariseAAPosition(hla_calls, "DMA_100")
 
   aa_sum_test <- data.frame(
-    allele = c("DMA*01:01", "DMA*01:02", "DMA*01:03"),
-    residue = c("F", "F", "F"),
-    count = c(33, 6, 1),
-    frequency = c(0.825, 0.15, 0.025),
-    stringsAsFactors = FALSE
+    `HLA-DMA (100)` = c("F"),
+    `HLA-DMA alleles` = "*01:02, *01:01, *01:03",
+    count = 40,
+    frequency = formattable::percent(1),
+    stringsAsFactors = FALSE,
+    check.names = FALSE
   )
   expect_equal(aa_sum, aa_sum_test)
 
