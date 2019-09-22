@@ -1,62 +1,91 @@
-#' Lists HLA alleles for amino acid residues at a given position in the alignment
+#' Summarize amino acid position
 #'
-#' @param hla_calls Character vector containing HLA allele numbers.
-#' @genename
+#' Lists HLA alleles and amino acid residues at a given position
 #'
-#' @return Logical vector of length 1 specifying if \code{allele} follows HLA
-#' alleles naming conventions and have desired resolution.
+#' @inheritParams checkHlaCallsFormat
+#' @inheritParams hlaToAAVariation
+#' @param pos String specifying gene and amio acid position, example
+#'   \code{"A_9"}.
+#' @param aln Matrix containing amino acids sequence alignments as returned by
+#'   \link{readHlaAlignments} function. By default function will use alignment
+#'   files shipped with the package.
+#' @param na.rm Logical flag indicating if \code{NA} values should be considered
+#'   for frequency calculations.
+#'
+#' @return Data frame containing HLA alleles, thier corresponding amino acid
+#'   residues and thier frequencies at requested position.
 #'
 #' @examples
-#' allele <- c("A*01:01", "A*01:02")
-#' checkAlleleFormat(allele)
+#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(file)
+#' summariseAAPosition(hla_calls, "A_9")
 #'
 #' @importFrom assertthat assert_that
-#' @importFrom stringi stri_detect_regex
+#' @importFrom dplyr group_by n summarise
+#' @importFrom magrittr %>%
+#' @importFrom rlang .data
+#'
 #' @export
+summariseAAPosition <- function(hla_calls,
+                                pos,
+                                aln = NULL,
+                                na.rm = FALSE) {
+  assert_that(
+    checkHlaCallsFormat(hla_calls),
+    is.string(pos),
+    see_if(grepl("^[A-Z]+[0-9]*_[0-9]+$", pos),
+           msg = "amino acid position should be formatted like: A_9."
+    ),
+    see_if(
+      is.matrix(aln) || is.null(aln),
+      msg = "aln is not a matrix or NULL."
+    ),
+    isTRUEorFALSE(na.rm)
+  )
 
-file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-hla_calls <- readHlaCalls(file) %>% select(starts_with("DPB1"))
-file <- system.file("extdata", "DPB1_prot.txt", package = "MiDAS")
-aln <- readHlaAlignments(file, resolution = 4)
-aln <- aln[unlist(hla_calls), ]
-varaa <- aln[, 8]
-df <- lapply(unique(names(varaa)), function(x) data.frame(aa = varaa[x], hla = x, count = sum(names(varaa) == x)))
-df <- do.call(rbind, df)
-ggplot(data = df, mapping = aes(x = reorder(hla, -count), y = count, fill = aa)) +
-  geom_bar(stat = "identity", position = ) +
-  labs(title = "DPB1_AA_8", y = "count", x = "") +
-  theme_bw()
+  gene <- gsub("[0-9]+$", "", pos)
+  pos <- as.integer(gsub(".*_([0-9]+)$", "\\1", pos))
 
-# It should somehow come from this
-aa_variation <- hlaToAAVariation(hla_calls)
+  alleles <- dplyr::select(hla_calls, dplyr::starts_with(gene)) %>%
+    unlist()
+  alleles_wo_na <- na.omit(alleles)
+  assert_that(length(alleles_wo_na) != 0,
+              msg = "hla_calls for given gene contains only NA."
+  )
 
-# mby its better to wait with this function until the association test is implemented
+  if (na.rm) {
+    alleles <- alleles_wo_na
+  }
 
-### typical workflow ###
-library("survival")
-hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-hla_calls <- readHlaCalls(hla_calls_file)
-pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
-covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-midas_data <- prepareMiDASData(hla_calls = hla_calls,
-                               pheno = pheno,
-                               covar = covar,
-                               analysis_type = "aa_level",
-                               inheritance_model = "additive"
-)
+  hla_resolution <- min(getAlleleResolution(alleles_wo_na))
+  aln <- readHlaAlignments(
+    gene = gsub("_", "", gene),
+    resolution = hla_resolution,
+    unkchar = "*"
+  )
 
-object <- lm(OS ~ AGE + SEX, data = midas_data)
-res <- analyzeMiDASData(object, analysis_type = "aa_level", kable_output = FALSE)
+  assert_that(
+    see_if(
+      pos <= ncol(aln),
+      msg = sprintf("amino acid position %i is higher than amino acid sequence length.", pos)
+    ),
+    see_if(
+      all(i <- alleles_wo_na %in% rownames(aln)),
+      msg = sprintf(
+        fmt = "allele %s could not be found in the nucleotide alignment file.",
+        paste(unique(alleles_wo_na[! i]), collapse = ", ")
+      )
+    )
+  )
 
+  aa <- data.frame(
+    allele = alleles,
+    residue = aln[alleles_wo_na, pos],
+    stringsAsFactors = FALSE
+  ) %>%
+    group_by(.data$allele, .data$residue) %>%
+    summarise(count = n(), frequency = .data$count / length(alleles)) %>%
+    as.data.frame()
 
-aa_matrix <- hlaToAAVariation(hla_calls)
-f <- function(midas_data,
-              aa_pos,
-              frequency_cutoff) {
-  aa_pos <- paste0(aa_pos, "_")
-  aa_df <- select(midas_data, starts_with(aa_pos))
+  return(aa)
 }
-
-
