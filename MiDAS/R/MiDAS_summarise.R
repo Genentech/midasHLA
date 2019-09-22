@@ -91,10 +91,10 @@ summariseAAPosition <- function(hla_calls,
       frequency = percent(.data$count / length(alleles))
     ) %>%
     dplyr::select(
-      !! sprintf("HLA-%s (%i)", gsub("_", "", gene), pos) := residue,
-      !! sprintf("HLA-%s alleles", gsub("_", "", gene)) := allele,
-      count,
-      frequency
+      !! sprintf("HLA-%s (%i)", gsub("_", "", gene), pos) := .data$residue,
+      !! sprintf("HLA-%s alleles", gsub("_", "", gene)) := .data$allele,
+      .data$count,
+      .data$frequency
     ) %>%
     as.data.frame()
 
