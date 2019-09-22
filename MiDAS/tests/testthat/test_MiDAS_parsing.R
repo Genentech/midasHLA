@@ -121,36 +121,37 @@ test_that("HLA allele alignments are read properly", {
   fake_aln_tmp <- tempfile()
   writeLines(text = fake_aln, con = fake_aln_tmp)
   expect_error(readHlaAlignments(fake_aln_tmp),
-               "input file contains no correct HLA alignments"
+               "could not find alleles numbers in the alignment file"
   )
   unlink(fake_aln_tmp)
 
-  fake_aln <- readLines(aln_file)
-  fake_aln <- vapply(X = fake_aln,
-                     FUN = function(x) {
-                       number <- stri_split_regex(x, "\\s+")[[1]]
-                       if (any(checkAlleleFormat(number))) {
-                         li <- length(number) - 1
-                         number[li] <- paste(sample(c("?", ">", "<", "#", "@", "!"),
-                                                    nchar(number[li]),
-                                                    replace = TRUE
-                                             ),
-                                             collapse = ""
-                                       )
-                         paste(number, collapse = " ")
-                       } else {
-                         x
-                       }
-                     },
-                     FUN.VALUE = character(length = 1),
-                     USE.NAMES = FALSE
-  )
-  fake_aln_tmp <- tempfile()
-  writeLines(text = fake_aln, con = fake_aln_tmp)
-  expect_error(readHlaAlignments(fake_aln_tmp),
-               "alignments lines contain non standard characters"
-  )
-  unlink(fake_aln_tmp)
+  # This test is removed as part of reducing comp. time
+  # fake_aln <- readLines(aln_file)
+  # fake_aln <- vapply(X = fake_aln,
+  #                    FUN = function(x) {
+  #                      number <- stri_split_regex(x, "\\s+")[[1]]
+  #                      if (any(checkAlleleFormat(number))) {
+  #                        li <- length(number) - 1
+  #                        number[li] <- paste(sample(c("?", ">", "<", "#", "@", "!"),
+  #                                                   nchar(number[li]),
+  #                                                   replace = TRUE
+  #                                            ),
+  #                                            collapse = ""
+  #                                      )
+  #                        paste(number, collapse = " ")
+  #                      } else {
+  #                        x
+  #                      }
+  #                    },
+  #                    FUN.VALUE = character(length = 1),
+  #                    USE.NAMES = FALSE
+  # )
+  # fake_aln_tmp <- tempfile()
+  # writeLines(text = fake_aln, con = fake_aln_tmp)
+  # expect_error(readHlaAlignments(fake_aln_tmp),
+  #              "alignments lines contain non standard characters"
+  # )
+  # unlink(fake_aln_tmp)
 
   fake_aln <- readLines(aln_file)
   fake_aln[grepl("Prot", fake_aln)] <- "Prot"
