@@ -4,3 +4,6 @@
 .Ruserdata
 .DS_Store
 .lintr
+inst/doc
+*.html
+*.R
