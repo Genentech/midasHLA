@@ -1,29 +1,34 @@
-#' Converts HLA allele numbers to amino acid variation
+#' Convert HLA allele numbers to amino acid variation matrix
 #'
-#' \code{hlaToAAVariation} converts HLA allele numbers data frame to a matrix
-#' holding information on amino acid level variation.
+#' \code{hlaToAAVariation} convert HLA allele numbers data frame to a matrix
+#' holding information on amino acid variation.
+#'
+#' Variable amino acid positions are found by comparing elements of the
+#' alignment column wise. Some of the values in alignment can be treated
+#' specially using \code{indels} and \code{unkchar} arguments. Function process
+#' alignments for all HLA genes found in \code{hla_calls}.
 #'
 #' \code{alnpath} can be used to provide path to directory containing custom
 #' alignment files. Each alignment file have to be named following EBI database
 #' convention GENENAME_prot.txt. By default \code{alnpath} points to directory
-#' containing alignments files shipped with the package.
+#' containing alignment files available at EBI database.
 #'
 #' @inheritParams checkHlaCallsFormat
-#' @param indels Logical indicating whether indels should be considered as
-#'   variability.
+#' @param indels Logical indicating whether indels should be considered when
+#'   checking variability.
 #' @param unkchar Logical indicating whether unknown characters in the alignment
-#'   should be treated as variability.
+#'   should be considered when checking variability.
 #' @param alnpath String providing optional path to directory containing HLA
 #'   alignment files. See details for further explanations.
 #' @param as_df Logical indicating if data frame should be returned.
-#'   Otherwise function matrix is returned.
+#'   Otherwise matrix is returned.
 #'
-#' @return Data frame or matrix containing variable amino acid positions. See
+#' @return Matrix or data frame containing variable amino acid positions. See
 #'   \code{as_df} parameter.
 #'
 #'   Rownames corresponds to ID column of input data frame, and colnames to
-#'   alignment positions for given genes. If no variation in amino acids
-#'   alignments is found function return one column matrix filled with `NA`.
+#'   alignment positions for given genes. If no variation in amino acid
+#'   alignments is found function return one column matrix filled with `NA`s.
 #'
 #' @examples
 #' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
@@ -161,12 +166,12 @@ hlaToAAVariation <- function(hla_calls,
   return(aa_variation)
 }
 
-#' Converts hla calls data frame according to match table
+#' Convert HLA calls data frame according to match table
 #'
-#' \code{hlaToVariable} converts hla calls data frame to additional variables
+#' \code{hlaToVariable} convert HLA calls data frame to additional variables
 #' based on match table (dictionary).
 #'
-#' \code{reduce} controls if conversion should happen in a greedy way, such that
+#' \code{reduce} control if conversion should happen in a greedy way, such that
 #' if some hla numbers cannot be converted, their resolution is reduced by 2 and
 #' another attempt is taken. This iterative process stops when alleles cannot be
 #' further reduced or all have been successfully converted.
@@ -176,37 +181,48 @@ hlaToAAVariation <- function(hla_calls,
 #' variables. Optionally a data frame formatted in the same manner can be passed
 #' instead.
 #'
-#' \code{dictionary} can be also used to access matchings files shipped with the
+#' \code{dictionary} can be also used to access matching files shipped with the
 #' package. They can be referred to by using one of the following strings (to
-#' list available dictionaries use \link{listMiDASDictionaries}):
-#'
-#' \code{"allele_HLA-A_expression"} reference data to impute expression
-#' levels for HLA-A alleles.
-#'
-#' \code{"allele_HLA-B_Bw"} B alleles can be grouped in allele groups Bw4 and
-#' Bw6. In some cases HLA alleles containing Bw4 epitope, on nucleotide level
-#' actually carries a premature stop codon. Meaning that although on nucleotide
-#' level the allele would encode a Bw4 epitope it's not really there and it is
-#' assigned to Bw6 group. However in 4-digit resolution these alleles can not be
-#' distinguished from other Bw4 groups. Since alleles with premature stop codons
-#' are rare in those ambiguous cases those are assigned to Bw4 group.
-#'
-#' \code{"allele_HLA-C_C1-2"} C alleles can be grouped in allele groups C1
-#' and C2.
-#'
-#' \code{"allele_HLA-C_expression"} reference data to impute expression
-#' levels for HLA-C alleles.
-#'
-#' \code{"allele_HLA_supertype"} A and B alleles can be assigned to so-called
-#' supertypes.
-#'
-#' \code{"allele_HLA_Ggroup"} HLA alleles can be re-coded in G groups,
-#' which defines amino acid identity only in the exons relevant for peptide
-#' binding. Note that alleles "DRB1*01:01:01" and "DRB1*01:16" were matched with
-#' more than one G group, this ambiguity was removed by deleting matching with
-#' "DRB5*01:01:01G" group. Moreover in the original match file there were alleles
-#' named "DPA*...", here they are renamed to "DPA1*..." to adhere with HLA
-#' nomenclature.
+#' list available dictionaries use \code{\link{listMiDASDictionaries}}):
+#' \describe{
+#'   \item{\code{allele_HLA-A_expression}}{
+#'     Reference data to impute expression levels for HLA-A alleles.
+#'   }
+#'   \item{\code{allele_HLA-B_Bw}}{
+#'     B alleles can be grouped in allele groups Bw4 and Bw6. In some cases HLA
+#'     alleles containing Bw4 epitope, on nucleotide level actually carries a
+#'     premature stop codon. Meaning that although on nucleotide level the
+#'     allele would encode a Bw4 epitope it's not really there and it is
+#'     assigned to Bw6 group. However in 4-digit resolution these alleles can
+#'     not be distinguished from other Bw4 groups. Since alleles with premature
+#'     stop codons are rare in those ambiguous cases those are assigned to Bw4
+#'     group.
+#'   }
+#'   \item{allele_HLA_Bw4+A23+A24+A32}{
+#'     Extends \code{allele_HLA-B_Bw} dictionary by inclusion of A*23, A*24 and
+#'     A*32 HLA alleles.
+#'   }
+#'   \item{\code{allele_HLA-C_C1-2}}{
+#'     C alleles can be grouped in allele groups C1 and C2.
+#'   }
+#'   \item{\code{allele_HLA-C_expression}}{
+#'     Reference data to impute expression levels for HLA-C alleles.
+#'   }
+#'   \item{\code{allele_HLA_supertype}}{
+#'     A and B alleles can be assigned to so-called supertypes, a
+#'     classification that group HLA alleles based on peptide binding
+#'     specificities.
+#'   }
+#'   \item{\code{allele_HLA_Ggroup}}{
+#'     HLA alleles can be re-coded in G groups, which defines amino acid
+#'     identity only in the exons relevant for peptide binding. Note that
+#'     alleles "DRB1*01:01:01" and "DRB1*01:16" were matched with more than one
+#'     G group, this ambiguity was removed by deleting matching with
+#'     "DRB5*01:01:01G" group. Moreover in the original match file there were
+#'     alleles named "DPA*...", here they are renamed to "DPA1*..." to adhere
+#'     with HLA nomenclature.
+#'   }
+#' }
 #'
 #' @inheritParams checkHlaCallsFormat
 #' @inheritParams convertAlleleToVariable
@@ -218,7 +234,7 @@ hlaToAAVariation <- function(hla_calls,
 #' @param nacols.rm logical indicating if result columns that contain only
 #'   \code{NA} should be removed.
 #'
-#' @return Data frame of hla numbers converted to additional variables according
+#' @return Data frame of HLA numbers converted to additional variables according
 #'   to match table.
 #'
 #' @examples
@@ -299,13 +315,13 @@ hlaToVariable <- function(hla_calls,
   return(variable)
 }
 
-#' Reduce hla calls data frame resolution
+#' Reduce HLA calls data frame resolution
 #'
-#' \code{reduceHlaCalls} reduces hla calls data frame to specified resolution.
+#' \code{reduceHlaCalls} reduce HLA calls data frame to specified resolution.
 #'
 #' If \code{resolution} is greater than resolution of \code{hla_calls} elements,
-#' those elements will be returned unchanged. Elements with optional suffixes
-#' are not reduced.
+#' those elements will be unchanged. Elements with optional suffixes are not
+#' reduced.
 #'
 #' @inheritParams checkHlaCallsFormat
 #' @inheritParams reduceAlleleResolution
@@ -332,7 +348,7 @@ reduceHlaCalls <- function(hla_calls,
 
 #' Transform HLA calls to counts table
 #'
-#' \code{hlaCallsToCounts} converts HLA calls data frame into counts table.
+#' \code{hlaCallsToCounts} convert HLA calls data frame into counts table.
 #'
 #' @inheritParams checkHlaCallsFormat
 #' @param inheritance_model String specifying inheritance model to use.
@@ -343,15 +359,19 @@ reduceHlaCalls <- function(hla_calls,
 #'   are coded as \code{2} and heterozygotes as \code{1}.
 #' @param check_hla_format Logical indicating if \code{hla_calls} format should
 #'   be checked. This is useful if one wants to use \code{hlaCallsToCounts} with
-#'   input not adhering to HLA nomenclature standards.
+#'   input not adhering to HLA nomenclature standards. See examples.
 #'
-#' @return Data frame containing counts of HLA alleles counted according to
-#'   specified model.
+#' @return Data frame containing counts of HLA alleles according to specified
+#'   inheritance model.
 #'
 #' @examples
 #' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(file)
 #' hlaCallsToCounts(hla_calls, inheritance_model = "additive")
+#'
+#' # usage with non-HLA alleles numbers input
+#' hla_vars <- hlaToVariable(hla_calls, dictionary = "allele_HLA_supertype")
+#' hlaCallsToCounts(hla_calls, inheritance_model = "additive", check_hla_format = FALSE)
 #'
 #' @importFrom assertthat assert_that is.string
 #' @importFrom qdapTools mtabulate
@@ -455,7 +475,7 @@ hlaCallsToCounts <- function(hla_calls,
 #'
 #' @inheritParams checkHlaCallsFormat
 #'
-#' @return Data frame containing the allele and its corresponding frequencies.
+#' @return Data frame containing alleles and thier corresponding frequencies.
 #'
 #' @examples
 #' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
@@ -477,17 +497,19 @@ getHlaFrequencies <- function(hla_calls) {
   return(allele_freq)
 }
 
-#' Transform amino acids variation data frame to counts table
+#' Transform amino acid variations data frame to counts table
 #'
-#' \code{aaVariationToCounts} converts variation data frame data frame into
+#' \code{aaVariationToCounts} converts amino acid variations data frame into
 #' counts table.
 #'
 #' @inheritParams hlaCallsToCounts
 #' @param aa_variation Data frame holding amino acid variation data as returned
 #'   by \link{hlaToAAVariation}.
 #'
-#' @return Data frame containing counts of amino acids at specific positions
-#'   counted according to specified model.
+#' @return Data frame containing counts of amino acid at specific positions
+#'   according to inheritance specified model.
+#'
+#' @seealso \code{\link{hlaToAAVariation}}
 #'
 #' @examples
 #' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
@@ -560,19 +582,21 @@ aaVariationToCounts <- function(aa_variation,
   return(aa_counts)
 }
 
-#' Calculate amino acids frequencies
+#' Calculate amino acid's frequencies
 #'
-#' \code{getAAFrequencies} calculates amino acids frequencies in amino acids
-#' data frame.
+#' \code{getAAFrequencies} calculates amino acid's frequencies in amino acid
+#' variations data frame.
 #'
-#' Amino acids frequencies are counted in reference to sample taking both gene
+#' Amino acid's frequencies are counted in reference to sample taking both gene
 #' copies into consideration. `n / (2 * j)` where `n` is the number of amino
 #' acid occurrences and `j` is the sample size.
 #'
 #' @inheritParams aaVariationToCounts
 #'
-#' @return Data frame containing the amino acids with positions and its
+#' @return Data frame containing the amino acid's positions and their
 #'   corresponding frequencies.
+#'
+#' @seealso \code{\link{hlaToAAVariation}}
 #'
 #' @examples
 #' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
@@ -610,7 +634,7 @@ getAAFrequencies <- function(aa_variation) {
 
 #' Convert HLA counts table to HLA calls
 #'
-#' \code{countsToHlaCalls} converts counts table to hla calls data frame, this
+#' \code{countsToHlaCalls} convert counts table to HLA calls data frame, this
 #' is useful when working with data from UK Biobank.
 #'
 #' Note that proper HLA calls reconstruction from counts table is only possible
@@ -619,8 +643,9 @@ getAAFrequencies <- function(aa_variation) {
 #' \code{hlaCallsToCounts(hla_calls, inheritance_model = 'additive')}.
 #'
 #' @param counts Data frame with HLA alleles counts, as returned by
-#'   \link{hlaCallsToCounts} function. First column should contain samples IDs,
-#'   following columns should be named with valid HLA alleles numbers.
+#'   \code{\link{hlaCallsToCounts}} function. First column should contain
+#'   samples IDs, following columns should be named with valid HLA alleles
+#'   numbers.
 #'
 #' @return Data frame containing HLA allele calls.
 #'
@@ -683,24 +708,27 @@ countsToHlaCalls <- function(counts) {
 
 #' Helper function for pretty formating statistical analysis results
 #'
-#' \code{formatResults} formats statistical analysis results table to html or
+#' \code{formatResults} format statistical analysis results table to html or
 #' latex format.
 #'
-#' @param results Tibble as returned by \link{analyzeAssociations}.
-#' @param filter_by Character specifying conditional expression used to filter
-#'   \code{results}, this is equivalent to \code{...} argument passed to
-#'   \link[dplyr]{filter} except it has to be a character vector.
-#' @param arrange_by Character specifying variable names to use for sorting.
-#'   Equivalent to \code{...} argument passed to \link[dplyr]{arrange}.
-#' @param select_cols Character specifying variable names that should be
+#' @param results Tibble as returned by \code{\link{analyzeAssociations}}.
+#' @param filter_by Character vector specifying conditional expression used to
+#'   filter \code{results}, this is equivalent to \code{...} argument passed to
+#'   \code{\link[dplyr]{filter}} except it has to be a character vector.
+#' @param arrange_by Character vector specifying variable names to use for
+#'   sorting. Equivalent to \code{...} argument passed to
+#'   \code{\link[dplyr]{arrange}}.
+#' @param select_cols Character vector specifying variable names that should be
 #'   included in the output table. Can be also used to rename selected
 #'   variables, see examples.
-#' @param format A character string. Possible values are \code{"latex"} and
-#'   \code{"html"}.
+#' @param format String with possible values \code{"latex"} and \code{"html"}.
 #' @param header String specifying header for result table. If \code{NULL}
-#'   header is omitted.
+#'   no header is added.
 #'
-#' @return A character vector of the table source code.
+#' @return Character vector of formatted table source code.
+#'
+#' @seealso \code{\link{runMiDAS}}, \code{\link{analyzeAssociations}},
+#'   \code{\link{analyzeConditionalAssociations}}.
 #'
 #' @examples
 #' hla_calls <- readHlaCalls(system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS"))
@@ -785,7 +813,7 @@ formatResults <- function(results,
 #' Calculate variables frequencies
 #'
 #' \code{getCountsFrequencies} calculate variables frequencies based on counts
-#' table, such as produced by \link{hlaCallsToCounts}.
+#' table, such as produced by \code{\link{hlaCallsToCounts}}.
 #'
 #' Variables frequencies are counted in reference to sample size, depending on
 #' the inheritance model under which the counts table has been generated one
@@ -796,10 +824,12 @@ formatResults <- function(results,
 #' (`n / j`).
 #'
 #' @param counts_table Data frame containing variables counts, such as produced
-#'   by \link{hlaCallsToCounts}.
+#'   by \code{\link{hlaCallsToCounts}}.
 #'
 #' @return Data frame containing variables, its corresponding total counts
 #'   and frequencies.
+#'
+#' @seealso \code{\link{hlaCallsToCounts}}
 #'
 #' @examples
 #' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
@@ -824,6 +854,7 @@ getCountsFrequencies <- function(counts_table) {
   counts_sums <- colSums(counts_table, na.rm = TRUE)
 
   # Under additive inheritance model population size equals 2 * nrow(counts_table), in other cases it's 1 * nrow(counts_table)
+  # here we are taking guess at it, which might be wrong especially in smaller population sizes
   pop_mul <- ifelse(max(counts_table, na.rm = TRUE) > 1, 2, 1)
   counts_freq <- counts_sums / (pop_mul * nrow(counts_table))
 
@@ -839,10 +870,11 @@ getCountsFrequencies <- function(counts_table) {
 
 #' Pretty format association analysis results
 #'
-#' \link{formatAssociationsResults} formats results table to specified
-#' format. It uses \link{formatResults} with prespecifed arguments to return
-#' nice table depending on the type of analysis and model type. This function is
-#' intended only to be used internally by \link{analyzeMiDASData}.
+#' \code{formatAssociationsResults} formats results table to specified
+#' format. It uses \code{\link{formatResults}} with pre specified arguments to
+#' return pretty formatted table depending on the type of analysis and model
+#' type. This function is intended only to be used internally by
+#' \code{\link{runMiDAS}}.
 #'
 #' @inheritParams formatResults
 #' @param type String specifying type of analysis from which \code{results} were
@@ -859,6 +891,8 @@ getCountsFrequencies <- function(counts_table) {
 #'   \code{p.adjusted} value is used instead.
 #'
 #' @return A character vector with pretty formatted \code{results} table.
+#'
+#' @seealso \code{\link{formatResults}}, \code{\link{runMiDAS}}
 #'
 #' @importFrom assertthat assert_that is.number is.string see_if
 #' @importFrom dplyr ends_with mutate_at vars
@@ -952,35 +986,41 @@ formatAssociationsResults <- function(results,
   return(results)
 }
 
-#' Converts counts data frame according to match table
+#' Convert counts data frame according to match table
 #'
-#' \code{countsToVariables} converts counts data frame to variables based on
+#' \code{countsToVariables} convert counts data frame to variables based on
 #' match table (dictionary).
-#'
-#' @inheritParams hlaToVariable
-#' @param counts Data frame with counts, such as returned by
-#'   \link{hlaCallsToCounts} function. First column should contain samples IDs,
-#'   following columns should contain counts (natural numbers including zero).
-#' @param dictionary Path to the file containing variable matchings or data frame providing
-#'   this information. See details for further explanations.
-#' @param na.value Vector of length one speciyfing value for variables for which no
-#'   matching is found in \code{counts}. Default behaviour is to mark such
-#'   instances with \code{NA}.
-#'
-#' @return Data frame of indicators for new variables, with \code{1} signaling
-#'   presence of variable and \code{0} absence.
 #'
 #' \code{dictionary} file should be a tsv format with header and two columns.
 #' First column should be named \code{"Name"} and hold variable name, second
 #' should be named \code{"Expression"} and hold expression used to identify
-#' variable (eg. ...). Optionally a data frame formatted in the same manner can
-#' be passed instead.
+#' variable (eg. \code{"KIR2DL3 & ! KIR2DL2"} will match all samples with
+#' \code{KIR2DL3} and without \code{KIR2DL2}). Optionally a data frame formatted
+#' in the same manner can be passed instead.
 #'
-#' Dictionaries shipped with package:
+#' Dictionaries shipped with the package:
+#' \describe{
+#'   \item{\code{hla_kir_interactions}}{
+#'     HLA - KIR interactions based on Pende et al., 2019.
+#'   }
+#'   \item{\code{kir_haplotypes}}{
+#'     KIR genes to KIR haplotypes dictionary.
+#'   }
+#' }
 #'
-#' \code{hla_kir_interactions} interactions based on Pende et al., 2019.
+#' @inheritParams hlaToVariable
+#' @param counts Data frame with counts, such as returned by
+#'   \code{\link{hlaCallsToCounts}} function. First column should contain
+#'   samples IDs, following columns should contain counts (natural numbers
+#'   including zero).
+#' @param dictionary Path to the file containing variables matchings or data
+#'   frame providing this information. See details for further explanations.
+#' @param na.value Vector of length one speciyfing value for variables for which
+#'   no matching is found in \code{counts}. Default behaviour is to mark such
+#'   instances with \code{NA}.
 #'
-#' \code{kir_haplotypes} kir haplotypes.
+#' @return Data frame of indicators for new variables, with \code{1} signaling
+#'   presence of variable and \code{0} absence.
 #'
 #' @examples
 #' file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
@@ -1064,23 +1104,26 @@ countsToVariables <- function(counts,
 #' \code{getHlaKirInteractions} calculates binary presence-absence matrix of HLA
 #' - KIR interactions.
 #'
-#' @inheritParams checkHlaCallsFormat
-#' @param kir_counts Data frame containing KIR genes counts, as return by
-#'   \link{readKirCalls}.
-#' @param interactions_dict Path to the file containing HLA - KIR interactions
-#'   matchings. See details for further details.
-#'
-#' @return Data frame with binary presence-absence indicators for HLA - KIR
-#'   interactions.
-#'
 #' In order to be able to compare input data with \code{interactions_dict}
 #' \code{hla_calls} are first converted to variables such as G groups, using
 #' matching files shipped with the packages. Moreover \code{hla_calls} are also
 #' reduced to all possible resolutions.
 #'
-#' \code{interactions_dict} should be a tsv formatted file with following
-#' columns: HLA, KIR, Affinity, Type. The package is shipped with interactions
-#' file created based on Pende et al., 2019.
+#' \code{interactions_dict} file should be a tsv format with header and two
+#' columns. First column should be named \code{"Name"} and hold interactions
+#' names, second should be named \code{"Expression"} and hold expression used to
+#' identify interaction (eg. \code{"C2 & KIR2DL1"} will match all samples
+#' with \code{C2} and \code{KIR2DL1}). The package is shipped with interactions
+#' file created based on Pende, et al. 2019.
+#'
+#' @inheritParams checkHlaCallsFormat
+#' @param kir_counts Data frame containing KIR genes counts, as return by
+#'   \code{\link{readKirCalls}}.
+#' @param interactions_dict Path to the file containing HLA - KIR interactions
+#'   matchings. See details for further details.
+#'
+#' @return Data frame with binary presence-absence indicators for HLA - KIR
+#'   interactions.
 #'
 #' @examples
 #' hla_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")

@@ -13,5 +13,20 @@ hasTidyMethod(class)
 Logical indicating if there is tidy method for given class.
 }
 \description{
-\code{hasTidyMethod} checks if there is tidy method for given class.
+\code{hasTidyMethod} check if there is tidy method available for given class.
 }
+\seealso{
+Other assert functions: \code{\link{characterMatches}},
+  \code{\link{checkAdditionalData}},
+  \code{\link{checkHlaCallsFormat}},
+  \code{\link{checkKirCountsFormat}},
+  \code{\link{checkStatisticalModel}},
+  \code{\link{colnamesMatches}},
+  \code{\link{isCharacterOrNULL}},
+  \code{\link{isClassOrNULL}}, \code{\link{isCountOrNULL}},
+  \code{\link{isCountsOrZeros}},
+  \code{\link{isFlagOrNULL}}, \code{\link{isNumberOrNULL}},
+  \code{\link{isStringOrNULL}},
+  \code{\link{isTRUEorFALSE}}, \code{\link{stringMatches}}
+}
+\concept{assert functions}

@@ -1,9 +1,9 @@
-#' Reads data table with HLA allele calls
+#' Read HLA allele calls data
 #'
-#' \code{readHlaCalls} reads table with HLA allele calls from file.
+#' \code{readHlaCalls} read HLA allele calls from file
 #'
 #' Input file have to be a tsv formatted table with header. First column should
-#' contain samples IDs, further columns should hold corresponding HLA allele
+#' contain sample IDs, further columns should hold corresponding HLA allele
 #' numbers.
 #'
 #' \code{resolution} parameter can be used to reduce HLA allele numbers. If
@@ -17,8 +17,6 @@
 #' @param file Path to input file.
 #'
 #' @return Data frame containing HLA allele calls.
-#'
-#' \code{NA} values in input file are parsed unchanged.
 #'
 #' @examples
 #' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
@@ -78,11 +76,11 @@ readHlaCalls <- function(file,
   return(hla_calls)
 }
 
-#' Reads HLA allele alignments
+#' Read HLA allele alignments
 #'
-#' \code{readHlaAlignments} reads HLA allele alignments from file.
+#' \code{readHlaAlignments} read HLA allele alignments from file.
 #'
-#' HLA allele alignment file should follow format used EBI database, for details
+#' HLA allele alignment file should follow EBI database format, for details
 #' see
 #' \url{ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/alignments/README.md}.
 #'
@@ -90,8 +88,7 @@ readHlaCalls <- function(file,
 #' They can be easily accessed using \code{gene} parameter. If \code{gene} is
 #' set to \code{NULL} file parameter is used instead and alignment is read from
 #' the provided file. In EBI database alignments for DRB1, DRB3, DRB4 and DRB5
-#' genes are provided as a single file, here they are separated into separate
-#' files for accordance with the package functionality.
+#' genes are provided as a single file, here they are separated.
 #'
 #' @inheritParams readHlaCalls
 #' @inheritParams reduceAlleleResolution

@@ -8,7 +8,7 @@ getCountsFrequencies(counts_table)
 }
 \arguments{
 \item{counts_table}{Data frame containing variables counts, such as produced
-by \link{hlaCallsToCounts}.}
+by \code{\link{hlaCallsToCounts}}.}
 }
 \value{
 Data frame containing variables, its corresponding total counts
@@ -16,7 +16,7 @@ Data frame containing variables, its corresponding total counts
 }
 \description{
 \code{getCountsFrequencies} calculate variables frequencies based on counts
-table, such as produced by \link{hlaCallsToCounts}.
+table, such as produced by \code{\link{hlaCallsToCounts}}.
 }
 \details{
 Variables frequencies are counted in reference to sample size, depending on
@@ -33,4 +33,7 @@ hla_calls <- readHlaCalls(file)
 hla_counts <- hlaCallsToCounts(hla_calls, inheritance_model = "additive")
 getCountsFrequencies(hla_counts)
 
+}
+\seealso{
+\code{\link{hlaCallsToCounts}}
 }

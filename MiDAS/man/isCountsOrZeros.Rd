@@ -2,7 +2,7 @@
 % Please edit documentation in R/MiDAS_utils.R
 \name{isCountsOrZeros}
 \alias{isCountsOrZeros}
-\title{Check if vectors contains only counts or zeros}
+\title{Check if vector contains only counts or zeros}
 \usage{
 isCountsOrZeros(x, na.rm = TRUE)
 }
@@ -10,7 +10,7 @@ isCountsOrZeros(x, na.rm = TRUE)
 \item{x}{Numeric vector or object that can be \code{unlist} to numeric
 vector.}
 
-\item{na.rm}{Logical indicating if \code{NA} values should be omitted.}
+\item{na.rm}{Logical indicating if \code{NA} values should be accepted.}
 }
 \value{
 Logical indicating if provided vector contains only positive integers
@@ -20,3 +20,18 @@ Logical indicating if provided vector contains only positive integers
 \code{isCountsOrZeros} checks if vector contains only positive integers or
 zeros.
 }
+\seealso{
+Other assert functions: \code{\link{characterMatches}},
+  \code{\link{checkAdditionalData}},
+  \code{\link{checkHlaCallsFormat}},
+  \code{\link{checkKirCountsFormat}},
+  \code{\link{checkStatisticalModel}},
+  \code{\link{colnamesMatches}},
+  \code{\link{hasTidyMethod}},
+  \code{\link{isCharacterOrNULL}},
+  \code{\link{isClassOrNULL}}, \code{\link{isCountOrNULL}},
+  \code{\link{isFlagOrNULL}}, \code{\link{isNumberOrNULL}},
+  \code{\link{isStringOrNULL}},
+  \code{\link{isTRUEorFALSE}}, \code{\link{stringMatches}}
+}
+\concept{assert functions}

@@ -7,15 +7,30 @@
 characterMatches(x, choice)
 }
 \arguments{
-\item{x}{character vector to test.}
+\item{x}{Character vector to test.}
 
 \item{choice}{Character vector with possible values for \code{x}.}
 }
 \value{
-Logical indicating if \code{x} matches one of the values in
-  \code{choice}.
+Logical indicating if \code{x}'s elements matches any of the values
+in \code{choice}.
 }
 \description{
-\code{characterMatches} checks if all elements of character matches values in
-choices.
+\code{characterMatches} checks if all elements of a character vector matches
+values in choices.
 }
+\seealso{
+Other assert functions: \code{\link{checkAdditionalData}},
+  \code{\link{checkHlaCallsFormat}},
+  \code{\link{checkKirCountsFormat}},
+  \code{\link{checkStatisticalModel}},
+  \code{\link{colnamesMatches}},
+  \code{\link{hasTidyMethod}},
+  \code{\link{isCharacterOrNULL}},
+  \code{\link{isClassOrNULL}}, \code{\link{isCountOrNULL}},
+  \code{\link{isCountsOrZeros}},
+  \code{\link{isFlagOrNULL}}, \code{\link{isNumberOrNULL}},
+  \code{\link{isStringOrNULL}},
+  \code{\link{isTRUEorFALSE}}, \code{\link{stringMatches}}
+}
+\concept{assert functions}

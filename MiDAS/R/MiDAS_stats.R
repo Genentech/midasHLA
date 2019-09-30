@@ -1,27 +1,32 @@
 #' Association analysis
 #'
-#' \code{analyzeAssociations} performs associations analysis on single variable
+#' \code{analyzeAssociations} perform association analysis on single variable
 #' level using statistical model of choice.
-#'
-#' @inheritParams updateModel
-#' @param variables Character specifying variables to use in association tests.
-#' @param correction String specifying multiple testing correction method. See
-#'   details for further information.
-#' @param n_correction Integer specifying number of comparisons to consider
-#'   during multiple testing correction calculations, must be at least equql to
-#'   number of comparisons being made; only set this (to non-default) when you
-#'   know what you are doing!
-#' @param exponentiate Logical indicating whether or not to exponentiate the
-#'   coefficient estimates. Internally this is passed to \link[broom]{tidy}.
-#'   This is typical for logistic and multinomial regressions, but a bad idea if
-#'   there is no log or logit link. Defaults to FALSE.
 #'
 #' \code{correction} specifies p-value adjustment method to use, common choice
 #' is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
-#' \link[stats]{p.adjust}. Check there to get more details.
+#' \link[stats]{p.adjust}.
+#'
+#' @inheritParams updateModel
+#' @param variables Character vector specifying variables to use in association
+#'   tests.
+#' @param correction String specifying multiple testing correction method. See
+#'   details for further information.
+#' @param n_correction Integer specifying number of comparisons to consider
+#'   during multiple testing correction calculations, must be at least equal to
+#'   number of comparisons being made; only set this (to non-default) when you
+#'   know what you are doing!
+#' @param exponentiate Logical flag indicating whether or not to exponentiate
+#'   the coefficient estimates. Internally this is passed to
+#'   \code{\link[broom]{tidy}}. This is typical for logistic and multinomial
+#'   regressions, but a bad idea if there is no log or logit link. Defaults to
+#'   FALSE.
 #'
 #' @return Tibble containing combined results for all alleles in
 #'   \code{hla_calls}.
+#'
+#' @family MiDAS statistical functions
+#' @seealso \code{\link[stats]{p.adjust}}, \code{\link[broom]{tidy}}
 #'
 #' @examples
 #' library("survival")
@@ -31,7 +36,7 @@
 #' pheno <- read.table(pheno_file, header = TRUE)
 #' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE)
-#' midas_data <- prepareMiDASData(hla_calls = hla_calls,
+#' midas_data <- prepareMiDAS(hla_calls = hla_calls,
 #'                                pheno = pheno,
 #'                                covar = covar,
 #'                                analysis_type = "hla_allele",
@@ -132,7 +137,7 @@ analyzeAssociations <- function(object,
 
 #' Stepwise conditional association analysis
 #'
-#' \code{analyzeConditionalAssociations} performs stepwise conditional testing
+#' \code{analyzeConditionalAssociations} perform stepwise conditional testing
 #' adding the previous top-associated variable as covariate, until there is no
 #' more significant variables based on a self-defined threshold.
 #'
@@ -140,18 +145,21 @@ analyzeAssociations <- function(object,
 #'
 #' @inheritParams updateModel
 #' @inheritParams analyzeAssociations
-#' @param th number specifying p-value threshold for a variable to be considered
+#' @param th Number specifying p-value threshold for a variable to be considered
 #'   significant.
-#' @param keep logical flag indicating if the output should be a list of results
+#' @param keep Logical flag indicating if the output should be a list of results
 #'   resulting from each selection step. Default is to return only the final
 #'   result.
-#' @param rss_th number specifying residual sum of squares threshold at which
+#' @param rss_th Number specifying residual sum of squares threshold at which
 #'   function should stop adding additional variables. As the residual sum of
 #'   squares approaches \code{0} the perfect fit is obtained making further
 #'   attempts at variables selection nonsense, thus function is stopped. This
 #'   behavior can be controlled using \code{rss_th}.
 #'
-#' @return tibble with stepwise conditional testing results.
+#' @return Tibble with stepwise conditional testing results.
+#'
+#' @family MiDAS statistical functions
+#' @seealso \code{\link[stats]{p.adjust}}, \code{\link[broom]{tidy}}
 #'
 #' @examples
 #' library("survival")
@@ -161,7 +169,7 @@ analyzeAssociations <- function(object,
 #' pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
 #' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-#' midas_data <- prepareMiDASData(hla_calls = hla_calls,
+#' midas_data <- prepareMiDAS(hla_calls = hla_calls,
 #'                              pheno = pheno,
 #'                              covar = covar,
 #'                              analysis_type = "hla_allele",
@@ -309,54 +317,66 @@ analyzeConditionalAssociations <- function(object,
   return(results)
 }
 
-#' Analyze associations in MiDAS data
+#' Analyze MiDAS data
 #'
-#' \code{analyzeMiDASData} performs association analysis on MiDAS data using
+#' \code{runMiDAS} perform association analysis on MiDAS data using
 #' statistical model specified by user. Function is intended for use with
-#' \link{prepareMiDASData}. See examples section.
+#' \code{\link{prepareMiDAS}}. See examples section.
 #'
-#' @inheritParams analyzeAssociations
-#' @inheritParams analyzeConditionalAssociations
-#' @inheritParams formatAssociationsResults
-#' @param analysis_type String indicating the type of analysis being performed,
-#'   at this point it is only used for results formatting. Valid values are
-#'   \code{"hla_allele"}, \code{"aa_level"}, \code{"expression_level"},
-#'   \code{"allele_g_group"}, \code{"allele_supertype"}, \code{"allele_group"},
-#'   \code{"kir_genes"}, \code{"hla_kir_interactions"}.
-#' @param pattern Character string containing a regular expression that is used
-#'   to further select test variables selected by \code{analysis_type}.
-#' @param conditional Logical indicating if the analysis should be performed
-#'   using stepwise conditional tests or not. See
-#'   \link{analyzeConditionalAssociations} for more details.
-#' @param variables Character specifying additional variables to use in
-#'   association tests except those choosen by \code{analysis_type}.
-#' @param lower_frequency_cutoff Number specifying lower threshold for inclusion
-#'   of a variable. If it's a number between 0 and 1 variables with frequency
-#'   below this number will not be considered during analysis. If it's greater
-#'   or equal 1 variables with number of counts less that this will not be
-#'   considered during analysis.
-#' @param upper_frequency_cutoff Number specifying upper threshold for inclusion
-#'   of a variable. If it's a number between 0 and 1 variables with frequency
-#'   above this number will not be considered during analysis. If it's greater
-#'   or equal 1 variables with number of counts greater that this will not be
-#'   considered during analysis.
-#' @param logistic Logical indicating if statistical model used is logistic (eg.
-#'   \code{coxph}). If \code{NULL} function will try to figure this out. This is
-#'   only used for results formatting.
-#' @param binary_phenotype Logical indicating if coefficient estimates should be
-#'   exponentiated. This is typical for logistic and multinomial regressions,
-#'   but a bad idea if there is no log or logit link. If \code{NULL} function
-#'   will try to figure this out by testing if response is binary (\code{0} or
-#'   \code{1}).
-#'
-#' \code{variables} takes \code{NULL} as a default value, variables labeled with
-#' specified \code{analysis_type} are used in association tests.
+#' \code{analysis_type} is used to select variables from data associated with
+#' \code{object} using \code{\link[Hmisc]{label}}s. In standard work flow data
+#' are first processed using \code{\link{prepareMiDAS}}, columns of its
+#' output data frame are labeled with the type of analysis they can be used for
+#' eg. \code{hla_allele}. By specifying \code{analysis_type} function will
+#' select all variables with corresponding label. This choice can be further
+#' refined by using \code{pattern} argument or extended with \code{variables}.
 #'
 #' \code{correction} specifies p-value adjustment method to use, common choice
 #' is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
 #' \link[stats]{p.adjust}. Check there to get more details.
 #'
-#' @return Tibble containing results for all tested variables.
+#' @inheritParams analyzeAssociations
+#' @inheritParams analyzeConditionalAssociations
+#' @inheritParams formatAssociationsResults
+#' @param analysis_type String indicating the type of analysis to be performed,
+#'   it's used to select appropriate variables for testing from the data
+#'   associated with \code{object}. Valid values are \code{"hla_allele"},
+#'   \code{"aa_level"}, \code{"expression_level"}, \code{"allele_g_group"},
+#'   \code{"allele_supertype"}, \code{"allele_group"}, \code{"kir_genes"},
+#'   \code{"hla_kir_interactions"}. See details for further explanations.
+#' @param pattern String containing a regular expression that is used
+#'   to further select variables selected by \code{analysis_type}.
+#' @param conditional Logical flag indicating if the analysis should be
+#'   performed using stepwise conditional test. See
+#'   \code{\link{analyzeConditionalAssociations}} for more details.
+#' @param variables Character vector specifying additional variables to use in
+#'   association tests except those selected by \code{analysis_type}. By default
+#'   \code{NULL}.
+#' @param lower_frequency_cutoff Number specifying lower threshold for inclusion
+#'   of a variable. If it's a number between \code{0} and \code{1} variables
+#'   with frequency below this number will not be considered during analysis. If
+#'   it's greater or equal \code{1} variables with number of counts less that
+#'   this will not be considered during analysis. Only applied to discrete
+#'   variables.
+#' @param upper_frequency_cutoff Number specifying upper threshold for inclusion
+#'   of a variable. If it's a number between \code{0} and \code{1} variables
+#'   with frequency above this number will not be considered during analysis. If
+#'   it's greater or equal \code{1} variables with number of counts greater that
+#'   this will not be considered during analysis.Only applied to discrete
+#'   variables.
+#' @param logistic Logical flag indicating if statistical model used is logistic
+#'   (eg. \code{coxph}). If \code{NULL} function will try to figure this out.
+#'   This is only used for results formatting.
+#' @param exponentiate Logical flag indicating if coefficient estimates
+#'   should be exponentiated. This is typical for logistic and multinomial
+#'   regressions, but a bad idea if there is no log or logit link. If
+#'   \code{NULL} function will try to figure this out by testing if response is
+#'   binary (\code{0} or \code{1}).
+#'
+#' @return Tibble containing results for tested variables.
+#'
+#' @family MiDAS statistical functions
+#' @seealso \code{\link[stats]{p.adjust}}, \code{\link[broom]{tidy}}
 #'
 #' @examples
 #' library("survival")
@@ -366,7 +386,7 @@ analyzeConditionalAssociations <- function(object,
 #' pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
 #' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-#' midas_data <- prepareMiDASData(hla_calls = hla_calls,
+#' midas_data <- prepareMiDAS(hla_calls = hla_calls,
 #'                                pheno = pheno,
 #'                                covar = covar,
 #'                                analysis_type = "hla_allele",
@@ -374,7 +394,7 @@ analyzeConditionalAssociations <- function(object,
 #' )
 #'
 #' object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
-#' analyzeMiDASData(object, analysis_type = "hla_allele")
+#' runMiDAS(object, analysis_type = "hla_allele")
 #'
 #' @importFrom assertthat assert_that is.number is.string
 #' @importFrom dplyr bind_rows filter left_join select rename
@@ -384,7 +404,7 @@ analyzeConditionalAssociations <- function(object,
 #' @importFrom Hmisc label
 #'
 #' @export
-analyzeMiDASData <- function(object,
+runMiDAS <- function(object,
                              analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions"),
                              pattern = NULL,
                              variables = NULL,
@@ -396,7 +416,7 @@ analyzeMiDASData <- function(object,
                              correction = "bonferroni",
                              n_correction = NULL,
                              logistic = NULL,
-                             binary_phenotype = NULL,
+                             exponentiate = NULL,
                              th = 0.05,
                              rss_th = 1e-07) {
   assert_that(
@@ -433,14 +453,14 @@ analyzeMiDASData <- function(object,
     is.string(correction),
     isCountOrNULL(n_correction),
     isFlagOrNULL(logistic),
-    isFlagOrNULL(binary_phenotype),
+    isFlagOrNULL(exponentiate),
     is.number(th),
     is.number(rss_th)
   )
 
   assert_that(
     any(variables_labels == analysis_type, na.rm = TRUE) || ! is.null(variables),
-    msg = "Argument variables = NULL can be used only with labeled variables, make sure to use prepareMiDASData function for data preparation."
+    msg = "Argument variables = NULL can be used only with labeled variables, make sure to use prepareMiDAS function for data preparation."
   )
 
   # select variables based on analysis_type labels
@@ -538,12 +558,12 @@ analyzeMiDASData <- function(object,
   }
 
   pheno_var <- all.vars(object_formula)[1]
-  if (is.null(binary_phenotype)) {
-    binary_phenotype <- object_data[, pheno_var] %in% c(0, 1)
-    binary_phenotype <- all(binary_phenotype, na.rm = TRUE)
+  if (is.null(exponentiate)) {
+    exponentiate <- object_data[, pheno_var] %in% c(0, 1)
+    exponentiate <- all(exponentiate, na.rm = TRUE)
   }
 
-  if (binary_phenotype & length(cts_vars)) {
+  if (exponentiate & length(cts_vars)) {
     pos_freq <- object_data %>%
       filter(.data[[!! pheno_var]] == 1) %>%
       select("ID", !! cts_vars) %>%
@@ -601,18 +621,78 @@ analyzeMiDASData <- function(object,
   return(results)
 }
 
-#' Prepare HLA calls data for statistical analysis
+#' Prepare MiDAS data for statistical analysis
 #'
-#' \code{prepareMiDASData} transform HLA alleles calls according to selected
-#' analysis type and joins obtained transformation with additional data frames
-#' like phenotypic observations or covariates, creating an input data for
-#' further statistical analysis.
+#' \code{prepareMiDAS} transform HLA alleles calls and KIR calls according
+#' to selected analysis type and join obtained transformation with additional
+#' data like phenotypic observations or covariates.
+#'
+#' Data frames passed as arguments to the function are joined using
+#' \code{hla_calls} as a reference. As a consequence all samples with HLA data
+#' are kept, independent of whether there's actually phenotypes / covariates.
+#' Moreover phenotypes / covariates without HLA data are discarded.
+#'
+#' \code{...} should be data frames with first column holding sample IDs and
+#' named \code{ID}. Those should correspond to \code{ID} column in
+#' \code{hla_calls} and \code{kir_counts}.
+#'
+#' Choices for \code{analysis_type}:
+#' \describe{
+#'   \item{\code{hla_allele}}{
+#'     \code{hla_calls} are transformed into counts under
+#'     \code{inheritance_model} of choice (see \code{\link{hlaCallsToCounts}}
+#'     for more details).
+#'   }
+#'   \item{\code{aa_level}}{
+#'     \code{hla_calls} are first converted to amino acid level, taking only
+#'     variable positions under consideration. Than variable amino acid
+#'     positions are transformed to counts under \code{inheritance_model} of
+#'     choice (see \code{\link{hlaToAAVariation}} and
+#'     \code{\link{aaVariationToCounts}} for more details).
+#'   }
+#'   \item{\code{expression_level}}{
+#'     \code{hla_calls} are transformed to expression levels using expression
+#'     dictionaries shipped with package (see \code{\link{hlaToVariable}} for
+#'     more details). Expression levels from both alleles are summed into single
+#'     variable for each HLA gene.
+#'   }
+#'   \item{\code{allele_g_group}}{
+#'     \code{hla_calls} are transformed to HLA alleles groups using G group
+#'     dictionary shipped with the package. Than they are transformed to counts
+#'     under \code{inheritance_model} of choice (see \code{\link{hlaToVariable}}
+#'     and \code{\link{hlaCallsToCounts}} for more details).
+#'   }
+#' . \item{\code{allele_supertype}}{
+#'     \code{hla_calls} are transformed to HLA alleles groups using supertypes
+#'     dictionary shipped with the package. Than they are transformed to counts
+#'     under \code{inheritance_model} of choice (see \code{\link{hlaToVariable}}
+#'     and \code{\link{hlaCallsToCounts}} for more details).
+#'   }
+#'   \item{\code{allele_group}}{
+#'     \code{hla_calls} are transformed to HLA alleles groups using Bw4/6, C1/2
+#'     and Bw4+A23+A24+A32 dictionaries shipped with the package. Than they are
+#'     transformed to counts under \code{inheritance_model} of choice
+#'     (see \code{\link{hlaToVariable}} and \code{\link{hlaCallsToCounts}} for
+#'     more details).
+#'   }
+#'   \item{\code{kir_genes}}{
+#'     \code{kir_counts} data frame is joined with other inputs.
+#'   }
+#'   \item{\code{hla_kir_interactions}}{
+#'     \code{hla_calls} are processed with \code{kir_counts} into HLA - KIR
+#'     interactions variables (see \code{\link{getHlaKirInteractions}} for more
+#'     details).
+#'   }
+#'   \item{\code{custom}}{
+#'     No data transformation is done. All inputs are joined together.
+#'   }
+#' }
 #'
 #' @inheritParams checkHlaCallsFormat
 #' @inheritParams hlaCallsToCounts
 #' @inheritParams hlaToAAVariation
-#' @param kir_counts Data frame holding counts with KIR genes counts. Required
-#'   for \code{"kir_genes"} analysis type.
+#' @param kir_counts Data frame with KIR genes counts. Required for
+#'   \code{"kir_genes"} analysis type.
 #' @param ... Data frames holding additional variables like phenotypic
 #'   observations or covariates.
 #' @param analysis_type String indicating analysis type for which data should be
@@ -621,55 +701,9 @@ analyzeMiDASData <- function(object,
 #'   prepared variable will be labeled with corresponding \code{analysis_type}.
 #'   See details for further explanations.
 #'
-#' \code{...} should be data frames with first column holding samples IDs and
-#' named \code{ID}. Those should correspond to \code{ID} column in
-#' \code{hla_calls}.
-#'
-#' \code{analysis_type} specifies type of analysis for which \code{hla_calls}
-#' should be prepared:
-#'
-#' \code{"hla_allele"} - \code{hla_calls} are transformed into counts  under
-#' \code{inheritance_model} of choice (this is done with
-#' \link{hlaCallsToCounts}).
-#'
-#' \code{"aa_level"} - \code{hla_calls} are first converted to amino acid level,
-#' taking only variable positions under consideration. Than variable amino acid
-#' positions are transformed to counts under \code{inheritance_model} of choice
-#' (this is done with \link{aaVariationToCounts}).
-#'
-#' \code{"expression_level"} - \code{hla_calls} are transformed to expression
-#' levels using expression dictionaries shipped with package (this is done using
-#' \link{hlaToVariable}). The expression levels from both alleles are than
-#' summed into single variable for each translated HLA gene.
-#'
-#' \code{"allele_g_group"} - \code{hla_calls} are transformed to HLA alleles
-#' groups using G group dictionary shipped with package (this is done using
-#' \link{hlaToVariable}). Than those are transformed to counts under
-#' \code{inheritance_model} of choice (this is done with
-#' \link{hlaCallsToCounts}).
-#'
-#' \code{"allele_supertype"} - \code{hla_calls} are transformed to HLA alleles
-#' groups using supertypes dictionary shipped with package (this is done using
-#' \link{hlaToVariable}). Than those are transformed to counts under
-#' \code{inheritance_model} of choice (this is done with
-#' \link{hlaCallsToCounts}).
-#'
-#' \code{"allele_group"} - \code{hla_calls} are transformed to HLA alleles
-#' groups using Bw4/6 and C1/2 groups dictionaries shipped with package (this is
-#' done using \link{hlaToVariable}). Than those are transformed to counts under
-#' \code{inheritance_model} of choice (this is done with
-#' \link{hlaCallsToCounts}).
-#'
-#' \code{"kir_genes"} - joins \code{kir_genes} with result data frame.
-#'
-#' \code{"hla_kir_interactions"} - \code{hla_calls} are processed with
-#' \code{kir_counts} into HLA - KIR interactions variables (see
-#' \link{getHlaKirInteractions} for more details).
-#'
-#' \code{"custom"} - will not transform \code{hla_calls} and only joins it with
-#' additional data(\code{...}).
-#'
 #' @return Data frame containing prepared data.
+#'
+#' @family MiDAS statistical functions
 #'
 #' @examples
 #' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
@@ -678,7 +712,7 @@ analyzeMiDASData <- function(object,
 #' pheno <- read.table(pheno_file, header = TRUE)
 #' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE)
-#' prepareMiDASData(hla_calls, pheno, covar, analysis_type = "expression_level")
+#' prepareMiDAS(hla_calls, pheno, covar, analysis_type = "expression_level")
 #'
 #' @importFrom assertthat assert_that is.string see_if
 #' @importFrom dplyr funs group_by left_join mutate summarise_all syms
@@ -688,7 +722,7 @@ analyzeMiDASData <- function(object,
 #' @importFrom Hmisc label label<-
 #'
 #' @export
-prepareMiDASData <- function(hla_calls,
+prepareMiDAS <- function(hla_calls,
                              ...,
                              kir_counts = NULL,
                              analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions", "custom"),

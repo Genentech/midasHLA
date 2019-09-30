@@ -8,13 +8,13 @@ listMiDASDictionaries(pattern = ".*", file.names = FALSE)
 }
 \arguments{
 \item{pattern}{String used to match dictionary names, it can be a regular
-expression.}
+expression. By default all names are matched.}
 
 \item{file.names}{Logical value. If FALSE, only the names of dictionaries are
-returned. If TRUE their file names are returned.}
+returned. If TRUE their paths are returned.}
 }
 \value{
-Character vector with names of available HLA alleles dictionaries.
+Character vector with names of HLA alleles dictionaries.
 }
 \description{
 \code{listMiDASDictionaries} lists dictionaries shipped with MiDAS package.

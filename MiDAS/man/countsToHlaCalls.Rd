@@ -8,14 +8,15 @@ countsToHlaCalls(counts)
 }
 \arguments{
 \item{counts}{Data frame with HLA alleles counts, as returned by
-\link{hlaCallsToCounts} function. First column should contain samples IDs,
-following columns should be named with valid HLA alleles numbers.}
+\code{\link{hlaCallsToCounts}} function. First column should contain
+samples IDs, following columns should be named with valid HLA alleles
+numbers.}
 }
 \value{
 Data frame containing HLA allele calls.
 }
 \description{
-\code{countsToHlaCalls} converts counts table to hla calls data frame, this
+\code{countsToHlaCalls} convert counts table to HLA calls data frame, this
 is useful when working with data from UK Biobank.
 }
 \details{

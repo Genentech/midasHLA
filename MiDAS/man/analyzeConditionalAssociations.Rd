@@ -12,43 +12,41 @@ analyzeConditionalAssociations(object, variables,
 \item{object}{An existing fit from a model function such as lm, glm and many
 others.}
 
-\item{variables}{Character specifying variables to use in association tests.}
+\item{variables}{Character vector specifying variables to use in association
+tests.}
 
 \item{correction}{String specifying multiple testing correction method. See
 details for further information.}
 
 \item{n_correction}{Integer specifying number of comparisons to consider
-during multiple testing correction calculations, must be at least equql to
+during multiple testing correction calculations, must be at least equal to
 number of comparisons being made; only set this (to non-default) when you
 know what you are doing!}
 
-\item{th}{number specifying p-value threshold for a variable to be considered
+\item{th}{Number specifying p-value threshold for a variable to be considered
 significant.}
 
-\item{keep}{logical flag indicating if the output should be a list of results
+\item{keep}{Logical flag indicating if the output should be a list of results
 resulting from each selection step. Default is to return only the final
 result.}
 
-\item{rss_th}{number specifying residual sum of squares threshold at which
+\item{rss_th}{Number specifying residual sum of squares threshold at which
 function should stop adding additional variables. As the residual sum of
 squares approaches \code{0} the perfect fit is obtained making further
 attempts at variables selection nonsense, thus function is stopped. This
 behavior can be controlled using \code{rss_th}.}
 
-\item{exponentiate}{Logical indicating whether or not to exponentiate the
-  coefficient estimates. Internally this is passed to \link[broom]{tidy}.
-  This is typical for logistic and multinomial regressions, but a bad idea if
-  there is no log or logit link. Defaults to FALSE.
-
-\code{correction} specifies p-value adjustment method to use, common choice
-is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
-\link[stats]{p.adjust}. Check there to get more details.}
+\item{exponentiate}{Logical flag indicating whether or not to exponentiate
+the coefficient estimates. Internally this is passed to
+\code{\link[broom]{tidy}}. This is typical for logistic and multinomial
+regressions, but a bad idea if there is no log or logit link. Defaults to
+FALSE.}
 }
 \value{
-tibble with stepwise conditional testing results.
+Tibble with stepwise conditional testing results.
 }
 \description{
-\code{analyzeConditionalAssociations} performs stepwise conditional testing
+\code{analyzeConditionalAssociations} perform stepwise conditional testing
 adding the previous top-associated variable as covariate, until there is no
 more significant variables based on a self-defined threshold.
 }
@@ -63,7 +61,7 @@ pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
 pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
 covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-midas_data <- prepareMiDASData(hla_calls = hla_calls,
+midas_data <- prepareMiDAS(hla_calls = hla_calls,
                              pheno = pheno,
                              covar = covar,
                              analysis_type = "hla_allele",
@@ -79,3 +77,10 @@ analyzeConditionalAssociations(object,
 )
 
 }
+\seealso{
+\code{\link[stats]{p.adjust}}, \code{\link[broom]{tidy}}
+
+Other MiDAS statistical functions: \code{\link{analyzeAssociations}},
+  \code{\link{prepareMiDAS}}, \code{\link{runMiDAS}}
+}
+\concept{MiDAS statistical functions}

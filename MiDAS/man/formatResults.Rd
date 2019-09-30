@@ -10,30 +10,30 @@ formatResults(results, filter_by = "p.value <= 0.05",
   header = NULL)
 }
 \arguments{
-\item{results}{Tibble as returned by \link{analyzeAssociations}.}
+\item{results}{Tibble as returned by \code{\link{analyzeAssociations}}.}
 
-\item{filter_by}{Character specifying conditional expression used to filter
-\code{results}, this is equivalent to \code{...} argument passed to
-\link[dplyr]{filter} except it has to be a character vector.}
+\item{filter_by}{Character vector specifying conditional expression used to
+filter \code{results}, this is equivalent to \code{...} argument passed to
+\code{\link[dplyr]{filter}} except it has to be a character vector.}
 
-\item{arrange_by}{Character specifying variable names to use for sorting.
-Equivalent to \code{...} argument passed to \link[dplyr]{arrange}.}
+\item{arrange_by}{Character vector specifying variable names to use for
+sorting. Equivalent to \code{...} argument passed to
+\code{\link[dplyr]{arrange}}.}
 
-\item{select_cols}{Character specifying variable names that should be
+\item{select_cols}{Character vector specifying variable names that should be
 included in the output table. Can be also used to rename selected
 variables, see examples.}
 
-\item{format}{A character string. Possible values are \code{"latex"} and
-\code{"html"}.}
+\item{format}{String with possible values \code{"latex"} and \code{"html"}.}
 
 \item{header}{String specifying header for result table. If \code{NULL}
-header is omitted.}
+no header is added.}
 }
 \value{
-A character vector of the table source code.
+Character vector of formatted table source code.
 }
 \description{
-\code{formatResults} formats statistical analysis results table to html or
+\code{formatResults} format statistical analysis results table to html or
 latex format.
 }
 \examples{
@@ -52,4 +52,8 @@ formatResults(res,
               format = "html",
               header = "HLA allelic associations")
 
+}
+\seealso{
+\code{\link{runMiDAS}}, \code{\link{analyzeAssociations}},
+  \code{\link{analyzeConditionalAssociations}}.
 }

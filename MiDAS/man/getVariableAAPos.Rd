@@ -7,17 +7,17 @@
 getVariableAAPos(alignment, varchar = "[A-Z]")
 }
 \arguments{
-\item{alignment}{Matrix containing amino acids level alignment.}
+\item{alignment}{Matrix containing amino acid level alignment.}
 
 \item{varchar}{Regex matching characters that should be considered when
-looking for variable amino acids positions. See details for further
+looking for variable amino acid positions. See details for further
 explanations.}
 }
 \value{
 Integer vector specifying which alignment columns are variable.
 }
 \description{
-\code{getVariableAAPos} finds variable amino acids positions in the
+\code{getVariableAAPos} finds variable amino acid positions in the
 alignment.
 }
 \details{

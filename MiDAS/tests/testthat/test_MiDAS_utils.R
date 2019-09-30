@@ -149,7 +149,7 @@ test_that("HLA statistical models are updated properly", {
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
   midas_data <-
-    prepareMiDASData(hla_calls,
+    prepareMiDAS(hla_calls,
                      pheno,
                      covar,
                      analysis_type = "hla_allele",
@@ -315,6 +315,12 @@ test_that("KIR haplotypes are converted to gene counts", {
 test_that("column names matches", {
   df <- data.frame(a = 1:5, b = 1:5)
   expect_equal(colnamesMatches(df, c("a", "b")), TRUE)
+
+  expect_error(colnamesMatches(1:2, c("foo", "bar")), "x is not a data frame")
+
+  expect_error(colnamesMatches(data.frame(one = 1:2), c("foo", "bar")),
+               "Number of columns in data.frame\\(one = 1:2\\) must equal 2."
+  )
 
   expect_error(
     assertthat::assert_that(colnamesMatches(df, c("foo", "bar"))),

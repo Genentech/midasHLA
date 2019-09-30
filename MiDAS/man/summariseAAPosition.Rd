@@ -10,22 +10,22 @@ summariseAAPosition(hla_calls, pos, aln = NULL, na.rm = FALSE)
 \item{hla_calls}{Data frame containing HLA allele calls, as return by
 \code{\link{readHlaCalls}} function.}
 
-\item{pos}{String specifying gene and amio acid position, example
+\item{pos}{String specifying gene and amino acid position, example
 \code{"A_9"}.}
 
-\item{aln}{Matrix containing amino acids sequence alignments as returned by
-\link{readHlaAlignments} function. By default function will use alignment
-files shipped with the package.}
+\item{aln}{Matrix containing amino acid sequence alignments as returned by
+\code{\link{readHlaAlignments}} function. By default function will use
+alignment files shipped with the package.}
 
 \item{na.rm}{Logical flag indicating if \code{NA} values should be considered
 for frequency calculations.}
 }
 \value{
-Data frame containing HLA alleles, thier corresponding amino acid
-  residues and thier frequencies at requested position.
+Data frame containing HLA alleles, their corresponding amino acid
+  residues and frequencies at requested position.
 }
 \description{
-Lists HLA alleles and amino acid residues at a given position
+List HLA alleles and amino acid residues at a given position
 }
 \examples{
 file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")

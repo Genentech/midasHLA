@@ -7,15 +7,28 @@
 colnamesMatches(x, cols)
 }
 \arguments{
-\item{x}{Data frame vector to test.}
+\item{x}{Data frame to test.}
 
-\item{cols}{Ordered character vector with values for \code{x} colnames
-to test.}
+\item{cols}{Ordered character vector to test against \code{x}'s colnames.}
 }
 \value{
-Logical indicating if \code{x} colnames matches values in
-  \code{choice}.
+Logical indicating if \code{x}'s colnames equals \code{choice}.
 }
 \description{
-\code{colnamesMatches} checks columns of data frame are named as specified
+\code{colnamesMatches} check if  data frame's columns are named as specified
 }
+\seealso{
+Other assert functions: \code{\link{characterMatches}},
+  \code{\link{checkAdditionalData}},
+  \code{\link{checkHlaCallsFormat}},
+  \code{\link{checkKirCountsFormat}},
+  \code{\link{checkStatisticalModel}},
+  \code{\link{hasTidyMethod}},
+  \code{\link{isCharacterOrNULL}},
+  \code{\link{isClassOrNULL}}, \code{\link{isCountOrNULL}},
+  \code{\link{isCountsOrZeros}},
+  \code{\link{isFlagOrNULL}}, \code{\link{isNumberOrNULL}},
+  \code{\link{isStringOrNULL}},
+  \code{\link{isTRUEorFALSE}}, \code{\link{stringMatches}}
+}
+\concept{assert functions}

@@ -20,18 +20,22 @@ are coded as \code{2} and heterozygotes as \code{1}.}
 
 \item{check_hla_format}{Logical indicating if \code{hla_calls} format should
 be checked. This is useful if one wants to use \code{hlaCallsToCounts} with
-input not adhering to HLA nomenclature standards.}
+input not adhering to HLA nomenclature standards. See examples.}
 }
 \value{
-Data frame containing counts of HLA alleles counted according to
-  specified model.
+Data frame containing counts of HLA alleles according to specified
+  inheritance model.
 }
 \description{
-\code{hlaCallsToCounts} converts HLA calls data frame into counts table.
+\code{hlaCallsToCounts} convert HLA calls data frame into counts table.
 }
 \examples{
 file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 hla_calls <- readHlaCalls(file)
 hlaCallsToCounts(hla_calls, inheritance_model = "additive")
+
+# usage with non-HLA alleles numbers input
+hla_vars <- hlaToVariable(hla_calls, dictionary = "allele_HLA_supertype")
+hlaCallsToCounts(hla_calls, inheritance_model = "additive", check_hla_format = FALSE)
 
 }
