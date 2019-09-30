@@ -1,3 +1,8 @@
+## 0.0.0.9033 - 30/09/2019
++ imporves documentation
++ renames prepareMiDASData to prepareMiDAS
++ renames analyzeMiDASData to runMiDAS
+
 ## 0.0.0.9032 - 21/09/2019
 + add function that lists HLA alleles and amino acid residues at a given position together with frequencies.
 
