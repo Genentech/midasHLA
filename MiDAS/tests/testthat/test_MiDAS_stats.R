@@ -844,7 +844,7 @@ test_that("amino acid omnibus test works fine", {
   obj_B11 <- lm(OS ~ AGE + SEX + B_11_A + B_11_S, data = midas_data)
   obj_E107 <- lm(OS ~ AGE + SEX + E_107_R + E_107_G, data = midas_data)
   obj_A246 <- lm(OS ~ AGE + SEX + A_246_A + A_246_S, data = midas_data)
-  LRT <- lapply(list(obj_B11, obj_E107, obj_A246), lrtest, mod0 = object)
+  LRT <- lapply(list(obj_B11, obj_E107, obj_A246), LRTest, mod0 = object)
   omnibus_res_test <- data.frame(
     aa_pos = c("B_11", "E_107", "A_246"),
     residues = c("A, S", "R, G", "A, S"),

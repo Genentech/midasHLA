@@ -959,7 +959,7 @@ assertthat::on_failure(hasTidyMethod) <- function(call, env) {
 
 #' Likelihood ratio test
 #'
-#' \code{lrtest} carry out asymptotic likelihood ratio test for two models.
+#' \code{LRTest} carry out asymptotic likelihood ratio test for two models.
 #'
 #' \code{mod0} have to be a reduced version of \code{mod1}. See examples.
 #'
@@ -980,12 +980,12 @@ assertthat::on_failure(hasTidyMethod) <- function(call, env) {
 #' df <- data.frame(OS = c(20, 30, 40), AGE = c(50, 60, 70))
 #' mod0 <- lm(OS ~ 1, data = df)
 #' mod1 <- lm(OS ~ AGE, data = df)
-#' MiDAS:::lrtest(mod0, mod1)
+#' MiDAS:::LRTest(mod0, mod1)
 #'
 #' @importFrom assertthat assert_that
 #' @importFrom stats logLik pchisq
 #'
-lrtest <- function(mod0, mod1) {
+LRTest <- function(mod0, mod1) {
   formula0 <- formula(mod0)
   vars0 <- all.vars(formula0)
   formula1 <- formula(mod1)

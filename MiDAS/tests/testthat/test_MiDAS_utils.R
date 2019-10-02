@@ -384,7 +384,7 @@ test_that("likelihood ratio test", {
   df <- data.frame(OS = c(20, 30, 40), AGE = c(50, 60, 70))
   mod0 <- lm(OS ~ 1, data = df)
   mod1 <- lm(OS ~ AGE, data = df)
-  lrt_res <- lrtest(mod0, mod1)
+  lrt_res <- LRTest(mod0, mod1)
   expect_equal(
     lrt_res,
     data.frame(
@@ -397,5 +397,5 @@ test_that("likelihood ratio test", {
     )
   )
 
-  expect_error(lrtest(mod1, mod0), "variables AGE were not found in mod1")
+  expect_error(LRTest(mod1, mod0), "variables AGE were not found in mod1")
 })

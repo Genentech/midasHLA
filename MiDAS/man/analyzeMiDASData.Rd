@@ -4,9 +4,9 @@
 \alias{analyzeMiDASData}
 \title{Analyze associations in MiDAS data}
 \usage{
-analyzeMiDASData(object, analysis_type = c("hla_allele", "aa_res",
-  "aa_pos", "expression_level", "allele_g_group", "allele_supertype",
-  "allele_group", "kir_genes", "hla_kir_interactions"), variables = NULL,
+analyzeMiDASData(object, analysis_type = c("hla_allele", "aa_level",
+  "expression_level", "allele_g_group", "allele_supertype", "allele_group",
+  "kir_genes", "hla_kir_interactions"), variables = NULL,
   conditional = FALSE, keep = FALSE, lower_frequency_cutoff = NULL,
   upper_frequency_cutoff = NULL, pvalue_cutoff = NULL,
   correction = "bonferroni", n_correction = NULL, logistic = NULL,
@@ -18,10 +18,9 @@ others.}
 
 \item{analysis_type}{String indicating the type of analysis being performed,
 at this point it is only used for results formatting. Valid values are
-\code{"hla_allele"}, \code{"aa_pos"}, \code{"aa_res"},
-\code{"expression_level"}, \code{"allele_g_group"},
-\code{"allele_supertype"}, \code{"allele_group"}, \code{"kir_genes"},
-\code{"hla_kir_interactions"}.}
+\code{"hla_allele"}, \code{"aa_level"}, \code{"expression_level"},
+\code{"allele_g_group"}, \code{"allele_supertype"}, \code{"allele_group"},
+\code{"kir_genes"}, \code{"hla_kir_interactions"}.}
 
 \item{variables}{Character specifying additional variables to use in
 association tests except those choosen by \code{analysis_type}.}

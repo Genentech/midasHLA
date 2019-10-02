@@ -970,7 +970,7 @@ aaPosOmnibusTest <- function(object,
   results <- lapply(
     X = variables,
     FUN = function(x) tryCatch(
-      expr = lrtest(
+      expr = LRTest(
         object,
         updateModel(
           object = object,
