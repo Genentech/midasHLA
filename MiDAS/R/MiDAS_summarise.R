@@ -21,9 +21,10 @@
 #' summariseAAPosition(hla_calls, "A_9")
 #'
 #' @importFrom assertthat assert_that
-#' @importFrom dplyr group_by n summarise
+#' @importFrom dplyr group_by n select starts_with summarise
 #' @importFrom formattable percent
 #' @importFrom magrittr %>%
+#' @importFrom stats na.omit
 #' @importFrom rlang .data
 #'
 #' @export
@@ -47,7 +48,7 @@ summariseAAPosition <- function(hla_calls,
   gene <- gsub("[0-9]+$", "", pos)
   pos <- as.integer(gsub(".*_([0-9]+)$", "\\1", pos))
 
-  alleles <- dplyr::select(hla_calls, dplyr::starts_with(gene)) %>%
+  alleles <- select(hla_calls, starts_with(gene)) %>%
     unlist()
   alleles_wo_na <- na.omit(alleles)
   assert_that(length(alleles_wo_na) != 0,
@@ -86,7 +87,7 @@ summariseAAPosition <- function(hla_calls,
   ) %>%
     group_by(.data$residue) %>%
     summarise(
-      allele = paste(unique(allele), collapse = ", "),
+      allele = paste(sort(unique(allele)), collapse = ", "),
       count = n(),
       frequency = percent(.data$count / length(alleles))
     ) %>%

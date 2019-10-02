@@ -1,3 +1,6 @@
+## 0.0.0.9034 - 1/10/2019
++ in summariseAAPosition output alleles numbers are now sorted alphabeticaly
+
 ## 0.0.0.9032 - 21/09/2019
 + add function that lists HLA alleles and amino acid residues at a given position together with frequencies.
 
