@@ -385,3 +385,23 @@ test_that("tidy method exists", {
     "tidy function for object of class \"bar\" could not be found."
   )
 })
+
+test_that("likelihood ratio test", {
+  df <- data.frame(OS = c(20, 30, 40), AGE = c(50, 60, 70))
+  mod0 <- lm(OS ~ 1, data = df)
+  mod1 <- lm(OS ~ AGE, data = df)
+  lrt_res <- LRTest(mod0, mod1)
+  expect_equal(
+    lrt_res,
+    data.frame(
+      term = "AGE",
+      dof = 1,
+      logLik = 109.8401115921340078785,
+      statistic = 219.680223184268015757,
+      p.value = 1.062026e-49,
+      stringsAsFactors = FALSE
+    )
+  )
+
+  expect_error(LRTest(mod1, mod0), "variables AGE were not found in mod1")
+})

@@ -1,3 +1,7 @@
+## 0.0.0.9034 - 1/10/2019
++ add function for models comparison using likelihood ratio test (LRTest)
++ add function for performing omnibus test on amino acid positions (aaPosOmnibusTest)
+
 ## 0.0.0.9033 - 30/09/2019
 + imporves documentation
 + renames prepareMiDASData to prepareMiDAS

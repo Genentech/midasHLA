@@ -994,3 +994,62 @@ assertthat::on_failure(hasTidyMethod) <- function(call, env) {
          " could not be found."
   )
 }
+
+#' Likelihood ratio test
+#'
+#' \code{LRTest} carry out asymptotic likelihood ratio test for two models.
+#'
+#' \code{mod0} have to be a reduced version of \code{mod1}. See examples.
+#'
+#' @param mod0 An existing fit from a model function such as lm, glm and many
+#'   others.
+#' @param mod1 Object of the same class as \code{mod0} with extra terms
+#'   included.
+#'
+#' @return Data frame with the results of likelihood ratio test of the supplied
+#'   models.
+#'
+#'   Column \code{term} holds new variables apearing in \code{mod1},
+#'   \code{dof} difference in degrees of freedom between models, \code{logLik}
+#'   difference in log likelihoods, \code{statistic} \code{Chisq} statistic and
+#'   \code{p.value} corresponding p-value.
+#'
+#' @examples
+#' df <- data.frame(OS = c(20, 30, 40), AGE = c(50, 60, 70))
+#' mod0 <- lm(OS ~ 1, data = df)
+#' mod1 <- lm(OS ~ AGE, data = df)
+#' MiDAS:::LRTest(mod0, mod1)
+#'
+#' @importFrom assertthat assert_that
+#' @importFrom stats logLik pchisq
+#'
+LRTest <- function(mod0, mod1) {
+  formula0 <- formula(mod0)
+  vars0 <- all.vars(formula0)
+  formula1 <- formula(mod1)
+  vars1 <- all.vars(formula1)
+  assert_that(
+    all(vars0 %in% vars1),
+    msg = sprintf("variables %s were not found in mod1",
+                  paste(vars0[! vars0 %in% vars1], collapse = ", ")
+    )
+  )
+
+  ll0 <- logLik(mod0)
+  ll1 <- logLik(mod1)
+  dof <- attr(ll1, "df") - attr(ll0, "df")
+  statistic <- 2 * (as.numeric(ll1) - as.numeric(ll0))
+  p.value <- pchisq(statistic, df = dof, lower.tail=FALSE)
+
+  new_vars <- paste(vars1[! vars1 %in% vars0], collapse = ", ")
+  res <- data.frame(
+    term = new_vars,
+    dof = dof,
+    logLik = ll1 - ll0,
+    statistic = statistic,
+    p.value = p.value,
+    stringsAsFactors = FALSE
+  )
+
+  return(res)
+}
