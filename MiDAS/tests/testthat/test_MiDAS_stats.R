@@ -829,3 +829,56 @@ test_that("MiDAS data is prepared properly", {
     "\"hla_kir_interactions\" analysis type requires kir_counts argument to be specified"
   )
 })
+
+test_that("amino acid omnibus test works fine", {
+  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(hla_calls_file)
+  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+  pheno <- read.table(pheno_file, header = TRUE)
+  covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
+  covar <- read.table(covar_file, header = TRUE)
+  midas_data <- prepareMiDASData(hla_calls, pheno, covar, analysis_type = "aa_level")
+  object <- lm(OS ~ AGE + SEX, data = midas_data)
+  omnibus_res <- aaPosOmnibusTest(object, aa_pos = c("B_11", "E_107", "A_246"))
+
+  obj_B11 <- lm(OS ~ AGE + SEX + B_11_A + B_11_S, data = midas_data)
+  obj_E107 <- lm(OS ~ AGE + SEX + E_107_R + E_107_G, data = midas_data)
+  obj_A246 <- lm(OS ~ AGE + SEX + A_246_A + A_246_S, data = midas_data)
+  LRT <- lapply(list(obj_B11, obj_E107, obj_A246), lrtest, mod0 = object)
+  omnibus_res_test <- data.frame(
+    aa_pos = c("B_11", "E_107", "A_246"),
+    residues = c("A, S", "R, G", "A, S"),
+    d.f. = c(1, 1, 1),
+    statistic = sapply(LRT, `[[`, "statistic"),
+    p.value = sapply(LRT, `[[`, "p.value"),
+    p.adjusted = p.adjust(sapply(LRT, `[[`, "p.value"), method = "bonferroni"),
+    stringsAsFactors = FALSE
+  )
+  expect_equal(omnibus_res, omnibus_res_test)
+
+  # Tests for checkStatisticalModel errors are ommitted here
+
+  expect_error(aaPosOmnibusTest(object, aa_pos = 1:5),
+               "aa_pos is not a character vector"
+  )
+
+  expect_error(
+    aaPosOmnibusTest(object, c("B_11", "E_107", "A_246"), correction = 1),
+    "correction is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(
+    aaPosOmnibusTest(object, c("B_11", "E_107", "A_246"), n_correction = 1.5),
+    "n_correction is not a count \\(a single positive integer\\) or NULL."
+  )
+
+  expect_error(
+    aaPosOmnibusTest(object, "FOO_2"),
+    "amino acid position FOO_2 could not be found."
+  )
+
+  expect_error(
+    aaPosOmnibusTest(object, c("B_11", "E_107", "A_246"), n_correction = 1),
+    "n_correction must be at least 3."
+  )
+})
