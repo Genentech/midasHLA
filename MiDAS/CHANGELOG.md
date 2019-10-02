@@ -1,3 +1,6 @@
+## 0.0.0.9032 - 21/09/2019
++ add function that lists HLA alleles and amino acid residues at a given position together with frequencies.
+
 ## 0.0.0.9031 - 21/09/2019
 + add pattern argument to analyzeMiDASData that can be used to subset variables choosen by analysis_type
 
