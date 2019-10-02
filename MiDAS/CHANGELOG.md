@@ -1,3 +1,7 @@
+## 0.0.0.9034 - 1/10/2019
++ add function for models comparison using likelihood ratio test (LRTest)
++ add function for performing omnibus test on amino acid positions (aaPosOmnibusTest)
+
 ## 0.0.0.9032 - 21/09/2019
 + add function that lists HLA alleles and amino acid residues at a given position together with frequencies.
 
