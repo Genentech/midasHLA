@@ -960,7 +960,7 @@ prepareMiDAS <- function(hla_calls,
 #' pheno <- read.table(pheno_file, header = TRUE)
 #' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 #' covar <- read.table(covar_file, header = TRUE)
-#' midas_data <- prepareMiDASData(hla_calls, pheno, covar, analysis_type = "aa_level")
+#' midas_data <- prepareMiDAS(hla_calls, pheno, covar, analysis_type = "aa_level")
 #' object <- lm(OS ~ AGE + SEX, data = midas_data)
 #' aaPosOmnibusTest(object, aa_pos = c("B_11", "E_107", "A_246"))
 #'
