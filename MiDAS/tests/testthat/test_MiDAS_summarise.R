@@ -7,7 +7,7 @@ test_that("summarize amino acid position", {
 
   aa_sum_test <- data.frame(
     `HLA-DMA (100)` = c("F"),
-    `HLA-DMA alleles` = "*01:02, *01:01, *01:03",
+    `HLA-DMA alleles` = "*01:01, *01:02, *01:03",
     count = 40,
     frequency = formattable::percent(1),
     stringsAsFactors = FALSE,
