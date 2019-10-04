@@ -695,11 +695,11 @@ runMiDAS <- function(object,
 #'   \code{"kir_genes"} analysis type.
 #' @param ... Data frames holding additional variables like phenotypic
 #'   observations or covariates.
-#' @param analysis_type String indicating analysis type for which data should be
-#'   prepared. Valid choices are \code{"hla_allele"}, \code{"aa_level"},
-#'   \code{"expression_level"}, \code{"allele_group"}, \code{"custom"}. Each
-#'   prepared variable will be labeled with corresponding \code{analysis_type}.
-#'   See details for further explanations.
+#' @param analysis_type Character vector indicating analysis type for which data
+#'   should be prepared. Valid choices are \code{"hla_allele"},
+#'   \code{"aa_level"}, \code{"expression_level"}, \code{"allele_group"},
+#'   \code{"custom"}. Each prepared variable will be labeled with corresponding
+#'   \code{analysis_type}. See details for further explanations.
 #'
 #' @return Data frame containing prepared data.
 #'
