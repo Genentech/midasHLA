@@ -323,6 +323,8 @@ analyzeConditionalAssociations <- function(object,
 #'   \code{"hla_allele"}, \code{"aa_level"}, \code{"expression_level"},
 #'   \code{"allele_g_group"}, \code{"allele_supertype"}, \code{"allele_group"},
 #'   \code{"kir_genes"}, \code{"hla_kir_interactions"}.
+#' @param pattern Character string containing a regular expression that is used
+#'   to further select test variables selected by \code{analysis_type}.
 #' @param conditional Logical indicating if the analysis should be performed
 #'   using stepwise conditional tests or not. See
 #'   \link{analyzeConditionalAssociations} for more details.
@@ -384,6 +386,7 @@ analyzeConditionalAssociations <- function(object,
 #' @export
 analyzeMiDASData <- function(object,
                              analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions"),
+                             pattern = NULL,
                              variables = NULL,
                              conditional = FALSE,
                              keep = FALSE,
@@ -414,6 +417,7 @@ analyzeMiDASData <- function(object,
     stringMatches(analysis_type,
                   choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions")
     ),
+    isStringOrNULL(pattern),
     isCharacterOrNULL(variables),
     isTRUEorFALSE(conditional),
     isTRUEorFALSE(keep),
@@ -434,15 +438,20 @@ analyzeMiDASData <- function(object,
     is.number(rss_th)
   )
 
-  mask <- variables_labels == analysis_type
-  assert_that(any(mask, na.rm = TRUE) || ! is.null(variables),
-              msg = "Argument variables = NULL can be used only with labeled variables, make sure to use prepareMiDASData function for data preparation."
+  assert_that(
+    any(variables_labels == analysis_type, na.rm = TRUE) || ! is.null(variables),
+    msg = "Argument variables = NULL can be used only with labeled variables, make sure to use prepareMiDASData function for data preparation."
   )
-  mask <-  mask | object_variables %in% variables
 
-  mask <- (! object_variables %in% all.vars(object_formula)) & mask
-  variables <- object_variables[mask]
-  variables_labels <- variables_labels[mask]
+  # select variables based on analysis_type labels
+  labeled_vars <- object_variables[variables_labels == analysis_type]
+  if (! is.null(pattern)) {
+    labeled_vars <- grep(pattern = pattern, x = labeled_vars, value = TRUE)
+  }
+
+  # create set of variables for further testing
+  variables <- c(labeled_vars, variables)
+  variables <- variables[! variables %in% all.vars(object_formula)]
   assert_that(length(variables) != 0,
               msg = "No new variables found in object data."
   )

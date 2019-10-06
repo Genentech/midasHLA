@@ -6,11 +6,12 @@
 \usage{
 analyzeMiDASData(object, analysis_type = c("hla_allele", "aa_level",
   "expression_level", "allele_g_group", "allele_supertype", "allele_group",
-  "kir_genes", "hla_kir_interactions"), variables = NULL,
-  conditional = FALSE, keep = FALSE, lower_frequency_cutoff = NULL,
-  upper_frequency_cutoff = NULL, pvalue_cutoff = NULL,
-  correction = "bonferroni", n_correction = NULL, logistic = NULL,
-  binary_phenotype = NULL, th = 0.05, rss_th = 1e-07)
+  "kir_genes", "hla_kir_interactions"), pattern = NULL,
+  variables = NULL, conditional = FALSE, keep = FALSE,
+  lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL,
+  pvalue_cutoff = NULL, correction = "bonferroni",
+  n_correction = NULL, logistic = NULL, binary_phenotype = NULL,
+  th = 0.05, rss_th = 1e-07)
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many
@@ -21,6 +22,9 @@ at this point it is only used for results formatting. Valid values are
 \code{"hla_allele"}, \code{"aa_level"}, \code{"expression_level"},
 \code{"allele_g_group"}, \code{"allele_supertype"}, \code{"allele_group"},
 \code{"kir_genes"}, \code{"hla_kir_interactions"}.}
+
+\item{pattern}{Character string containing a regular expression that is used
+to further select test variables selected by \code{analysis_type}.}
 
 \item{variables}{Character specifying additional variables to use in
 association tests except those choosen by \code{analysis_type}.}
