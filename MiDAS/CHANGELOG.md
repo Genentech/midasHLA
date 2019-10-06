@@ -1,3 +1,9 @@
+## 0.0.0.9035 - 6/10/2019
++ reading alignment files shipped with package is now faster.
++ alignment files shipped with the packge are now stored in a preparsed format.
++ readHlaAlignments now have divergent behaviour if file is supplied it behaves as previously, when gene is supplied it loads preparsed alignment ommiting some lengthly steps. This change speeds up the process but has no visible consequences.
++ hlaToAAVariation no longer have alnpath argument. The variable amino acid positions search in a custom alignment file can now be done only manualy.
+
 ## 0.0.0.9033 - 30/09/2019
 + imporves documentation
 + renames prepareMiDASData to prepareMiDAS
