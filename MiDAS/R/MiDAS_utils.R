@@ -136,8 +136,7 @@ reduceAlleleResolution <- function(allele,
 #' @return Integer vector specifying which alignment columns are variable.
 #'
 #' @examples
-#' file <- system.file("extdata", "A_prot.txt", package = "MiDAS")
-#' alignment <- readHlaAlignments(file)
+#' alignment <- readHlaAlignments(gene = "TAP1")
 #' getVariableAAPos(alignment)
 #'
 #' @importFrom assertthat assert_that is.count see_if
