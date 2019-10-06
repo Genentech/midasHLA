@@ -8,18 +8,15 @@
 #' specially using \code{indels} and \code{unkchar} arguments. Function process
 #' alignments for all HLA genes found in \code{hla_calls}.
 #'
-#' \code{alnpath} can be used to provide path to directory containing custom
-#' alignment files. Each alignment file have to be named following EBI database
-#' convention GENENAME_prot.txt. By default \code{alnpath} points to directory
-#' containing alignment files available at EBI database.
+#' To infer variable amino acid position function uses protein alignment files
+#' that are shipped with the package. Those files were downloaded from
+#' \href{ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/alignments/}{EBI database}.
 #'
 #' @inheritParams checkHlaCallsFormat
 #' @param indels Logical indicating whether indels should be considered when
 #'   checking variability.
 #' @param unkchar Logical indicating whether unknown characters in the alignment
 #'   should be considered when checking variability.
-#' @param alnpath String providing optional path to directory containing HLA
-#'   alignment files. See details for further explanations.
 #' @param as_df Logical indicating if data frame should be returned.
 #'   Otherwise matrix is returned.
 #'
@@ -35,19 +32,17 @@
 #' hla_calls <- readHlaCalls(file)
 #' hlaToAAVariation(hla_calls)
 #'
-#' @importFrom assertthat assert_that see_if is.dir
+#' @importFrom assertthat assert_that see_if
 #' @importFrom stringi stri_split_fixed
 #' @export
 hlaToAAVariation <- function(hla_calls,
                              indels = TRUE,
                              unkchar = FALSE,
-                             alnpath = system.file("extdata", package = "MiDAS"),
                              as_df = TRUE){
   assert_that(
     checkHlaCallsFormat(hla_calls),
     isTRUEorFALSE(indels),
     isTRUEorFALSE(unkchar),
-    is.dir(alnpath),
     isTRUEorFALSE(as_df)
   )
   ids <- hla_calls[, 1]
@@ -59,32 +54,32 @@ hlaToAAVariation <- function(hla_calls,
                        FUN.VALUE = character(length = 1)
   )
   gene_names_uniq <- unique(gene_names)
-  # discard genes for which no alignment files are available
+
+  # assert that alignment files are available
   available_genes <- list.files(
-    path = alnpath,
-    pattern = "_prot.txt$"
-  )
-  assert_that(
-    length(available_genes) >= 1,
-    msg = sprintf("no alignment files was found in path %s", alnpath)
-  )
-  alnfiles_readable <- vapply(
-    X = file.path(alnpath, available_genes),
-    FUN = is.readable,
-    FUN.VALUE = logical(length = 1)
-  )
-  assert_that(
-    all(alnfiles_readable),
-    msg = sprintf("files: %s are not readable",
-                  paste(available_genes[!alnfiles_readable], collapse = ", ")
-    )
+    path = system.file("extdata", package = "MiDAS"),
+    pattern = "_prot.Rdata$"
   )
   available_genes <- vapply(
-    X = stri_split_fixed(available_genes, "_prot.txt"),
+    X = stri_split_fixed(available_genes, "_prot.Rdata"),
     `[[`, 1,
     FUN.VALUE = character(length = 1)
   )
-  gene_names_uniq <- gene_names_uniq[gene_names_uniq %in% available_genes]
+  av_genes_idx <- gene_names_uniq %in% available_genes
+  assert_that(
+    any(av_genes_idx),
+    msg = sprintf("Alignments for genes %s are not available.",
+                  paste(gene_names_uniq[! av_genes_idx], collapse = ", ")
+    )
+  )
+  if (! all(av_genes_idx)) {
+    warn(sprintf(
+      "Alignments for genes %s are not available and will be omitted.",
+      paste(gene_names_uniq[! av_genes_idx], collapse = ", ")
+    ))
+    gene_names_uniq <- gene_names_uniq[av_genes_idx]
+  }
+
   hla_resolution <- vapply(X = gene_names_uniq,
                            FUN = function(x) {
                              x_numbers <- unlist(hla_calls[, gene_names == x])
@@ -98,9 +93,8 @@ hlaToAAVariation <- function(hla_calls,
   # read alignment matrices and convert to desired resolution
   hla_aln <- lapply(X = gene_names_uniq,
                     FUN = function(x) {
-                      aln_file <- file.path(alnpath, paste0(x, "_prot.txt"))
                       aln <- readHlaAlignments(
-                        file = aln_file,
+                        gene = x,
                         resolution = hla_resolution[x],
                         unkchar = "*"
                       )
