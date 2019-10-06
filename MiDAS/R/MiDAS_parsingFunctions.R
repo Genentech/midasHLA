@@ -119,96 +119,125 @@ readHlaAlignments <- function(file,
                               trim = TRUE,
                               unkchar = "",
                               resolution = 8) {
-  if (is.null(gene)) {
-    assert_that(is.readable(file))
-  } else {
-    assert_that(is.string(gene))
-    gene <- toupper(gene)
-    file <- paste0(system.file("extdata", package = "MiDAS"),
-                   "/",
-                   gene,
-                   "_prot.txt"
-    )
-    available_genes <- list.files(
-      path = system.file("extdata", package = "MiDAS"),
-      pattern = "_prot.txt$",
-      full.names = TRUE
-    )
-    assert_that(
-      see_if(file %in% available_genes,
-             msg = sprintf("alignment for %s is not available", gene)
-      ),
-      is.readable(file)
-    )
-  }
   assert_that(
     isTRUEorFALSE(trim),
     is.string(unkchar),
     is.count(resolution)
   )
 
-  aln_raw <- stri_read_lines(file)
-  aln <- stri_split_regex(aln_raw, "\\s+")
+  if (is.null(gene)) {
+    assert_that(is.readable(file))
+    aln_raw <- stri_read_lines(file)
+    aln <- stri_split_regex(aln_raw, "\\s+")
 
-  # extract lines containing alignments and omit empty alignment lines
-  nonempty_lines <- vapply(aln, length, integer(length = 1)) >= 2
-  aln <- aln[nonempty_lines]
-  allele_numbers <- vapply(aln, `[`, character(length = 1), 2)
-  allele_lines <- checkAlleleFormat(allele_numbers)
+    # extract lines containing alignments and omit empty alignment lines
+    nonempty_lines <- vapply(aln, length, integer(length = 1)) >= 2
+    aln <- aln[nonempty_lines]
+    allele_numbers <- vapply(aln, `[`, character(length = 1), 2)
+    allele_lines <- checkAlleleFormat(allele_numbers)
 
-  assert_that(
-    see_if(any(allele_lines),
-           msg = "could not find alleles numbers in the alignment file"
+    assert_that(
+      see_if(any(allele_lines),
+             msg = "could not find alleles numbers in the alignment file"
+      )
     )
-  )
-  allele_numbers <- allele_numbers[allele_lines]
-  aln <- aln[allele_lines]
-  # assert_that(
-  #   see_if(all(stri_detect_regex(unlist(aln), "^[A-Z0-9:*.-]*$")),
-  #                            msg = "alignments lines contain non standard characters"
-  #   )
-  # )
+    allele_numbers <- allele_numbers[allele_lines]
+    aln <- aln[allele_lines]
+    assert_that(
+      see_if(all(stri_detect_regex(unlist(aln), "^[A-Z0-9:*.-]*$")),
+                               msg = "alignments lines contain non standard characters"
+      )
+    )
 
-  tmp_aln_env <- new.env(size = 5000)
-  for (i in 1:length(allele_numbers)) {
-    assign(
-      x = allele_numbers[i],
-      value = append(
-        x = get0(
-          x = allele_numbers[i],
-          envir = tmp_aln_env,
-          ifnotfound = character(length = 0)
+    tmp_aln_env <- new.env(size = 5000)
+    for (i in 1:length(allele_numbers)) {
+      assign(
+        x = allele_numbers[i],
+        value = append(
+          x = get0(
+            x = allele_numbers[i],
+            envir = tmp_aln_env,
+            ifnotfound = character(length = 0)
+          ),
+          values = aln[[i]][-c(1, 2)] # discard empty element and allele number
         ),
-        values = aln[[i]][-c(1, 2)] # discard empty element and allele number
-      ),
-      envir = tmp_aln_env
+        envir = tmp_aln_env
+      )
+    }
+    aln_list <- as.list(tmp_aln_env)[unique(allele_numbers)] # convert to list and sort
+
+    ref_seq <- stri_flatten(aln_list[[1]])
+    seq_along_ref <- seq(1, nchar(ref_seq), 1)
+    ref_seq <- stri_sub(ref_seq,
+                        seq_along_ref,
+                        seq_along_ref
     )
+    ref_len <- length(ref_seq)
+    aln <- do.call(rbind,
+                   lapply(aln_list,
+                          function(a) {
+                            a <- stri_flatten(a)
+                            a <- stri_sub(a,
+                                          seq_along_ref,
+                                          seq_along_ref
+                            )
+                            i <- a == "-"
+                            a[i] <- ref_seq[i]
+
+                            return(a)
+                          }
+                   )
+    )
+
+    # discard aa '5 to start codon of mature protein
+    if (trim) {
+      aln_raw <- aln_raw[nonempty_lines]
+      raw_first_codon_idx <- nchar(stri_subset_fixed(aln_raw, "Prot")[1])
+      raw_alignment_line <- stri_sub(aln_raw[allele_lines][1],
+                                     1,
+                                     raw_first_codon_idx
+      )
+      raw_alignment_seq <- stri_split_regex(raw_alignment_line, "\\s+")
+      raw_alignment_seq <- unlist(raw_alignment_seq)[-c(1, 2)]
+      first_codon_idx <- nchar(stri_flatten(raw_alignment_seq))
+      assert_that(
+        see_if(is.count(first_codon_idx),
+               msg = "start codon is not marked properly in the input file"
+        )
+      )
+      aln <- aln[, first_codon_idx:ncol(aln)]
+    }
+  } else {
+    assert_that(is.string(gene))
+    gene <- toupper(gene)
+    file <- paste0(system.file("extdata", package = "MiDAS"),
+                   "/",
+                   gene,
+                   "_prot.Rdata"
+    )
+    available_genes <- list.files(
+      path = system.file("extdata", package = "MiDAS"),
+      pattern = "_prot.Rdata$",
+      full.names = TRUE
+    )
+    assert_that(
+      see_if(file %in% available_genes,
+             msg = sprintf("alignment for %s is not available", gene)
+      )
+    )
+
+    cached_aln_obj <- readRDS(file) # list(readHlaAlignments(file, trim = FALSE, unkchar = "*", resolution = 8), first_codon_idx)
+    aln <- cached_aln_obj[[1]]
+
+    # discard aa '5 to start codon of mature protein
+    if (trim) {
+      first_codon_idx <- cached_aln_obj[[2]]
+      aln <- aln[, first_codon_idx:ncol(aln)]
+    }
   }
-  aln_list <- as.list(tmp_aln_env)[unique(allele_numbers)] # convert to list and sort
 
-  ref_seq <- stri_flatten(aln_list[[1]])
-  seq_along_ref <- seq(1, nchar(ref_seq), 1)
-  ref_seq <- stri_sub(ref_seq,
-                      seq_along_ref,
-                      seq_along_ref
-  )
-  ref_len <- length(ref_seq)
-  aln <- do.call(rbind,
-                 lapply(aln_list,
-                        function(a) {
-                          a <- stri_flatten(a)
-                          a <- stri_sub(a,
-                                        seq_along_ref,
-                                        seq_along_ref
-                          )
-                          i <- a == "-"
-                          a[i] <- ref_seq[i]
-                          a[a == "*"] <- unkchar
-
-                          return(a)
-                        }
-                 )
-  )
+  # substitute unkchar
+  aln[aln == "*"] <- unkchar
 
   # reduce alignment matrix to selected resolution
   allele_numbers <- reduceAlleleResolution(rownames(aln),
@@ -218,24 +247,7 @@ readHlaAlignments <- function(file,
   aln <- aln[unique_numbers, ]
   rownames(aln) <- allele_numbers[unique_numbers]
 
-  # discard aa '5 to start codon of mature protein
-  if (trim) {
-    aln_raw <- aln_raw[nonempty_lines]
-    raw_first_codon_idx <- nchar(stri_subset_fixed(aln_raw, "Prot")[1])
-    raw_alignment_line <- stri_sub(aln_raw[allele_lines][1],
-                                   1,
-                                   raw_first_codon_idx
-    )
-    raw_alignment_seq <- stri_split_regex(raw_alignment_line, "\\s+")
-    raw_alignment_seq <- unlist(raw_alignment_seq)[-c(1, 2)]
-    first_codon_idx <- nchar(stri_flatten(raw_alignment_seq))
-    assert_that(
-      see_if(is.count(first_codon_idx),
-             msg = "start codon is not marked properly in the input file"
-      )
-    )
-    aln <- aln[, first_codon_idx:ncol(aln)]
-  }
+
 
   return(aln)
 }
