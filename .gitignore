@@ -6,4 +6,3 @@
 .lintr
 inst/doc
 *.html
-*.R
