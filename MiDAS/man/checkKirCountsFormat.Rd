@@ -2,23 +2,23 @@
 % Please edit documentation in R/MiDAS_utils.R
 \name{checkKirCountsFormat}
 \alias{checkKirCountsFormat}
-\title{Assert kir counts data frame format}
+\title{Assert KIR counts data frame format}
 \usage{
 checkKirCountsFormat(kir_counts, accept.null = FALSE)
 }
 \arguments{
-\item{kir_counts}{Data frame containing KIR genes counts, as return by
+\item{kir_counts}{Data frame containing KIR gene counts, as returned by
 \code{\link{readKirCalls}} function.}
 
 \item{accept.null}{Logical indicating if NULL \code{kir_counts} should be
 accepted.}
 }
 \value{
-Logical indicating if \code{kir_counts} follows kir counts data frame
+Logical indicating if \code{kir_counts} follow KIR counts data frame
   format. Otherwise raise error.
 }
 \description{
-\code{checkKirCountsFormat} asserts if kir counts data frame have proper
+\code{checkKirCountsFormat} asserts if KIR counts data frame have proper
 format.
 }
 \examples{
@@ -27,3 +27,21 @@ kir_counts <- readKirCalls(file)
 checkKirCountsFormat(kir_counts)
 
 }
+\seealso{
+\code{\link{readKirCalls}}, \code{\link{getHlaKirInteractions}},
+  \code{\link{kirHaplotypeToCounts}}, \code{\link{prepareMiDAS}}.
+
+Other assert functions: \code{\link{characterMatches}},
+  \code{\link{checkAdditionalData}},
+  \code{\link{checkHlaCallsFormat}},
+  \code{\link{checkStatisticalModel}},
+  \code{\link{colnamesMatches}},
+  \code{\link{hasTidyMethod}},
+  \code{\link{isCharacterOrNULL}},
+  \code{\link{isClassOrNULL}}, \code{\link{isCountOrNULL}},
+  \code{\link{isCountsOrZeros}},
+  \code{\link{isFlagOrNULL}}, \code{\link{isNumberOrNULL}},
+  \code{\link{isStringOrNULL}},
+  \code{\link{isTRUEorFALSE}}, \code{\link{stringMatches}}
+}
+\concept{assert functions}

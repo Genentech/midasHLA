@@ -14,17 +14,17 @@ others.}
 formula giving a template which specifies how to update.}
 
 \item{backquote}{Logical indicating if added variables should be quoted.
-Longer than one element vectors are accepted as well, specifying which new
-variables should be backquoted. Only relevant if x is of type character.}
+Elements of this vector are recycled over \code{x}. Only relevant if
+\code{x} is of type character.}
 
-\item{collapse}{Character specifying how new characters should be added to
-old formula. Only relevant if x is of type character.}
+\item{collapse}{String specifying how new characters should be added to
+old formula. Only relevant if \code{x} is of type character.}
 }
 \value{
 Updated fit of input model.
 }
 \description{
-\code{updateModel} will add new variables to model and re-fit it.
+\code{updateModel} adds new variables to model and re-fit it.
 }
 \examples{
 object <- lm(dist ~ 1, data = cars)

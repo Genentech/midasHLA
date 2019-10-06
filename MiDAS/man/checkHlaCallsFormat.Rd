@@ -24,3 +24,18 @@ hla_calls <- readHlaCalls(file)
 checkHlaCallsFormat(hla_calls)
 
 }
+\seealso{
+Other assert functions: \code{\link{characterMatches}},
+  \code{\link{checkAdditionalData}},
+  \code{\link{checkKirCountsFormat}},
+  \code{\link{checkStatisticalModel}},
+  \code{\link{colnamesMatches}},
+  \code{\link{hasTidyMethod}},
+  \code{\link{isCharacterOrNULL}},
+  \code{\link{isClassOrNULL}}, \code{\link{isCountOrNULL}},
+  \code{\link{isCountsOrZeros}},
+  \code{\link{isFlagOrNULL}}, \code{\link{isNumberOrNULL}},
+  \code{\link{isStringOrNULL}},
+  \code{\link{isTRUEorFALSE}}, \code{\link{stringMatches}}
+}
+\concept{assert functions}

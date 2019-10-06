@@ -11,7 +11,7 @@ checkStatisticalModel(object)
 others.}
 }
 \value{
-Logical indicating if \code{data_frame} is an existing fit from a
+Logical indicating if \code{object} is an existing fit from a
 model function such as lm, glm and many others. Otherwise raise error.
 }
 \description{
@@ -23,3 +23,18 @@ object <- lm(dist ~ speed, data = cars)
 checkStatisticalModel(object)
 
 }
+\seealso{
+Other assert functions: \code{\link{characterMatches}},
+  \code{\link{checkAdditionalData}},
+  \code{\link{checkHlaCallsFormat}},
+  \code{\link{checkKirCountsFormat}},
+  \code{\link{colnamesMatches}},
+  \code{\link{hasTidyMethod}},
+  \code{\link{isCharacterOrNULL}},
+  \code{\link{isClassOrNULL}}, \code{\link{isCountOrNULL}},
+  \code{\link{isCountsOrZeros}},
+  \code{\link{isFlagOrNULL}}, \code{\link{isNumberOrNULL}},
+  \code{\link{isStringOrNULL}},
+  \code{\link{isTRUEorFALSE}}, \code{\link{stringMatches}}
+}
+\concept{assert functions}

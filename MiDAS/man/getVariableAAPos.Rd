@@ -7,17 +7,17 @@
 getVariableAAPos(alignment, varchar = "[A-Z]")
 }
 \arguments{
-\item{alignment}{Matrix containing amino acids level alignment.}
+\item{alignment}{Matrix containing amino acid level alignment.}
 
 \item{varchar}{Regex matching characters that should be considered when
-looking for variable amino acids positions. See details for further
+looking for variable amino acid positions. See details for further
 explanations.}
 }
 \value{
 Integer vector specifying which alignment columns are variable.
 }
 \description{
-\code{getVariableAAPos} finds variable amino acids positions in the
+\code{getVariableAAPos} finds variable amino acid positions in the
 alignment.
 }
 \details{
@@ -30,8 +30,7 @@ deletion/insertion (".") will not be treated as variability. In order to
 detect this kind of variability \code{varchar = "[A-Z\\\\.]"} should be used.
 }
 \examples{
-file <- system.file("extdata", "A_prot.txt", package = "MiDAS")
-alignment <- readHlaAlignments(file)
+alignment <- readHlaAlignments(gene = "TAP1")
 getVariableAAPos(alignment)
 
 }

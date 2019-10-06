@@ -2,7 +2,7 @@
 % Please edit documentation in R/MiDAS_transformationFunctions.R
 \name{reduceHlaCalls}
 \alias{reduceHlaCalls}
-\title{Reduce hla calls data frame resolution}
+\title{Reduce HLA calls data frame resolution}
 \usage{
 reduceHlaCalls(hla_calls, resolution = 4)
 }
@@ -17,12 +17,12 @@ Data frame containing HLA allele calls reduced to required
   resolution.
 }
 \description{
-\code{reduceHlaCalls} reduces hla calls data frame to specified resolution.
+\code{reduceHlaCalls} reduce HLA calls data frame to specified resolution.
 }
 \details{
 If \code{resolution} is greater than resolution of \code{hla_calls} elements,
-those elements will be returned unchanged. Elements with optional suffixes
-are not reduced.
+those elements will be unchanged. Elements with optional suffixes are not
+reduced.
 }
 \examples{
 file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
