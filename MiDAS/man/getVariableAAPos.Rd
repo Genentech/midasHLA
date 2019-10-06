@@ -30,8 +30,7 @@ deletion/insertion (".") will not be treated as variability. In order to
 detect this kind of variability \code{varchar = "[A-Z\\\\.]"} should be used.
 }
 \examples{
-file <- system.file("extdata", "A_prot.txt", package = "MiDAS")
-alignment <- readHlaAlignments(file)
+alignment <- readHlaAlignments(gene = "TAP1")
 getVariableAAPos(alignment)
 
 }

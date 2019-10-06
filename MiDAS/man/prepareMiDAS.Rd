@@ -20,11 +20,11 @@ observations or covariates.}
 \item{kir_counts}{Data frame with KIR genes counts. Required for
 \code{"kir_genes"} analysis type.}
 
-\item{analysis_type}{String indicating analysis type for which data should be
-prepared. Valid choices are \code{"hla_allele"}, \code{"aa_level"},
-\code{"expression_level"}, \code{"allele_group"}, \code{"custom"}. Each
-prepared variable will be labeled with corresponding \code{analysis_type}.
-See details for further explanations.}
+\item{analysis_type}{Character vector indicating analysis type for which data
+should be prepared. Valid choices are \code{"hla_allele"},
+\code{"aa_level"}, \code{"expression_level"}, \code{"allele_group"},
+\code{"custom"}. Each prepared variable will be labeled with corresponding
+\code{analysis_type}. See details for further explanations.}
 
 \item{inheritance_model}{String specifying inheritance model to use.
 Available choices are \code{"dominant"}, \code{"recessive"},

@@ -5,7 +5,7 @@
 \title{Convert HLA allele numbers to amino acid variation matrix}
 \usage{
 hlaToAAVariation(hla_calls, indels = TRUE, unkchar = FALSE,
-  alnpath = system.file("extdata", package = "MiDAS"), as_df = TRUE)
+  as_df = TRUE)
 }
 \arguments{
 \item{hla_calls}{Data frame containing HLA allele calls, as return by
@@ -16,9 +16,6 @@ checking variability.}
 
 \item{unkchar}{Logical indicating whether unknown characters in the alignment
 should be considered when checking variability.}
-
-\item{alnpath}{String providing optional path to directory containing HLA
-alignment files. See details for further explanations.}
 
 \item{as_df}{Logical indicating if data frame should be returned.
 Otherwise matrix is returned.}
@@ -41,10 +38,9 @@ alignment column wise. Some of the values in alignment can be treated
 specially using \code{indels} and \code{unkchar} arguments. Function process
 alignments for all HLA genes found in \code{hla_calls}.
 
-\code{alnpath} can be used to provide path to directory containing custom
-alignment files. Each alignment file have to be named following EBI database
-convention GENENAME_prot.txt. By default \code{alnpath} points to directory
-containing alignment files available at EBI database.
+To infer variable amino acid position function uses protein alignment files
+that are shipped with the package. Those files were downloaded from
+\href{ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/alignments/}{EBI database}.
 }
 \examples{
 file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
