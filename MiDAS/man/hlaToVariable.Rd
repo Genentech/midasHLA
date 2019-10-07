@@ -2,7 +2,7 @@
 % Please edit documentation in R/MiDAS_transformationFunctions.R
 \name{hlaToVariable}
 \alias{hlaToVariable}
-\title{Converts hla calls data frame according to match table}
+\title{Convert HLA calls data frame according to match table}
 \usage{
 hlaToVariable(hla_calls, dictionary, reduce = TRUE, na.value = 0,
   nacols.rm = TRUE)
@@ -26,15 +26,15 @@ resolution when no matching is found. See details for more details.}
 \code{NA} should be removed.}
 }
 \value{
-Data frame of hla numbers converted to additional variables according
+Data frame of HLA numbers converted to additional variables according
   to match table.
 }
 \description{
-\code{hlaToVariable} converts hla calls data frame to additional variables
+\code{hlaToVariable} convert HLA calls data frame to additional variables
 based on match table (dictionary).
 }
 \details{
-\code{reduce} controls if conversion should happen in a greedy way, such that
+\code{reduce} control if conversion should happen in a greedy way, such that
 if some hla numbers cannot be converted, their resolution is reduced by 2 and
 another attempt is taken. This iterative process stops when alleles cannot be
 further reduced or all have been successfully converted.
@@ -44,37 +44,48 @@ First column should hold allele numbers and second corresponding additional
 variables. Optionally a data frame formatted in the same manner can be passed
 instead.
 
-\code{dictionary} can be also used to access matchings files shipped with the
+\code{dictionary} can be also used to access matching files shipped with the
 package. They can be referred to by using one of the following strings (to
-list available dictionaries use \link{listMiDASDictionaries}):
-
-\code{"allele_HLA-A_expression"} reference data to impute expression
-levels for HLA-A alleles.
-
-\code{"allele_HLA-B_Bw"} B alleles can be grouped in allele groups Bw4 and
-Bw6. In some cases HLA alleles containing Bw4 epitope, on nucleotide level
-actually carries a premature stop codon. Meaning that although on nucleotide
-level the allele would encode a Bw4 epitope it's not really there and it is
-assigned to Bw6 group. However in 4-digit resolution these alleles can not be
-distinguished from other Bw4 groups. Since alleles with premature stop codons
-are rare in those ambiguous cases those are assigned to Bw4 group.
-
-\code{"allele_HLA-C_C1-2"} C alleles can be grouped in allele groups C1
-and C2.
-
-\code{"allele_HLA-C_expression"} reference data to impute expression
-levels for HLA-C alleles.
-
-\code{"allele_HLA_supertype"} A and B alleles can be assigned to so-called
-supertypes.
-
-\code{"allele_HLA_Ggroup"} HLA alleles can be re-coded in G groups,
-which defines amino acid identity only in the exons relevant for peptide
-binding. Note that alleles "DRB1*01:01:01" and "DRB1*01:16" were matched with
-more than one G group, this ambiguity was removed by deleting matching with
-"DRB5*01:01:01G" group. Moreover in the original match file there were alleles
-named "DPA*...", here they are renamed to "DPA1*..." to adhere with HLA
-nomenclature.
+list available dictionaries use \code{\link{listMiDASDictionaries}}):
+\describe{
+  \item{\code{allele_HLA-A_expression}}{
+    Reference data to impute expression levels for HLA-A alleles.
+  }
+  \item{\code{allele_HLA-B_Bw}}{
+    B alleles can be grouped in allele groups Bw4 and Bw6. In some cases HLA
+    alleles containing Bw4 epitope, on nucleotide level actually carries a
+    premature stop codon. Meaning that although on nucleotide level the
+    allele would encode a Bw4 epitope it's not really there and it is
+    assigned to Bw6 group. However in 4-digit resolution these alleles can
+    not be distinguished from other Bw4 groups. Since alleles with premature
+    stop codons are rare in those ambiguous cases those are assigned to Bw4
+    group.
+  }
+  \item{allele_HLA_Bw4+A23+A24+A32}{
+    Extends \code{allele_HLA-B_Bw} dictionary by inclusion of A*23, A*24 and
+    A*32 HLA alleles.
+  }
+  \item{\code{allele_HLA-C_C1-2}}{
+    C alleles can be grouped in allele groups C1 and C2.
+  }
+  \item{\code{allele_HLA-C_expression}}{
+    Reference data to impute expression levels for HLA-C alleles.
+  }
+  \item{\code{allele_HLA_supertype}}{
+    A and B alleles can be assigned to so-called supertypes, a
+    classification that group HLA alleles based on peptide binding
+    specificities.
+  }
+  \item{\code{allele_HLA_Ggroup}}{
+    HLA alleles can be re-coded in G groups, which defines amino acid
+    identity only in the exons relevant for peptide binding. Note that
+    alleles "DRB1*01:01:01" and "DRB1*01:16" were matched with more than one
+    G group, this ambiguity was removed by deleting matching with
+    "DRB5*01:01:01G" group. Moreover in the original match file there were
+    alleles named "DPA*...", here they are renamed to "DPA1*..." to adhere
+    with HLA nomenclature.
+  }
+}
 }
 \examples{
 file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")

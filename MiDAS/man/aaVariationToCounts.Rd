@@ -2,7 +2,7 @@
 % Please edit documentation in R/MiDAS_transformationFunctions.R
 \name{aaVariationToCounts}
 \alias{aaVariationToCounts}
-\title{Transform amino acids variation data frame to counts table}
+\title{Transform amino acid variations data frame to counts table}
 \usage{
 aaVariationToCounts(aa_variation, inheritance_model = c("dominant",
   "recessive", "additive"))
@@ -19,11 +19,11 @@ are coded as \code{1}. In \code{"recessive"} model homozygotes are coded as
 are coded as \code{2} and heterozygotes as \code{1}.}
 }
 \value{
-Data frame containing counts of amino acids at specific positions
-  counted according to specified model.
+Data frame containing counts of amino acid at specific positions
+  according to inheritance specified model.
 }
 \description{
-\code{aaVariationToCounts} converts variation data frame data frame into
+\code{aaVariationToCounts} converts amino acid variations data frame into
 counts table.
 }
 \examples{
@@ -32,4 +32,7 @@ hla_calls <- readHlaCalls(file)
 aa_variation <- hlaToAAVariation(hla_calls)
 aaVariationToCounts(aa_variation, inheritance_model = "additive")
 
+}
+\seealso{
+\code{\link{hlaToAAVariation}}
 }

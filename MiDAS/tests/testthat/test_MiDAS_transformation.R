@@ -19,14 +19,6 @@ test_that("Amino acids variability is infered correctly", {
                "unkchar is not a flag \\(a length one logical vector\\)."
   )
 
-  expect_error(hlaToAAVariation(hla_calls, alnpath = "foo/bar/foo/bar"),
-               "Path 'foo/bar/foo/bar' does not exist"
-  )
-
-  expect_error(hlaToAAVariation(hla_calls, alnpath = system.file(package = "MiDAS")),
-               sprintf("no alignment files was found in path %s", system.file("inst", package = "MiDAS"))
-  )
-
   expect_error(hlaToAAVariation(hla_calls, as_df = 1),
                "as_df is not a flag \\(a length one logical vector\\)."
   )
@@ -385,7 +377,7 @@ test_that("results are formatted properly with preselected args", {
 
   object <- stats::glm(R ~ 1, data = midas_data, family = stats::binomial)
   object$call$data <- midas_data
-  res <- analyzeMiDASData(object, analysis_type = "hla_allele", variables = c("A*01:01", "A*01:02"), pvalue_cutoff = 1)
+  res <- runMiDAS(object, analysis_type = "hla_allele", variables = c("A*01:01", "A*01:02"), pvalue_cutoff = 1)
   res <- rename(res, term = allele, estimate = odds.ratio)
   res_kable <- formatAssociationsResults(res, type = "hla_allele")
   res_kable_test <- formatResults(res,

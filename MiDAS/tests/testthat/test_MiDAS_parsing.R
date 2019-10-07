@@ -62,10 +62,10 @@ test_that("HLA allele calls are read properly", {
 test_that("HLA allele alignments are read properly", {
   file <- system.file("extdata", "TAP1_prot.txt", package = "MiDAS")
   hla_alignments <- readHlaAlignments(file)
-  load(system.file("extdata", "test_hla_alignments.Rdata", package = "MiDAS"))
+  test_hla_alignments <- readHlaAlignments(gene = "TAP1")
   expect_equal(hla_alignments, test_hla_alignments)
 
-  hla_alignments_res2 <- readHlaAlignments(file, resolution = 2)
+  hla_alignments_res2 <- readHlaAlignments(gene = "TAP1", resolution = 2)
   res2 <- getAlleleResolution(rownames(hla_alignments_res2))
   test_res2 <- c(2, 4, 2, 2, 2, 2, 2)
   expect_equal(res2, test_res2)
@@ -96,9 +96,9 @@ test_that("HLA allele alignments are read properly", {
                "alignment for FOO is not available"
   )
 
-  aln_file <- system.file("extdata/A_prot.txt", package = "MiDAS")
+  aln_file <- system.file("extdata/TAP1_prot.txt", package = "MiDAS")
   hla_alignments <- readHlaAlignments(aln_file, trim = FALSE)
-  fasta_file <- system.file("extdata", "A_prot.fasta", package = "MiDAS")
+  fasta_file <- system.file("extdata", "TAP1_prot.fasta", package = "MiDAS")
   fasta <- seqinr::read.alignment(fasta_file, format = "fasta")
   fasta <- fasta$seq[[1]]
   expect_equal(paste(hla_alignments[1, ], collapse = ""),
@@ -107,7 +107,7 @@ test_that("HLA allele alignments are read properly", {
 
   hla_alignments_trim <- readHlaAlignments(aln_file, trim = TRUE)
   n_trimmed <- ncol(hla_alignments) - ncol(hla_alignments_trim)
-  expect_equal(n_trimmed, 24) # check if sequence is trimmed properly
+  expect_equal(n_trimmed, 0) # check if sequence is trimmed properly
 
   fake_aln <- readLines(aln_file)
   fake_aln <- vapply(X = fake_aln,
@@ -125,33 +125,33 @@ test_that("HLA allele alignments are read properly", {
   )
   unlink(fake_aln_tmp)
 
-  # This test is removed as part of reducing comp. time
-  # fake_aln <- readLines(aln_file)
-  # fake_aln <- vapply(X = fake_aln,
-  #                    FUN = function(x) {
-  #                      number <- stri_split_regex(x, "\\s+")[[1]]
-  #                      if (any(checkAlleleFormat(number))) {
-  #                        li <- length(number) - 1
-  #                        number[li] <- paste(sample(c("?", ">", "<", "#", "@", "!"),
-  #                                                   nchar(number[li]),
-  #                                                   replace = TRUE
-  #                                            ),
-  #                                            collapse = ""
-  #                                      )
-  #                        paste(number, collapse = " ")
-  #                      } else {
-  #                        x
-  #                      }
-  #                    },
-  #                    FUN.VALUE = character(length = 1),
-  #                    USE.NAMES = FALSE
-  # )
-  # fake_aln_tmp <- tempfile()
-  # writeLines(text = fake_aln, con = fake_aln_tmp)
-  # expect_error(readHlaAlignments(fake_aln_tmp),
-  #              "alignments lines contain non standard characters"
-  # )
-  # unlink(fake_aln_tmp)
+  # alignments lines contain non standard characters
+  fake_aln <- readLines(aln_file)
+  fake_aln <- vapply(X = fake_aln,
+                     FUN = function(x) {
+                       number <- stri_split_regex(x, "\\s+")[[1]]
+                       if (any(checkAlleleFormat(number))) {
+                         li <- length(number) - 1
+                         number[li] <- paste(sample(c("?", ">", "<", "#", "@", "!"),
+                                                    nchar(number[li]),
+                                                    replace = TRUE
+                                             ),
+                                             collapse = ""
+                                       )
+                         paste(number, collapse = " ")
+                       } else {
+                         x
+                       }
+                     },
+                     FUN.VALUE = character(length = 1),
+                     USE.NAMES = FALSE
+  )
+  fake_aln_tmp <- tempfile()
+  writeLines(text = fake_aln, con = fake_aln_tmp)
+  expect_error(readHlaAlignments(fake_aln_tmp),
+               "alignments lines contain non standard characters"
+  )
+  unlink(fake_aln_tmp)
 
   fake_aln <- readLines(aln_file)
   fake_aln[grepl("Prot", fake_aln)] <- "Prot"

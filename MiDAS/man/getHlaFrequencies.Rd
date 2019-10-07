@@ -11,7 +11,7 @@ getHlaFrequencies(hla_calls)
 \code{\link{readHlaCalls}} function.}
 }
 \value{
-Data frame containing the allele and its corresponding frequencies.
+Data frame containing alleles and thier corresponding frequencies.
 }
 \description{
 \code{getHlaFrequencies} calculates alleles frequencies in HLA calls data

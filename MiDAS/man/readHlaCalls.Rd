@@ -2,7 +2,7 @@
 % Please edit documentation in R/MiDAS_parsingFunctions.R
 \name{readHlaCalls}
 \alias{readHlaCalls}
-\title{Reads data table with HLA allele calls}
+\title{Read HLA allele calls data}
 \usage{
 readHlaCalls(file, resolution = 4, na.strings = c("Not typed", "-",
   "NA"))
@@ -21,15 +21,13 @@ readHlaCalls(file, resolution = 4, na.strings = c("Not typed", "-",
 }
 \value{
 Data frame containing HLA allele calls.
-
-\code{NA} values in input file are parsed unchanged.
 }
 \description{
-\code{readHlaCalls} reads table with HLA allele calls from file.
+\code{readHlaCalls} read HLA allele calls from file
 }
 \details{
 Input file have to be a tsv formatted table with header. First column should
-contain samples IDs, further columns should hold corresponding HLA allele
+contain sample IDs, further columns should hold corresponding HLA allele
 numbers.
 
 \code{resolution} parameter can be used to reduce HLA allele numbers. If

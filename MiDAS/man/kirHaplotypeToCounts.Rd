@@ -2,7 +2,7 @@
 % Please edit documentation in R/MiDAS_utils.R
 \name{kirHaplotypeToCounts}
 \alias{kirHaplotypeToCounts}
-\title{Convert KIR haplotypes to gene level}
+\title{Convert KIR haplotypes to gene counts}
 \usage{
 kirHaplotypeToCounts(x, hap_dict = system.file("extdata",
   "Match_kir_haplotype_gene.txt", package = "MiDAS"), binary = TRUE)
@@ -15,23 +15,27 @@ default file shipped together with package is being used. See details for
 more information.}
 
 \item{binary}{Logical flag indicating if haplotypes should be converted only
-  to gene presence / absence indicators. At this point this is the only way
-  that allows unambiguous conversion.
+  to gene presence / absence indicators (it is the only way that allows
+  unambiguous conversion). This argument is currently ignored.
 
-\code{hap_dict} have to be a \code{tsv} file with first column holding KIR
-haplotypes and gene counts in others. File should have header with first
-column unnamed it is being used as row names.}
+\code{hap_dict} have to be a tab separated values formatted file with first
+column holding KIR haplotypes and gene counts in others. File should have
+header with first column unnamed and gene names in the others.}
 }
 \value{
 Data frame with haplotypes and corresponding gene counts. \code{NA}'s
   in \code{x} are removed during conversion.
 }
 \description{
-\code{kirHaplotypeToCounts} converts vector of KIR haplotypes to data frame
-of KIR genes counts.
+\code{kirHaplotypeToCounts} convert vector of KIR haplotypes to data frame
+of KIR gene counts.
 }
 \examples{
 x <- c(NA, "1+3|16+3", "1+1", NA)
 kirHaplotypeToCounts(x)
 
+}
+\seealso{
+\code{\link{readKirCalls}}, \code{\link{getHlaKirInteractions}},
+  \code{\link{checkKirCountsFormat}}, \code{\link{prepareMiDAS}}.
 }

@@ -2,44 +2,45 @@
 % Please edit documentation in R/MiDAS_transformationFunctions.R
 \name{hlaToAAVariation}
 \alias{hlaToAAVariation}
-\title{Converts HLA allele numbers to amino acid variation}
+\title{Convert HLA allele numbers to amino acid variation matrix}
 \usage{
 hlaToAAVariation(hla_calls, indels = TRUE, unkchar = FALSE,
-  alnpath = system.file("extdata", package = "MiDAS"), as_df = TRUE)
+  as_df = TRUE)
 }
 \arguments{
 \item{hla_calls}{Data frame containing HLA allele calls, as return by
 \code{\link{readHlaCalls}} function.}
 
-\item{indels}{Logical indicating whether indels should be considered as
-variability.}
+\item{indels}{Logical indicating whether indels should be considered when
+checking variability.}
 
 \item{unkchar}{Logical indicating whether unknown characters in the alignment
-should be treated as variability.}
-
-\item{alnpath}{String providing optional path to directory containing HLA
-alignment files. See details for further explanations.}
+should be considered when checking variability.}
 
 \item{as_df}{Logical indicating if data frame should be returned.
-Otherwise function matrix is returned.}
+Otherwise matrix is returned.}
 }
 \value{
-Data frame or matrix containing variable amino acid positions. See
+Matrix or data frame containing variable amino acid positions. See
   \code{as_df} parameter.
 
   Rownames corresponds to ID column of input data frame, and colnames to
-  alignment positions for given genes. If no variation in amino acids
-  alignments is found function return one column matrix filled with `NA`.
+  alignment positions for given genes. If no variation in amino acid
+  alignments is found function return one column matrix filled with `NA`s.
 }
 \description{
-\code{hlaToAAVariation} converts HLA allele numbers data frame to a matrix
-holding information on amino acid level variation.
+\code{hlaToAAVariation} convert HLA allele numbers data frame to a matrix
+holding information on amino acid variation.
 }
 \details{
-\code{alnpath} can be used to provide path to directory containing custom
-alignment files. Each alignment file have to be named following EBI database
-convention GENENAME_prot.txt. By default \code{alnpath} points to directory
-containing alignments files shipped with the package.
+Variable amino acid positions are found by comparing elements of the
+alignment column wise. Some of the values in alignment can be treated
+specially using \code{indels} and \code{unkchar} arguments. Function process
+alignments for all HLA genes found in \code{hla_calls}.
+
+To infer variable amino acid position function uses protein alignment files
+that are shipped with the package. Those files were downloaded from
+\href{ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/alignments/}{EBI database}.
 }
 \examples{
 file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")

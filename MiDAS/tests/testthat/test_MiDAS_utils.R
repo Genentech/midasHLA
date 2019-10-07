@@ -119,10 +119,10 @@ test_that("HLA allele are backquoted properly", {
 context("HLA allele alignments")
 
 test_that("Variable amino acids positions are detected properly", {
-  hlaa_calls <- c("A*01:01", "A*01:02")
+  hlaa_calls <- c("TAP1*01:01", "TAP1*02:01")
   hlaa_res <- 4
   hlaa_aln <- readHlaAlignments(system.file("extdata",
-                                            "A_prot.txt",
+                                            "TAP1_prot.txt",
                                             package = "MiDAS")
   )
   four_dig_numbers <- reduceAlleleResolution(rownames(hlaa_aln), resolution = 4)
@@ -130,7 +130,7 @@ test_that("Variable amino acids positions are detected properly", {
   rownames(hlaa_aln) <- four_dig_numbers[!duplicated(four_dig_numbers)]
   hlaa_aln <- hlaa_aln[hlaa_calls, ]
 
-  expect_equal(getVariableAAPos(hlaa_aln), c(9, 17))
+  expect_equal(getVariableAAPos(hlaa_aln), c(333,637))
 
   expect_error(getVariableAAPos(hlaa_calls), "alignment is not a matrix")
 })
@@ -149,7 +149,7 @@ test_that("HLA statistical models are updated properly", {
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
   midas_data <-
-    prepareMiDASData(hla_calls,
+    prepareMiDAS(hla_calls,
                      pheno,
                      covar,
                      analysis_type = "hla_allele",
@@ -315,6 +315,12 @@ test_that("KIR haplotypes are converted to gene counts", {
 test_that("column names matches", {
   df <- data.frame(a = 1:5, b = 1:5)
   expect_equal(colnamesMatches(df, c("a", "b")), TRUE)
+
+  expect_error(colnamesMatches(1:2, c("foo", "bar")), "x is not a data frame")
+
+  expect_error(colnamesMatches(data.frame(one = 1:2), c("foo", "bar")),
+               "Number of columns in data.frame\\(one = 1:2\\) must equal 2."
+  )
 
   expect_error(
     assertthat::assert_that(colnamesMatches(df, c("foo", "bar"))),

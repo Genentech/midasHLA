@@ -117,7 +117,7 @@ reduceAlleleResolution <- function(allele,
 
 #' Returns positions of variable amino acids in the alignment
 #'
-#' \code{getVariableAAPos} finds variable amino acids positions in the
+#' \code{getVariableAAPos} finds variable amino acid positions in the
 #' alignment.
 #'
 #' The variable amino acid positions in the alignment are those at which
@@ -128,16 +128,15 @@ reduceAlleleResolution <- function(allele,
 #' deletion/insertion (".") will not be treated as variability. In order to
 #' detect this kind of variability \code{varchar = "[A-Z\\\\.]"} should be used.
 #'
-#' @param alignment Matrix containing amino acids level alignment.
+#' @param alignment Matrix containing amino acid level alignment.
 #' @param varchar Regex matching characters that should be considered when
-#'   looking for variable amino acids positions. See details for further
+#'   looking for variable amino acid positions. See details for further
 #'   explanations.
 #'
 #' @return Integer vector specifying which alignment columns are variable.
 #'
 #' @examples
-#' file <- system.file("extdata", "A_prot.txt", package = "MiDAS")
-#' alignment <- readHlaAlignments(file)
+#' alignment <- readHlaAlignments(gene = "TAP1")
 #' getVariableAAPos(alignment)
 #'
 #' @importFrom assertthat assert_that is.count see_if
@@ -240,6 +239,8 @@ convertAlleleToVariable <- function(allele,
 #' @return Logical indicating if \code{hla_calls} follows hla calls data frame
 #'   format. Otherwise raise error.
 #'
+#' @family assert functions
+#'
 #' @importFrom assertthat assert_that see_if
 #' @examples
 #' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
@@ -294,8 +295,8 @@ checkHlaCallsFormat <- function(hla_calls) {
 backquote <- function(x) {
   assert_that(is.character(x))
   x <- gsub("`", "", x)
-  backquted <- paste0("`", x, "`")
-  return(backquted)
+  backquoted <- paste0("`", x, "`")
+  return(backquoted)
 }
 
 #' Assert additional data
@@ -310,6 +311,8 @@ backquote <- function(x) {
 #'
 #' @return Logical indicating if \code{data_frame} is properly formatted.
 #'   Otherwise raise error.
+#'
+#' @family assert functions
 #'
 #' @importFrom assertthat assert_that see_if
 #' @examples
@@ -358,17 +361,17 @@ checkAdditionalData <- function(data_frame,
 
 #' Add new variables to statistical model
 #'
-#' \code{updateModel} will add new variables to model and re-fit it.
+#' \code{updateModel} adds new variables to model and re-fit it.
 #'
 #' @param object An existing fit from a model function such as lm, glm and many
 #'   others.
 #' @param x Character vector specifying variables to be added to model or a
 #'   formula giving a template which specifies how to update.
 #' @param backquote Logical indicating if added variables should be quoted.
-#'   Longer than one element vectors are accepted as well, specifying which new
-#'   variables should be backquoted. Only relevant if x is of type character.
-#' @param collapse Character specifying how new characters should be added to
-#'   old formula. Only relevant if x is of type character.
+#'   Elements of this vector are recycled over \code{x}. Only relevant if
+#'   \code{x} is of type character.
+#' @param collapse String specifying how new characters should be added to
+#'   old formula. Only relevant if \code{x} is of type character.
 #'
 #' @return Updated fit of input model.
 #'
@@ -410,8 +413,10 @@ updateModel <- function(object, x, backquote = TRUE, collapse = " + ") {
 #'
 #' @inheritParams updateModel
 #'
-#' @return Logical indicating if \code{data_frame} is an existing fit from a
+#' @return Logical indicating if \code{object} is an existing fit from a
 #' model function such as lm, glm and many others. Otherwise raise error.
+#'
+#' @family assert functions
 #'
 #' @importFrom assertthat assert_that see_if
 #' @importFrom stats getCall
@@ -447,17 +452,19 @@ checkStatisticalModel <- function(object) { # TODO simplyfy output of this funct
   )
 }
 
-#' Check if vectors contains only counts or zeros
+#' Check if vector contains only counts or zeros
 #'
 #' \code{isCountsOrZeros} checks if vector contains only positive integers or
 #' zeros.
 #'
 #' @param x Numeric vector or object that can be \code{unlist} to numeric
 #'   vector.
-#' @param na.rm Logical indicating if \code{NA} values should be omitted.
+#' @param na.rm Logical indicating if \code{NA} values should be accepted.
 #'
 #' @return Logical indicating if provided vector contains only positive integers
 #'   or zeros.
+#'
+#' @family assert functions
 #'
 #' @importFrom rlang is_integerish
 #'
@@ -485,6 +492,8 @@ assertthat::on_failure(isCountsOrZeros) <- function(call, env) {
 #'
 #' @return Logical indicating if object is character vector or NULL
 #'
+#' @family assert functions
+#'
 isCharacterOrNULL <- function(x) {
     test <- is.character(x) | is.null(x)
 
@@ -507,6 +516,8 @@ assertthat::on_failure(isCharacterOrNULL) <- function(call, env) {
 #' @param x object to test.
 #'
 #' @return Logical indicating if object is number or NULL
+#'
+#' @family assert functions
 #'
 #' @importFrom assertthat is.number
 #'
@@ -534,6 +545,8 @@ assertthat::on_failure(isNumberOrNULL) <- function(call, env) {
 #' @param x object to test.
 #'
 #' @return Logical indicating if object is string or NULL
+#'
+#' @family assert functions
 #'
 #' @importFrom assertthat is.string
 #'
@@ -563,6 +576,8 @@ assertthat::on_failure(isStringOrNULL) <- function(call, env) {
 #' @return Logical indicating if \code{x} matches one of the strings in
 #'   \code{choice}.
 #'
+#' @family assert functions
+#'
 stringMatches <- function(x, choice) {
     test <- x %in% choice
 
@@ -590,6 +605,8 @@ assertthat::on_failure(stringMatches) <- function(call, env) {
 #'
 #' @return Logical indicating if object is flag or NULL
 #'
+#' @family assert functions
+#'
 #' @importFrom assertthat is.flag
 #'
 isFlagOrNULL <- function(x) {
@@ -613,11 +630,11 @@ assertthat::on_failure(isFlagOrNULL) <- function(call, env) {
 #' \code{listMiDASDictionaries} lists dictionaries shipped with MiDAS package.
 #'
 #' @param file.names Logical value. If FALSE, only the names of dictionaries are
-#' returned. If TRUE their file names are returned.
+#' returned. If TRUE their paths are returned.
 #' @param pattern String used to match dictionary names, it can be a regular
-#'   expression.
+#'   expression. By default all names are matched.
 #'
-#' @return Character vector with names of available HLA alleles dictionaries.
+#' @return Character vector with names of HLA alleles dictionaries.
 #'
 #' @export
 listMiDASDictionaries <- function(pattern = ".*",
@@ -638,14 +655,16 @@ listMiDASDictionaries <- function(pattern = ".*",
 
 #' Check if character matches one of possible values
 #'
-#' \code{characterMatches} checks if all elements of character matches values in
-#' choices.
+#' \code{characterMatches} checks if all elements of a character vector matches
+#' values in choices.
 #'
-#' @param x character vector to test.
+#' @param x Character vector to test.
 #' @param choice Character vector with possible values for \code{x}.
 #'
-#' @return Logical indicating if \code{x} matches one of the values in
-#'   \code{choice}.
+#' @return Logical indicating if \code{x}'s elements matches any of the values
+#' in \code{choice}.
+#'
+#' @family assert functions
 #'
 #' @importFrom assertthat assert_that
 characterMatches <- function(x, choice) {
@@ -678,6 +697,8 @@ assertthat::on_failure(characterMatches) <- function(call, env) {
 #'
 #' @return Logical indicating if \code{x} is an instance of \code{class}.
 #'
+#' @family assert functions
+#'
 #' @importFrom assertthat assert_that
 #' @importFrom methods is
 isClassOrNULL <- function(x, class) {
@@ -698,25 +719,28 @@ assertthat::on_failure(isClassOrNULL) <- function(call, env) {
   )
 }
 
-#' Convert KIR haplotypes to gene level
+#' Convert KIR haplotypes to gene counts
 #'
-#' \code{kirHaplotypeToCounts} converts vector of KIR haplotypes to data frame
-#' of KIR genes counts.
+#' \code{kirHaplotypeToCounts} convert vector of KIR haplotypes to data frame
+#' of KIR gene counts.
 #'
 #' @param x Character vector specifying KIR haplotypes.
 #' @param hap_dict String specifying path to KIR haplotypes dictionary. By
 #'   default file shipped together with package is being used. See details for
 #'   more information.
 #' @param binary Logical flag indicating if haplotypes should be converted only
-#'   to gene presence / absence indicators. At this point this is the only way
-#'   that allows unambiguous conversion.
+#'   to gene presence / absence indicators (it is the only way that allows
+#'   unambiguous conversion). This argument is currently ignored.
 #'
-#' \code{hap_dict} have to be a \code{tsv} file with first column holding KIR
-#' haplotypes and gene counts in others. File should have header with first
-#' column unnamed it is being used as row names.
+#' \code{hap_dict} have to be a tab separated values formatted file with first
+#' column holding KIR haplotypes and gene counts in others. File should have
+#' header with first column unnamed and gene names in the others.
 #'
 #' @return Data frame with haplotypes and corresponding gene counts. \code{NA}'s
 #'   in \code{x} are removed during conversion.
+#'
+#' @seealso \code{\link{readKirCalls}}, \code{\link{getHlaKirInteractions}},
+#'   \code{\link{checkKirCountsFormat}}, \code{\link{prepareMiDAS}}.
 #'
 #' @examples
 #' x <- c(NA, "1+3|16+3", "1+1", NA)
@@ -735,6 +759,7 @@ kirHaplotypeToCounts <- function(x,
     is.readable(hap_dict),
     isTRUEorFALSE(binary)
   )
+  binary <- TRUE # its not possible yet to not oparate on binary states - once available delete this line
   hap_dict <- read.table(hap_dict, stringsAsFactors = FALSE)
 
   # x <- na.omit(x)
@@ -787,14 +812,14 @@ kirHaplotypeToCounts <- function(x,
 
 #' Check column names
 #'
-#' \code{colnamesMatches} checks columns of data frame are named as specified
+#' \code{colnamesMatches} check if  data frame's columns are named as specified
 #'
-#' @param x Data frame vector to test.
-#' @param cols Ordered character vector with values for \code{x} colnames
-#'   to test.
+#' @param x Data frame to test.
+#' @param cols Ordered character vector to test against \code{x}'s colnames.
 #'
-#' @return Logical indicating if \code{x} colnames matches values in
-#'   \code{choice}.
+#' @return Logical indicating if \code{x}'s colnames equals \code{choice}.
+#'
+#' @family assert functions
 #'
 #' @importFrom assertthat assert_that
 colnamesMatches <- function(x, cols) {
@@ -802,8 +827,9 @@ colnamesMatches <- function(x, cols) {
     is.data.frame(x),
     see_if(ncol(x) == length(cols),
            msg = sprintf(
-             "Number of columns in %s must equal number of values in cols",
-             deparse(substitute(x))
+             "Number of columns in %s must equal %i.",
+             deparse(substitute(x)),
+             length(cols)
            )
     )
   )
@@ -830,18 +856,23 @@ assertthat::on_failure(colnamesMatches) <- function(call, env) {
   )
 }
 
-#' Assert kir counts data frame format
+#' Assert KIR counts data frame format
 #'
-#' \code{checkKirCountsFormat} asserts if kir counts data frame have proper
+#' \code{checkKirCountsFormat} asserts if KIR counts data frame have proper
 #' format.
 #'
-#' @param kir_counts Data frame containing KIR genes counts, as return by
+#' @param kir_counts Data frame containing KIR gene counts, as returned by
 #'   \code{\link{readKirCalls}} function.
 #' @param accept.null Logical indicating if NULL \code{kir_counts} should be
 #'   accepted.
 #'
-#' @return Logical indicating if \code{kir_counts} follows kir counts data frame
+#' @return Logical indicating if \code{kir_counts} follow KIR counts data frame
 #'   format. Otherwise raise error.
+#'
+#' @family assert functions
+#'
+#' @seealso \code{\link{readKirCalls}}, \code{\link{getHlaKirInteractions}},
+#'   \code{\link{kirHaplotypeToCounts}}, \code{\link{prepareMiDAS}}.
 #'
 #' @importFrom assertthat assert_that see_if
 #' @examples
@@ -877,12 +908,14 @@ checkKirCountsFormat <- function(kir_counts,
 
 #' Check if object is count or NULL
 #'
-#' \code{isCountOrNULL} checks if object is a count (a single positive integer)
+#' \code{isCountOrNULL} check if object is a count (a single positive integer)
 #' or NULL.
 #'
 #' @param x object to test.
 #'
 #' @return Logical indicating if object is count or NULL
+#'
+#' @family assert functions
 #'
 #' @importFrom assertthat is.count
 #'
@@ -904,12 +937,14 @@ assertthat::on_failure(isCountOrNULL) <- function(call, env) {
 
 #' Check if object is TRUE or FALSE flag
 #'
-#' \code{isTRUEorFALSE} checks if object is a flag (a length one logical vector)
+#' \code{isTRUEorFALSE} check if object is a flag (a length one logical vector)
 #' except NA.
 #'
 #' @param x object to test.
 #'
 #' @return Logical indicating if object is TRUE or FALSE flag
+#'
+#' @family assert functions
 #'
 #' @importFrom assertthat is.flag
 #'
@@ -931,11 +966,13 @@ assertthat::on_failure(isTRUEorFALSE) <- function(call, env) {
 
 #' Check if tidy method for class exist
 #'
-#' \code{hasTidyMethod} checks if there is tidy method for given class.
+#' \code{hasTidyMethod} check if there is tidy method available for given class.
 #'
 #' @param class Object class.
 #'
 #' @return Logical indicating if there is tidy method for given class.
+#'
+#' @family assert functions
 #'
 #' @importFrom utils methods
 #'

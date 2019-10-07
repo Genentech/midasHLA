@@ -9,7 +9,7 @@ test_that("HLA allele associations are analyzed properly", {
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
   midas_data <-
-    prepareMiDASData(hla_calls,
+    prepareMiDAS(hla_calls,
                      pheno,
                      covar,
                      analysis_type = "hla_allele",
@@ -79,7 +79,7 @@ test_that("Stepwise conditional alleles subset selection", {
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
   midas_data <-
-    prepareMiDASData(hla_calls,
+    prepareMiDAS(hla_calls,
                      pheno,
                      covar,
                      analysis_type = "hla_allele",
@@ -206,7 +206,7 @@ test_that("MiDAS associations are analyzed properly", {
     system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
   kir_counts <- readKirCalls(kir_file, counts = TRUE)
   midas_data <-
-    prepareMiDASData(
+    prepareMiDAS(
       hla_calls,
       pheno,
       covar,
@@ -228,7 +228,7 @@ test_that("MiDAS associations are analyzed properly", {
   object <- lm(OS_DIED ~ AGE + SEX, data = midas_data)
 
   # conditional FALSE, analysis_type = "hla_allele", extra variables
-  res <- analyzeMiDASData(object,
+  res <- runMiDAS(object,
                           analysis_type = "hla_allele",
                           variables = c("expression_A", "expression_C")
   )
@@ -251,7 +251,7 @@ test_that("MiDAS associations are analyzed properly", {
   expect_equal(as.data.frame(res), as.data.frame(test_res)) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
 
   # conditional FALSE, analysis_type = "hla_allele", pattern = "^A"
-  res <- analyzeMiDASData(object,
+  res <- runMiDAS(object,
                           analysis_type = "hla_allele",
                           pattern = "^A"
   )
@@ -274,7 +274,7 @@ test_that("MiDAS associations are analyzed properly", {
   expect_equal(as.data.frame(res), as.data.frame(test_res))
 
   ## analysis_type = "hla_allele" variables = NULL
-  res <- analyzeMiDASData(object,
+  res <- runMiDAS(object,
                           analysis_type = "hla_allele",
                           variables = NULL
   )
@@ -298,7 +298,7 @@ test_that("MiDAS associations are analyzed properly", {
 
 
   ## analysis_type = "aa_level" variables = NULL
-  res <- analyzeMiDASData(object,
+  res <- runMiDAS(object,
                           analysis_type = "aa_level",
                           variables = NULL
   )
@@ -321,7 +321,7 @@ test_that("MiDAS associations are analyzed properly", {
   expect_equal(as.data.frame(res), as.data.frame(test_res))
 
   ## analysis_type = "expression_level" variables = NULL
-  res <- analyzeMiDASData(object,
+  res <- runMiDAS(object,
                           analysis_type = "expression_level",
                           variables = NULL
   )
@@ -335,7 +335,7 @@ test_that("MiDAS associations are analyzed properly", {
   expect_equal(as.data.frame(res), as.data.frame(test_res))
 
   ## analysis_type = "allele_g_group" variables = NULL
-  res <- analyzeMiDASData(object,
+  res <- runMiDAS(object,
                           analysis_type = "allele_g_group",
                           variables = NULL
   )
@@ -358,7 +358,7 @@ test_that("MiDAS associations are analyzed properly", {
   expect_equal(as.data.frame(res), as.data.frame(test_res))
 
   ## analysis_type = "allele_supertype" variables = NULL
-  res <- analyzeMiDASData(object,
+  res <- runMiDAS(object,
                           analysis_type = "allele_supertype",
                           variables = NULL
   )
@@ -381,7 +381,7 @@ test_that("MiDAS associations are analyzed properly", {
   expect_equal(as.data.frame(res), as.data.frame(test_res))
 
   ## analysis_type = "allele_group" variables = NULL
-  res <- analyzeMiDASData(object,
+  res <- runMiDAS(object,
                           analysis_type = "allele_group",
                           variables = NULL
   )
@@ -404,7 +404,7 @@ test_that("MiDAS associations are analyzed properly", {
   expect_equal(as.data.frame(res), as.data.frame(test_res))
 
   ## analysis_type = "kir_genes" variables = NULL
-  res <- analyzeMiDASData(object,
+  res <- runMiDAS(object,
                           analysis_type = "kir_genes",
                           variables = NULL
   )
@@ -426,7 +426,7 @@ test_that("MiDAS associations are analyzed properly", {
   expect_equal(as.data.frame(res), as.data.frame(test_res))
 
   ## analysis_type = "hla_kir_interactions" variables = NULL
-  res <- analyzeMiDASData(object,
+  res <- runMiDAS(object,
                           analysis_type = "hla_kir_interactions",
                           variables = NULL
   )
@@ -449,7 +449,7 @@ test_that("MiDAS associations are analyzed properly", {
   expect_equal(as.data.frame(res), as.data.frame(test_res))
 
   # conditional TRUE keep TRUE
-  res <- analyzeMiDASData(object,
+  res <- runMiDAS(object,
                           analysis_type = "hla_allele",
                           conditional = TRUE,
                           keep = TRUE
@@ -483,7 +483,7 @@ test_that("MiDAS associations are analyzed properly", {
   expect_equal(res, test_res) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
 
   # conditional TRUE keep FALSE
-  res <- analyzeMiDASData(object,
+  res <- runMiDAS(object,
                           analysis_type = "hla_allele",
                           conditional = TRUE,
                           keep = FALSE
@@ -512,85 +512,85 @@ test_that("MiDAS associations are analyzed properly", {
 
   # Test lower and upper frequency thresholds
   # %
-  res <- analyzeMiDASData(object, analysis_type = "hla_allele", lower_frequency_cutoff = 0.85)
+  res <- runMiDAS(object, analysis_type = "hla_allele", lower_frequency_cutoff = 0.85)
   freqs <- getHlaFrequencies(hla_calls)
   expect_equal(res$allele, freqs$allele[freqs$Freq > 0.85 & freqs$Freq != 1])
 
-  res <- analyzeMiDASData(object, analysis_type = "hla_allele", upper_frequency_cutoff = 0.03)
+  res <- runMiDAS(object, analysis_type = "hla_allele", upper_frequency_cutoff = 0.03)
   expect_equal(res$allele, freqs$allele[freqs$Freq < 0.03 & freqs$Freq != 1])
 
   # counts
-  counts <- prepareMiDASData(hla_calls, analysis_type = "hla_allele")
+  counts <- prepareMiDAS(hla_calls, analysis_type = "hla_allele")
   counts <- colSums(counts[-1], na.rm = TRUE)
-  res <- analyzeMiDASData(object, analysis_type = "hla_allele", lower_frequency_cutoff = 34)
+  res <- runMiDAS(object, analysis_type = "hla_allele", lower_frequency_cutoff = 34)
   expect_equal(res$allele, names(counts)[counts > 34 & freqs$Freq != 1])
 
-  res <- analyzeMiDASData(object, analysis_type = "hla_allele", upper_frequency_cutoff = 2)
+  res <- runMiDAS(object, analysis_type = "hla_allele", upper_frequency_cutoff = 2)
   expect_equal(res$allele, names(counts)[counts < 2 & freqs$Freq != 1])
 
   # Tests for checkStatisticalModel errors are ommitted here
 
-  expect_error(analyzeMiDASData(object, analysis_type = 1),
+  expect_error(runMiDAS(object, analysis_type = 1),
                "analysis_type is not a string \\(a length one character vector\\)."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "a"),
+  expect_error(runMiDAS(object, analysis_type = "a"),
                "analysis_type should be one of \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"hla_kir_interactions\"."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", pattern = 1),
+  expect_error(runMiDAS(object, analysis_type = "hla_allele", pattern = 1),
                "pattern is not a string \\(a length one character vector\\) or NULL."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", variables = 1),
+  expect_error(runMiDAS(object, analysis_type = "hla_allele", variables = 1),
                "variables is not a character vector or NULL."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", conditional = 1),
+  expect_error(runMiDAS(object, analysis_type = "hla_allele", conditional = 1),
                "conditional is not a flag \\(a length one logical vector\\)."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", keep = 1),
+  expect_error(runMiDAS(object, analysis_type = "hla_allele", keep = 1),
                "keep is not a flag \\(a length one logical vector\\)."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", variables = "thief"),
+  expect_error(runMiDAS(object, analysis_type = "hla_allele", variables = "thief"),
                "thief can not be found in object data"
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", lower_frequency_cutoff = "foo"),
+  expect_error(runMiDAS(object, analysis_type = "hla_allele", lower_frequency_cutoff = "foo"),
                "lower_frequency_cutoff is not a number \\(a length one numeric vector\\) or NULL."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", upper_frequency_cutoff = "foo"),
+  expect_error(runMiDAS(object, analysis_type = "hla_allele", upper_frequency_cutoff = "foo"),
                "upper_frequency_cutoff is not a number \\(a length one numeric vector\\) or NULL."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", pvalue_cutoff = "foo"),
+  expect_error(runMiDAS(object, analysis_type = "hla_allele", pvalue_cutoff = "foo"),
                "pvalue_cutoff is not a number \\(a length one numeric vector\\) or NULL."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", correction = NA),
+  expect_error(runMiDAS(object, analysis_type = "hla_allele", correction = NA),
                "correction is not a string \\(a length one character vector\\)."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", n_correction = "foo"),
+  expect_error(runMiDAS(object, analysis_type = "hla_allele", n_correction = "foo"),
                "n_correction is not a count \\(a single positive integer\\) or NULL."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", logistic = "NA"),
+  expect_error(runMiDAS(object, analysis_type = "hla_allele", logistic = "NA"),
                "logistic is not a flag \\(a length one logical vector\\) or NULL."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", binary_phenotype = "NA"),
-               "binary_phenotype is not a flag \\(a length one logical vector\\) or NULL."
+  expect_error(runMiDAS(object, analysis_type = "hla_allele", exponentiate = "NA"),
+               "exponentiate is not a flag \\(a length one logical vector\\) or NULL."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", th = "NA"),
+  expect_error(runMiDAS(object, analysis_type = "hla_allele", th = "NA"),
                "th is not a number \\(a length one numeric vector\\)."
   )
 
-  expect_error(analyzeMiDASData(object, analysis_type = "hla_allele", rss_th = "NA"),
+  expect_error(runMiDAS(object, analysis_type = "hla_allele", rss_th = "NA"),
                "rss_th is not a number \\(a length one numeric vector\\)."
   )
 })
@@ -612,7 +612,7 @@ test_that("MiDAS data is prepared properly", {
 
   # hla_allele
   midas_hla_allele <-
-    prepareMiDASData(hla_calls,
+    prepareMiDAS(hla_calls,
                      pheno,
                      covar,
                      analysis_type = "hla_allele",
@@ -625,7 +625,7 @@ test_that("MiDAS data is prepared properly", {
   expect_equal(midas_hla_allele, midas_hla_allele_test)
 
   # aa_level
-  midas_aa_level <- prepareMiDASData(hla_calls,
+  midas_aa_level <- prepareMiDAS(hla_calls,
                                      pheno,
                                      covar,
                                      analysis_type = "aa_level",
@@ -639,7 +639,7 @@ test_that("MiDAS data is prepared properly", {
   expect_equal(midas_aa_level, midas_aa_level_test)
 
   # expression_levels
-  midas_expression_levels <- prepareMiDASData(hla_calls,
+  midas_expression_levels <- prepareMiDAS(hla_calls,
                                               pheno,
                                               covar,
                                               analysis_type = "expression_level",
@@ -663,7 +663,7 @@ test_that("MiDAS data is prepared properly", {
   expect_equal(midas_expression_levels, midas_expression_levels_test)
 
   # allele_g_group
-  midas_allele_g_group <- prepareMiDASData(hla_calls,
+  midas_allele_g_group <- prepareMiDAS(hla_calls,
                                           pheno,
                                           covar,
                                           analysis_type = "allele_g_group",
@@ -682,7 +682,7 @@ test_that("MiDAS data is prepared properly", {
   expect_equal(midas_allele_g_group, midas_allele_g_group_test)
 
   # allele_supertype
-  midas_allele_supertype <- prepareMiDASData(hla_calls,
+  midas_allele_supertype <- prepareMiDAS(hla_calls,
                                           pheno,
                                           covar,
                                           analysis_type = "allele_supertype",
@@ -704,7 +704,7 @@ test_that("MiDAS data is prepared properly", {
   expect_equal(midas_allele_supertype, test_midas_allele_supertype)
 
   # allele_groups
-  midas_allele_groups <- prepareMiDASData(hla_calls,
+  midas_allele_groups <- prepareMiDAS(hla_calls,
                                               pheno,
                                               covar,
                                               analysis_type = "allele_group",
@@ -729,7 +729,7 @@ test_that("MiDAS data is prepared properly", {
   # kir_genes
   kir_path <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
   kir_counts <- readKirCalls(kir_path, counts = TRUE)
-  midas_kir_genes <- prepareMiDASData(hla_calls,
+  midas_kir_genes <- prepareMiDAS(hla_calls,
                                       pheno,
                                       covar,
                                       kir_counts = kir_counts,
@@ -743,7 +743,7 @@ test_that("MiDAS data is prepared properly", {
   expect_equal(midas_kir_genes, test_midas_kir_genes)
 
   # hla_kir_interactions
-  midas_hla_kir_interactions <- prepareMiDASData(
+  midas_hla_kir_interactions <- prepareMiDAS(
     hla_calls,
     pheno,
     covar,
@@ -764,7 +764,7 @@ test_that("MiDAS data is prepared properly", {
   expect_equal(midas_hla_kir_interactions, test_midas_hla_kir_interactions)
 
   # custom
-  midas_custom <- prepareMiDASData(hla_calls,
+  midas_custom <- prepareMiDAS(hla_calls,
                                    pheno,
                                    covar,
                                    analysis_type = "custom",
@@ -777,7 +777,7 @@ test_that("MiDAS data is prepared properly", {
   expect_equal(midas_custom, midas_custom_test)
 
   # check more analysis types at once
-  midas_multiple <- prepareMiDASData(hla_calls,
+  midas_multiple <- prepareMiDAS(hla_calls,
                                      pheno,
                                      covar,
                                      kir_counts = kir_counts,
@@ -804,54 +804,54 @@ test_that("MiDAS data is prepared properly", {
   # test for checkHlaCallsFormat are ommitted here
 
   expect_error(
-    prepareMiDASData(hla_calls, analysis_type = 1),
+    prepareMiDAS(hla_calls, analysis_type = 1),
     "analysis_type is not a character vector"
   )
 
   expect_error(
-    prepareMiDASData(hla_calls, analysis_type = "foo"),
+    prepareMiDAS(hla_calls, analysis_type = "foo"),
     "analysis_type should match values \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"hla_kir_interactions\", \"custom\"."
   )
 
   expect_error(
-    prepareMiDASData(hla_calls, analysis_type = "hla_allele", inheritance_model = 1),
+    prepareMiDAS(hla_calls, analysis_type = "hla_allele", inheritance_model = 1),
     "inheritance_model is not a string \\(a length one character vector\\)."
   )
 
   expect_error(
-    prepareMiDASData(hla_calls, analysis_type = "hla_allele", inheritance_model = "bar"),
+    prepareMiDAS(hla_calls, analysis_type = "hla_allele", inheritance_model = "bar"),
     "inheritance_model should be one of \"dominant\", \"recessive\", \"additive\"."
   )
 
   expect_error(
-    prepareMiDASData(hla_calls, analysis_type = "hla_allele", indels = "no"),
+    prepareMiDAS(hla_calls, analysis_type = "hla_allele", indels = "no"),
     "indels is not a flag \\(a length one logical vector\\)."
   )
 
   expect_error(
-    prepareMiDASData(hla_calls, analysis_type = "hla_allele", unkchar = "nope"),
+    prepareMiDAS(hla_calls, analysis_type = "hla_allele", unkchar = "nope"),
     "unkchar is not a flag \\(a length one logical vector\\)."
   )
 
   # checkAdditionalData on ... argument are ommitted here
 
   expect_error(
-    prepareMiDASData(hla_calls[, c("ID", "DMA_1", "DMA_2")], analysis_type = "expression_level"),
+    prepareMiDAS(hla_calls[, c("ID", "DMA_1", "DMA_2")], analysis_type = "expression_level"),
     "no expression levels were found for input hla_calls"
   )
 
   expect_error(
-    prepareMiDASData(hla_calls[, c("ID", "DOB_1", "DOB_2")], analysis_type = "allele_group"),
+    prepareMiDAS(hla_calls[, c("ID", "DOB_1", "DOB_2")], analysis_type = "allele_group"),
     "no allele could be assigned to allele groups for input hla_calls"
   )
 
   expect_error(
-    prepareMiDASData(hla_calls, analysis_type = "kir_genes"),
+    prepareMiDAS(hla_calls, analysis_type = "kir_genes"),
     "\"kir_genes\" analysis type requires kir_counts argument to be specified"
   )
 
   expect_error(
-    prepareMiDASData(hla_calls, analysis_type = "hla_kir_interactions"),
+    prepareMiDAS(hla_calls, analysis_type = "hla_kir_interactions"),
     "\"hla_kir_interactions\" analysis type requires kir_counts argument to be specified"
   )
 })
@@ -863,7 +863,7 @@ test_that("amino acid omnibus test works fine", {
   pheno <- read.table(pheno_file, header = TRUE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE)
-  midas_data <- prepareMiDASData(hla_calls, pheno, covar, analysis_type = "aa_level")
+  midas_data <- prepareMiDAS(hla_calls, pheno, covar, analysis_type = "aa_level")
   object <- lm(OS ~ AGE + SEX, data = midas_data)
   omnibus_res <- aaPosOmnibusTest(object, aa_pos = c("B_11", "E_107", "A_246"))
 

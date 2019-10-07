@@ -1,19 +1,19 @@
 #' Summarize amino acid position
 #'
-#' Lists HLA alleles and amino acid residues at a given position
+#' List HLA alleles and amino acid residues at a given position
 #'
 #' @inheritParams checkHlaCallsFormat
 #' @inheritParams hlaToAAVariation
 #' @param aa_pos String specifying gene and amio acid position, example
 #'   \code{"A_9"}.
-#' @param aln Matrix containing amino acids sequence alignments as returned by
-#'   \link{readHlaAlignments} function. By default function will use alignment
-#'   files shipped with the package.
+#' @param aln Matrix containing amino acid sequence alignments as returned by
+#'   \code{\link{readHlaAlignments}} function. By default function will use
+#'   alignment files shipped with the package.
 #' @param na.rm Logical flag indicating if \code{NA} values should be considered
 #'   for frequency calculations.
 #'
-#' @return Data frame containing HLA alleles, thier corresponding amino acid
-#'   residues and thier frequencies at requested position.
+#' @return Data frame containing HLA alleles, their corresponding amino acid
+#'   residues and frequencies at requested position.
 #'
 #' @examples
 #' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")

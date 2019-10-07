@@ -13,6 +13,21 @@ isTRUEorFALSE(x)
 Logical indicating if object is TRUE or FALSE flag
 }
 \description{
-\code{isTRUEorFALSE} checks if object is a flag (a length one logical vector)
+\code{isTRUEorFALSE} check if object is a flag (a length one logical vector)
 except NA.
 }
+\seealso{
+Other assert functions: \code{\link{characterMatches}},
+  \code{\link{checkAdditionalData}},
+  \code{\link{checkHlaCallsFormat}},
+  \code{\link{checkKirCountsFormat}},
+  \code{\link{checkStatisticalModel}},
+  \code{\link{colnamesMatches}},
+  \code{\link{hasTidyMethod}},
+  \code{\link{isCharacterOrNULL}},
+  \code{\link{isClassOrNULL}}, \code{\link{isCountOrNULL}},
+  \code{\link{isCountsOrZeros}},
+  \code{\link{isFlagOrNULL}}, \code{\link{isNumberOrNULL}},
+  \code{\link{isStringOrNULL}}, \code{\link{stringMatches}}
+}
+\concept{assert functions}

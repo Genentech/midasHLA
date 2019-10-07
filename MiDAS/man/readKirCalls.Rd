@@ -19,12 +19,12 @@ more information.}
 to gene counts.}
 
 \item{binary}{Logical flag indicating if haplotypes should be converted only
-  to gene presence / absence indicators. At this point this is the only way
-  that allows unambiguous conversion.
+  to gene presence / absence indicators (it is the only way that allows
+  unambiguous conversion). This argument is currently ignored.
 
-\code{hap_dict} have to be a \code{tsv} file with first column holding KIR
-haplotypes and gene counts in others. File should have header with first
-column unnamed it is being used as row names.}
+\code{hap_dict} have to be a tab separated values formatted file with first
+column holding KIR haplotypes and gene counts in others. File should have
+header with first column unnamed and gene names in the others.}
 
 \item{na.strings}{a character vector of strings which are to be
     interpreted as \code{\link{NA}} values.  Blank fields are also

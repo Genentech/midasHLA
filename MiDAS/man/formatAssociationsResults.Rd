@@ -9,7 +9,7 @@ formatAssociationsResults(results, type = "hla_allele",
   format = getOption("knitr.table.format"))
 }
 \arguments{
-\item{results}{Tibble as returned by \link{analyzeAssociations}.}
+\item{results}{Tibble as returned by \code{\link{analyzeAssociations}}.}
 
 \item{type}{String specifying type of analysis from which \code{results} were
 produced. Possible values includes \code{'hla_allele'}, \code{'aa_level'},
@@ -27,15 +27,18 @@ to \code{TRUE}, estimate will be renamed to odds ratio.}
 included in output. If \code{NULL} cutoff of \code{0.05} on
 \code{p.adjusted} value is used instead.}
 
-\item{format}{A character string. Possible values are \code{"latex"} and
-\code{"html"}.}
+\item{format}{String with possible values \code{"latex"} and \code{"html"}.}
 }
 \value{
 A character vector with pretty formatted \code{results} table.
 }
 \description{
-\link{formatAssociationsResults} formats results table to specified
-format. It uses \link{formatResults} with prespecifed arguments to return
-nice table depending on the type of analysis and model type. This function is
-intended only to be used internally by \link{analyzeMiDASData}.
+\code{formatAssociationsResults} formats results table to specified
+format. It uses \code{\link{formatResults}} with pre specified arguments to
+return pretty formatted table depending on the type of analysis and model
+type. This function is intended only to be used internally by
+\code{\link{runMiDAS}}.
+}
+\seealso{
+\code{\link{formatResults}}, \code{\link{runMiDAS}}
 }

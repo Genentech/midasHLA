@@ -11,32 +11,35 @@ analyzeAssociations(object, variables, correction = "bonferroni",
 \item{object}{An existing fit from a model function such as lm, glm and many
 others.}
 
-\item{variables}{Character specifying variables to use in association tests.}
+\item{variables}{Character vector specifying variables to use in association
+tests.}
 
 \item{correction}{String specifying multiple testing correction method. See
 details for further information.}
 
 \item{n_correction}{Integer specifying number of comparisons to consider
-during multiple testing correction calculations, must be at least equql to
+during multiple testing correction calculations, must be at least equal to
 number of comparisons being made; only set this (to non-default) when you
 know what you are doing!}
 
-\item{exponentiate}{Logical indicating whether or not to exponentiate the
-  coefficient estimates. Internally this is passed to \link[broom]{tidy}.
-  This is typical for logistic and multinomial regressions, but a bad idea if
-  there is no log or logit link. Defaults to FALSE.
-
-\code{correction} specifies p-value adjustment method to use, common choice
-is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
-\link[stats]{p.adjust}. Check there to get more details.}
+\item{exponentiate}{Logical flag indicating whether or not to exponentiate
+the coefficient estimates. Internally this is passed to
+\code{\link[broom]{tidy}}. This is typical for logistic and multinomial
+regressions, but a bad idea if there is no log or logit link. Defaults to
+FALSE.}
 }
 \value{
 Tibble containing combined results for all alleles in
   \code{hla_calls}.
 }
 \description{
-\code{analyzeAssociations} performs associations analysis on single variable
+\code{analyzeAssociations} perform association analysis on single variable
 level using statistical model of choice.
+}
+\details{
+\code{correction} specifies p-value adjustment method to use, common choice
+is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
+\link[stats]{p.adjust}.
 }
 \examples{
 library("survival")
@@ -46,7 +49,7 @@ pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
 pheno <- read.table(pheno_file, header = TRUE)
 covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 covar <- read.table(covar_file, header = TRUE)
-midas_data <- prepareMiDASData(hla_calls = hla_calls,
+midas_data <- prepareMiDAS(hla_calls = hla_calls,
                                pheno = pheno,
                                covar = covar,
                                analysis_type = "hla_allele",
@@ -63,3 +66,10 @@ analyzeAssociations(object = object,
 )
 
 }
+\seealso{
+\code{\link[stats]{p.adjust}}, \code{\link[broom]{tidy}}
+
+Other MiDAS statistical functions: \code{\link{analyzeConditionalAssociations}},
+  \code{\link{prepareMiDAS}}, \code{\link{runMiDAS}}
+}
+\concept{MiDAS statistical functions}

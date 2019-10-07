@@ -13,7 +13,7 @@ getHlaKirInteractions(hla_calls, kir_counts,
 \code{\link{readHlaCalls}} function.}
 
 \item{kir_counts}{Data frame containing KIR genes counts, as return by
-\link{readKirCalls}.}
+\code{\link{readKirCalls}}.}
 
 \item{interactions_dict}{Path to the file containing HLA - KIR interactions
 matchings. See details for further details.}
@@ -21,19 +21,23 @@ matchings. See details for further details.}
 \value{
 Data frame with binary presence-absence indicators for HLA - KIR
   interactions.
-
+}
+\description{
+\code{getHlaKirInteractions} calculates binary presence-absence matrix of HLA
+- KIR interactions.
+}
+\details{
 In order to be able to compare input data with \code{interactions_dict}
 \code{hla_calls} are first converted to variables such as G groups, using
 matching files shipped with the packages. Moreover \code{hla_calls} are also
 reduced to all possible resolutions.
 
-\code{interactions_dict} should be a tsv formatted file with following
-columns: HLA, KIR, Affinity, Type. The package is shipped with interactions
-file created based on Pende et al., 2019.
-}
-\description{
-\code{getHlaKirInteractions} calculates binary presence-absence matrix of HLA
-- KIR interactions.
+\code{interactions_dict} file should be a tsv format with header and two
+columns. First column should be named \code{"Name"} and hold interactions
+names, second should be named \code{"Expression"} and hold expression used to
+identify interaction (eg. \code{"C2 & KIR2DL1"} will match all samples
+with \code{C2} and \code{KIR2DL1}). The package is shipped with interactions
+file created based on Pende, et al. 2019.
 }
 \examples{
 hla_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")

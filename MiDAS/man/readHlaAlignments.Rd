@@ -2,7 +2,7 @@
 % Please edit documentation in R/MiDAS_parsingFunctions.R
 \name{readHlaAlignments}
 \alias{readHlaAlignments}
-\title{Reads HLA allele alignments}
+\title{Read HLA allele alignments}
 \usage{
 readHlaAlignments(file, gene = NULL, trim = TRUE, unkchar = "",
   resolution = 8)
@@ -31,10 +31,10 @@ Matrix containing HLA allele alignments.
   Insertion and deletions are marked with period (.).
 }
 \description{
-\code{readHlaAlignments} reads HLA allele alignments from file.
+\code{readHlaAlignments} read HLA allele alignments from file.
 }
 \details{
-HLA allele alignment file should follow format used EBI database, for details
+HLA allele alignment file should follow EBI database format, for details
 see
 \url{ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/alignments/README.md}.
 
@@ -42,8 +42,7 @@ All protein alignment files from EBI database are shipped with the package.
 They can be easily accessed using \code{gene} parameter. If \code{gene} is
 set to \code{NULL} file parameter is used instead and alignment is read from
 the provided file. In EBI database alignments for DRB1, DRB3, DRB4 and DRB5
-genes are provided as a single file, here they are separated into separate
-files for accordance with the package functionality.
+genes are provided as a single file, here they are separated.
 }
 \examples{
 hla_alignments <- readHlaAlignments(gene = "A")

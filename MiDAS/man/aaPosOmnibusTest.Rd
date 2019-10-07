@@ -18,7 +18,7 @@ others.}
 details for further information.}
 
 \item{n_correction}{Integer specifying number of comparisons to consider
-during multiple testing correction calculations, must be at least equql to
+during multiple testing correction calculations, must be at least equal to
 number of comparisons being made; only set this (to non-default) when you
 know what you are doing!}
 }
@@ -43,7 +43,7 @@ pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
 pheno <- read.table(pheno_file, header = TRUE)
 covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 covar <- read.table(covar_file, header = TRUE)
-midas_data <- prepareMiDASData(hla_calls, pheno, covar, analysis_type = "aa_level")
+midas_data <- prepareMiDAS(hla_calls, pheno, covar, analysis_type = "aa_level")
 object <- lm(OS ~ AGE + SEX, data = midas_data)
 aaPosOmnibusTest(object, aa_pos = c("B_11", "E_107", "A_246"))
 

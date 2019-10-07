@@ -2,20 +2,21 @@
 % Please edit documentation in R/MiDAS_transformationFunctions.R
 \name{countsToVariables}
 \alias{countsToVariables}
-\title{Converts counts data frame according to match table}
+\title{Convert counts data frame according to match table}
 \usage{
 countsToVariables(counts, dictionary, na.value = NA, nacols.rm = TRUE)
 }
 \arguments{
 \item{counts}{Data frame with counts, such as returned by
-\link{hlaCallsToCounts} function. First column should contain samples IDs,
-following columns should contain counts (natural numbers including zero).}
+\code{\link{hlaCallsToCounts}} function. First column should contain
+samples IDs, following columns should contain counts (natural numbers
+including zero).}
 
-\item{dictionary}{Path to the file containing variable matchings or data frame providing
-this information. See details for further explanations.}
+\item{dictionary}{Path to the file containing variables matchings or data
+frame providing this information. See details for further explanations.}
 
-\item{na.value}{Vector of length one speciyfing value for variables for which no
-matching is found in \code{counts}. Default behaviour is to mark such
+\item{na.value}{Vector of length one speciyfing value for variables for which
+no matching is found in \code{counts}. Default behaviour is to mark such
 instances with \code{NA}.}
 
 \item{nacols.rm}{logical indicating if result columns that contain only
@@ -24,22 +25,28 @@ instances with \code{NA}.}
 \value{
 Data frame of indicators for new variables, with \code{1} signaling
   presence of variable and \code{0} absence.
-
+}
+\description{
+\code{countsToVariables} convert counts data frame to variables based on
+match table (dictionary).
+}
+\details{
 \code{dictionary} file should be a tsv format with header and two columns.
 First column should be named \code{"Name"} and hold variable name, second
 should be named \code{"Expression"} and hold expression used to identify
-variable (eg. ...). Optionally a data frame formatted in the same manner can
-be passed instead.
+variable (eg. \code{"KIR2DL3 & ! KIR2DL2"} will match all samples with
+\code{KIR2DL3} and without \code{KIR2DL2}). Optionally a data frame formatted
+in the same manner can be passed instead.
 
-Dictionaries shipped with package:
-
-\code{hla_kir_interactions} interactions based on Pende et al., 2019.
-
-\code{kir_haplotypes} kir haplotypes.
+Dictionaries shipped with the package:
+\describe{
+  \item{\code{hla_kir_interactions}}{
+    HLA - KIR interactions based on Pende et al., 2019.
+  }
+  \item{\code{kir_haplotypes}}{
+    KIR genes to KIR haplotypes dictionary.
+  }
 }
-\description{
-\code{countsToVariables} converts counts data frame to variables based on
-match table (dictionary).
 }
 \examples{
 file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")

@@ -1,6 +1,6 @@
 Package: MiDAS
 Title: R package for immunogenomics data handling and association analysis
-Version: 0.0.0.9034
+Version: 0.0.0.9035
 Authors@R: c(
   person("First", "Last", email = "first.last@example.com", role = c("aut", "cre")))
 Description: What the package does (one paragraph).
@@ -14,6 +14,13 @@ Imports:
     magrittr (>= 1.5), tidyr (>= 0.8.2), formattable (>= 0.2.0.1), Hmisc (>= 4.2-0),
     methods
 Suggests:
-    testthat (>= 2.0.1), seqinr (>= 3.4-5), survival (>= 2.43-3), vcfR (>= 1.8.0), 
-    ensembldb (>= 2.6.8), EnsDb.Hsapiens.v86 (>= 2.99.0), broom.mixed (>= 0.2.4)
+    testthat (>= 2.0.1),
+    seqinr (>= 3.4-5),
+    survival (>= 2.43-3),
+    vcfR (>= 1.8.0),
+    ensembldb (>= 2.6.8),
+    EnsDb.Hsapiens.v86 (>= 2.99.0),
+    broom.mixed (>= 0.2.4),
+    rmarkdown
 RoxygenNote: 6.1.1
+VignetteBuilder: knitr
