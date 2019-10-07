@@ -4,7 +4,7 @@
 #'
 #' @inheritParams checkHlaCallsFormat
 #' @inheritParams hlaToAAVariation
-#' @param pos String specifying gene and amio acid position, example
+#' @param aa_pos String specifying gene and amio acid position, example
 #'   \code{"A_9"}.
 #' @param aln Matrix containing amino acids sequence alignments as returned by
 #'   \link{readHlaAlignments} function. By default function will use alignment
@@ -29,13 +29,13 @@
 #'
 #' @export
 summariseAAPosition <- function(hla_calls,
-                                pos,
+                                aa_pos,
                                 aln = NULL,
                                 na.rm = FALSE) {
   assert_that(
     checkHlaCallsFormat(hla_calls),
-    is.string(pos),
-    see_if(grepl("^[A-Z]+[0-9]*_[0-9]+$", pos),
+    is.string(aa_pos),
+    see_if(grepl("^[A-Z]+[0-9]*_[0-9]+$", aa_pos),
            msg = "amino acid position should be formatted like: A_9."
     ),
     see_if(
@@ -45,8 +45,8 @@ summariseAAPosition <- function(hla_calls,
     isTRUEorFALSE(na.rm)
   )
 
-  gene <- gsub("[0-9]+$", "", pos)
-  pos <- as.integer(gsub(".*_([0-9]+)$", "\\1", pos))
+  gene <- gsub("[0-9]+$", "", aa_pos)
+  aa_pos <- as.integer(gsub(".*_([0-9]+)$", "\\1", aa_pos))
 
   alleles <- select(hla_calls, starts_with(gene)) %>%
     unlist()
@@ -68,8 +68,8 @@ summariseAAPosition <- function(hla_calls,
 
   assert_that(
     see_if(
-      pos <= ncol(aln),
-      msg = sprintf("amino acid position %i is higher than amino acid sequence length.", pos)
+      aa_pos <= ncol(aln),
+      msg = sprintf("amino acid position %i is higher than amino acid sequence length.", aa_pos)
     ),
     see_if(
       all(i <- alleles_wo_na %in% rownames(aln)),
@@ -82,7 +82,7 @@ summariseAAPosition <- function(hla_calls,
 
   aa <- data.frame(
     allele = gsub("[A-Z]+[0-9]*", "", alleles),
-    residue = aln[alleles_wo_na, pos],
+    residue = aln[alleles_wo_na, aa_pos],
     stringsAsFactors = FALSE
   ) %>%
     group_by(.data$residue) %>%
@@ -92,7 +92,7 @@ summariseAAPosition <- function(hla_calls,
       frequency = percent(.data$count / length(alleles))
     ) %>%
     dplyr::select(
-      !! sprintf("HLA-%s (%i)", gsub("_", "", gene), pos) := .data$residue,
+      !! sprintf("HLA-%s (%i)", gsub("_", "", gene), aa_pos) := .data$residue,
       !! sprintf("HLA-%s alleles", gsub("_", "", gene)) := .data$allele,
       .data$count,
       .data$frequency

@@ -4,13 +4,13 @@
 \alias{summariseAAPosition}
 \title{Summarize amino acid position}
 \usage{
-summariseAAPosition(hla_calls, pos, aln = NULL, na.rm = FALSE)
+summariseAAPosition(hla_calls, aa_pos, aln = NULL, na.rm = FALSE)
 }
 \arguments{
 \item{hla_calls}{Data frame containing HLA allele calls, as return by
 \code{\link{readHlaCalls}} function.}
 
-\item{pos}{String specifying gene and amio acid position, example
+\item{aa_pos}{String specifying gene and amio acid position, example
 \code{"A_9"}.}
 
 \item{aln}{Matrix containing amino acids sequence alignments as returned by

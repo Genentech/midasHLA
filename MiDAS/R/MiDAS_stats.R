@@ -902,3 +902,127 @@ prepareMiDASData <- function(hla_calls,
 
   return(midas_data)
 }
+
+#' Amino acid position omnibus test
+#'
+#' \code{aaPosOmnibusTest} calculate overall p-value for amino acid position
+#' using likelihood rato test.
+#'
+#' Likelihood ratio test is conducted by comparing model given in \code{object}
+#' with extended model, that is created by including effect of amino acid
+#' residues at each position in \code{aa_pos}. Amino acid effect is assumend to
+#' be simply additive.
+#'
+#' @inheritParams analyzeAssociations
+#' @inheritParams summariseAAPosition
+#'
+#' @return Data frame containing omnibus test results for specified amino acid
+#'   positions.
+#'
+#' @examples
+#' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(hla_calls_file)
+#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+#' pheno <- read.table(pheno_file, header = TRUE)
+#' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
+#' covar <- read.table(covar_file, header = TRUE)
+#' midas_data <- prepareMiDASData(hla_calls, pheno, covar, analysis_type = "aa_level")
+#' object <- lm(OS ~ AGE + SEX, data = midas_data)
+#' aaPosOmnibusTest(object, aa_pos = c("B_11", "E_107", "A_246"))
+#'
+#' @importFrom assertthat assert_that see_if is.string
+#' @importFrom broom tidy
+#' @importFrom dplyr bind_cols mutate select
+#' @importFrom stats p.adjust
+#' @importFrom rlang .data
+#'
+#' @export
+aaPosOmnibusTest <- function(object,
+                             aa_pos,
+                             correction = "bonferroni",
+                             n_correction = NULL) {
+  assert_that(
+    checkStatisticalModel(object)
+  )
+  object_call <- getCall(object)
+  object_env <- attr(object$terms, ".Environment")
+  object_data <- eval(object_call[["data"]], envir = object_env)
+  object_variables <- colnames(object_data)[-1]
+  base_vars <- all.vars(object_call$formula)
+
+  assert_that(
+    is.character(aa_pos),
+    is.string(correction),
+    isCountOrNULL(n_correction)
+  )
+
+  variables <- lapply(
+    X = aa_pos,
+    FUN = function(x) {
+      pattern <- paste0(x, "_")
+      resids <- grep(
+        pattern = pattern,
+        x = object_variables,
+        fixed = TRUE,
+        value = TRUE
+      )
+      resids <- resids[! resids %in% base_vars] # discard residues used as covariates
+      assert_that(
+        length(resids) != 0,
+        msg = sprintf("amino acid position %s could not be found.", x)
+      )
+
+      return(resids)
+    }
+  )
+
+  results <- lapply(
+    X = variables,
+    FUN = function(x) tryCatch(
+      expr = LRTest(
+        object,
+        updateModel(
+          object = object,
+          x = x,
+          backquote = TRUE,
+          collapse = " + "
+        )
+      ),
+      error = function(e) {
+        msg <- sprintf(
+          "Error occurred while processing variable %s:\n\t%s",
+          gsub("_[A-Z]", "", x[1]), # output aa_pos in err message
+          conditionMessage(e)
+        )
+        warn(msg)
+
+        return(object)
+      }
+    )
+  )
+
+  results <- bind_rows(results) %>%
+    mutate(
+      residues = gsub("[A-Z]+_[0-9]+_", "", .data$term),
+      term = aa_pos
+    ) %>%
+    select(aa_pos = .data$term,
+           .data$residues,
+           d.f. = .data$dof,
+           .data$statistic,
+           .data$p.value
+    )
+
+  nc <- ifelse(is.null(n_correction), length(results$p.value), n_correction)
+  assert_that(
+    nc >= length(results$p.value),
+    msg = sprintf("n_correction must be at least %i.", length(results$p.value))
+  )
+  results$p.adjusted <- p.adjust(
+    p = results$p.value,
+    method = correction,
+    n = nc
+  )
+
+  return(results)
+}
