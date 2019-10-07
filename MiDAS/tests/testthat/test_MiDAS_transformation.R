@@ -19,14 +19,6 @@ test_that("Amino acids variability is infered correctly", {
                "unkchar is not a flag \\(a length one logical vector\\)."
   )
 
-  expect_error(hlaToAAVariation(hla_calls, alnpath = "foo/bar/foo/bar"),
-               "Path 'foo/bar/foo/bar' does not exist"
-  )
-
-  expect_error(hlaToAAVariation(hla_calls, alnpath = system.file(package = "MiDAS")),
-               sprintf("no alignment files was found in path %s", system.file("inst", package = "MiDAS"))
-  )
-
   expect_error(hlaToAAVariation(hla_calls, as_df = 1),
                "as_df is not a flag \\(a length one logical vector\\)."
   )

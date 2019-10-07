@@ -119,10 +119,10 @@ test_that("HLA allele are backquoted properly", {
 context("HLA allele alignments")
 
 test_that("Variable amino acids positions are detected properly", {
-  hlaa_calls <- c("A*01:01", "A*01:02")
+  hlaa_calls <- c("TAP1*01:01", "TAP1*02:01")
   hlaa_res <- 4
   hlaa_aln <- readHlaAlignments(system.file("extdata",
-                                            "A_prot.txt",
+                                            "TAP1_prot.txt",
                                             package = "MiDAS")
   )
   four_dig_numbers <- reduceAlleleResolution(rownames(hlaa_aln), resolution = 4)
@@ -130,7 +130,7 @@ test_that("Variable amino acids positions are detected properly", {
   rownames(hlaa_aln) <- four_dig_numbers[!duplicated(four_dig_numbers)]
   hlaa_aln <- hlaa_aln[hlaa_calls, ]
 
-  expect_equal(getVariableAAPos(hlaa_aln), c(9, 17))
+  expect_equal(getVariableAAPos(hlaa_aln), c(333,637))
 
   expect_error(getVariableAAPos(hlaa_calls), "alignment is not a matrix")
 })
