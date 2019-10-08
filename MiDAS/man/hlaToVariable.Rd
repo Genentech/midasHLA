@@ -46,7 +46,6 @@ instead.
 
 \code{dictionary} can be also used to access matching files shipped with the
 package. They can be referred to by using one of the following strings (to
-<<<<<<< Updated upstream
 list available dictionaries use \code{\link{listMiDASDictionaries}}):
 \describe{
   \item{\code{allele_HLA-A_expression}}{
@@ -87,37 +86,6 @@ list available dictionaries use \code{\link{listMiDASDictionaries}}):
     with HLA nomenclature.
   }
 }
-=======
-list available dictionaries use \link{listMiDASDictionaries}):
-
-\code{"allele_HLA-A_expression"} reference data to impute expression
-levels for HLA-A alleles.
-
-\code{"allele_HLA-B_Bw"} B alleles can be grouped in allele groups Bw4 and
-Bw6. In some cases HLA alleles containing Bw4 epitope, on nucleotide level
-actually carries a premature stop codon. Meaning that although on nucleotide
-level the allele would encode a Bw4 epitope it's not really there and it is
-assigned to Bw6 group. However in 4-digit resolution these alleles can not be
-distinguished from other Bw4 groups. Since alleles with premature stop codons
-are rare in those ambiguous cases those are assigned to Bw4 group.
-
-\code{"allele_HLA-C_C1-2"} C alleles can be grouped in allele groups C1
-and C2.
-
-\code{"allele_HLA-C_expression"} reference data to impute expression
-levels for HLA-C alleles.
-
-\code{"allele_HLA_supertype"} A and B alleles can be assigned to so-called
-supertypes.
-
-\code{"allele_HLA_Ggroup"} HLA alleles can be re-coded in G groups,
-which defines amino acid identity only in the exons relevant for peptide
-binding. Note that alleles "DRB1*01:01:01" and "DRB1*01:16" were matched with
-more than one G group, this ambiguity was removed by deleting matching with
-"DRB5*01:01:01G" group. Moreover in the original match file there were alleles
-named "DPA*...", here they are renamed to "DPA1*..." to adhere with HLA
-nomenclature.
->>>>>>> Stashed changes
 }
 \examples{
 file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")

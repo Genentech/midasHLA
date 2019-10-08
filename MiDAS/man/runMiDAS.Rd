@@ -10,8 +10,8 @@ runMiDAS(object, analysis_type = c("hla_allele", "aa_level",
   variables = NULL, conditional = FALSE, keep = FALSE,
   lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL,
   pvalue_cutoff = NULL, correction = "bonferroni",
-  n_correction = NULL, logistic = NULL, exponentiate = NULL,
-  th = 0.05, rss_th = 1e-07)
+  n_correction = NULL, exponentiate = FALSE, th = 0.05,
+  rss_th = 1e-07)
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many
@@ -53,10 +53,6 @@ it's greater or equal \code{1} variables with number of counts greater that
 this will not be considered during analysis.Only applied to discrete
 variables.}
 
-\item{pvalue_cutoff}{Number specifying p-value cutoff for results to be
-included in output. If \code{NULL} cutoff of \code{0.05} on
-\code{p.adjusted} value is used instead.}
-
 \item{correction}{String specifying multiple testing correction method. See
 details for further information.}
 
@@ -64,10 +60,6 @@ details for further information.}
 during multiple testing correction calculations, must be at least equal to
 number of comparisons being made; only set this (to non-default) when you
 know what you are doing!}
-
-\item{logistic}{Logical flag indicating if statistical model used is logistic
-(eg. \code{coxph}). If \code{NULL} function will try to figure this out.
-This is only used for results formatting.}
 
 \item{exponentiate}{Logical flag indicating if coefficient estimates
 should be exponentiated. This is typical for logistic and multinomial
