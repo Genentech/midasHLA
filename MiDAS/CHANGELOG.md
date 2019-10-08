@@ -1,3 +1,6 @@
+## 0.0.0.9036 - 8/10/2019
++ refactor function for kabling results now it is much more general and easier to use.
+
 ## 0.0.0.9035 - 6/10/2019
 + reading alignment files shipped with package is now faster.
 + alignment files shipped with the packge are now stored in a preparsed format.
