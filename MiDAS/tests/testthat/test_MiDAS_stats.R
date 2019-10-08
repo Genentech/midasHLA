@@ -229,12 +229,13 @@ test_that("MiDAS associations are analyzed properly", {
 
   # conditional FALSE, analysis_type = "hla_allele", extra variables
   res <- runMiDAS(object,
-                          analysis_type = "hla_allele",
-                          variables = c("expression_A", "expression_C")
+                  analysis_type = "hla_allele",
+                  variables = c("expression_A", "expression_C"),
+                  exponentiate = FALSE
   )
 
   test_variables <- colnames(midas_data[, label(midas_data) == "hla_allele"])
-  test_res <- analyzeAssociations(object, variables = c("expression_A", "expression_C", test_variables))
+  test_res <- analyzeAssociations(object, variables = c("expression_A", "expression_C", test_variables), exponentiate = FALSE)
   test_variables <- test_res$term[-1:-2] # constant variables are discarded
   test_res <- dplyr::rename(test_res, allele = term)
   variables_freq <- getCountsFrequencies(midas_data[, c("ID", test_variables)])
@@ -252,13 +253,14 @@ test_that("MiDAS associations are analyzed properly", {
 
   # conditional FALSE, analysis_type = "hla_allele", pattern = "^A"
   res <- runMiDAS(object,
-                          analysis_type = "hla_allele",
-                          pattern = "^A"
+                  analysis_type = "hla_allele",
+                  pattern = "^A",
+                  exponentiate = FALSE
   )
 
   test_variables <- colnames(midas_data[, label(midas_data) == "hla_allele"])
   test_variables <- grep("^A", test_variables, value = TRUE)
-  test_res <- analyzeAssociations(object, variables = test_variables)
+  test_res <- analyzeAssociations(object, variables = test_variables, exponentiate = FALSE)
   test_res <- dplyr::rename(test_res, allele = term)
   variables_freq <- getCountsFrequencies(midas_data[, c("ID", test_variables)])
   test_res$Ntotal <- variables_freq$Counts
@@ -275,12 +277,13 @@ test_that("MiDAS associations are analyzed properly", {
 
   ## analysis_type = "hla_allele" variables = NULL
   res <- runMiDAS(object,
-                          analysis_type = "hla_allele",
-                          variables = NULL
+                  analysis_type = "hla_allele",
+                  variables = NULL,
+                  exponentiate = FALSE
   )
 
   test_variables <- colnames(midas_data[, label(midas_data) == "hla_allele"])
-  test_res <- analyzeAssociations(object, variables = test_variables)
+  test_res <- analyzeAssociations(object, variables = test_variables, exponentiate = FALSE)
   test_variables <- test_res$term # constant variables are discarded
   test_res <- dplyr::rename(test_res, allele = term)
   variables_freq <- getCountsFrequencies(midas_data[, c("ID", test_variables)])
@@ -299,12 +302,13 @@ test_that("MiDAS associations are analyzed properly", {
 
   ## analysis_type = "aa_level" variables = NULL
   res <- runMiDAS(object,
-                          analysis_type = "aa_level",
-                          variables = NULL
+                  analysis_type = "aa_level",
+                  variables = NULL,
+                  exponentiate = FALSE
   )
 
   test_variables <- colnames(midas_data[, label(midas_data) == "aa_level"])
-  test_res <- analyzeAssociations(object, variables = test_variables)
+  test_res <- analyzeAssociations(object, variables = test_variables, exponentiate = FALSE)
   test_variables <- test_res$term # constant variables are discarded
   test_res <- dplyr::rename(test_res, aa = term)
   variables_freq <- getCountsFrequencies(midas_data[, c("ID", test_variables)])
@@ -322,13 +326,14 @@ test_that("MiDAS associations are analyzed properly", {
 
   ## analysis_type = "expression_level" variables = NULL
   res <- runMiDAS(object,
-                          analysis_type = "expression_level",
-                          variables = NULL
+                  analysis_type = "expression_level",
+                  variables = NULL,
+                  exponentiate = FALSE
   )
 
   test_variables <-
     colnames(midas_data[, label(midas_data) == "expression_level", drop = FALSE])
-  test_res <- analyzeAssociations(object, variables = test_variables)
+  test_res <- analyzeAssociations(object, variables = test_variables, exponentiate = FALSE)
   test_variables <- test_res$term # constant variables are discarded
   test_res <- dplyr::rename(test_res, allele = term)
 
@@ -336,8 +341,9 @@ test_that("MiDAS associations are analyzed properly", {
 
   ## analysis_type = "allele_g_group" variables = NULL
   res <- runMiDAS(object,
-                          analysis_type = "allele_g_group",
-                          variables = NULL
+                  analysis_type = "allele_g_group",
+                  variables = NULL,
+                  exponentiate = FALSE
   )
 
   test_variables <- colnames(midas_data[, label(midas_data) == "allele_g_group"])
@@ -359,8 +365,9 @@ test_that("MiDAS associations are analyzed properly", {
 
   ## analysis_type = "allele_supertype" variables = NULL
   res <- runMiDAS(object,
-                          analysis_type = "allele_supertype",
-                          variables = NULL
+                  analysis_type = "allele_supertype",
+                  variables = NULL,
+                  exponentiate = FALSE
   )
 
   test_variables <- colnames(midas_data[, label(midas_data) == "allele_supertype"])
@@ -382,8 +389,9 @@ test_that("MiDAS associations are analyzed properly", {
 
   ## analysis_type = "allele_group" variables = NULL
   res <- runMiDAS(object,
-                          analysis_type = "allele_group",
-                          variables = NULL
+                  analysis_type = "allele_group",
+                  variables = NULL,
+                  exponentiate = FALSE
   )
 
   test_variables <- colnames(midas_data[, label(midas_data) == "allele_group"])
@@ -405,8 +413,9 @@ test_that("MiDAS associations are analyzed properly", {
 
   ## analysis_type = "kir_genes" variables = NULL
   res <- runMiDAS(object,
-                          analysis_type = "kir_genes",
-                          variables = NULL
+                  analysis_type = "kir_genes",
+                  variables = NULL,
+                  exponentiate = FALSE
   )
   test_variables <- colnames(midas_data[, label(midas_data) == "kir_genes"])
   test_res <- analyzeAssociations(object, variables = test_variables)
@@ -427,8 +436,9 @@ test_that("MiDAS associations are analyzed properly", {
 
   ## analysis_type = "hla_kir_interactions" variables = NULL
   res <- runMiDAS(object,
-                          analysis_type = "hla_kir_interactions",
-                          variables = NULL
+                  analysis_type = "hla_kir_interactions",
+                  variables = NULL,
+                  exponentiate = FALSE
   )
   test_variables <-
     colnames(midas_data[, label(midas_data) == "hla_kir_interactions"])
@@ -450,9 +460,10 @@ test_that("MiDAS associations are analyzed properly", {
 
   # conditional TRUE keep TRUE
   res <- runMiDAS(object,
-                          analysis_type = "hla_allele",
-                          conditional = TRUE,
-                          keep = TRUE
+                  analysis_type = "hla_allele",
+                  conditional = TRUE,
+                  keep = TRUE,
+                  exponentiate = FALSE
   )
 
   test_variables <- colnames(midas_data[, label(midas_data) == "hla_allele"])
@@ -484,16 +495,18 @@ test_that("MiDAS associations are analyzed properly", {
 
   # conditional TRUE keep FALSE
   res <- runMiDAS(object,
-                          analysis_type = "hla_allele",
-                          conditional = TRUE,
-                          keep = FALSE
+                  analysis_type = "hla_allele",
+                  conditional = TRUE,
+                  keep = FALSE,
+                  exponentiate = FALSE
   )
 
   test_variables <- colnames(midas_data[, label(midas_data) == "hla_allele"])
   test_res <- analyzeConditionalAssociations(object,
                                              variables = test_variables,
                                              th = 0.05,
-                                             keep = FALSE
+                                             keep = FALSE,
+                                             exponentiate = FALSE
   )
   test_variables <- test_res$term # constant variables are discarded
   test_res <- dplyr::rename(test_res, allele = term)
@@ -578,12 +591,8 @@ test_that("MiDAS associations are analyzed properly", {
                "n_correction is not a count \\(a single positive integer\\) or NULL."
   )
 
-  expect_error(runMiDAS(object, analysis_type = "hla_allele", logistic = "NA"),
-               "logistic is not a flag \\(a length one logical vector\\) or NULL."
-  )
-
   expect_error(runMiDAS(object, analysis_type = "hla_allele", exponentiate = "NA"),
-               "exponentiate is not a flag \\(a length one logical vector\\) or NULL."
+               "exponentiate is not a flag \\(a length one logical vector\\)."
   )
 
   expect_error(runMiDAS(object, analysis_type = "hla_allele", th = "NA"),

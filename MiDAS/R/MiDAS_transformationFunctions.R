@@ -864,25 +864,16 @@ getCountsFrequencies <- function(counts_table) {
 
 #' Pretty format association analysis results
 #'
-#' \code{formatAssociationsResults} formats results table to specified
-#' format. It uses \code{\link{formatResults}} with pre specified arguments to
-#' return pretty formatted table depending on the type of analysis and model
-#' type. This function is intended only to be used internally by
-#' \code{\link{runMiDAS}}.
+#' \code{kableResults} formats results table to specified format. It uses
+#' \code{\link{formatResults}} with pre specified arguments to return pretty
+#' formatted table depending on the type of analysis and model type.
 #'
 #' @inheritParams formatResults
-#' @param type String specifying type of analysis from which \code{results} were
-#'   produced. Possible values includes \code{'hla_allele'}, \code{'aa_level'},
-#'   \code{'expression_level'}, \code{'allele_g_group'},
-#'   \code{'allele_supertype'}, \code{'allele_group'}, \code{'kir_genes'},
-#'   \code{'hla_kir_interactions'}, \code{'custom'}.
-#' @param response_variable String giving the name of response variable, it is
-#'   used to produce binary phenotype column names.
-#' @param logistic Logical indicating if statistical model is logistic. If set
-#'  to \code{TRUE}, estimate will be renamed to odds ratio.
+#' @param cols Character vector specifying columns to kable. Names can be used
+#'   to rename columns.
+#' @param header String specifying results table header.
 #' @param pvalue_cutoff Number specifying p-value cutoff for results to be
-#'   included in output. If \code{NULL} cutoff of \code{0.05} on
-#'   \code{p.adjusted} value is used instead.
+#'   included in output. If \code{NULL} no filtering is done.
 #'
 #' @return A character vector with pretty formatted \code{results} table.
 #'
@@ -893,19 +884,14 @@ getCountsFrequencies <- function(counts_table) {
 #' @importFrom magrittr %>% %<>%
 #' @importFrom rlang has_name list2 parse_expr warn !! :=
 #'
-formatAssociationsResults <- function(results,
-                                      type = "hla_allele",
-                                      response_variable = "R",
-                                      logistic = FALSE,
-                                      pvalue_cutoff = NULL,
-                                      format = getOption("knitr.table.format")) {
+kableResults <- function(results,
+                         cols = c("estimate", "std.error", "p.value", "p.adjusted", "Ntotal", "Ntotal (%)" = "Ntotal.frequency", Npositive = "N R=1", Npositive.frequency = "N R=1 (%%)", Nnegative = "N R=0", Nnegative.frequency = "N R=0 (%%)"),
+                         header = "MiDAS analysis results",
+                         pvalue_cutoff = NULL,
+                         format = getOption("knitr.table.format")) {
   assert_that(
-    is.string(type),
-    stringMatches(type,
-                  choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions", "custom")
-    ),
-    is.string(response_variable),
-    isTRUEorFALSE(logistic),
+    is.data.frame(results),
+    is.character(cols),
     isNumberOrNULL(pvalue_cutoff),
     is.string(format),
     stringMatches(format, choice = c("html", "latex"))
@@ -913,7 +899,7 @@ formatAssociationsResults <- function(results,
 
   filter_by <- ifelse(
     test = is.null(pvalue_cutoff),
-    yes = "p.adjusted <= 0.05",
+    yes = "p.adjusted <= 1",
     no = sprintf("p.value <= %f", pvalue_cutoff)
   )
   passed_filter <- eval(parse_expr(filter_by), envir = as.list(results))
@@ -921,32 +907,35 @@ formatAssociationsResults <- function(results,
     warn(sprintf("None of the results meets filtering criteria: %s", filter_by))
   }
 
-  estimate_name <- ifelse(logistic, "odds ratio", "estimate")
-  term_name <- switch (type,
-                       "hla_allele" = "allele",
-                       "aa_level" = "aa",
-                       "expression_level" = "allele",
-                       "allele_g_group" = "g group",
-                       "allele_supertype" = "supertype",
-                       "allele_group" = "allele group",
-                       "kir_genes" = "kir gene",
-                       "hla_kir_interactions" = "hla kir interaction",
-                       "term"
+  term_name <- colnames(results)[1] # term name is always added..
+  if (term_name %in% cols) {
+    cols <- cols[cols != term_name]
+  }
+  select_cols <- c(
+    unlist(list2(
+      !! term_name := colnames(results)[1] # term name
+    )),
+    cols
   )
-  select_cols <- unlist(list2(
-    !! term_name := "term",
-    !! estimate_name := "estimate",
-    "std.error",
-    "p.value",
-    "p.adjusted",
-    "Ntotal",
-    "Ntotal (%)" = "Ntotal.frequency",
-    !! sprintf("N %s=1", response_variable) := "Npositive",
-    !! sprintf("N %s=1 (%%)", response_variable) := "Npositive.frequency",
-    !! sprintf("N %s=0", response_variable) := "Nnegative",
-    !! sprintf("N %s=0 (%%)", response_variable) := "Nnegative.frequency"
-  ))
+
   present_cols <- has_name(results, select_cols)
+  if (test_present_cols <- ! all(present_cols)) {
+    warn(
+      sprintf(
+        "Columns %s could't be found in results, will be ommited.",
+        ifelse(test_present_cols,
+               paste0("\"",
+                      paste(
+                        select_cols[! present_cols],
+                        collapse = "\", \""
+                       ),
+                      "\""
+               ),
+               ""
+        )
+      )
+    )
+  }
   assert_that(
     sum(present_cols) != 0,
     msg = sprintf("results does not contain any of the following columns: %s",
@@ -954,19 +943,6 @@ formatAssociationsResults <- function(results,
     )
   )
   select_cols <- select_cols[present_cols]
-
-
-  header <- switch (type,
-                    "hla_allele" = "HLA allelic associations",
-                    "aa_level" = "HLA AA associations",
-                    "expression_level" = "HLA expression level associations",
-                    "allele_g_group" = "HLA alleles G groups associations",
-                    "allele_supertype" = "HLA alleles supertypes associations",
-                    "allele_group" = "HLA alleles groups associations",
-                    "kir_genes" = "KIR genes associations",
-                    "hla_kir_interactions" = "HLA - KIR interaction associations",
-                    "Associations results"
-  )
 
   results %<>%
     formatResults(

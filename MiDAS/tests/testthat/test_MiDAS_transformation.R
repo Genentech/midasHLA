@@ -378,49 +378,33 @@ test_that("results are formatted properly with preselected args", {
   object <- stats::glm(R ~ 1, data = midas_data, family = stats::binomial)
   object$call$data <- midas_data
   res <- runMiDAS(object, analysis_type = "hla_allele", variables = c("A*01:01", "A*01:02"), pvalue_cutoff = 1)
-  res <- rename(res, term = allele, estimate = odds.ratio)
-  res_kable <- formatAssociationsResults(res, type = "hla_allele")
+  res <- rename(res, term = allele)
+  res_kable <- kableResults(res)
   res_kable_test <- formatResults(res,
-                                  filter_by = "p.adjusted <= 0.05",
+                                  filter_by = "p.adjusted <= 1",
                                   arrange_by = "p.value",
                                   select_cols = c(
-                                    "allele" = "term",
-                                    "estimate" = "estimate",
+                                    "term",
+                                    "estimate",
                                     "std.error",
                                     "p.value",
                                     "p.adjusted"
   ),
                                   format = "html",
-                                  header = "HLA allelic associations"
+                                  header = "MiDAS analysis results"
   )
 
   expect_equal(res_kable, res_kable_test)
 
-  expect_error(formatAssociationsResults(res, type = 1),
-               "type is not a string \\(a length one character vector\\)."
-  )
-
-  expect_error(formatAssociationsResults(res, type = "foo"),
-               "type should be one of \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"hla_kir_interactions\", \"custom\"."
-  )
-
-  expect_error(formatAssociationsResults(res, type = "hla_allele", response_variable = 1),
-               "response_variable is not a string \\(a length one character vector\\)."
-  )
-
-  expect_error(formatAssociationsResults(res, type = "hla_allele", logistic = 1),
-               "logistic is not a flag \\(a length one logical vector\\)."
-  )
-
-  expect_error(formatAssociationsResults(res, type = "hla_allele", pvalue_cutoff = "a"),
+  expect_error(kableResults(res, pvalue_cutoff = "a"),
                "pvalue_cutoff is not a number \\(a length one numeric vector\\) or NULL."
   )
 
-  expect_error(formatAssociationsResults(res, type = "hla_allele", format = 1),
+  expect_error(kableResults(res, format = 1),
                "format is not a string \\(a length one character vector\\)."
   )
 
-  expect_error(formatAssociationsResults(res, type = "hla_allele", format = "foo"),
+  expect_error(kableResults(res, format = "foo"),
                "format should be one of \"html\", \"latex\"."
   )
 })
