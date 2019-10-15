@@ -419,14 +419,14 @@ hlaCallsToCounts <- function(hla_calls,
   hla_counts <- switch(inheritance_model,
                        "dominant" = as.data.frame(
                          lapply(hla_counts,
-                                function(x) ifelse(x == 2, 1, x)
+                                function(x) ifelse(x >= 1, 1, 0)
                          ),
                          stringsAsFactors = FALSE,
                          optional = TRUE
                        ),
                        "recessive" = as.data.frame(
                          lapply(hla_counts,
-                                function(x) ifelse(x == 2, 1, 0)
+                                function(x) ifelse(x >= 2, 1, 0)
                          ),
                          stringsAsFactors = FALSE,
                          optional = TRUE
