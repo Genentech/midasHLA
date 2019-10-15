@@ -402,19 +402,19 @@ analyzeConditionalAssociations <- function(object,
 #'
 #' @export
 runMiDAS <- function(object,
-                             analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions"),
-                             pattern = NULL,
-                             variables = NULL,
-                             conditional = FALSE,
-                             keep = FALSE,
-                             lower_frequency_cutoff = NULL,
-                             upper_frequency_cutoff = NULL,
-                             pvalue_cutoff = NULL,
-                             correction = "bonferroni",
-                             n_correction = NULL,
-                             exponentiate = FALSE,
-                             th = 0.05,
-                             rss_th = 1e-07) {
+                     analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions"),
+                     pattern = NULL,
+                     variables = NULL,
+                     conditional = FALSE,
+                     keep = FALSE,
+                     lower_frequency_cutoff = NULL,
+                     upper_frequency_cutoff = NULL,
+                     pvalue_cutoff = NULL,
+                     correction = "bonferroni",
+                     n_correction = NULL,
+                     exponentiate = FALSE,
+                     th = 0.05,
+                     rss_th = 1e-07) {
   assert_that(
     checkStatisticalModel(object),
     hasTidyMethod(class(object)[1L])
@@ -553,12 +553,9 @@ runMiDAS <- function(object,
   }
 
   pheno_var <- all.vars(object_formula)[1]
-  # if (is.null(exponentiate)) {
-  #   exponentiate <- object_data[, pheno_var] %in% c(0, 1)
-  #   exponentiate <- all(exponentiate, na.rm = TRUE)
-  # }
-
-  if (length(cts_vars)) {
+  bin_pheno <- object_data[, pheno_var] %in% c(0, 1)
+  bin_pheno <- all(bin_pheno, na.rm = TRUE)
+  if (length(cts_vars) != 0 & bin_pheno) {
     pos_freq <- object_data %>%
       filter(.data[[!! pheno_var]] == 1) %>%
       select("ID", !! cts_vars) %>%
