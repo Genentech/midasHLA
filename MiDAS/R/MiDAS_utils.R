@@ -365,8 +365,10 @@ checkAdditionalData <- function(data_frame,
 #'
 #' @param object An existing fit from a model function such as lm, glm and many
 #'   others.
-#' @param x Character vector specifying variables to be added to model or a
-#'   formula giving a template which specifies how to update.
+#' @param x Character vector specifying variables to be added to model.
+#' @param placeholder String specifying term to substitute with value from
+#'   \code{x}. Can be used only if \code{x} is a string. Ignored if set to
+#'   \code{NULL}.
 #' @param backquote Logical indicating if added variables should be quoted.
 #'   Elements of this vector are recycled over \code{x}. Only relevant if
 #'   \code{x} is of type character.
@@ -376,6 +378,7 @@ checkAdditionalData <- function(data_frame,
 #' @return Updated fit of input model.
 #'
 #' @importFrom assertthat assert_that is.string
+#' @importFrom magrittr %>%
 #' @importFrom stats update
 #' @importFrom purrr is_formula
 #'
@@ -384,22 +387,40 @@ checkAdditionalData <- function(data_frame,
 #' updateModel(object, "dist")
 #'
 #' @export
-updateModel <- function(object, x, backquote = TRUE, collapse = " + ") {
+updateModel <- function(object,
+                        x,
+                        placeholder = NULL,
+                        backquote = TRUE,
+                        collapse = " + ") {
   assert_that(
     checkStatisticalModel(object),
-    see_if(is.character(x) | is_formula(x),
-           msg = "x is not a character vector or formula"
+    is.character(x),
+    isStringOrNULL(placeholder),
+    see_if(
+      ! (! is.null(placeholder) && length(x) != 1),
+      msg = "placeholder argument can be used only with one new variable x."
     ),
     isTRUEorFALSE(backquote),
     is.string(collapse)
   )
 
-  if (is.character(x)) {
-    x[backquote] <- backquote(x[backquote])
-    x <- paste0(". ~ . + ", paste(x, collapse = collapse))
+  object_env <- attr(object$terms, ".Environment")
+
+  if (backquote) {
+    x <- backquote(x)
   }
 
-  object_env <- attr(object$terms, ".Environment")
+  if (is.null(placeholder)) {
+    x <- paste0(". ~ . + ", paste(x, collapse = collapse))
+  } else {
+    object_call <- getCall(object)
+    form <- object_call[["formula"]] %>%
+      eval(envir = object_env) %>%
+      deparse() %>%
+      gsub(placeholder, "%s")
+    x <- sprintf(form, x)
+  }
+
   new_object <- update(object = object, x, evaluate = FALSE)
   new_object <- eval(new_object, envir = object_env)
 

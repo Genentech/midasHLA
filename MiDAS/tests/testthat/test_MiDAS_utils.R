@@ -163,7 +163,7 @@ test_that("HLA statistical models are updated properly", {
   )
 
   expect_error(updateModel(coxmod, 1),
-               "x is not a character vector or formula"
+               "x is not a character vector"
   )
 
   expect_error(updateModel(coxmod, x = "A*01:01", backquote = 1),
