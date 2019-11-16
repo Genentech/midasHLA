@@ -87,7 +87,7 @@ summariseAAPosition <- function(hla_calls,
   ) %>%
     group_by(.data$residue) %>%
     summarise(
-      allele = paste(sort(unique(allele)), collapse = ", "),
+      allele = paste(sort(unique(.data$allele)), collapse = ", "),
       count = n(),
       frequency = percent(.data$count / length(alleles))
     ) %>%

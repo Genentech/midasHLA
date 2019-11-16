@@ -364,9 +364,6 @@ analyzeConditionalAssociations <- function(object,
 #'   it's greater or equal \code{1} variables with number of counts greater that
 #'   this will not be considered during analysis.Only applied to discrete
 #'   variables.
-#' @param logistic Logical flag indicating if statistical model used is logistic
-#'   (eg. \code{coxph}). If \code{NULL} function will try to figure this out.
-#'   This is only used for results formatting.
 #' @param exponentiate Logical flag indicating if coefficient estimates
 #'   should be exponentiated. This is typical for logistic and multinomial
 #'   regressions, but a bad idea if there is no log or logit link. If
@@ -405,20 +402,19 @@ analyzeConditionalAssociations <- function(object,
 #'
 #' @export
 runMiDAS <- function(object,
-                             analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions"),
-                             pattern = NULL,
-                             variables = NULL,
-                             conditional = FALSE,
-                             keep = FALSE,
-                             lower_frequency_cutoff = NULL,
-                             upper_frequency_cutoff = NULL,
-                             pvalue_cutoff = NULL,
-                             correction = "bonferroni",
-                             n_correction = NULL,
-                             logistic = NULL,
-                             exponentiate = NULL,
-                             th = 0.05,
-                             rss_th = 1e-07) {
+                     analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions"),
+                     pattern = NULL,
+                     variables = NULL,
+                     conditional = FALSE,
+                     keep = FALSE,
+                     lower_frequency_cutoff = NULL,
+                     upper_frequency_cutoff = NULL,
+                     pvalue_cutoff = NULL,
+                     correction = "bonferroni",
+                     n_correction = NULL,
+                     exponentiate = FALSE,
+                     th = 0.05,
+                     rss_th = 1e-07) {
   assert_that(
     checkStatisticalModel(object),
     hasTidyMethod(class(object)[1L])
@@ -452,8 +448,7 @@ runMiDAS <- function(object,
     isNumberOrNULL(pvalue_cutoff),
     is.string(correction),
     isCountOrNULL(n_correction),
-    isFlagOrNULL(logistic),
-    isFlagOrNULL(exponentiate),
+    isTRUEorFALSE(exponentiate),
     is.number(th),
     is.number(rss_th)
   )
@@ -476,13 +471,13 @@ runMiDAS <- function(object,
               msg = "No new variables found in object data."
   )
 
-  # guess if model used is logistic type
-  if (is.null(logistic)) {
-    model_fun <- deparse(object_call[[1]])
-    model_family <- deparse(object_call[["family"]])
-    logistic <- grepl("coxph", model_fun) |
-      (grepl("glm", model_fun) & grepl("binomial", model_family))
-  }
+  # # guess if model used is logistic type
+  # if (is.null(logistic)) {
+  #   model_fun <- deparse(object_call[[1]])
+  #   model_family <- deparse(object_call[["family"]])
+  #   logistic <- grepl("coxph", model_fun) |
+  #     (grepl("glm", model_fun) & grepl("binomial", model_family))
+  # }
 
   # Filter variables on frequency cutoff
   variables_labels <- variables_labels[variables] # if variables != NULL select only corresponding labels
@@ -524,7 +519,7 @@ runMiDAS <- function(object,
                                                    th = th,
                                                    keep = TRUE,
                                                    rss_th = rss_th,
-                                                   exponentiate = logistic
+                                                   exponentiate = exponentiate
     )
     results <- lapply(results_iter, function(res) {
       i_min <- which.min(res[["p.value"]])
@@ -536,7 +531,7 @@ runMiDAS <- function(object,
                                    variables = variables,
                                    correction = correction,
                                    n_correction = n_correction,
-                                   exponentiate = logistic
+                                   exponentiate = exponentiate
     )
   }
 
@@ -558,12 +553,9 @@ runMiDAS <- function(object,
   }
 
   pheno_var <- all.vars(object_formula)[1]
-  if (is.null(exponentiate)) {
-    exponentiate <- object_data[, pheno_var] %in% c(0, 1)
-    exponentiate <- all(exponentiate, na.rm = TRUE)
-  }
-
-  if (exponentiate & length(cts_vars)) {
+  bin_pheno <- object_data[, pheno_var] %in% c(0, 1)
+  bin_pheno <- all(bin_pheno, na.rm = TRUE)
+  if (length(cts_vars) != 0 & bin_pheno) {
     pos_freq <- object_data %>%
       filter(.data[[!! pheno_var]] == 1) %>%
       select("ID", !! cts_vars) %>%
@@ -590,7 +582,7 @@ runMiDAS <- function(object,
   }
 
   # rename term and estimate to match preety_table
-  estimate_name <- ifelse(logistic, "odds.ratio", "estimate")
+  # estimate_name <- ifelse(logistic, "odds.ratio", "estimate") in favor of new policy :D
   term_name <- switch (analysis_type,
                        "hla_allele" = "allele",
                        "aa_level" = "aa",
@@ -608,14 +600,14 @@ runMiDAS <- function(object,
       X = results_iter,
       FUN = function(x) {
         rename(.data = x,
-               !! term_name := .data$term,
-               !! estimate_name := .data$estimate
+               !! term_name := .data$term
+               # !! estimate_name := .data$estimate
         )
       }
     )
   } else {
     results %<>%
-     rename(!! term_name := .data$term, !! estimate_name := .data$estimate)
+     rename(!! term_name := .data$term)# , !! estimate_name := .data$estimate)
   }
 
   return(results)
