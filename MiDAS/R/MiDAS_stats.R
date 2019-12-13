@@ -692,6 +692,11 @@ runMiDAS <- function(object,
 #'   \code{"aa_level"}, \code{"expression_level"}, \code{"allele_group"},
 #'   \code{"custom"}. Each prepared variable will be labeled with corresponding
 #'   \code{analysis_type}. See details for further explanations.
+#' @param placeholder String specifying name of dummy column added to result
+#'   data frame. This column is useful if more complicated formula for
+#'   statistical modeling is desired (eg. one including interactions terms).
+#'   Note that if more complicated formula is used all terms has to be included
+#'   explicitly. If `NULL` no dummy column is added.
 #'
 #' @return Data frame containing prepared data.
 #'
@@ -719,6 +724,7 @@ prepareMiDAS <- function(hla_calls,
                              kir_counts = NULL,
                              analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions", "custom"),
                              inheritance_model = "additive",
+                             placeholder = NULL,
                              indels = TRUE,
                              unkchar = FALSE
 ) {
@@ -731,6 +737,7 @@ prepareMiDAS <- function(hla_calls,
       choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions", "custom")
     ),
     is.string(inheritance_model),
+    isStringOrNULL(placeholder),
     stringMatches(
       x = inheritance_model,
       choice = c("dominant", "recessive", "additive")
@@ -924,6 +931,11 @@ prepareMiDAS <- function(hla_calls,
       x = additional_data,
       init = midas_data
     )
+  }
+
+  # add dummy column
+  if (! is.null(placeholder)) {
+    midas_data[[placeholder]] <- 1
   }
 
   return(midas_data)
