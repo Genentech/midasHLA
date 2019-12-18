@@ -1,3 +1,6 @@
+## 0.0.9037 - 18/12/19
++ now using interactions terms is possible through placeholder argument in runMiDAS and presence of dummy var in input data frame
+
 ## 0.0.0.9036 - 8/10/2019
 + refactor function for kabling results now it is much more general and easier to use.
 

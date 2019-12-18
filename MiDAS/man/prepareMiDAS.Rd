@@ -8,7 +8,7 @@ prepareMiDAS(hla_calls, ..., kir_counts = NULL,
   analysis_type = c("hla_allele", "aa_level", "expression_level",
   "allele_g_group", "allele_supertype", "allele_group", "kir_genes",
   "hla_kir_interactions", "custom"), inheritance_model = "additive",
-  indels = TRUE, unkchar = FALSE)
+  placeholder = NULL, indels = TRUE, unkchar = FALSE)
 }
 \arguments{
 \item{hla_calls}{Data frame containing HLA allele calls, as return by
@@ -32,6 +32,12 @@ Available choices are \code{"dominant"}, \code{"recessive"},
 are coded as \code{1}. In \code{"recessive"} model homozygotes are coded as
 \code{1} and all other as \code{0}. In \code{"additive"} model homozygotes
 are coded as \code{2} and heterozygotes as \code{1}.}
+
+\item{placeholder}{String specifying name of dummy column added to result
+data frame. This column is useful if more complicated formula for
+statistical modeling is desired (eg. one including interactions terms).
+Note that if more complicated formula is used all terms has to be included
+explicitly. If `NULL` no dummy column is added.}
 
 \item{indels}{Logical indicating whether indels should be considered when
 checking variability.}

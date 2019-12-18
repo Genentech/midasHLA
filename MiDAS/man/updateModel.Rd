@@ -4,21 +4,25 @@
 \alias{updateModel}
 \title{Add new variables to statistical model}
 \usage{
-updateModel(object, x, backquote = TRUE, collapse = " + ")
+updateModel(object, x, placeholder = NULL, backquote = TRUE,
+  collapse = " + ")
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many
 others.}
 
-\item{x}{Character vector specifying variables to be added to model or a
-formula giving a template which specifies how to update.}
+\item{x}{Character vector specifying variables to be added to model.}
+
+\item{placeholder}{String specifying term to substitute with value from
+\code{x}. Can be used only if \code{x} is a string. Ignored if set to
+\code{NULL}.}
 
 \item{backquote}{Logical indicating if added variables should be quoted.
 Elements of this vector are recycled over \code{x}. Only relevant if
 \code{x} is of type character.}
 
 \item{collapse}{String specifying how new characters should be added to
-old formula. Only relevant if \code{x} is of type character.}
+old formula. Only relevant if \code{placeholder} is specified.}
 }
 \value{
 Updated fit of input model.

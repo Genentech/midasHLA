@@ -4,8 +4,9 @@
 \alias{analyzeAssociations}
 \title{Association analysis}
 \usage{
-analyzeAssociations(object, variables, correction = "bonferroni",
-  n_correction = NULL, exponentiate = FALSE)
+analyzeAssociations(object, variables, placeholder = NULL,
+  correction = "bonferroni", n_correction = NULL,
+  exponentiate = FALSE)
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many
@@ -13,6 +14,10 @@ others.}
 
 \item{variables}{Character vector specifying variables to use in association
 tests.}
+
+\item{placeholder}{String specyfing term in \code{object}'s formula which
+should be substituted with an allele during analysis. If \code{NULL}
+alleles are added to the formula.}
 
 \item{correction}{String specifying multiple testing correction method. See
 details for further information.}

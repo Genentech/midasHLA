@@ -4,7 +4,7 @@
 \alias{analyzeConditionalAssociations}
 \title{Stepwise conditional association analysis}
 \usage{
-analyzeConditionalAssociations(object, variables,
+analyzeConditionalAssociations(object, variables, placeholder = NULL,
   correction = "bonferroni", n_correction = NULL, th, keep = FALSE,
   rss_th = 1e-07, exponentiate = FALSE)
 }
@@ -14,6 +14,10 @@ others.}
 
 \item{variables}{Character vector specifying variables to use in association
 tests.}
+
+\item{placeholder}{String specifying term to substitute with value from
+\code{x}. Can be used only if \code{x} is a string. Ignored if set to
+\code{NULL}.}
 
 \item{correction}{String specifying multiple testing correction method. See
 details for further information.}

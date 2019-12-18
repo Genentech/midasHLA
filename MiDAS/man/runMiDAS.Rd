@@ -7,11 +7,11 @@
 runMiDAS(object, analysis_type = c("hla_allele", "aa_level",
   "expression_level", "allele_g_group", "allele_supertype", "allele_group",
   "kir_genes", "hla_kir_interactions"), pattern = NULL,
-  variables = NULL, conditional = FALSE, keep = FALSE,
-  lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL,
-  pvalue_cutoff = NULL, correction = "bonferroni",
-  n_correction = NULL, exponentiate = FALSE, th = 0.05,
-  rss_th = 1e-07)
+  variables = NULL, placeholder = NULL, conditional = FALSE,
+  keep = FALSE, lower_frequency_cutoff = NULL,
+  upper_frequency_cutoff = NULL, pvalue_cutoff = NULL,
+  correction = "bonferroni", n_correction = NULL,
+  exponentiate = FALSE, th = 0.05, rss_th = 1e-07)
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many
@@ -30,6 +30,10 @@ to further select variables selected by \code{analysis_type}.}
 \item{variables}{Character vector specifying additional variables to use in
 association tests except those selected by \code{analysis_type}. By default
 \code{NULL}.}
+
+\item{placeholder}{String specyfing term in \code{object}'s formula which
+should be substituted with an allele during analysis. If \code{NULL}
+alleles are added to the formula.}
 
 \item{conditional}{Logical flag indicating if the analysis should be
 performed using stepwise conditional test. See
