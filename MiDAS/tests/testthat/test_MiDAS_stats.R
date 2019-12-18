@@ -44,6 +44,11 @@ test_that("HLA allele associations are analyzed properly", {
   )
 
   expect_error(
+    analyzeAssociations(object, variables = "A*01:01", placeholder = 1),
+    "placeholder is not a string \\(a length one character vector\\) or NULL."
+  )
+
+  expect_error(
     analyzeAssociations(object, variables = "A*01:01", n_correction = 1.5),
     "n_correction is not a count \\(a single positive integer\\) or NULL."
   )
@@ -146,6 +151,11 @@ test_that("Stepwise conditional alleles subset selection", {
 
   expect_error(analyzeConditionalAssociations(object, variables = "thief"),
                "thief can not be found in object data"
+  )
+
+  expect_error(
+    analyzeConditionalAssociations(object, variables = "A*01:01", placeholder = 1),
+    "placeholder is not a string \\(a length one character vector\\) or NULL."
   )
 
   expect_error(
@@ -557,6 +567,10 @@ test_that("MiDAS associations are analyzed properly", {
 
   expect_error(runMiDAS(object, analysis_type = "hla_allele", variables = 1),
                "variables is not a character vector or NULL."
+  )
+
+  expect_error(runMiDAS(object, analysis_type = "hla_allele", placeholder = 1),
+               "placeholder is not a string \\(a length one character vector\\) or NULL."
   )
 
   expect_error(runMiDAS(object, analysis_type = "hla_allele", conditional = 1),
