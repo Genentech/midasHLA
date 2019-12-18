@@ -398,7 +398,7 @@ updateModel <- function(object,
     isStringOrNULL(placeholder),
     see_if(
       ! (! is.null(placeholder) && length(x) != 1),
-      msg = "placeholder argument can be used only with one new variable x."
+      msg = "placeholder argument can be used only with one new variable in x."
     ),
     isTRUEorFALSE(backquote),
     is.string(collapse)
@@ -414,10 +414,14 @@ updateModel <- function(object,
     x <- paste0(". ~ . + ", paste(x, collapse = collapse))
   } else {
     object_call <- getCall(object)
-    x <- object_call[["formula"]] %>%
-      eval(envir = object_env) %>%
-      deparse() %>%
-      gsub(pattern = placeholder, replacement = x)
+    object_form <- object_call[["formula"]] %>%
+      eval(envir = object_env)
+    assert_that(
+      placeholder %in% all.vars(object_form),
+      msg = sprintf(fmt = "placeholder '%s' could not be found in object's formula",
+                    placeholder)
+    )
+    x <- gsub(pattern = placeholder, replacement = x, x = deparse(object_form))
   }
 
   # print(x)
