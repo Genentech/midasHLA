@@ -373,7 +373,7 @@ checkAdditionalData <- function(data_frame,
 #'   Elements of this vector are recycled over \code{x}. Only relevant if
 #'   \code{x} is of type character.
 #' @param collapse String specifying how new characters should be added to
-#'   old formula. Only relevant if \code{x} is of type character.
+#'   old formula. Only relevant if \code{placeholder} is specified.
 #'
 #' @return Updated fit of input model.
 #'
@@ -414,13 +414,13 @@ updateModel <- function(object,
     x <- paste0(". ~ . + ", paste(x, collapse = collapse))
   } else {
     object_call <- getCall(object)
-    form <- object_call[["formula"]] %>%
+    x <- object_call[["formula"]] %>%
       eval(envir = object_env) %>%
       deparse() %>%
-      gsub(placeholder, "%s")
-    x <- sprintf(form, x)
+      gsub(pattern = placeholder, replacement = x)
   }
 
+  # print(x)
   new_object <- update(object = object, x, evaluate = FALSE)
   new_object <- eval(new_object, envir = object_env)
 
