@@ -10,6 +10,9 @@
 #' @inheritParams updateModel
 #' @param variables Character vector specifying variables to use in association
 #'   tests.
+#' @param placeholder String specyfing term in \code{object}'s formula which
+#'   should be substituted with an allele during analysis. If \code{NULL}
+#'   alleles are added to the formula.
 #' @param correction String specifying multiple testing correction method. See
 #'   details for further information.
 #' @param n_correction Integer specifying number of comparisons to consider
@@ -60,6 +63,7 @@
 #' @export
 analyzeAssociations <- function(object,
                                 variables,
+                                placeholder = NULL,
                                 correction = "bonferroni",
                                 n_correction = NULL,
                                 exponentiate = FALSE) {
@@ -80,6 +84,7 @@ analyzeAssociations <- function(object,
                     paste(variables[! test_vars], collapse = ", ")
       )
     ),
+    isStringOrNULL(placeholder),
     is.string(correction),
     isCountOrNULL(n_correction),
     isTRUEorFALSE(exponentiate)
@@ -91,6 +96,7 @@ analyzeAssociations <- function(object,
       expr = updateModel(
         object = object,
         x = x,
+        placeholder = placeholder,
         backquote = TRUE,
         collapse = " + "
       ),
@@ -123,10 +129,10 @@ analyzeAssociations <- function(object,
     n = nc
   )
 
-#  This covariates were added for consistiency with conditional analyze, now however that we are filtering covariates there it doesn't make much sense to keep those?
-#  covariates <- formula(object)[[3]]
-#  covariates <- deparse(covariates)
-#  results$covariates <- covariates
+  #  This covariates were added for consistiency with conditional analyze, now however that we are filtering covariates there it doesn't make much sense to keep those?
+  #  covariates <- formula(object)[[3]]
+  #  covariates <- deparse(covariates)
+  #  results$covariates <- covariates
 
   if (nrow(results) == 0) {
     warn("None of the variables could be tested. Returning empty table.")
@@ -193,6 +199,7 @@ analyzeAssociations <- function(object,
 #' @export
 analyzeConditionalAssociations <- function(object,
                                            variables,
+                                           placeholder = NULL,
                                            correction = "bonferroni",
                                            n_correction = NULL,
                                            th,
@@ -217,6 +224,7 @@ analyzeConditionalAssociations <- function(object,
                     paste(variables[! test_vars], collapse = ", ")
       )
     ),
+    isStringOrNULL(placeholder),
     is.string(correction),
     isCountOrNULL(n_correction),
     is.number(th),
@@ -240,6 +248,7 @@ analyzeConditionalAssociations <- function(object,
         expr = updateModel(
           object = object,
           x = x,
+          placeholder = placeholder,
           backquote = TRUE,
           collapse = " + "
         ),
@@ -405,6 +414,7 @@ runMiDAS <- function(object,
                      analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions"),
                      pattern = NULL,
                      variables = NULL,
+                     placeholder = NULL,
                      conditional = FALSE,
                      keep = FALSE,
                      lower_frequency_cutoff = NULL,
@@ -435,6 +445,7 @@ runMiDAS <- function(object,
     ),
     isStringOrNULL(pattern),
     isCharacterOrNULL(variables),
+    isStringOrNULL(placeholder),
     isTRUEorFALSE(conditional),
     isTRUEorFALSE(keep),
     see_if(
@@ -514,6 +525,7 @@ runMiDAS <- function(object,
   if (conditional) {
     results_iter <- analyzeConditionalAssociations(object,
                                                    variables = variables,
+                                                   placeholder = placeholder,
                                                    correction = correction,
                                                    n_correction = n_correction,
                                                    th = th,
@@ -529,6 +541,7 @@ runMiDAS <- function(object,
   } else {
     results <- analyzeAssociations(object,
                                    variables = variables,
+                                   placeholder = placeholder,
                                    correction = correction,
                                    n_correction = n_correction,
                                    exponentiate = exponentiate
