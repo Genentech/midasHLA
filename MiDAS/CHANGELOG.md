@@ -1,3 +1,6 @@
+## 0.0.0.9037 - 16/11/2019
++ adds new analysis type "none" to runMiDAS function. In this mode only terms passed by variables argument are used.
+
 ## 0.0.0.9036 - 8/10/2019
 + refactor function for kabling results now it is much more general and easier to use.
 

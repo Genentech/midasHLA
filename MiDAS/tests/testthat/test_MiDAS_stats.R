@@ -458,6 +458,27 @@ test_that("MiDAS associations are analyzed properly", {
 
   expect_equal(as.data.frame(res), as.data.frame(test_res))
 
+  ## analysis_type = "none" variables = c("A*01:01", "A*02:01", "A*02:06")
+  test_variables <- c("A*01:01", "A*02:01", "A*02:06")
+  res <- runMiDAS(object,
+                  analysis_type = "none",
+                  variables = test_variables,
+                  exponentiate = FALSE
+  )
+  test_res <- analyzeAssociations(object, variables = test_variables)
+  variables_freq <- getCountsFrequencies(midas_data[, c("ID", test_variables)])
+  test_res$Ntotal <- variables_freq$Counts
+  test_res$Ntotal.frequency <- variables_freq$Freq
+  pos <- midas_data$OS_DIED == 1
+  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", test_variables)])
+  test_res$Npositive <- pos_freq$Counts
+  test_res$Npositive.frequency <- pos_freq$Freq
+  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", test_variables)])
+  test_res$Nnegative <- neg_freq$Counts
+  test_res$Nnegative.frequency <- neg_freq$Freq
+
+  expect_equal(as.data.frame(res), as.data.frame(test_res))
+
   # conditional TRUE keep TRUE
   res <- runMiDAS(object,
                   analysis_type = "hla_allele",
@@ -601,6 +622,25 @@ test_that("MiDAS associations are analyzed properly", {
 
   expect_error(runMiDAS(object, analysis_type = "hla_allele", rss_th = "NA"),
                "rss_th is not a number \\(a length one numeric vector\\)."
+  )
+
+  expect_error(runMiDAS(object, analysis_type = "none"),
+               "For analysis type \"none\" variables argument can not be NULL."
+  )
+
+  new_data <- eval(object$call$data)
+  new_data <- rapply(
+    object = new_data,
+    f = function(col) {
+      attr(col, which = "label") <- NULL
+      col
+    },
+    how = "replace"
+  )
+  object2 <- object
+  object2$call$data <- new_data
+  expect_error(runMiDAS(object2, analysis_type = "hla_allele"),
+               "Argument variables = NULL can be used only with labeled variables, make sure to use prepareMiDAS function for data preparation."
   )
 })
 
