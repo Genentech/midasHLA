@@ -466,16 +466,6 @@ test_that("MiDAS associations are analyzed properly", {
                   exponentiate = FALSE
   )
   test_res <- analyzeAssociations(object, variables = test_variables)
-  variables_freq <- getCountsFrequencies(midas_data[, c("ID", test_variables)])
-  test_res$Ntotal <- variables_freq$Counts
-  test_res$Ntotal.frequency <- variables_freq$Freq
-  pos <- midas_data$OS_DIED == 1
-  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", test_variables)])
-  test_res$Npositive <- pos_freq$Counts
-  test_res$Npositive.frequency <- pos_freq$Freq
-  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", test_variables)])
-  test_res$Nnegative <- neg_freq$Counts
-  test_res$Nnegative.frequency <- neg_freq$Freq
 
   expect_equal(as.data.frame(res), as.data.frame(test_res))
 
@@ -552,6 +542,18 @@ test_that("MiDAS associations are analyzed properly", {
 
   res <- runMiDAS(object, analysis_type = "hla_allele", upper_frequency_cutoff = 0.03)
   expect_equal(res$allele, freqs$allele[freqs$Freq < 0.03 & freqs$Freq != 1])
+
+  # test that additional variables are not considered for freq. cut-offs
+  additional_var <- "G*01:01" # freq == 0.875
+  res <-
+    runMiDAS(
+      object,
+      analysis_type = "hla_allele",
+      variables = additional_var,
+      upper_frequency_cutoff = 0.03
+    )
+  filtered_alleles <- freqs$allele[freqs$Freq < 0.03 & freqs$Freq != 1]
+  expect_equal(sort(res$allele), sort(c(filtered_alleles, additional_var)))
 
   # counts
   counts <- prepareMiDAS(hla_calls, analysis_type = "hla_allele")

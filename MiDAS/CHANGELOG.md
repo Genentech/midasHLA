@@ -1,3 +1,6 @@
+## 0.0.0.9037 - 19/11/2019
++ now variables passed to runMiDAS via variables argument are not taken into account when applying frequency cut-off
+
 ## 0.0.0.9037 - 16/11/2019
 + adds new analysis type "none" to runMiDAS function. In this mode only terms passed by variables argument are used.
 
