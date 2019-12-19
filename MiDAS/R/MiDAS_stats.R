@@ -355,7 +355,8 @@ analyzeConditionalAssociations <- function(object,
 #'   \code{\link{analyzeConditionalAssociations}} for more details.
 #' @param variables Character vector specifying additional variables to use in
 #'   association tests except those selected by \code{analysis_type}. By default
-#'   \code{NULL}.
+#'   \code{NULL}. Note that additional variables are not considered when
+#'   applying lower or upper frequency cutoff.
 #' @param lower_frequency_cutoff Number specifying lower threshold for inclusion
 #'   of a variable. If it's a number between \code{0} and \code{1} variables
 #'   with frequency below this number will not be considered during analysis. If
@@ -473,9 +474,10 @@ runMiDAS <- function(object,
   }
 
   # create set of variables for further testing
-  variables <- c(labeled_vars, variables)
-  variables <- variables[! variables %in% all.vars(object_formula)]
-  assert_that(length(variables) != 0,
+  test_var <- c(labeled_vars, variables) %>%
+    unique()
+  test_var <- test_var[! test_var %in% all.vars(object_formula)]
+  assert_that(length(test_var) != 0,
               msg = "No new variables found in object data."
   )
 
@@ -488,17 +490,18 @@ runMiDAS <- function(object,
   # }
 
   # Filter variables on frequency cutoff
-  variables_labels <- variables_labels[variables] # if variables != NULL select only corresponding labels
-  mask_counts <- variables_labels %in% c("hla_allele",
-                                         "aa_level",
-                                         "allele_g_group",
-                                         "allele_supertype",
-                                         "allele_group",
-                                         "kir_genes",
-                                         "hla_kir_interactions"
-  )
-  cts_vars <- variables[mask_counts]
-  ncts_vars <- variables[! mask_counts]
+  variables_labels <- variables_labels[test_var] # if test_var != NULL select only corresponding labels
+  mask_counts <- variables_labels %in% c(
+    "hla_allele",
+    "aa_level",
+    "allele_g_group",
+    "allele_supertype",
+    "allele_group",
+    "kir_genes",
+    "hla_kir_interactions"
+  ) & ! test_var %in% variables
+  cts_vars <- test_var[mask_counts]
+  ncts_vars <- test_var[! mask_counts]
 
   if (length(cts_vars)) {
     lower_frequency_cutoff <- ifelse(is.null(lower_frequency_cutoff), 0, lower_frequency_cutoff)
@@ -516,12 +519,12 @@ runMiDAS <- function(object,
       filter(.data$Ntotal.frequency < upper_frequency_cutoff |
                upper_frequency_cutoff >= 1)
 
-    variables <- c(ncts_vars, variables_freq$term)
+    test_var <- c(ncts_vars, variables_freq$term)
   }
 
   if (conditional) {
     results_iter <- analyzeConditionalAssociations(object,
-                                                   variables = variables,
+                                                   variables = test_var,
                                                    correction = correction,
                                                    n_correction = n_correction,
                                                    th = th,
@@ -536,7 +539,7 @@ runMiDAS <- function(object,
     results <- bind_rows(results)
   } else {
     results <- analyzeAssociations(object,
-                                   variables = variables,
+                                   variables = test_var,
                                    correction = correction,
                                    n_correction = n_correction,
                                    exponentiate = exponentiate

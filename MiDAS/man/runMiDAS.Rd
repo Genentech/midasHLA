@@ -30,7 +30,8 @@ to further select variables selected by \code{analysis_type}.}
 
 \item{variables}{Character vector specifying additional variables to use in
 association tests except those selected by \code{analysis_type}. By default
-\code{NULL}.}
+\code{NULL}. Note that additional variables are not considered when
+applying lower or upper frequency cutoff.}
 
 \item{conditional}{Logical flag indicating if the analysis should be
 performed using stepwise conditional test. See
