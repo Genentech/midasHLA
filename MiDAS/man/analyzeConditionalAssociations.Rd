@@ -4,7 +4,7 @@
 \alias{analyzeConditionalAssociations}
 \title{Stepwise conditional association analysis}
 \usage{
-analyzeConditionalAssociations(object, variables, placeholder = NULL,
+analyzeConditionalAssociations(object, variables, placeholder = "term",
   correction = "bonferroni", n_correction = NULL, th, keep = FALSE,
   rss_th = 1e-07, exponentiate = FALSE)
 }
@@ -73,7 +73,7 @@ midas_data <- prepareMiDAS(hla_calls = hla_calls,
 )
 
 ## define base model with covariates only
-object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
+object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX + term, data = midas_data)
 analyzeConditionalAssociations(object,
                             variables = c("B*14:02", "DRB1*11:01"),
                             th = 0.05,

@@ -81,7 +81,7 @@ kable(midas_data) %>%
 
 ```{r association_analysis}
 # Logistic regression
-object <- glm(OS_DIED ~ AGE + SEX, data = midas_data, family = binomial(link = "logit"))
+object <- glm(OS_DIED ~ AGE + SEX + term, data = midas_data, family = binomial(link = "logit"))
 glm_results <- runMiDAS(object, analysis_type = "hla_allele")
 
 kable(glm_results) %>%
@@ -89,7 +89,7 @@ kable(glm_results) %>%
   scroll_box(width = "100%", height = "200px")
 
 # Linear regression
-object <- lm(OS ~ AGE + SEX, data = midas_data)
+object <- lm(OS ~ AGE + SEX + term, data = midas_data)
 lm_results <-  runMiDAS(object, analysis_type = "hla_allele")
 
 kable(lm_results) %>%
@@ -98,7 +98,7 @@ kable(lm_results) %>%
 
 # Cox survival analysis
 library("survival")
-object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
+object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX + term, data = midas_data)
 coxph_results <- runMiDAS(object, analysis_type = "hla_allele")
 
 kable(lm_results) %>%
@@ -131,7 +131,7 @@ kable(midas_data) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
   scroll_box(width = "100%", height = "200px")
 
-object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
+object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX + term, data = midas_data)
 coxph_results <- runMiDAS(object, analysis_type = "hla_allele", conditional = TRUE)
 
 kable(coxph_results) %>%

@@ -28,6 +28,8 @@ Other assert functions: \code{\link{characterMatches}},
   \code{\link{isClassOrNULL}}, \code{\link{isCountOrNULL}},
   \code{\link{isCountsOrZeros}},
   \code{\link{isFlagOrNULL}}, \code{\link{isNumberOrNULL}},
-  \code{\link{isTRUEorFALSE}}, \code{\link{stringMatches}}
+  \code{\link{isTRUEorFALSE}},
+  \code{\link{objectHasPlaceholder}},
+  \code{\link{stringMatches}}
 }
 \concept{assert functions}

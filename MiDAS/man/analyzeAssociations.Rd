@@ -4,7 +4,7 @@
 \alias{analyzeAssociations}
 \title{Association analysis}
 \usage{
-analyzeAssociations(object, variables, placeholder = NULL,
+analyzeAssociations(object, variables, placeholder = "term",
   correction = "bonferroni", n_correction = NULL,
   exponentiate = FALSE)
 }
@@ -16,8 +16,7 @@ others.}
 tests.}
 
 \item{placeholder}{String specyfing term in \code{object}'s formula which
-should be substituted with an allele during analysis. If \code{NULL}
-alleles are added to the formula.}
+should be substituted with an allele during analysis.}
 
 \item{correction}{String specifying multiple testing correction method. See
 details for further information.}
@@ -63,7 +62,7 @@ midas_data <- prepareMiDAS(hla_calls = hla_calls,
 
 # Cox proportional hazards regression model
 ## define base model with response and covariates
-object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
+object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX + term, data = midas_data)
 
 ## test for alleles associations
 analyzeAssociations(object = object,
