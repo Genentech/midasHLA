@@ -84,6 +84,7 @@ analyzeAssociations <- function(object,
       )
     ),
     is.string(placeholder),
+    objectHasPlaceholder(object, placeholder),
     is.string(correction),
     isCountOrNULL(n_correction),
     isTRUEorFALSE(exponentiate)
@@ -224,6 +225,7 @@ analyzeConditionalAssociations <- function(object,
       )
     ),
     is.string(placeholder),
+    objectHasPlaceholder(object, placeholder),
     is.string(correction),
     isCountOrNULL(n_correction),
     is.number(th),
@@ -445,6 +447,7 @@ runMiDAS <- function(object,
     isStringOrNULL(pattern),
     isCharacterOrNULL(variables),
     is.string(placeholder),
+    objectHasPlaceholder(object, placeholder),
     isTRUEorFALSE(conditional),
     isTRUEorFALSE(keep),
     see_if(

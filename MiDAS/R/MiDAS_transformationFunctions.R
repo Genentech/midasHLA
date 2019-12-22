@@ -726,12 +726,11 @@ countsToHlaCalls <- function(counts) {
 #'
 #' @examples
 #' hla_calls <- readHlaCalls(system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS"))
-#' hla_counts <- hlaCallsToCounts(hla_calls, inheritance_model = "additive")
-#' midas_data <- read.table(
+#' pheno <- read.table(
 #'   system.file("extdata", "pheno_example.txt", package = "MiDAS"),
 #'   header = TRUE)
-#' midas_data <- dplyr::left_join(x = midas_data, y = hla_counts, by = "ID")
-#' object <- lm(OS ~ 1, data = midas_data)
+#' midas_data <- prepareMiDAS(hla_calls, pheno, analysis_type = "hla_allele")
+#' object <- lm(OS ~ 1 + term, data = midas_data)
 #' res <- analyzeAssociations(object, variables = colnames(midas_data)[-1])
 #' formatResults(res,
 #'               filter_by = c("p.value <= 0.05", "estimate > 0"),

@@ -427,3 +427,14 @@ test_that("likelihood ratio test", {
 
   expect_error(LRTest(mod1, mod0), "variables AGE were not found in mod1")
 })
+
+test_that("object has placeholder", {
+  object <- lm(speed ~ dist, data = cars)
+  expect_equal(objectHasPlaceholder(object, "dist"), TRUE)
+  expect_equal(objectHasPlaceholder(object, "foo"), FALSE)
+
+  expect_error(
+    assertthat::assert_that(objectHasPlaceholder(object, "foo")),
+    "placeholder 'foo' could not be found in object's formula"
+  )
+})

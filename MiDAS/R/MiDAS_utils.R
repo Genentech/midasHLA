@@ -417,9 +417,7 @@ updateModel <- function(object,
     object_form <- object_call[["formula"]] %>%
       eval(envir = object_env)
     assert_that(
-      placeholder %in% all.vars(object_form),
-      msg = sprintf(fmt = "placeholder '%s' could not be found in object's formula",
-                    placeholder)
+      objectHasPlaceholder(object, placeholder = placeholder)
     )
     x <- gsub(pattern = placeholder, replacement = x, x = deparse(object_form))
   }
@@ -1076,4 +1074,37 @@ LRTest <- function(mod0, mod1) {
   )
 
   return(res)
+}
+
+#' Check if placeholder is present in object formula
+#'
+#' \code{isTRUEorFALSE} check if object is a flag (a length one logical vector)
+#' except NA.
+#'
+#' @param object statistical model to test.
+#' @param placeholder string specifying name of placeholder.
+#'
+#' @return Logical indicating if placeholder is present in object formula.
+#'
+#' @family assert functions
+#'
+objectHasPlaceholder <- function(object, placeholder) {
+  object_env <- attr(object$terms, ".Environment")
+  object_call <- getCall(object)
+  object_form <- object_call[["formula"]] %>%
+    eval(envir = object_env)
+  test <- placeholder %in% all.vars(object_form)
+
+  return(test)
+}
+
+#' Error message for objectHasPlaceholder
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(objectHasPlaceholder) <- function(call, env) {
+  paste0("placeholder '",
+         eval(call$placeholder, envir = env),
+         "' could not be found in object's formula"
+  )
 }

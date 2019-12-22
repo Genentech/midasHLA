@@ -49,6 +49,11 @@ test_that("HLA allele associations are analyzed properly", {
   )
 
   expect_error(
+    analyzeAssociations(object, variables = "A*01:01", placeholder = "foo"),
+    "placeholder 'foo' could not be found in object's formula"
+  )
+
+  expect_error(
     analyzeAssociations(object, variables = "A*01:01", n_correction = 1.5),
     "n_correction is not a count \\(a single positive integer\\) or NULL."
   )
@@ -156,6 +161,11 @@ test_that("Stepwise conditional alleles subset selection", {
   expect_error(
     analyzeConditionalAssociations(object, variables = "A*01:01", placeholder = 1),
     "placeholder is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(
+    analyzeConditionalAssociations(object, variables = "A*01:01", placeholder = "foo"),
+    "placeholder 'foo' could not be found in object's formula"
   )
 
   expect_error(
@@ -571,6 +581,11 @@ test_that("MiDAS associations are analyzed properly", {
 
   expect_error(runMiDAS(object, analysis_type = "hla_allele", placeholder = 1),
                "placeholder is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(
+    runMiDAS(object, analysis_type = "hla_allele", placeholder = "foo"),
+    "placeholder 'foo' could not be found in object's formula"
   )
 
   expect_error(runMiDAS(object, analysis_type = "hla_allele", conditional = 1),
