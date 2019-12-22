@@ -15,7 +15,7 @@ test_that("HLA allele associations are analyzed properly", {
                      analysis_type = "hla_allele",
                      inheritance_model = "additive")
 
-  object <- lm(OS_DIED ~ AGE + SEX, data = midas_data)
+  object <- lm(OS_DIED ~ AGE + SEX + term, data = midas_data)
   #object$call$data <- midas_data
   res <- analyzeAssociations(object,
                              variables = c("A*01:01", "A*02:01"),
@@ -45,7 +45,7 @@ test_that("HLA allele associations are analyzed properly", {
 
   expect_error(
     analyzeAssociations(object, variables = "A*01:01", placeholder = 1),
-    "placeholder is not a string \\(a length one character vector\\) or NULL."
+    "placeholder is not a string \\(a length one character vector\\)."
   )
 
   expect_error(
@@ -90,7 +90,7 @@ test_that("Stepwise conditional alleles subset selection", {
                      analysis_type = "hla_allele",
                      inheritance_model = "additive")
 
-  object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
+  object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX + term, data = midas_data)
 
   # keep = FALSE
   res <- analyzeConditionalAssociations(object,
@@ -155,7 +155,7 @@ test_that("Stepwise conditional alleles subset selection", {
 
   expect_error(
     analyzeConditionalAssociations(object, variables = "A*01:01", placeholder = 1),
-    "placeholder is not a string \\(a length one character vector\\) or NULL."
+    "placeholder is not a string \\(a length one character vector\\)."
   )
 
   expect_error(
@@ -235,7 +235,7 @@ test_that("MiDAS associations are analyzed properly", {
       inheritance_model = "additive"
     )
 
-  object <- lm(OS_DIED ~ AGE + SEX, data = midas_data)
+  object <- lm(OS_DIED ~ AGE + SEX + term, data = midas_data)
 
   # conditional FALSE, analysis_type = "hla_allele", extra variables
   res <- runMiDAS(object,
@@ -570,7 +570,7 @@ test_that("MiDAS associations are analyzed properly", {
   )
 
   expect_error(runMiDAS(object, analysis_type = "hla_allele", placeholder = 1),
-               "placeholder is not a string \\(a length one character vector\\) or NULL."
+               "placeholder is not a string \\(a length one character vector\\)."
   )
 
   expect_error(runMiDAS(object, analysis_type = "hla_allele", conditional = 1),
@@ -645,6 +645,7 @@ test_that("MiDAS data is prepared properly", {
   Hmisc::label(midas_hla_allele_test[-1], self = FALSE) <-
     rep("hla_allele", ncol(midas_hla_allele_test) - 1)
   midas_hla_allele_test <- rleft_join(midas_hla_allele_test, pheno, covar)
+  midas_hla_allele_test$term <- 1
   expect_equal(midas_hla_allele, midas_hla_allele_test)
 
   # aa_level
@@ -659,6 +660,7 @@ test_that("MiDAS data is prepared properly", {
   Hmisc::label(midas_aa_level_test[-1], self = FALSE) <-
     rep("aa_level", ncol(midas_aa_level_test) - 1)
   midas_aa_level_test <- rleft_join(midas_aa_level_test, pheno, covar)
+  midas_aa_level_test$term <- 1
   expect_equal(midas_aa_level, midas_aa_level_test)
 
   # expression_levels
@@ -683,6 +685,7 @@ test_that("MiDAS data is prepared properly", {
     rep("expression_level", ncol(midas_expression_levels_test) - 1)
   midas_expression_levels_test <-
     rleft_join(midas_expression_levels_test, pheno, covar)
+  midas_expression_levels_test$term <- 1
   expect_equal(midas_expression_levels, midas_expression_levels_test)
 
   # allele_g_group
@@ -702,6 +705,7 @@ test_that("MiDAS data is prepared properly", {
   Hmisc::label(midas_allele_g_group_test[-1], self = FALSE) <-
     rep("allele_g_group", ncol(midas_allele_g_group_test) - 1)
   midas_allele_g_group_test <- rleft_join(midas_allele_g_group_test, pheno, covar)
+  midas_allele_g_group_test$term <- 1
   expect_equal(midas_allele_g_group, midas_allele_g_group_test)
 
   # allele_supertype
@@ -724,6 +728,7 @@ test_that("MiDAS data is prepared properly", {
     rleft_join(test_midas_allele_supertype, pheno, covar)
   test_midas_allele_supertype <-
     subset(test_midas_allele_supertype, select = - Unclassified)
+  test_midas_allele_supertype$term <- 1
   expect_equal(midas_allele_supertype, test_midas_allele_supertype)
 
   # allele_groups
@@ -747,6 +752,7 @@ test_that("MiDAS data is prepared properly", {
     rep("allele_group", ncol(test_midas_allele_group) - 1)
   test_midas_allele_group <-
     rleft_join(test_midas_allele_group, pheno, covar)
+  test_midas_allele_group$term <- 1
   expect_equal(midas_allele_groups, test_midas_allele_group)
 
   # kir_genes
@@ -763,6 +769,7 @@ test_that("MiDAS data is prepared properly", {
     rep("kir_genes", ncol(kir_counts) - 1)
   test_midas_kir_genes <-
     rleft_join(hla_calls[, 1, drop = FALSE], test_midas_kir_genes, pheno, covar)
+  test_midas_kir_genes$term <- 1
   expect_equal(midas_kir_genes, test_midas_kir_genes)
 
   # hla_kir_interactions
@@ -784,6 +791,7 @@ test_that("MiDAS data is prepared properly", {
                pheno,
                covar
     )
+  test_midas_hla_kir_interactions$term <- 1
   expect_equal(midas_hla_kir_interactions, test_midas_hla_kir_interactions)
 
   # custom
@@ -797,6 +805,7 @@ test_that("MiDAS data is prepared properly", {
     ! colnames(midas_custom_test) %in% c("ID", "OS", "OS_DIED", "AGE", "SEX")
   Hmisc::label(midas_custom_test[, gene_idx], self = FALSE) <-
     rep("custom", sum(gene_idx))
+  midas_custom_test$term <- 1
   expect_equal(midas_custom, midas_custom_test)
 
   # check more analysis types at once
@@ -822,6 +831,8 @@ test_that("MiDAS data is prepared properly", {
   midas_multiple <- midas_multiple[, order(colnames(midas_multiple))]
   midas_multiple_test <-
     midas_multiple_test[, order(colnames(midas_multiple_test))]
+  midas_multiple_test[, grepl("term", colnames(midas_multiple_test))] <- NULL
+  midas_multiple_test$term <- 1
   expect_equal(midas_multiple, midas_multiple_test)
 
   # test for checkHlaCallsFormat are ommitted here
@@ -887,12 +898,12 @@ test_that("amino acid omnibus test works fine", {
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE)
   midas_data <- prepareMiDAS(hla_calls, pheno, covar, analysis_type = "aa_level")
-  object <- lm(OS ~ AGE + SEX, data = midas_data)
+  object <- lm(OS ~ AGE + SEX + term, data = midas_data)
   omnibus_res <- aaPosOmnibusTest(object, aa_pos = c("B_11", "E_107", "A_246"))
 
-  obj_B11 <- lm(OS ~ AGE + SEX + B_11_A + B_11_S, data = midas_data)
-  obj_E107 <- lm(OS ~ AGE + SEX + E_107_R + E_107_G, data = midas_data)
-  obj_A246 <- lm(OS ~ AGE + SEX + A_246_A + A_246_S, data = midas_data)
+  obj_B11 <- lm(OS ~ AGE + SEX + B_11_A + B_11_S + term, data = midas_data)
+  obj_E107 <- lm(OS ~ AGE + SEX + E_107_R + E_107_G + term, data = midas_data)
+  obj_A246 <- lm(OS ~ AGE + SEX + A_246_A + A_246_S + term, data = midas_data)
   LRT <- lapply(list(obj_B11, obj_E107, obj_A246), LRTest, mod0 = object)
   omnibus_res_test <- data.frame(
     aa_pos = c("B_11", "E_107", "A_246"),
