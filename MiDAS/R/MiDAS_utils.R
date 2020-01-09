@@ -365,17 +365,20 @@ checkAdditionalData <- function(data_frame,
 #'
 #' @param object An existing fit from a model function such as lm, glm and many
 #'   others.
-#' @param x Character vector specifying variables to be added to model or a
-#'   formula giving a template which specifies how to update.
+#' @param x Character vector specifying variables to be added to model.
+#' @param placeholder String specifying term to substitute with value from
+#'   \code{x}. Can be used only if \code{x} is a string. Ignored if set to
+#'   \code{NULL}.
 #' @param backquote Logical indicating if added variables should be quoted.
 #'   Elements of this vector are recycled over \code{x}. Only relevant if
 #'   \code{x} is of type character.
 #' @param collapse String specifying how new characters should be added to
-#'   old formula. Only relevant if \code{x} is of type character.
+#'   old formula. Only relevant if \code{placeholder} is specified.
 #'
 #' @return Updated fit of input model.
 #'
 #' @importFrom assertthat assert_that is.string
+#' @importFrom magrittr %>%
 #' @importFrom stats update
 #' @importFrom purrr is_formula
 #'
@@ -384,22 +387,42 @@ checkAdditionalData <- function(data_frame,
 #' updateModel(object, "dist")
 #'
 #' @export
-updateModel <- function(object, x, backquote = TRUE, collapse = " + ") {
+updateModel <- function(object,
+                        x,
+                        placeholder = NULL,
+                        backquote = TRUE,
+                        collapse = " + ") {
   assert_that(
     checkStatisticalModel(object),
-    see_if(is.character(x) | is_formula(x),
-           msg = "x is not a character vector or formula"
+    is.character(x),
+    isStringOrNULL(placeholder),
+    see_if(
+      ! (! is.null(placeholder) && length(x) != 1),
+      msg = "placeholder argument can be used only with one new variable in x."
     ),
     isTRUEorFALSE(backquote),
     is.string(collapse)
   )
 
-  if (is.character(x)) {
-    x[backquote] <- backquote(x[backquote])
-    x <- paste0(". ~ . + ", paste(x, collapse = collapse))
+  object_env <- attr(object$terms, ".Environment")
+
+  if (backquote) {
+    x <- backquote(x)
   }
 
-  object_env <- attr(object$terms, ".Environment")
+  if (is.null(placeholder)) {
+    x <- paste0(". ~ . + ", paste(x, collapse = collapse))
+  } else {
+    object_call <- getCall(object)
+    object_form <- object_call[["formula"]] %>%
+      eval(envir = object_env)
+    assert_that(
+      objectHasPlaceholder(object, placeholder = placeholder)
+    )
+    x <- gsub(pattern = placeholder, replacement = x, x = deparse(object_form))
+  }
+
+  # print(x)
   new_object <- update(object = object, x, evaluate = FALSE)
   new_object <- eval(new_object, envir = object_env)
 
@@ -1051,4 +1074,37 @@ LRTest <- function(mod0, mod1) {
   )
 
   return(res)
+}
+
+#' Check if placeholder is present in object formula
+#'
+#' \code{isTRUEorFALSE} check if object is a flag (a length one logical vector)
+#' except NA.
+#'
+#' @param object statistical model to test.
+#' @param placeholder string specifying name of placeholder.
+#'
+#' @return Logical indicating if placeholder is present in object formula.
+#'
+#' @family assert functions
+#'
+objectHasPlaceholder <- function(object, placeholder) {
+  object_env <- attr(object$terms, ".Environment")
+  object_call <- getCall(object)
+  object_form <- object_call[["formula"]] %>%
+    eval(envir = object_env)
+  test <- placeholder %in% all.vars(object_form)
+
+  return(test)
+}
+
+#' Error message for objectHasPlaceholder
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(objectHasPlaceholder) <- function(call, env) {
+  paste0("placeholder '",
+         eval(call$placeholder, envir = env),
+         "' could not be found in object's formula"
+  )
 }

@@ -30,6 +30,8 @@ Other assert functions: \code{\link{characterMatches}},
   \code{\link{isClassOrNULL}}, \code{\link{isCountOrNULL}},
   \code{\link{isCountsOrZeros}},
   \code{\link{isFlagOrNULL}}, \code{\link{isNumberOrNULL}},
-  \code{\link{isStringOrNULL}}, \code{\link{isTRUEorFALSE}}
+  \code{\link{isStringOrNULL}},
+  \code{\link{isTRUEorFALSE}},
+  \code{\link{objectHasPlaceholder}}
 }
 \concept{assert functions}

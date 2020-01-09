@@ -4,8 +4,9 @@
 \alias{analyzeAssociations}
 \title{Association analysis}
 \usage{
-analyzeAssociations(object, variables, correction = "bonferroni",
-  n_correction = NULL, exponentiate = FALSE)
+analyzeAssociations(object, variables, placeholder = "term",
+  correction = "bonferroni", n_correction = NULL,
+  exponentiate = FALSE)
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many
@@ -13,6 +14,9 @@ others.}
 
 \item{variables}{Character vector specifying variables to use in association
 tests.}
+
+\item{placeholder}{String specyfing term in \code{object}'s formula which
+should be substituted with an allele during analysis.}
 
 \item{correction}{String specifying multiple testing correction method. See
 details for further information.}
@@ -58,7 +62,7 @@ midas_data <- prepareMiDAS(hla_calls = hla_calls,
 
 # Cox proportional hazards regression model
 ## define base model with response and covariates
-object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
+object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX + term, data = midas_data)
 
 ## test for alleles associations
 analyzeAssociations(object = object,

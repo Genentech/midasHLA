@@ -163,7 +163,20 @@ test_that("HLA statistical models are updated properly", {
   )
 
   expect_error(updateModel(coxmod, 1),
-               "x is not a character vector or formula"
+               "x is not a character vector"
+  )
+
+  expect_error(updateModel(coxmod, x = "A*01:01", placeholder = 1),
+               "placeholder is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(
+    updateModel(
+      coxmod,
+      x = c("A*01:01", "A*01:02"),
+      placeholder = "foo"
+    ),
+    "placeholder argument can be used only with one new variable in x."
   )
 
   expect_error(updateModel(coxmod, x = "A*01:01", backquote = 1),
@@ -172,6 +185,15 @@ test_that("HLA statistical models are updated properly", {
 
   expect_error(updateModel(coxmod, x = "A*01:01", collapse = 1),
                "collapse is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(
+    updateModel(
+      coxmod,
+      x = "A*01:01",
+      placeholder = "foo"
+    ),
+    "placeholder 'foo' could not be found in object's formula"
   )
 })
 
@@ -404,4 +426,15 @@ test_that("likelihood ratio test", {
   )
 
   expect_error(LRTest(mod1, mod0), "variables AGE were not found in mod1")
+})
+
+test_that("object has placeholder", {
+  object <- lm(speed ~ dist, data = cars)
+  expect_equal(objectHasPlaceholder(object, "dist"), TRUE)
+  expect_equal(objectHasPlaceholder(object, "foo"), FALSE)
+
+  expect_error(
+    assertthat::assert_that(objectHasPlaceholder(object, "foo")),
+    "placeholder 'foo' could not be found in object's formula"
+  )
 })

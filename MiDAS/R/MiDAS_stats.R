@@ -10,6 +10,8 @@
 #' @inheritParams updateModel
 #' @param variables Character vector specifying variables to use in association
 #'   tests.
+#' @param placeholder String specyfing term in \code{object}'s formula which
+#'   should be substituted with an allele during analysis.
 #' @param correction String specifying multiple testing correction method. See
 #'   details for further information.
 #' @param n_correction Integer specifying number of comparisons to consider
@@ -45,7 +47,7 @@
 #'
 #' # Cox proportional hazards regression model
 #' ## define base model with response and covariates
-#' object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
+#' object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX + term, data = midas_data)
 #'
 #' ## test for alleles associations
 #' analyzeAssociations(object = object,
@@ -60,6 +62,7 @@
 #' @export
 analyzeAssociations <- function(object,
                                 variables,
+                                placeholder = "term",
                                 correction = "bonferroni",
                                 n_correction = NULL,
                                 exponentiate = FALSE) {
@@ -80,6 +83,8 @@ analyzeAssociations <- function(object,
                     paste(variables[! test_vars], collapse = ", ")
       )
     ),
+    is.string(placeholder),
+    objectHasPlaceholder(object, placeholder),
     is.string(correction),
     isCountOrNULL(n_correction),
     isTRUEorFALSE(exponentiate)
@@ -91,6 +96,7 @@ analyzeAssociations <- function(object,
       expr = updateModel(
         object = object,
         x = x,
+        placeholder = placeholder,
         backquote = TRUE,
         collapse = " + "
       ),
@@ -123,10 +129,10 @@ analyzeAssociations <- function(object,
     n = nc
   )
 
-#  This covariates were added for consistiency with conditional analyze, now however that we are filtering covariates there it doesn't make much sense to keep those?
-#  covariates <- formula(object)[[3]]
-#  covariates <- deparse(covariates)
-#  results$covariates <- covariates
+  #  This covariates were added for consistiency with conditional analyze, now however that we are filtering covariates there it doesn't make much sense to keep those?
+  #  covariates <- formula(object)[[3]]
+  #  covariates <- deparse(covariates)
+  #  results$covariates <- covariates
 
   if (nrow(results) == 0) {
     warn("None of the variables could be tested. Returning empty table.")
@@ -177,7 +183,7 @@ analyzeAssociations <- function(object,
 #' )
 #'
 #' ## define base model with covariates only
-#' object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
+#' object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX + term, data = midas_data)
 #' analyzeConditionalAssociations(object,
 #'                             variables = c("B*14:02", "DRB1*11:01"),
 #'                             th = 0.05,
@@ -193,6 +199,7 @@ analyzeAssociations <- function(object,
 #' @export
 analyzeConditionalAssociations <- function(object,
                                            variables,
+                                           placeholder = "term",
                                            correction = "bonferroni",
                                            n_correction = NULL,
                                            th,
@@ -217,6 +224,8 @@ analyzeConditionalAssociations <- function(object,
                     paste(variables[! test_vars], collapse = ", ")
       )
     ),
+    is.string(placeholder),
+    objectHasPlaceholder(object, placeholder),
     is.string(correction),
     isCountOrNULL(n_correction),
     is.number(th),
@@ -240,6 +249,7 @@ analyzeConditionalAssociations <- function(object,
         expr = updateModel(
           object = object,
           x = x,
+          placeholder = placeholder,
           backquote = TRUE,
           collapse = " + "
         ),
@@ -394,7 +404,8 @@ analyzeConditionalAssociations <- function(object,
 #'                                analysis_type = "hla_allele",
 #'                                inheritance_model = "additive"
 #' )
-#' object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
+#'
+#' object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX + term, data = midas_data)
 #' runMiDAS(object, analysis_type = "hla_allele")
 #'
 #' @importFrom assertthat assert_that is.number is.string
@@ -409,6 +420,7 @@ runMiDAS <- function(object,
                      analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions", "none"),
                      pattern = NULL,
                      variables = NULL,
+                     placeholder = "term",
                      conditional = FALSE,
                      keep = FALSE,
                      lower_frequency_cutoff = NULL,
@@ -439,6 +451,8 @@ runMiDAS <- function(object,
     ),
     isStringOrNULL(pattern),
     isCharacterOrNULL(variables),
+    is.string(placeholder),
+    objectHasPlaceholder(object, placeholder),
     isTRUEorFALSE(conditional),
     isTRUEorFALSE(keep),
     see_if(
@@ -525,6 +539,7 @@ runMiDAS <- function(object,
   if (conditional) {
     results_iter <- analyzeConditionalAssociations(object,
                                                    variables = test_var,
+                                                   placeholder = placeholder,
                                                    correction = correction,
                                                    n_correction = n_correction,
                                                    th = th,
@@ -540,16 +555,12 @@ runMiDAS <- function(object,
   } else {
     results <- analyzeAssociations(object,
                                    variables = test_var,
+                                   placeholder = placeholder,
                                    correction = correction,
                                    n_correction = n_correction,
                                    exponentiate = exponentiate
     )
   }
-
-  assert_that(
-    nrow(results) > 0,
-    msg = "Could not process any variables. Please check warning messages for more informations."
-  )
 
   # Add frequency information to results table if there were any count variables
   if (length(cts_vars)) {
@@ -703,6 +714,8 @@ runMiDAS <- function(object,
 #'   \code{"aa_level"}, \code{"expression_level"}, \code{"allele_group"},
 #'   \code{"custom"}. Each prepared variable will be labeled with corresponding
 #'   \code{analysis_type}. See details for further explanations.
+#' @param placeholder String specifying name of dummy column added to result
+#'   data frame.
 #'
 #' @return Data frame containing prepared data.
 #'
@@ -730,6 +743,7 @@ prepareMiDAS <- function(hla_calls,
                              kir_counts = NULL,
                              analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions", "custom"),
                              inheritance_model = "additive",
+                             placeholder = "term",
                              indels = TRUE,
                              unkchar = FALSE
 ) {
@@ -742,6 +756,7 @@ prepareMiDAS <- function(hla_calls,
       choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions", "custom")
     ),
     is.string(inheritance_model),
+    is.string(placeholder),
     stringMatches(
       x = inheritance_model,
       choice = c("dominant", "recessive", "additive")
@@ -935,6 +950,11 @@ prepareMiDAS <- function(hla_calls,
       x = additional_data,
       init = midas_data
     )
+  }
+
+  # add dummy column
+  if (! is.null(placeholder)) {
+    midas_data[[placeholder]] <- 1
   }
 
   return(midas_data)

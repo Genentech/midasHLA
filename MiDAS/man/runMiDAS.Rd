@@ -7,11 +7,11 @@
 runMiDAS(object, analysis_type = c("hla_allele", "aa_level",
   "expression_level", "allele_g_group", "allele_supertype", "allele_group",
   "kir_genes", "hla_kir_interactions", "none"), pattern = NULL,
-  variables = NULL, conditional = FALSE, keep = FALSE,
-  lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL,
-  pvalue_cutoff = NULL, correction = "bonferroni",
-  n_correction = NULL, exponentiate = FALSE, th = 0.05,
-  rss_th = 1e-07)
+  variables = NULL, placeholder = "term", conditional = FALSE,
+  keep = FALSE, lower_frequency_cutoff = NULL,
+  upper_frequency_cutoff = NULL, pvalue_cutoff = NULL,
+  correction = "bonferroni", n_correction = NULL,
+  exponentiate = FALSE, th = 0.05, rss_th = 1e-07)
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many
@@ -32,6 +32,9 @@ to further select variables selected by \code{analysis_type}.}
 association tests except those selected by \code{analysis_type}. By default
 \code{NULL}. Note that additional variables are not considered when
 applying lower or upper frequency cutoff.}
+
+\item{placeholder}{String specyfing term in \code{object}'s formula which
+should be substituted with an allele during analysis.}
 
 \item{conditional}{Logical flag indicating if the analysis should be
 performed using stepwise conditional test. See
@@ -116,7 +119,8 @@ midas_data <- prepareMiDAS(hla_calls = hla_calls,
                                analysis_type = "hla_allele",
                                inheritance_model = "additive"
 )
-object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
+
+object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX + term, data = midas_data)
 runMiDAS(object, analysis_type = "hla_allele")
 
 }

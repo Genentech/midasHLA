@@ -371,11 +371,12 @@ test_that("results are formatted properly with preselected args", {
     "A*01:01" = c(0, 2),
     "A*01:02" = c(2, 0),
     R = c(1, 0),
+    term = c(1, 1),
     check.names = FALSE,
     stringsAsFactors = FALSE
   )
 
-  object <- stats::glm(R ~ 1, data = midas_data, family = stats::binomial)
+  object <- stats::glm(R ~ 1 + term, data = midas_data, family = stats::binomial)
   object$call$data <- midas_data
   res <- runMiDAS(object, analysis_type = "hla_allele", variables = c("A*01:01", "A*01:02"), pvalue_cutoff = 1)
   res <- rename(res, term = allele)

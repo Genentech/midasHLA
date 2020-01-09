@@ -1,4 +1,7 @@
-## 0.0.0.9037 - 19/11/2019
+## 0.0.9039 - 18/12/19
++ now using interactions terms is possible through placeholder argument in runMiDAS and presence of dummy var in input data frame
+
+## 0.0.0.9038 - 19/11/2019
 + now variables passed to runMiDAS via variables argument are not taken into account when applying frequency cut-off
 
 ## 0.0.0.9037 - 16/11/2019
