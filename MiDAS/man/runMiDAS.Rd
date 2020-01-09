@@ -6,7 +6,7 @@
 \usage{
 runMiDAS(object, analysis_type = c("hla_allele", "aa_level",
   "expression_level", "allele_g_group", "allele_supertype", "allele_group",
-  "kir_genes", "hla_kir_interactions"), pattern = NULL,
+  "kir_genes", "hla_kir_interactions", "none"), pattern = NULL,
   variables = NULL, placeholder = "term", conditional = FALSE,
   keep = FALSE, lower_frequency_cutoff = NULL,
   upper_frequency_cutoff = NULL, pvalue_cutoff = NULL,
@@ -22,14 +22,16 @@ it's used to select appropriate variables for testing from the data
 associated with \code{object}. Valid values are \code{"hla_allele"},
 \code{"aa_level"}, \code{"expression_level"}, \code{"allele_g_group"},
 \code{"allele_supertype"}, \code{"allele_group"}, \code{"kir_genes"},
-\code{"hla_kir_interactions"}. See details for further explanations.}
+\code{"hla_kir_interactions"}, \code{"none"}. See details for further
+explanations.}
 
 \item{pattern}{String containing a regular expression that is used
 to further select variables selected by \code{analysis_type}.}
 
 \item{variables}{Character vector specifying additional variables to use in
 association tests except those selected by \code{analysis_type}. By default
-\code{NULL}.}
+\code{NULL}. Note that additional variables are not considered when
+applying lower or upper frequency cutoff.}
 
 \item{placeholder}{String specyfing term in \code{object}'s formula which
 should be substituted with an allele during analysis.}
@@ -95,6 +97,9 @@ output data frame are labeled with the type of analysis they can be used for
 eg. \code{hla_allele}. By specifying \code{analysis_type} function will
 select all variables with corresponding label. This choice can be further
 refined by using \code{pattern} argument or extended with \code{variables}.
+In cases where one would rather prefer to specify more custom set of
+variables analysis type \code{"none"} can be used. In this mode function will
+only use variables specifed by \code{variables} argument.
 
 \code{correction} specifies p-value adjustment method to use, common choice
 is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to

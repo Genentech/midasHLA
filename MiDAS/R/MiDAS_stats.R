@@ -340,6 +340,9 @@ analyzeConditionalAssociations <- function(object,
 #' eg. \code{hla_allele}. By specifying \code{analysis_type} function will
 #' select all variables with corresponding label. This choice can be further
 #' refined by using \code{pattern} argument or extended with \code{variables}.
+#' In cases where one would rather prefer to specify more custom set of
+#' variables analysis type \code{"none"} can be used. In this mode function will
+#' only use variables specifed by \code{variables} argument.
 #'
 #' \code{correction} specifies p-value adjustment method to use, common choice
 #' is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
@@ -353,7 +356,8 @@ analyzeConditionalAssociations <- function(object,
 #'   associated with \code{object}. Valid values are \code{"hla_allele"},
 #'   \code{"aa_level"}, \code{"expression_level"}, \code{"allele_g_group"},
 #'   \code{"allele_supertype"}, \code{"allele_group"}, \code{"kir_genes"},
-#'   \code{"hla_kir_interactions"}. See details for further explanations.
+#'   \code{"hla_kir_interactions"}, \code{"none"}. See details for further
+#'   explanations.
 #' @param pattern String containing a regular expression that is used
 #'   to further select variables selected by \code{analysis_type}.
 #' @param conditional Logical flag indicating if the analysis should be
@@ -361,7 +365,8 @@ analyzeConditionalAssociations <- function(object,
 #'   \code{\link{analyzeConditionalAssociations}} for more details.
 #' @param variables Character vector specifying additional variables to use in
 #'   association tests except those selected by \code{analysis_type}. By default
-#'   \code{NULL}.
+#'   \code{NULL}. Note that additional variables are not considered when
+#'   applying lower or upper frequency cutoff.
 #' @param lower_frequency_cutoff Number specifying lower threshold for inclusion
 #'   of a variable. If it's a number between \code{0} and \code{1} variables
 #'   with frequency below this number will not be considered during analysis. If
@@ -412,7 +417,7 @@ analyzeConditionalAssociations <- function(object,
 #'
 #' @export
 runMiDAS <- function(object,
-                     analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions"),
+                     analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions", "none"),
                      pattern = NULL,
                      variables = NULL,
                      placeholder = "term",
@@ -442,7 +447,7 @@ runMiDAS <- function(object,
   assert_that(
     is.string(analysis_type),
     stringMatches(analysis_type,
-                  choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions")
+                  choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions", "none")
     ),
     isStringOrNULL(pattern),
     isCharacterOrNULL(variables),
@@ -467,6 +472,11 @@ runMiDAS <- function(object,
   )
 
   assert_that(
+    ! (analysis_type == "none" && is.null(variables)),
+    msg = "For analysis type \"none\" variables argument can not be NULL."
+  )
+
+  assert_that(
     any(variables_labels == analysis_type, na.rm = TRUE) || ! is.null(variables),
     msg = "Argument variables = NULL can be used only with labeled variables, make sure to use prepareMiDAS function for data preparation."
   )
@@ -478,9 +488,10 @@ runMiDAS <- function(object,
   }
 
   # create set of variables for further testing
-  variables <- c(labeled_vars, variables)
-  variables <- variables[! variables %in% all.vars(object_formula)]
-  assert_that(length(variables) != 0,
+  test_var <- c(labeled_vars, variables) %>%
+    unique()
+  test_var <- test_var[! test_var %in% all.vars(object_formula)]
+  assert_that(length(test_var) != 0,
               msg = "No new variables found in object data."
   )
 
@@ -493,17 +504,18 @@ runMiDAS <- function(object,
   # }
 
   # Filter variables on frequency cutoff
-  variables_labels <- variables_labels[variables] # if variables != NULL select only corresponding labels
-  mask_counts <- variables_labels %in% c("hla_allele",
-                                         "aa_level",
-                                         "allele_g_group",
-                                         "allele_supertype",
-                                         "allele_group",
-                                         "kir_genes",
-                                         "hla_kir_interactions"
-  )
-  cts_vars <- variables[mask_counts]
-  ncts_vars <- variables[! mask_counts]
+  variables_labels <- variables_labels[test_var] # if test_var != NULL select only corresponding labels
+  mask_counts <- variables_labels %in% c(
+    "hla_allele",
+    "aa_level",
+    "allele_g_group",
+    "allele_supertype",
+    "allele_group",
+    "kir_genes",
+    "hla_kir_interactions"
+  ) & ! test_var %in% variables
+  cts_vars <- test_var[mask_counts]
+  ncts_vars <- test_var[! mask_counts]
 
   if (length(cts_vars)) {
     lower_frequency_cutoff <- ifelse(is.null(lower_frequency_cutoff), 0, lower_frequency_cutoff)
@@ -521,12 +533,12 @@ runMiDAS <- function(object,
       filter(.data$Ntotal.frequency < upper_frequency_cutoff |
                upper_frequency_cutoff >= 1)
 
-    variables <- c(ncts_vars, variables_freq$term)
+    test_var <- c(ncts_vars, variables_freq$term)
   }
 
   if (conditional) {
     results_iter <- analyzeConditionalAssociations(object,
-                                                   variables = variables,
+                                                   variables = test_var,
                                                    placeholder = placeholder,
                                                    correction = correction,
                                                    n_correction = n_correction,
@@ -542,18 +554,13 @@ runMiDAS <- function(object,
     results <- bind_rows(results)
   } else {
     results <- analyzeAssociations(object,
-                                   variables = variables,
+                                   variables = test_var,
                                    placeholder = placeholder,
                                    correction = correction,
                                    n_correction = n_correction,
                                    exponentiate = exponentiate
     )
   }
-
-  assert_that(
-    nrow(results) > 0,
-    msg = "Could not process any variables. Please check warning messages for more informations."
-  )
 
   # Add frequency information to results table if there were any count variables
   if (length(cts_vars)) {

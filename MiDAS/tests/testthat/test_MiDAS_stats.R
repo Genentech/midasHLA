@@ -478,6 +478,17 @@ test_that("MiDAS associations are analyzed properly", {
 
   expect_equal(as.data.frame(res), as.data.frame(test_res))
 
+  ## analysis_type = "none" variables = c("A*01:01", "A*02:01", "A*02:06")
+  test_variables <- c("A*01:01", "A*02:01", "A*02:06")
+  res <- runMiDAS(object,
+                  analysis_type = "none",
+                  variables = test_variables,
+                  exponentiate = FALSE
+  )
+  test_res <- analyzeAssociations(object, variables = test_variables)
+
+  expect_equal(as.data.frame(res), as.data.frame(test_res))
+
   # conditional TRUE keep TRUE
   res <- runMiDAS(object,
                   analysis_type = "hla_allele",
@@ -551,6 +562,18 @@ test_that("MiDAS associations are analyzed properly", {
 
   res <- runMiDAS(object, analysis_type = "hla_allele", upper_frequency_cutoff = 0.03)
   expect_equal(res$allele, freqs$allele[freqs$Freq < 0.03 & freqs$Freq != 1])
+
+  # test that additional variables are not considered for freq. cut-offs
+  additional_var <- "G*01:01" # freq == 0.875
+  res <-
+    runMiDAS(
+      object,
+      analysis_type = "hla_allele",
+      variables = additional_var,
+      upper_frequency_cutoff = 0.03
+    )
+  filtered_alleles <- freqs$allele[freqs$Freq < 0.03 & freqs$Freq != 1]
+  expect_equal(sort(res$allele), sort(c(filtered_alleles, additional_var)))
 
   # counts
   counts <- prepareMiDAS(hla_calls, analysis_type = "hla_allele")
@@ -630,6 +653,25 @@ test_that("MiDAS associations are analyzed properly", {
 
   expect_error(runMiDAS(object, analysis_type = "hla_allele", rss_th = "NA"),
                "rss_th is not a number \\(a length one numeric vector\\)."
+  )
+
+  expect_error(runMiDAS(object, analysis_type = "none"),
+               "For analysis type \"none\" variables argument can not be NULL."
+  )
+
+  new_data <- eval(object$call$data)
+  new_data <- rapply(
+    object = new_data,
+    f = function(col) {
+      attr(col, which = "label") <- NULL
+      col
+    },
+    how = "replace"
+  )
+  object2 <- object
+  object2$call$data <- new_data
+  expect_error(runMiDAS(object2, analysis_type = "hla_allele"),
+               "Argument variables = NULL can be used only with labeled variables, make sure to use prepareMiDAS function for data preparation."
   )
 })
 

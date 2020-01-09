@@ -1,5 +1,11 @@
-## 0.0.9037 - 18/12/19
+## 0.0.9039 - 18/12/19
 + now using interactions terms is possible through placeholder argument in runMiDAS and presence of dummy var in input data frame
+
+## 0.0.0.9038 - 19/11/2019
++ now variables passed to runMiDAS via variables argument are not taken into account when applying frequency cut-off
+
+## 0.0.0.9037 - 16/11/2019
++ adds new analysis type "none" to runMiDAS function. In this mode only terms passed by variables argument are used.
 
 ## 0.0.0.9036 - 8/10/2019
 + refactor function for kabling results now it is much more general and easier to use.
