@@ -673,6 +673,16 @@ test_that("MiDAS associations are analyzed properly", {
   expect_error(runMiDAS(object2, analysis_type = "hla_allele"),
                "Argument variables = NULL can be used only with labeled variables, make sure to use prepareMiDAS function for data preparation."
   )
+
+  expect_error(
+    runMiDAS(
+      object,
+      analysis_type = "hla_allele",
+      lower_frequency_cutoff = Inf,
+      upper_frequency_cutoff = Inf
+    ),
+    "No observations passes filtering criteria. Revisit your choice of 'lower_frequency_cutoff' and 'upper_frequency_cutoff'."
+  )
 })
 
 test_that("MiDAS data is prepared properly", {

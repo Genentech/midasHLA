@@ -533,6 +533,11 @@ runMiDAS <- function(object,
       filter(.data$Ntotal.frequency < upper_frequency_cutoff |
                upper_frequency_cutoff >= 1)
 
+    assert_that(
+      nrow(variables_freq) != 0,
+      msg = "No observations passes filtering criteria. Revisit your choice of 'lower_frequency_cutoff' and 'upper_frequency_cutoff'."
+    )
+
     test_var <- c(ncts_vars, variables_freq$term)
   }
 
@@ -561,6 +566,11 @@ runMiDAS <- function(object,
                                    exponentiate = exponentiate
     )
   }
+
+  assert_that(
+    nrow(results) > 0,
+    msg = "Could not process any variables. Please check warning messages for more informations."
+  )
 
   # Add frequency information to results table if there were any count variables
   if (length(cts_vars)) {
