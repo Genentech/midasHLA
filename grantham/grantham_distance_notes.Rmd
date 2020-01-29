@@ -63,7 +63,7 @@ For the class I alleles exons 2 and 3 are located at positions *1-182* of the
 reference alleles, according to alignment files at IPD-IMGT/HLA database.
 
 ```{r}
-hla_alignments_a <- MiDAS::readHlaAlignments(gene = "A", trim = TRUE, resolution = 4)
+hla_alignments_a <- MiDAS::readHlaAlignments(gene = "A", trim = FALSE, resolution = 4)
 a_exons_2_3 <- hla_alignments_a[, 1:182]
 ```
 
