@@ -1108,3 +1108,52 @@ assertthat::on_failure(objectHasPlaceholder) <- function(call, env) {
          "' could not be found in object's formula"
   )
 }
+
+#' Grantham distance
+#'
+#' \code{distGrantham} calculates normalized Grantham distance between two
+#' amino acid sequences.
+#'
+#' Distance between amino acid sequences is normalized by length of compared
+#' sequences.
+#'
+#' Lengths of \code{aa1} and \code{aa2} must be equal.
+#'
+#' @param aa1 Character vector giving amino acid sequence using one letter
+#'   codings. Each element must correspond to single amino acid.
+#' @param aa2 Character vector giving amino acid sequence using one letter
+#'   codings. Each element must correspond to single amino acid.
+#'
+#' @return Integer Grantham distance between \code{aa1} and \code{aa2}.
+#'
+#' @examples
+#' distGrantham(
+#'   aa1 = c("A", "S", "W"),
+#'   aa2 = c("A", "S", "V")
+#' )
+#'
+#' @importFrom assertthat assert_that see_if
+#'
+distGrantham <- function(aa1, aa2) {
+  assert_that(
+    is.character(aa1),
+    is.character(aa2),
+    see_if(
+      length(aa1) == length(aa2),
+      msg = "aa1 and aa2 must have equal lengths."
+    )
+  )
+
+  idx <- paste(aa1, aa2, sep = "")
+  assert_that(
+    all(test <- idx %in% names(dict_dist_grantham)),
+    msg = sprintf(
+      fmt = "%s are not valid amino acids pairs.",
+      paste(idx[! test], collapse = ", ")
+    )
+  )
+
+  d <- sum(dict_dist_grantham[idx]) / length(idx)
+
+  return(d)
+}
