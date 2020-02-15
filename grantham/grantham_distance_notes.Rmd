@@ -60,7 +60,9 @@ between variable regions in peptide binding groove. Those consist out of exons
 2 and 3 for class I alleles and exon 2 for class II alleles.
 
 For the class I alleles exons 2 and 3 are located at positions *1-182* of the 
-reference alleles, according to alignment files at IPD-IMGT/HLA database.
+reference alleles, according to alignment files at IPD-IMGT/HLA database. In 
+practice location *1* for most of the alleles is not given, so *2-182* might be
+a more reasonable choice.
 
 ```{r}
 hla_alignments_a <- MiDAS::readHlaAlignments(gene = "A", trim = FALSE, resolution = 4)
