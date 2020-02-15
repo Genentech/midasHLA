@@ -1124,7 +1124,8 @@ assertthat::on_failure(objectHasPlaceholder) <- function(call, env) {
 #' @param aa2 Character vector giving amino acid sequence using one letter
 #'   codings. Each element must correspond to single amino acid.
 #'
-#' @return Integer Grantham distance between \code{aa1} and \code{aa2}.
+#' @return Integer normalized Grantham distance between \code{aa1} and \
+#'   code{aa2}.
 #'
 #' @examples
 #' distGrantham(
@@ -1148,7 +1149,7 @@ distGrantham <- function(aa1, aa2) {
   assert_that(
     all(test <- idx %in% names(dict_dist_grantham)),
     msg = sprintf(
-      fmt = "%s are not valid amino acids pairs.",
+      fmt = "%s are not valid amino acids pairs",
       paste(idx[! test], collapse = ", ")
     )
   )
