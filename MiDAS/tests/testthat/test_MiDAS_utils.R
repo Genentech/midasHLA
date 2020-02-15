@@ -438,3 +438,51 @@ test_that("object has placeholder", {
     "placeholder 'foo' could not be found in object's formula"
   )
 })
+
+test_that("Grantham distance is calculated properly", {
+  aa1 <- c("A", "S", "W")
+  aa2 <- c("A", "S", "V")
+  d <- distGrantham(aa1, aa2)
+  d_test <- sum(dict_dist_grantham[paste0(aa1, aa2)]) / length(aa1)
+  expect_equal(d, d_test)
+
+  expect_error(distGrantham(1, aa2), "aa1 is not a character vector")
+
+  expect_error(distGrantham(aa1, 1), "aa2 is not a character vector")
+
+  expect_error(distGrantham(aa1, aa2[-3]),
+               "aa1 and aa2 must have equal lengths.")
+
+  expect_error(distGrantham(aa1, c("F", "O", "O")),
+               "SO, WO are not valid amino acids pairs")
+})
+
+test_that("Between allele Grantham distance is calculated properly", {
+  file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(file)[1:5, ]
+  gdist <- hlaCallsGranthamDistance(hla_calls, genes = c("A", "B", "C"))
+  gdist_test <- structure(list(
+    ID = c("PAT1", "PAT2", "PAT3", "PAT4", "PAT5"),
+    A = c(0, 0, 0, 0.121546961325967, 0),
+    B = c(7.20441988950276, 13.9337016574586, 0, 10.2265193370166, 0),
+    C = c(7.27624309392265, 6.58563535911602, 0, 0, 0)
+  ),
+  class = "data.frame",
+  row.names = c(NA,-5L))
+  expect_equal(gdist, gdist_test)
+
+  # checkHlaCallsFormat test is ommitted here
+
+  expect_error(hlaCallsGranthamDistance(hla_calls, genes = 1),
+               "genes is not a character vector")
+
+  expect_error(hlaCallsGranthamDistance(hla_calls, genes = c("A", NA)),
+               "genes contains 1 missing values")
+
+  hla_calls_bad <- hla_calls
+  hla_calls_bad[2, 2] <- "A*01"
+  expect_error(
+    hlaCallsGranthamDistance(hla_calls_bad, genes = "A"),
+    "Allele resolutions for gene A are not equal"
+  )
+})
