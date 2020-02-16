@@ -240,6 +240,7 @@ test_that("MiDAS associations are analyzed properly", {
         "allele_group",
         "kir_genes",
         "hla_kir_interactions",
+        "hla_grantham_dist",
         "custom"
       ),
       inheritance_model = "additive"
@@ -318,7 +319,6 @@ test_that("MiDAS associations are analyzed properly", {
   test_res$Nnegative.frequency <- neg_freq$Freq
 
   expect_equal(as.data.frame(res), as.data.frame(test_res))
-
 
   ## analysis_type = "aa_level" variables = NULL
   res <- runMiDAS(object,
@@ -475,6 +475,20 @@ test_that("MiDAS associations are analyzed properly", {
   neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", test_variables)])
   test_res$Nnegative <- neg_freq$Counts
   test_res$Nnegative.frequency <- neg_freq$Freq
+
+  expect_equal(as.data.frame(res), as.data.frame(test_res))
+
+  ## analysis_type = "hla_grantham_dist" variables = NULL
+  res <- runMiDAS(object,
+                  analysis_type = "hla_grantham_dist",
+                  variables = NULL,
+                  exponentiate = FALSE
+  )
+  test_variables <-
+    colnames(midas_data[, label(midas_data) == "hla_grantham_dist"])
+  test_res <- analyzeAssociations(object, variables = test_variables)
+  test_variables <- test_res$term # constant variables are discarded
+  test_res <- dplyr::rename(test_res, grantham.distance = term)
 
   expect_equal(as.data.frame(res), as.data.frame(test_res))
 
@@ -861,6 +875,35 @@ test_that("MiDAS data is prepared properly", {
   test_midas_hla_kir_interactions$term <- 1
   expect_equal(midas_hla_kir_interactions, test_midas_hla_kir_interactions)
 
+  # hla_grantham_dist
+  midas_hla_grantham_dist <- prepareMiDAS(
+    hla_calls,
+    pheno,
+    covar,
+    analysis_type = "hla_grantham_dist",
+    inheritance_model = "additive"
+  )
+  test_midas_hla_grantham_dist <-hlaCallsGranthamDistance(
+    hla_calls = hla_calls,
+    genes = c("A", "B", "C")
+  )
+  test_midas_hla_grantham_dist$ABC_avg <-
+    rowMeans(test_midas_hla_grantham_dist[-1])
+  colnames(test_midas_hla_grantham_dist)[-1] <-
+    paste0(colnames(test_midas_hla_grantham_dist[-1]), "_grantham_dist")
+  label(test_midas_hla_grantham_dist[-1], self = FALSE) <- rep(
+    x = "hla_grantham_dist",
+    ncol(test_midas_hla_grantham_dist) - 1
+  )
+  test_midas_hla_grantham_dist <-
+    rleft_join(hla_calls[, 1, drop = FALSE],
+               test_midas_hla_grantham_dist,
+               pheno,
+               covar
+    )
+  test_midas_hla_grantham_dist$term <- 1
+  expect_equal(midas_hla_grantham_dist, test_midas_hla_grantham_dist)
+
   # custom
   midas_custom <- prepareMiDAS(hla_calls,
                                    pheno,
@@ -880,7 +923,7 @@ test_that("MiDAS data is prepared properly", {
                                      pheno,
                                      covar,
                                      kir_counts = kir_counts,
-                                     analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "custom"),
+                                     analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_grantham_dist", "custom"),
                                      inheritance_model = "additive")
   midas_multiple_test <-
     rleft_join(
@@ -891,6 +934,7 @@ test_that("MiDAS data is prepared properly", {
       midas_allele_supertype,
       midas_allele_groups,
       midas_kir_genes,
+      midas_hla_grantham_dist,
       midas_custom,
       by = c("ID", "OS", "OS_DIED", "AGE", "SEX")
     )
@@ -911,7 +955,7 @@ test_that("MiDAS data is prepared properly", {
 
   expect_error(
     prepareMiDAS(hla_calls, analysis_type = "foo"),
-    "analysis_type should match values \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"hla_kir_interactions\", \"custom\"."
+    "analysis_type should match values \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"hla_kir_interactions\", \"hla_grantham_dist\", \"custom\"."
   )
 
   expect_error(
