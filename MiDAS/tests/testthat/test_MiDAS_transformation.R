@@ -169,10 +169,10 @@ test_that("amino acids variation data frame is converted to counts table", {
   aa_counts <- aaVariationToCounts(aa_var, inheritance_model = "additive")
   test_aa_counts <- data.frame(
     ID = c("P1", "P2"),
-    A_44_K = c(1, 1),
-    A_44_R = c(1, 1),
-    A_62_Q = c(1, 1),
-    A_62_G = c(1, 1),
+    A_10_L = c(1, 1),
+    A_10_V = c(1, 1),
+    A_68_K = c(1, 1),
+    A_68_R = c(1, 1),
     stringsAsFactors = FALSE
   )
   expect_equal(aa_counts, test_aa_counts)
@@ -180,10 +180,10 @@ test_that("amino acids variation data frame is converted to counts table", {
   aa_counts <- aaVariationToCounts(aa_var, inheritance_model = "dominant")
   test_aa_counts <- data.frame(
     ID = c("P1", "P2"),
-    A_44_K = c(1, 1),
-    A_44_R = c(1, 1),
-    A_62_Q = c(1, 1),
-    A_62_G = c(1, 1),
+    A_10_L = c(1, 1),
+    A_10_V = c(1, 1),
+    A_68_K = c(1, 1),
+    A_68_R = c(1, 1),
     stringsAsFactors = FALSE
   )
   expect_equal(aa_counts, test_aa_counts)
@@ -191,10 +191,10 @@ test_that("amino acids variation data frame is converted to counts table", {
   aa_counts <- aaVariationToCounts(aa_var, inheritance_model = "recessive")
   test_aa_counts <- data.frame(
     ID = c("P1", "P2"),
-    A_44_K = c(0, 0),
-    A_44_R = c(0, 0),
-    A_62_Q = c(0, 0),
-    A_62_G = c(0, 0),
+    A_10_L = c(0, 0),
+    A_10_V = c(0, 0),
+    A_68_K = c(0, 0),
+    A_68_R = c(0, 0),
     stringsAsFactors = FALSE
   )
   expect_equal(aa_counts, test_aa_counts)
@@ -230,7 +230,7 @@ test_that("amino acids frequencies are calculated properly", {
   aa_var <- hlaToAAVariation(minimal_hla_calls)[, 1:5]
   aa_freq <- getAAFrequencies(aa_var)
   test_aa_freq <- data.frame(
-    aa_pos = c("A_44_K", "A_44_R", "A_62_G", "A_62_Q"),
+    aa_pos = c("A_10_L", "A_10_V", "A_68_K", "A_68_R"),
     Freq = c(0.5, 0.5, 0.5, 0.5),
     stringsAsFactors = FALSE
   )

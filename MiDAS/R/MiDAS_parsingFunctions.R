@@ -116,7 +116,7 @@ readHlaCalls <- function(file,
 #' @export
 readHlaAlignments <- function(file,
                               gene = NULL,
-                              trim = TRUE,
+                              trim = FALSE,
                               unkchar = "",
                               resolution = 8) {
   assert_that(
