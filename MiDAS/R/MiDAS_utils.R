@@ -1135,6 +1135,7 @@ assertthat::on_failure(objectHasPlaceholder) <- function(call, env) {
 #'
 #' @importFrom assertthat assert_that see_if
 #'
+#' @export
 distGrantham <- function(aa1, aa2) {
   assert_that(
     is.character(aa1),
