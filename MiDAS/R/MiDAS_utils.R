@@ -1232,8 +1232,7 @@ hlaCallsGranthamDistance <- function(hla_calls, genes = c("A", "B", "C")) {
     )
 
     # process alignment
-    alignment <- readHlaAlignments(gene = gene, resolution = resolution[1])
-    alignment <- procHlaAlignmentGrantham(alignment)
+    alignment <-hlaAlignmentGrantham(gene, resolution[1])
 
     allele_numbers <- rownames(alignment)
     d[[gene]] <- vapply(
@@ -1264,15 +1263,20 @@ hlaCallsGranthamDistance <- function(hla_calls, genes = c("A", "B", "C")) {
   return(hla_dist)
 }
 
-#' Helper function processing alignment for Grantham distance calculations
+#' Helper function alignment for Grantham distance calculations
 #'
-#' \code{procHlaAlignmentGrantham} apply processing to raw HLA alignments, so
-#' that grantham distance between alleles can be calculated. Processing includes
-#' extracting exons 1 and 2, masking indels, gaps and stop codons.
+#' \code{hlaAlignmentGrantham} get HLA alignment processed so that grantham
+#' distance between alleles can be calculated. Processing includes extracting
+#' exons 1 and 2, masking indels, gaps and stop codons.
 #'
 #' @param alignment Matrix containing HLA alleles amino acids level alignment.
 #'
-procHlaAlignmentGrantham <- function(alignment) {
+hlaAlignmentGrantham <- function(gene, resolution) {
+  alignment <- readHlaAlignments(
+    gene = gene,
+    resolution = resolution,
+    trim = TRUE
+  )
   alignment <- alignment[, 2:182] # select exons 2 and 3 w/o 1st position as it is biased towards missing data
   mask <- apply(alignment, 1, function(x) any(x == "" | x == "X" | x == ".")) # mask gaps, stop codons, indels
   alignment <- alignment[! mask, ]
