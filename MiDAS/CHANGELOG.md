@@ -1,3 +1,7 @@
+## 0.0.9039 - 16/02/20
++ add functionality for Grantham distance calcualtion between amino acid sequences (`distGrantham` function) and between HLA alleles (`hlaCallsGranthamDistance`).
++ add Grantham distances calculation for Class I HLA alleles to `prepareMiDAS` and `runMiDAS` functionality.
+
 ## 0.0.9039 - 18/12/19
 + now using interactions terms is possible through placeholder argument in runMiDAS and presence of dummy var in input data frame
 
