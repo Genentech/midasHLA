@@ -6,7 +6,7 @@
 \usage{
 runMiDAS(object, analysis_type = c("hla_allele", "aa_level",
   "expression_level", "allele_g_group", "allele_supertype", "allele_group",
-  "kir_genes", "hla_kir_interactions", "hla_grantham_dist", "none"),
+  "kir_genes", "hla_kir_interactions", "hla_divergence", "none"),
   pattern = NULL, variables = NULL, placeholder = "term",
   conditional = FALSE, keep = FALSE, lower_frequency_cutoff = NULL,
   upper_frequency_cutoff = NULL, pvalue_cutoff = NULL,

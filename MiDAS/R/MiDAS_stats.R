@@ -417,7 +417,7 @@ analyzeConditionalAssociations <- function(object,
 #'
 #' @export
 runMiDAS <- function(object,
-                     analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions", "hla_grantham_dist", "none"),
+                     analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions", "hla_divergence", "none"),
                      pattern = NULL,
                      variables = NULL,
                      placeholder = "term",
@@ -447,7 +447,7 @@ runMiDAS <- function(object,
   assert_that(
     is.string(analysis_type),
     stringMatches(analysis_type,
-                  choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions", "hla_grantham_dist", "none")
+                  choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions", "hla_divergence", "none")
     ),
     isStringOrNULL(pattern),
     isCharacterOrNULL(variables),
@@ -624,7 +624,7 @@ runMiDAS <- function(object,
                        "allele_group" = "allele.group",
                        "kir_genes" = "kir.gene",
                        "hla_kir_interactions" = "hla.kir.interaction",
-                       "hla_grantham_dist" = "grantham.distance",
+                       "hla_divergence" = "hla.divergence",
                        "term"
   )
 
@@ -708,7 +708,7 @@ runMiDAS <- function(object,
 #'     interactions variables (see \code{\link{getHlaKirInteractions}} for more
 #'     details).
 #'   }
-#'   \item{\code{hla_grantham_dist}}{
+#'   \item{\code{hla_divergence}}{
 #'     Distances between Class I alleles are calculated using Grantham distance,
 #'     as implemented in \code{hlaCallsGranthamDistance} function. Additionally
 #'     average distance in Class I genese is calculated.
@@ -728,7 +728,7 @@ runMiDAS <- function(object,
 #' @param analysis_type Character vector indicating analysis type for which data
 #'   should be prepared. Valid choices are \code{"hla_allele"},
 #'   \code{"aa_level"}, \code{"expression_level"}, \code{"allele_group"},
-#'   \code{"hla_grantham_dist"}, \code{"custom"}. Each prepared variable will
+#'   \code{"hla_divergence"}, \code{"custom"}. Each prepared variable will
 #'   be labeled with corresponding
 #'   \code{analysis_type}. See details for further explanations.
 #' @param placeholder String specifying name of dummy column added to result
@@ -758,7 +758,7 @@ runMiDAS <- function(object,
 prepareMiDAS <- function(hla_calls,
                              ...,
                              kir_counts = NULL,
-                             analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions", "hla_grantham_dist", "custom"),
+                             analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions", "hla_divergence", "custom"),
                              inheritance_model = "additive",
                              placeholder = "term",
                              indels = TRUE,
@@ -770,7 +770,7 @@ prepareMiDAS <- function(hla_calls,
     is.character(analysis_type),
     characterMatches(
       x = analysis_type,
-      choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions", "hla_grantham_dist", "custom")
+      choice = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions", "hla_divergence", "custom")
     ),
     is.string(inheritance_model),
     is.string(placeholder),
@@ -953,20 +953,20 @@ prepareMiDAS <- function(hla_calls,
     midas_data <- left_join(midas_data, hla_kir_interactions, by = "ID")
   }
 
-  if ("hla_grantham_dist" %in% analysis_type) {
-    hla_grantham_dist <- hlaCallsGranthamDistance(
+  if ("hla_divergence" %in% analysis_type) {
+    hla_divergence <- hlaCallsGranthamDistance(
       hla_calls = hla_calls,
       genes = c("A", "B", "C")
     )
-    hla_grantham_dist$ABC_avg <- rowMeans(hla_grantham_dist[-1])
-    colnames(hla_grantham_dist)[-1] <-
-      paste0(colnames(hla_grantham_dist[-1]), "_grantham_dist")
-    label(hla_grantham_dist[-1], self = FALSE) <- rep(
-      x = "hla_grantham_dist",
-      ncol(hla_grantham_dist) - 1
+    hla_divergence$ABC_avg <- rowMeans(hla_divergence[-1])
+    colnames(hla_divergence)[-1] <-
+      paste0(colnames(hla_divergence[-1]), "_divergence")
+    label(hla_divergence[-1], self = FALSE) <- rep(
+      x = "hla_divergence",
+      ncol(hla_divergence) - 1
     )
 
-    midas_data <- left_join(midas_data, hla_grantham_dist, by = "ID")
+    midas_data <- left_join(midas_data, hla_divergence, by = "ID")
   }
 
   if ("custom" %in% analysis_type) {
