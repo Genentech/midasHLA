@@ -4,7 +4,7 @@
 \alias{readHlaAlignments}
 \title{Read HLA allele alignments}
 \usage{
-readHlaAlignments(file, gene = NULL, trim = TRUE, unkchar = "",
+readHlaAlignments(file, gene = NULL, trim = FALSE, unkchar = "",
   resolution = 8)
 }
 \arguments{

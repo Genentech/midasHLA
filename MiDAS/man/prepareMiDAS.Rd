@@ -7,8 +7,9 @@
 prepareMiDAS(hla_calls, ..., kir_counts = NULL,
   analysis_type = c("hla_allele", "aa_level", "expression_level",
   "allele_g_group", "allele_supertype", "allele_group", "kir_genes",
-  "hla_kir_interactions", "custom"), inheritance_model = "additive",
-  placeholder = "term", indels = TRUE, unkchar = FALSE)
+  "hla_kir_interactions", "hla_divergence", "custom"),
+  inheritance_model = "additive", placeholder = "term",
+  indels = TRUE, unkchar = FALSE)
 }
 \arguments{
 \item{hla_calls}{Data frame containing HLA allele calls, as return by
@@ -23,7 +24,8 @@ observations or covariates.}
 \item{analysis_type}{Character vector indicating analysis type for which data
 should be prepared. Valid choices are \code{"hla_allele"},
 \code{"aa_level"}, \code{"expression_level"}, \code{"allele_group"},
-\code{"custom"}. Each prepared variable will be labeled with corresponding
+\code{"hla_divergence"}, \code{"custom"}. Each prepared variable will
+be labeled with corresponding
 \code{analysis_type}. See details for further explanations.}
 
 \item{inheritance_model}{String specifying inheritance model to use.
@@ -106,6 +108,11 @@ Choices for \code{analysis_type}:
     \code{hla_calls} are processed with \code{kir_counts} into HLA - KIR
     interactions variables (see \code{\link{getHlaKirInteractions}} for more
     details).
+  }
+  \item{\code{hla_divergence}}{
+    Distances between Class I alleles are calculated using Grantham distance,
+    as implemented in \code{hlaCallsGranthamDistance} function. Additionally
+    average distance in Class I genese is calculated.
   }
   \item{\code{custom}}{
     No data transformation is done. All inputs are joined together.

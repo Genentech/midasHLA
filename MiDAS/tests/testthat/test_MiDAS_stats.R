@@ -240,6 +240,7 @@ test_that("MiDAS associations are analyzed properly", {
         "allele_group",
         "kir_genes",
         "hla_kir_interactions",
+        "hla_divergence",
         "custom"
       ),
       inheritance_model = "additive"
@@ -318,7 +319,6 @@ test_that("MiDAS associations are analyzed properly", {
   test_res$Nnegative.frequency <- neg_freq$Freq
 
   expect_equal(as.data.frame(res), as.data.frame(test_res))
-
 
   ## analysis_type = "aa_level" variables = NULL
   res <- runMiDAS(object,
@@ -475,6 +475,20 @@ test_that("MiDAS associations are analyzed properly", {
   neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", test_variables)])
   test_res$Nnegative <- neg_freq$Counts
   test_res$Nnegative.frequency <- neg_freq$Freq
+
+  expect_equal(as.data.frame(res), as.data.frame(test_res))
+
+  ## analysis_type = "hla_divergence" variables = NULL
+  res <- runMiDAS(object,
+                  analysis_type = "hla_divergence",
+                  variables = NULL,
+                  exponentiate = FALSE
+  )
+  test_variables <-
+    colnames(midas_data[, label(midas_data) == "hla_divergence"])
+  test_res <- analyzeAssociations(object, variables = test_variables)
+  test_variables <- test_res$term # constant variables are discarded
+  test_res <- dplyr::rename(test_res, hla.divergence = term)
 
   expect_equal(as.data.frame(res), as.data.frame(test_res))
 
@@ -861,6 +875,35 @@ test_that("MiDAS data is prepared properly", {
   test_midas_hla_kir_interactions$term <- 1
   expect_equal(midas_hla_kir_interactions, test_midas_hla_kir_interactions)
 
+  # hla_divergence
+  midas_hla_divergence <- prepareMiDAS(
+    hla_calls,
+    pheno,
+    covar,
+    analysis_type = "hla_divergence",
+    inheritance_model = "additive"
+  )
+  test_midas_hla_divergence <-hlaCallsGranthamDistance(
+    hla_calls = hla_calls,
+    genes = c("A", "B", "C")
+  )
+  test_midas_hla_divergence$ABC_avg <-
+    rowMeans(test_midas_hla_divergence[-1])
+  colnames(test_midas_hla_divergence)[-1] <-
+    paste0(colnames(test_midas_hla_divergence[-1]), "_divergence")
+  label(test_midas_hla_divergence[-1], self = FALSE) <- rep(
+    x = "hla_divergence",
+    ncol(test_midas_hla_divergence) - 1
+  )
+  test_midas_hla_divergence <-
+    rleft_join(hla_calls[, 1, drop = FALSE],
+               test_midas_hla_divergence,
+               pheno,
+               covar
+    )
+  test_midas_hla_divergence$term <- 1
+  expect_equal(midas_hla_divergence, test_midas_hla_divergence)
+
   # custom
   midas_custom <- prepareMiDAS(hla_calls,
                                    pheno,
@@ -880,7 +923,7 @@ test_that("MiDAS data is prepared properly", {
                                      pheno,
                                      covar,
                                      kir_counts = kir_counts,
-                                     analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "custom"),
+                                     analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_divergence", "custom"),
                                      inheritance_model = "additive")
   midas_multiple_test <-
     rleft_join(
@@ -891,6 +934,7 @@ test_that("MiDAS data is prepared properly", {
       midas_allele_supertype,
       midas_allele_groups,
       midas_kir_genes,
+      midas_hla_divergence,
       midas_custom,
       by = c("ID", "OS", "OS_DIED", "AGE", "SEX")
     )
@@ -911,7 +955,7 @@ test_that("MiDAS data is prepared properly", {
 
   expect_error(
     prepareMiDAS(hla_calls, analysis_type = "foo"),
-    "analysis_type should match values \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"hla_kir_interactions\", \"custom\"."
+    "analysis_type should match values \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"hla_kir_interactions\", \"hla_divergence\", \"custom\"."
   )
 
   expect_error(
@@ -966,14 +1010,14 @@ test_that("amino acid omnibus test works fine", {
   covar <- read.table(covar_file, header = TRUE)
   midas_data <- prepareMiDAS(hla_calls, pheno, covar, analysis_type = "aa_level")
   object <- lm(OS ~ AGE + SEX + term, data = midas_data)
-  omnibus_res <- aaPosOmnibusTest(object, aa_pos = c("B_11", "E_107", "A_246"))
+  omnibus_res <- aaPosOmnibusTest(object, aa_pos = c("B_35", "E_128", "A_270"))
 
-  obj_B11 <- lm(OS ~ AGE + SEX + B_11_A + B_11_S + term, data = midas_data)
-  obj_E107 <- lm(OS ~ AGE + SEX + E_107_R + E_107_G + term, data = midas_data)
-  obj_A246 <- lm(OS ~ AGE + SEX + A_246_A + A_246_S + term, data = midas_data)
-  LRT <- lapply(list(obj_B11, obj_E107, obj_A246), LRTest, mod0 = object)
+  obj_B35 <- lm(OS ~ AGE + SEX + B_35_A + B_35_S + term, data = midas_data)
+  obj_E128 <- lm(OS ~ AGE + SEX + E_128_R + E_128_G + term, data = midas_data)
+  obj_A270 <- lm(OS ~ AGE + SEX + A_270_A + A_270_S + term, data = midas_data)
+  LRT <- lapply(list(obj_B35, obj_E128, obj_A270), LRTest, mod0 = object)
   omnibus_res_test <- data.frame(
-    aa_pos = c("B_11", "E_107", "A_246"),
+    aa_pos = c("B_35", "E_128", "A_270"),
     residues = c("A, S", "R, G", "A, S"),
     d.f. = c(1, 1, 1),
     statistic = sapply(LRT, `[[`, "statistic"),
@@ -990,12 +1034,12 @@ test_that("amino acid omnibus test works fine", {
   )
 
   expect_error(
-    aaPosOmnibusTest(object, c("B_11", "E_107", "A_246"), correction = 1),
+    aaPosOmnibusTest(object, c("B_35", "E_128", "A_270"), correction = 1),
     "correction is not a string \\(a length one character vector\\)."
   )
 
   expect_error(
-    aaPosOmnibusTest(object, c("B_11", "E_107", "A_246"), n_correction = 1.5),
+    aaPosOmnibusTest(object, c("B_35", "E_128", "A_270"), n_correction = 1.5),
     "n_correction is not a count \\(a single positive integer\\) or NULL."
   )
 
@@ -1005,7 +1049,7 @@ test_that("amino acid omnibus test works fine", {
   )
 
   expect_error(
-    aaPosOmnibusTest(object, c("B_11", "E_107", "A_246"), n_correction = 1),
+    aaPosOmnibusTest(object, c("B_35", "E_128", "A_270"), n_correction = 1),
     "n_correction must be at least 3."
   )
 })
