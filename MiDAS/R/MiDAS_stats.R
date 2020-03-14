@@ -442,7 +442,6 @@ runMiDAS <- function(object,
   # assert object data more than one column, etc
   object_variables <- colnames(object_data)[-1]
   variables_labels <- label(object_data[, -1])
-  # what happens if data is not labled?
 
   assert_that(
     is.string(analysis_type),
