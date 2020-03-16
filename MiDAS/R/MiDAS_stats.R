@@ -1019,7 +1019,7 @@ aaPosOmnibusTest <- function(object,
   base_vars <- all.vars(object_call$formula)
 
   assert_that(
-    is.character(aa_pos),
+    is.character(aa_pos), # proper check on aa_pos format is missing!
     is.string(correction),
     isCountOrNULL(n_correction)
   )
