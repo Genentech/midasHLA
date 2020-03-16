@@ -940,17 +940,33 @@ prepareMiDAS <- function(hla_calls,
 
   # join with additional_data
   if (length(additional_data)) {
+    current_vars <- colnames(midas_data)
     midas_data <- Reduce(
       f = function(...) left_join(..., by = "ID"),
       x = additional_data,
       init = midas_data
+    )
+    mask <- ! colnames(midas_data) %in% current_vars
+    new_vars <- colnames(midas_data)[mask]
+    label(midas_data[, new_vars], self = FALSE) <- rep(
+      x = "additional_variable",
+      times = length(new_vars)
     )
   }
 
   # add dummy column
   if (! is.null(placeholder)) {
     midas_data[[placeholder]] <- 1
+    label(midas_data[, placeholder], self = FALSE) <- "placeholder"
   }
+
+  # label ID column
+  label(midas_data[, "ID"], self = FALSE) <- "id"
+
+  # aguament information on call arguments
+  attributes(midas_data)$call <- as.list(match.call())
+
+  class(midas_data) <- c("midas.data", class(midas_data))
 
   return(midas_data)
 }
