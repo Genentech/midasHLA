@@ -1108,3 +1108,38 @@ assertthat::on_failure(objectHasPlaceholder) <- function(call, env) {
          "' could not be found in object's formula"
   )
 }
+
+#' Get attributes of statistical model object
+#'
+#' \code{getObjectDetails} extracts some of the statistical model object
+#' attributes that are needed for \code{runMiDAS} internal calculations.
+#'
+#' TODO write unit tests
+#'
+#' @inheritParams checkStatisticalModel
+#'
+#' @return List with following elemnts:
+#' \describe{
+#'   \item{formula_vars}{Character containing names of variables in object
+#'     formula}
+#'   \item{data}{Data frame associated with object}
+#'   \item{data_vars}{Character containing names of variables in object data}
+#'   \item{data_labels}{Character containing labels of variables in object data}
+#' }
+#' @importFrom assertthat assert_that
+#'
+getObjectDetails <- function(object) {
+  object_call <- getCall(object)
+  object_env <- attr(object$terms, ".Environment")
+  object_formula <- eval(object_call[["formula"]], envir = object_env)
+  object_data <- eval(object_call[["data"]], envir = object_env)
+
+  object_details <- list(
+    formula_vars = all.vars(object_formula),
+    data = object_data,
+    data_vars = colnames(object_data)[-1],
+    data_labels = label(object_data[, -1])
+  )
+
+  return(object_details)
+}

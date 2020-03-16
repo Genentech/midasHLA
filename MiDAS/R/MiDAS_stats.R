@@ -435,13 +435,7 @@ runMiDAS <- function(object,
     checkStatisticalModel(object),
     hasTidyMethod(class(object)[1L])
   )
-  object_call <- getCall(object)
-  object_env <- attr(object$terms, ".Environment")
-  object_formula <- eval(object_call[["formula"]], envir = object_env)
-  object_data <- eval(object_call[["data"]], envir = object_env)
-  # assert object data more than one column, etc
-  object_variables <- colnames(object_data)[-1]
-  variables_labels <- label(object_data[, -1])
+  object_details <- getObjectDetails(object)
 
   assert_that(
     is.string(analysis_type),
@@ -455,7 +449,8 @@ runMiDAS <- function(object,
     isTRUEorFALSE(conditional),
     isTRUEorFALSE(keep),
     see_if(
-      all(test_vars <- variables %in% object_variables) | is.null(variables),
+      all(test_vars <- variables %in% object_details$data_vars) |
+                       is.null(variables),
       msg = sprintf("%s can not be found in object data",
                     paste(variables[! test_vars], collapse = ", ")
       )
@@ -467,21 +462,20 @@ runMiDAS <- function(object,
     isCountOrNULL(n_correction),
     isTRUEorFALSE(exponentiate),
     is.number(th),
-    is.number(rss_th)
-  )
-
-  assert_that(
-    ! (analysis_type == "none" && is.null(variables)),
-    msg = "For analysis type \"none\" variables argument can not be NULL."
-  )
-
-  assert_that(
-    any(variables_labels == analysis_type, na.rm = TRUE) || ! is.null(variables),
-    msg = "Argument variables = NULL can be used only with labeled variables, make sure to use prepareMiDAS function for data preparation."
+    is.number(rss_th),
+    see_if(
+      ! (analysis_type == "none" && is.null(variables)),
+      msg = "For analysis type \"none\" variables argument can not be NULL."
+    ),
+    see_if( # make it more restrictive only midas.class
+      any(object_details$data_labels == analysis_type, na.rm = TRUE) ||
+        ! is.null(variables),
+      msg = "Argument variables = NULL can be used only with labeled variables, make sure to use prepareMiDAS function for data preparation."
+    )
   )
 
   # select variables based on analysis_type labels
-  labeled_vars <- object_variables[variables_labels == analysis_type]
+  labeled_vars <- object_details$data_vars[object_details$data_labels == analysis_type]
   if (! is.null(pattern)) {
     labeled_vars <- grep(pattern = pattern, x = labeled_vars, value = TRUE)
   }
@@ -489,21 +483,13 @@ runMiDAS <- function(object,
   # create set of variables for further testing
   test_var <- c(labeled_vars, variables) %>%
     unique()
-  test_var <- test_var[! test_var %in% all.vars(object_formula)]
+  test_var <- test_var[! test_var %in% object_details$formula_vars]
   assert_that(length(test_var) != 0,
               msg = "No new variables found in object data."
   )
 
-  # # guess if model used is logistic type
-  # if (is.null(logistic)) {
-  #   model_fun <- deparse(object_call[[1]])
-  #   model_family <- deparse(object_call[["family"]])
-  #   logistic <- grepl("coxph", model_fun) |
-  #     (grepl("glm", model_fun) & grepl("binomial", model_family))
-  # }
-
   # Filter variables on frequency cutoff
-  variables_labels <- variables_labels[test_var] # if test_var != NULL select only corresponding labels
+  variables_labels <- object_details$data_labels[test_var] # if test_var != NULL select only corresponding labels
   mask_counts <- variables_labels %in% c(
     "hla_allele",
     "aa_level",
@@ -519,7 +505,7 @@ runMiDAS <- function(object,
   if (length(cts_vars)) {
     lower_frequency_cutoff <- ifelse(is.null(lower_frequency_cutoff), 0, lower_frequency_cutoff)
     upper_frequency_cutoff <- ifelse(is.null(upper_frequency_cutoff), Inf, upper_frequency_cutoff)
-    variables_freq <- object_data %>%
+    variables_freq <- object_details$data %>%
       select("ID",!! cts_vars) %>%
       getCountsFrequencies() %>%
       rename(Ntotal = .data$Counts, Ntotal.frequency = .data$Freq) %>%
@@ -583,11 +569,11 @@ runMiDAS <- function(object,
     }
   }
 
-  pheno_var <- all.vars(object_formula)[1]
-  bin_pheno <- object_data[, pheno_var] %in% c(0, 1)
+  pheno_var <- object_details$formula_vars[1]
+  bin_pheno <- object_details$data[, pheno_var] %in% c(0, 1)
   bin_pheno <- all(bin_pheno, na.rm = TRUE)
   if (length(cts_vars) != 0 & bin_pheno) {
-    pos_freq <- object_data %>%
+    pos_freq <- object_details$data %>%
       filter(.data[[!! pheno_var]] == 1) %>%
       select("ID", !! cts_vars) %>%
       getCountsFrequencies() %>%
@@ -599,7 +585,7 @@ runMiDAS <- function(object,
       results_iter <- lapply(results_iter, left_join, y = pos_freq, by = "term")
     }
 
-    neg_freq <- object_data %>%
+    neg_freq <- object_details$data %>%
       filter(.data[[!! pheno_var]] != 1) %>%
       select("ID", !! cts_vars) %>%
       getCountsFrequencies() %>%
