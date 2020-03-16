@@ -1109,6 +1109,95 @@ assertthat::on_failure(objectHasPlaceholder) <- function(call, env) {
   )
 }
 
+#' Subset MiDAS data by frequency
+#'
+#' \code{subsetMiDASByFreq} subsets \code{midas_data} selecting variables that
+#' meet frequency criteria. Only variables of "integer" type are considered for
+#' filtration, variables of other types (eg. "float") are returend unaffected.
+#'
+#' TODO write unit tests
+#'
+#' @param midas_data
+#' @param lower_frequency_cutoff
+#' @param upper_frequency_cutoff
+#'
+#' @examples
+#' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(hla_calls_file)
+#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+#' pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
+#' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
+#' covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
+#' midas_data <- prepareMiDAS(hla_calls = hla_calls,
+#'                            pheno = pheno,
+#'                            covar = covar,
+#'                            analysis_type = "hla_allele",
+#'                            inheritance_model = "additive"
+#' )
+#' subsetMiDASByFreq(midas_data,
+#'                   lower_frequency_cutoff = 0.1,
+#'                   upper_frequency_cutoff = 0.9
+#' )
+#'
+#'
+#' @importFrom assertthat assert_that
+#' @importFrom dplyr filter select
+#' @importFrom magrittr %>%
+#' @importFrom rlang .data
+#'
+subsetMiDASByFreq <-
+  function(midas_data,
+           lower_frequency_cutoff = NULL,
+           upper_frequency_cutoff = NULL) {
+  # assert_that(
+  #   checkMiDASData,
+  #   isNumberOrNULL(lower_frequency_cutoff),
+  #   isNumberOrNULL(upper_frequency_cutoff)
+  # )
+
+  integers_labels <- midas_analysis_types %>%
+    filter(.data$type == "integer") %>%
+    `[[`("analysis_type")
+  mask_integers <- label(midas_data) %in% integers_labels
+  integer_vars <- colnames(midas_data)[mask_integers]
+
+  inheritance_model <- attr(midas_data, "call")$inheritance_model
+
+  if (length(integer_vars)) {
+    lower_frequency_cutoff <- ifelse(
+      test = is.null(lower_frequency_cutoff),
+      yes = 0,
+      no = lower_frequency_cutoff
+    )
+    upper_frequency_cutoff <- ifelse(
+      test = is.null(upper_frequency_cutoff),
+      yes = Inf,
+      no = upper_frequency_cutoff
+    )
+
+    vars_to_drop <- midas_data %>%
+      select("ID", !!integer_vars) %>%
+      getCountsFrequencies() %>% # add inheritance_model param to countsFrequencies
+      filter(
+        (.data$Counts < lower_frequency_cutoff & lower_frequency_cutoff >= 1) |
+        (.data$Freq < lower_frequency_cutoff & lower_frequency_cutoff < 1) |
+        (.data$Counts > upper_frequency_cutoff & upper_frequency_cutoff >= 1) |
+        (.data$Freq > upper_frequency_cutoff & upper_frequency_cutoff < 1)
+      ) %>%
+      `[[`("term")
+
+
+    midas_data <- midas_data[, ! colnames(midas_data) %in% vars_to_drop]
+
+    assert_that(
+      ncol(midas_data) > 1, # ID column
+      msg = "None of the variables passed selection criteria. Revisit your choice of 'lower_frequency_cutoff' and 'upper_frequency_cutoff' arguments."
+    )
+  }
+
+  return(midas_data)
+}
+
 #' Get attributes of statistical model object
 #'
 #' \code{getObjectDetails} extracts some of the statistical model object
