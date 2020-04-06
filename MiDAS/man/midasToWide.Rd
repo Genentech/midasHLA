@@ -4,7 +4,7 @@
 \alias{midasToWide}
 \title{Transform MiDAS to wide format data.frame}
 \usage{
-midasToWide(object)
+midasToWide(object, analysis_type)
 }
 \description{
 Transform MiDAS to wide format data.frame

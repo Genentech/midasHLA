@@ -226,14 +226,26 @@ prepareMiDAS_hla_allele <- function(hla_calls, inheritance_model, ...) {
 
 #' Transform MiDAS to wide format data.frame
 #'
+#' @importFrom assertthat assert_that
+#' @importFrom dplyr filter mutate
+#' @importFrom MultiAssayExperiment longFormat
 #' @importFrom tidyr spread
-#' @importFrom dplyr mutate
 #'
-midasToWide <- function(object) {
-  longFormat(object, colDataCols = TRUE) %>%
+midasToWide <- function(object, analysis_type) {
+  assert_that(
+    validObject(object),
+    is.character(analysis_type),
+    characterMatches(analysis_type, names(object))
+  )
+
+  wide_df <-
+    object[, , analysis_type] %>%
+    longFormat(colDataCols = TRUE) %>%
     as.data.frame() %>%
     subset(select = -assay) %>%
     subset(select = -colname) %>%
     spread(key = "rowname", value = "value") %>%
     mutate(term = 1)
+
+  return(wide_df)
 }
