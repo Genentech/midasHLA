@@ -11,7 +11,7 @@ getKirCalls(object)
 \S4method{getKirCalls}{MiDAS}(object)
 }
 \arguments{
-\item{a}{}
+\item{object}{\link{\code{MiDAS}} object.}
 }
 \value{
 String giving name of object's inheritance model.

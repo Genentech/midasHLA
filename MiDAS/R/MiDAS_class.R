@@ -188,7 +188,7 @@ setMethod(
 #'
 #' @title Extract KIR calls from MiDAS  object.
 #'
-#' @param a
+#' @param object \link{\code{MiDAS}} object.
 #'
 #' @return String giving name of object's inheritance model.
 #'
