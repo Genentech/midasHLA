@@ -44,12 +44,12 @@ pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
 covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
 covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
 colData <- left_join(pheno, covar, by ="ID")
-rownames(coldata) <- coldata$ID
-
+rownames(colData) <- colData$ID
 # create MiDAS object
 midas <- MiDAS(hla_calls = hla_calls,
                colData = colData,
-               inheritance_model = "additive"
+               inheritance_model = "additive",
+               analysis_type = "hla_allele"
 )
 
 
