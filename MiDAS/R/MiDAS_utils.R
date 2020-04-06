@@ -614,7 +614,7 @@ stringMatches <- function(x, choice) {
 assertthat::on_failure(stringMatches) <- function(call, env) {
   paste0(deparse(call$x),
          ' should be one of "',
-         paste(eval(call$choice), collapse = '", "'),
+         paste(eval(call$choice, envir = env), collapse = '", "'),
          '".'
   )
 }
@@ -705,7 +705,7 @@ characterMatches <- function(x, choice) {
 assertthat::on_failure(characterMatches) <- function(call, env) {
   paste0(deparse(call$x),
          ' should match values "',
-         paste(eval(call$choice), collapse = '", "'),
+         paste(eval(call$choice, envir = env), collapse = '", "'),
          '".'
   )
 }
