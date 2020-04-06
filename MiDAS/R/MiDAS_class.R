@@ -225,6 +225,194 @@ prepareMiDAS_hla_allele <- function(hla_calls, inheritance_model, ...) {
   return(hla_allele)
 }
 
+#' Prepare MiDAS data on HLA amino acid level
+#'
+#' @inheritParams aaVariationToCounts
+#' @param hla_calls Data frame
+#' @param inheritance_model String
+#' @param ... Not used
+#'
+#' @return Matrix
+#'
+#' @importFrom assertthat assert_that is.flag
+#'
+prepareMiDAS_aa_level <- function(hla_calls,
+                                  inheritance_model,
+                                  indels = TRUE,
+                                  unkchar = FALSE,
+                                  ...) {
+  assert_that(
+    is.flag(indels),
+    is.flag(unkchar)
+  )
+
+  hla_aa <-
+    hlaToAAVariation(
+      hla_calls = hla_calls,
+      indels = indels,
+      unkchar = unkchar
+    ) %>%
+    aaVariationToCounts(inheritance_model = inheritance_model) %>%
+    subset(select = -ID) %>%
+    t()
+  colnames(hla_aa) <- hla_calls$ID # TODO
+
+  return(hla_aa)
+}
+
+#' Prepare MiDAS data on HLA allele's G groups level
+#'
+#' @param hla_calls Data frame
+#' @param inheritance_model String
+#' @param ... Not used
+#'
+#' @return Matrix
+#'
+#' @importFrom assertthat assert_that
+#'
+prepareMiDAS_allele_g_group <- function(hla_calls,
+                                        inheritance_model,
+                                        ...) {
+  lib <- "allele_HLA_Ggroup"
+  allele_g_group <- hlaToVariable(hla_calls = hla_calls,
+                                  dictionary = lib,
+                                  na.value = 0
+  )
+
+  assert_that(
+    ncol(allele_g_group) > 1,
+    msg = "no allele could be assigned to G group for input hla_calls"
+  )
+
+  allele_g_group <-
+    hlaCallsToCounts(
+      hla_calls = allele_g_group,
+      inheritance_model = inheritance_model,
+      check_hla_format = FALSE
+    ) %>%
+    subset(select = -ID) %>%
+    t()
+  colnames(allele_g_group) <- hla_calls$ID
+
+  return(allele_g_group)
+}
+
+#' Prepare MiDAS data on HLA allele's supertypes level
+#'
+#' @param hla_calls Data frame
+#' @param inheritance_model String
+#' @param ... Not used
+#'
+#' @return Matrix
+#'
+#' @importFrom assertthat assert_that
+#'
+prepareMiDAS_allele_supertype <- function(hla_calls, inheritance_model, ...) {
+  lib <- "allele_HLA_supertype"
+  allele_supertype <- hlaToVariable(hla_calls = hla_calls,
+                                    dictionary = lib,
+                                    na.value = 0
+  )
+
+  assert_that(
+    ncol(allele_supertype) > 1,
+    msg = "no allele could be assigned to supertype for input hla_calls"
+  )
+
+  allele_supertype <-
+    hlaCallsToCounts(
+      hla_calls = allele_supertype,
+      inheritance_model = inheritance_model,
+      check_hla_format = FALSE
+    ) %>%
+    subset(select = - Unclassified) %>%
+    subset(select = - ID) %>%
+    t()
+  colnames(allele_supertype) <- hla_calls$ID # TODO
+
+  return(allele_supertype)
+}
+
+#' Prepare MiDAS data on HLA allele's groups level
+#'
+#' @param hla_calls Data frame
+#' @param inheritance_model String
+#' @param ... Not used
+#'
+#' @return Matrix
+#'
+#' @importFrom assertthat assert_that
+#'
+prepareMiDAS_allele_group <- function(hla_calls, inheritance_model, ...) {
+  lib <- c(
+    "allele_HLA-B_Bw",
+    "allele_HLA_Bw4+A23+A24+A32",
+    "allele_HLA-C_C1-2"
+  )
+  allele_group <- Reduce(
+    f = function(...) left_join(..., by = "ID"),
+    x = lapply(lib, hlaToVariable, hla_calls = hla_calls, na.value = 0)
+  )
+
+  assert_that(
+    ncol(allele_group) > 1,
+    msg = "no allele could be assigned to allele groups for input hla_calls"
+  )
+
+  allele_group <-
+    hlaCallsToCounts(
+      hla_calls = allele_group,
+      inheritance_model = inheritance_model,
+      check_hla_format = FALSE
+    ) %>%
+    subset(select = - ID) %>%
+    t()
+  colnames(allele_group) <- hla_calls$ID # TODO
+
+  return(allele_group)
+}
+
+#' Prepare MiDAS data on HLA genes level
+#'
+#' @param kir_calls Data frame
+#' @param ... Not used
+#'
+#' @return Matrix
+#'
+prepareMiDAS_kir_genes <- function(kir_calls, ...) {
+  kir_genes <-
+    kir_calls %>%
+    subset(select = - ID) %>%
+    t()
+  colnames(kir_genes) <- kir_calls$ID # TODO
+
+  return(kir_genes)
+}
+
+#' Prepare MiDAS data on HLA - KIR interactions level
+#'
+#' @param hla_calls Data frame
+#' @param kir_calls Data frame
+#' @param ... Not used
+#'
+#' @return Matrix
+#'
+prepareMiDAS_hla_kir_interactions <- function(hla_calls, kir_calls, ...) {
+  hla_kir_interactions <-
+    getHlaKirInteractions(
+      hla_calls = hla_calls,
+      kir_counts = kir_counts
+    )
+  ids <- hla_kir_interactions[["ID"]]
+  hla_kir_interactions <-
+    hla_kir_interactions %>%
+    subset(select = - ID) %>%
+    t()
+  colnames(hla_kir_interactions) <- ids # TODO
+
+  return(kir_genes)
+}
+
 #' Transform MiDAS to wide format data.frame
 #'
 #' @importFrom assertthat assert_that
