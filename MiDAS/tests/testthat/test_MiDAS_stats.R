@@ -726,8 +726,8 @@ test_that("MiDAS data is prepared properly", {
   Hmisc::label(midas_hla_allele_test[-1], self = FALSE) <-
     rep("hla_allele", ncol(midas_hla_allele_test) - 1)
   midas_hla_allele_test <- rleft_join(midas_hla_allele_test, pheno, covar)
-  midas_hla_allele_test$term <- 1
-  expect_equal(midas_hla_allele, midas_hla_allele_test)
+  # midas_hla_allele_test$term <- 1
+  expect_equal(subset(midas_hla_allele, select = -term), midas_hla_allele_test)
 
   # aa_level
   midas_aa_level <- prepareMiDAS(hla_calls,
@@ -741,8 +741,8 @@ test_that("MiDAS data is prepared properly", {
   Hmisc::label(midas_aa_level_test[-1], self = FALSE) <-
     rep("aa_level", ncol(midas_aa_level_test) - 1)
   midas_aa_level_test <- rleft_join(midas_aa_level_test, pheno, covar)
-  midas_aa_level_test$term <- 1
-  expect_equal(midas_aa_level, midas_aa_level_test)
+  # midas_aa_level_test$term <- 1
+  expect_equal(subset(midas_aa_level, select = -term), midas_aa_level_test)
 
   # expression_levels
   midas_expression_levels <- prepareMiDAS(hla_calls,
@@ -766,8 +766,8 @@ test_that("MiDAS data is prepared properly", {
     rep("expression_level", ncol(midas_expression_levels_test) - 1)
   midas_expression_levels_test <-
     rleft_join(midas_expression_levels_test, pheno, covar)
-  midas_expression_levels_test$term <- 1
-  expect_equal(midas_expression_levels, midas_expression_levels_test)
+  # midas_expression_levels_test$term <- 1
+  expect_equal(subset(midas_expression_levels, select = -term), midas_expression_levels_test)
 
   # allele_g_group
   midas_allele_g_group <- prepareMiDAS(hla_calls,
@@ -786,8 +786,8 @@ test_that("MiDAS data is prepared properly", {
   Hmisc::label(midas_allele_g_group_test[-1], self = FALSE) <-
     rep("allele_g_group", ncol(midas_allele_g_group_test) - 1)
   midas_allele_g_group_test <- rleft_join(midas_allele_g_group_test, pheno, covar)
-  midas_allele_g_group_test$term <- 1
-  expect_equal(midas_allele_g_group, midas_allele_g_group_test)
+  # midas_allele_g_group_test$term <- 1
+  expect_equal(subset(midas_allele_g_group, select = -term), midas_allele_g_group_test)
 
   # allele_supertype
   midas_allele_supertype <- prepareMiDAS(hla_calls,
@@ -809,8 +809,8 @@ test_that("MiDAS data is prepared properly", {
     rleft_join(test_midas_allele_supertype, pheno, covar)
   test_midas_allele_supertype <-
     subset(test_midas_allele_supertype, select = - Unclassified)
-  test_midas_allele_supertype$term <- 1
-  expect_equal(midas_allele_supertype, test_midas_allele_supertype)
+  # test_midas_allele_supertype$term <- 1
+  expect_equal(subset(midas_allele_supertype, select = -term), test_midas_allele_supertype)
 
   # allele_groups
   midas_allele_groups <- prepareMiDAS(hla_calls,
@@ -833,8 +833,8 @@ test_that("MiDAS data is prepared properly", {
     rep("allele_group", ncol(test_midas_allele_group) - 1)
   test_midas_allele_group <-
     rleft_join(test_midas_allele_group, pheno, covar)
-  test_midas_allele_group$term <- 1
-  expect_equal(midas_allele_groups, test_midas_allele_group)
+  # test_midas_allele_group$term <- 1
+  expect_equal(subset(midas_allele_groups, select = -term), test_midas_allele_group)
 
   # kir_genes
   kir_path <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
@@ -850,8 +850,8 @@ test_that("MiDAS data is prepared properly", {
     rep("kir_genes", ncol(kir_counts) - 1)
   test_midas_kir_genes <-
     rleft_join(hla_calls[, 1, drop = FALSE], test_midas_kir_genes, pheno, covar)
-  test_midas_kir_genes$term <- 1
-  expect_equal(midas_kir_genes, test_midas_kir_genes)
+  # test_midas_kir_genes$term <- 1
+  expect_equal(subset(midas_kir_genes, select = -term), test_midas_kir_genes)
 
   # hla_kir_interactions
   midas_hla_kir_interactions <- prepareMiDAS(
@@ -872,8 +872,8 @@ test_that("MiDAS data is prepared properly", {
                pheno,
                covar
     )
-  test_midas_hla_kir_interactions$term <- 1
-  expect_equal(midas_hla_kir_interactions, test_midas_hla_kir_interactions)
+  # test_midas_hla_kir_interactions$term <- 1
+  expect_equal(subset(midas_hla_kir_interactions, select = -term), test_midas_hla_kir_interactions)
 
   # hla_divergence
   midas_hla_divergence <- prepareMiDAS(
@@ -901,8 +901,8 @@ test_that("MiDAS data is prepared properly", {
                pheno,
                covar
     )
-  test_midas_hla_divergence$term <- 1
-  expect_equal(midas_hla_divergence, test_midas_hla_divergence)
+  # test_midas_hla_divergence$term <- 1
+  expect_equal(subset(midas_hla_divergence, select = -term), test_midas_hla_divergence)
 
   # custom
   midas_custom <- prepareMiDAS(hla_calls,
@@ -915,8 +915,8 @@ test_that("MiDAS data is prepared properly", {
     ! colnames(midas_custom_test) %in% c("ID", "OS", "OS_DIED", "AGE", "SEX")
   Hmisc::label(midas_custom_test[, gene_idx], self = FALSE) <-
     rep("custom", sum(gene_idx))
-  midas_custom_test$term <- 1
-  expect_equal(midas_custom, midas_custom_test)
+  # midas_custom_test$term <- 1
+  expect_equal(subset(midas_custom, select = -term), midas_custom_test)
 
   # check more analysis types at once
   midas_multiple <- prepareMiDAS(hla_calls,
@@ -943,8 +943,8 @@ test_that("MiDAS data is prepared properly", {
   midas_multiple_test <-
     midas_multiple_test[, order(colnames(midas_multiple_test))]
   midas_multiple_test[, grepl("term", colnames(midas_multiple_test))] <- NULL
-  midas_multiple_test$term <- 1
-  expect_equal(midas_multiple, midas_multiple_test)
+  # midas_multiple_test$term <- 1
+  expect_equal(subset(midas_multiple, select = -term), midas_multiple_test)
 
   # test for checkHlaCallsFormat are ommitted here
 

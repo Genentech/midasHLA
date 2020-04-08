@@ -1,3 +1,6 @@
+## 0.0.9041 - 9/04/20
++ fixes problem with placeholder (dummy variable) being constant. This caused coxme function to throw errors upon model definition.
+
 ## 0.0.9040 - 16/02/20
 + add functionality for Grantham distance calcualtion between amino acid sequences (`distGrantham` function) and between HLA alleles (`hlaCallsGranthamDistance`).
 + add Grantham distances calculation for Class I HLA alleles to `prepareMiDAS` and `runMiDAS` functionality.
