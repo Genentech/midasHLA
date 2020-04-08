@@ -413,14 +413,44 @@ prepareMiDAS_hla_kir_interactions <- function(hla_calls, kir_calls, ...) {
   return(kir_genes)
 }
 
+#' Filter midas object
+#'
+#' @inheritParams MiDAS
+#' @param filter Character giving suffix of filter function.
+#'
+#' @return Object of class MiDAS.
+#'
+#' @importFrom assertthat assert_that
+#'
+filterMiDAS <- function(object, filter_by = c("hla_allele_frequency"), ...) {
+  filter_by_choices <- eval(formals()[["filter_by"]])
+  assert_that(
+    validObject(object),
+    is.character(filter_by),
+    characterMatches(filter_by, filter_by_choices)
+  )
+
+  # get informations required for recreating MiDAS object
+  midas_components <- list(
+    inheritance_model = getInheritanceModel(object),
+    hla_calls = getHlaCalls(object),
+    kir_calls = getKirCalls(object),
+    analysis_types = names(object)
+  )
+
+  # for (by in filter_by) {
+  #
+  # }
+}
+
 #' Transform MiDAS to wide format data.frame
 #'
 #' @importFrom assertthat assert_that
-#' @importFrom dplyr filter mutate
+#' @importFrom dplyr filter mutate !! :=
 #' @importFrom MultiAssayExperiment longFormat
 #' @importFrom tidyr spread
 #'
-midasToWide <- function(object, analysis_type) {
+midasToWide <- function(object, analysis_type, placeholder = "term") {
   assert_that(
     validObject(object),
     is.character(analysis_type),
@@ -434,7 +464,7 @@ midasToWide <- function(object, analysis_type) {
     subset(select = -assay) %>%
     subset(select = -colname) %>%
     spread(key = "rowname", value = "value") %>%
-    mutate(term = 1)
+    mutate(!!placeholder := 1)
 
   return(wide_df)
 }
