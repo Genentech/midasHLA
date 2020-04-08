@@ -751,6 +751,7 @@ runMiDAS <- function(object,
 #' @importFrom dplyr funs group_by left_join mutate summarise_all syms
 #' @importFrom magrittr %>% %<>%
 #' @importFrom rlang .data !!!
+#' @importFrom stats runif
 #' @importFrom tidyr gather spread
 #' @importFrom Hmisc label label<-
 #'
