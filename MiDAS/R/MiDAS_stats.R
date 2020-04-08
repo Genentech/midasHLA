@@ -988,7 +988,7 @@ prepareMiDAS <- function(hla_calls,
 
   # add dummy column
   if (! is.null(placeholder)) {
-    midas_data[[placeholder]] <- 1
+    midas_data[[placeholder]] <- runif(nrow(midas_data))
   }
 
   return(midas_data)
