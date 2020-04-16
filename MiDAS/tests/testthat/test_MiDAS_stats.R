@@ -645,10 +645,6 @@ test_that("MiDAS associations are analyzed properly", {
                "upper_frequency_cutoff is not a number \\(a length one numeric vector\\) or NULL."
   )
 
-  expect_error(runMiDAS(object, analysis_type = "hla_allele", pvalue_cutoff = "foo"),
-               "pvalue_cutoff is not a number \\(a length one numeric vector\\) or NULL."
-  )
-
   expect_error(runMiDAS(object, analysis_type = "hla_allele", correction = NA),
                "correction is not a string \\(a length one character vector\\)."
   )
