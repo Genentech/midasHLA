@@ -310,11 +310,14 @@ analyzeConditionalAssociations <- function(object,
     i <- i + 1
   }
 
+  if (length(best) == 0) {
+    warn("No significant variables found. Returning empty table.") # Tibble to be more precise?
+  }
+
   if (keep) {
     results <- best
   } else {
     if (length(best) == 0) {
-      warn("No significant variables found. Returning empty table.") # Tibble to be more precise?
       results <- results[0, ]
     } else {
       results <- lapply(best, function(res) {
