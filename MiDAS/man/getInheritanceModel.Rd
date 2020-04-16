@@ -4,18 +4,18 @@
 \name{getInheritanceModel}
 \alias{getInheritanceModel}
 \alias{getInheritanceModel,MiDAS-method}
-\title{Extract inheritance model from MiDAS  object.}
+\title{Extract inheritance model from MiDAS object.}
 \usage{
 getInheritanceModel(object)
 
 \S4method{getInheritanceModel}{MiDAS}(object)
 }
 \arguments{
-\item{object}{\link{\code{MiDAS}} object}
+\item{object}{\code{\link{MiDAS}} object}
 }
 \value{
-String giving name of object's inheritance model.
+String name of object's inheritance model.
 }
 \description{
-Extract inheritance model from MiDAS  object.
+Extract inheritance model from MiDAS object.
 }

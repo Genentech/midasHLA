@@ -4,18 +4,18 @@
 \name{getKirCalls}
 \alias{getKirCalls}
 \alias{getKirCalls,MiDAS-method}
-\title{Extract KIR calls from MiDAS  object.}
+\title{Extract KIR calls from MiDAS object.}
 \usage{
 getKirCalls(object)
 
 \S4method{getKirCalls}{MiDAS}(object)
 }
 \arguments{
-\item{object}{\link{\code{MiDAS}} object.}
+\item{object}{\code{\link{MiDAS}} object.}
 }
 \value{
-String giving name of object's inheritance model.
+Data frame with object's KIR calls.
 }
 \description{
-Extract KIR calls from MiDAS  object.
+Extract KIR calls from MiDAS object.
 }

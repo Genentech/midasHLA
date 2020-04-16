@@ -27,7 +27,9 @@ checkHlaCallsFormat(hla_calls)
 \seealso{
 Other assert functions: \code{\link{characterMatches}},
   \code{\link{checkAdditionalData}},
+  \code{\link{checkKirCallsFormat}},
   \code{\link{checkKirCountsFormat}},
+  \code{\link{checkPhenotypeFormat}},
   \code{\link{checkStatisticalModel}},
   \code{\link{colnamesMatches}},
   \code{\link{hasTidyMethod}},

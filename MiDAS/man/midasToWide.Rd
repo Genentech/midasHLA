@@ -4,7 +4,17 @@
 \alias{midasToWide}
 \title{Transform MiDAS to wide format data.frame}
 \usage{
-midasToWide(object, analysis_type)
+midasToWide(object, analysis_type, placeholder = "term")
+}
+\arguments{
+\item{object}{Object of class MiDAS}
+
+\item{analysis_type}{Character}
+
+\item{placeholder}{String}
+}
+\value{
+Data frame
 }
 \description{
 Transform MiDAS to wide format data.frame

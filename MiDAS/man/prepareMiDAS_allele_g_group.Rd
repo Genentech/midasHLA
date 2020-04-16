@@ -17,5 +17,7 @@ prepareMiDAS_allele_g_group(hla_calls, inheritance_model, ...)
 Matrix
 }
 \description{
-Prepare MiDAS data on HLA allele's G groups level
+\code{hla_calls} are transformed to HLA alleles groups using G group
+dictionary shipped with the package. Than they are transformed to counts and
+\code{\link{hlaCallsToCounts}} for more details).
 }

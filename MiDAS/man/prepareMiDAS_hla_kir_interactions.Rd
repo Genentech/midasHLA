@@ -17,5 +17,7 @@ prepareMiDAS_hla_kir_interactions(hla_calls, kir_calls, ...)
 Matrix
 }
 \description{
-Prepare MiDAS data on HLA - KIR interactions level
+\code{hla_calls} are processed with \code{kir_counts} into HLA - KIR
+interactions variables (see \code{\link{getHlaKirInteractions}} for more
+details).
 }

@@ -17,5 +17,8 @@ prepareMiDAS_allele_supertype(hla_calls, inheritance_model, ...)
 Matrix
 }
 \description{
-Prepare MiDAS data on HLA allele's supertypes level
+\code{hla_calls} are transformed to HLA alleles groups using supertypes
+dictionary shipped with the package. Than they are transformed to counts
+under \code{inheritance_model} of choice (see \code{\link{hlaToVariable}} and
+\code{\link{hlaCallsToCounts}} for more details).
 }

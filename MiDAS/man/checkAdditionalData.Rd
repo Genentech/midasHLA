@@ -34,7 +34,9 @@ checkAdditionalData(pheno, hla_calls)
 \seealso{
 Other assert functions: \code{\link{characterMatches}},
   \code{\link{checkHlaCallsFormat}},
+  \code{\link{checkKirCallsFormat}},
   \code{\link{checkKirCountsFormat}},
+  \code{\link{checkPhenotypeFormat}},
   \code{\link{checkStatisticalModel}},
   \code{\link{colnamesMatches}},
   \code{\link{hasTidyMethod}},

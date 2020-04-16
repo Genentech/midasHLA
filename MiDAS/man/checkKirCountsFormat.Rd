@@ -34,6 +34,8 @@ checkKirCountsFormat(kir_counts)
 Other assert functions: \code{\link{characterMatches}},
   \code{\link{checkAdditionalData}},
   \code{\link{checkHlaCallsFormat}},
+  \code{\link{checkKirCallsFormat}},
+  \code{\link{checkPhenotypeFormat}},
   \code{\link{checkStatisticalModel}},
   \code{\link{colnamesMatches}},
   \code{\link{hasTidyMethod}},

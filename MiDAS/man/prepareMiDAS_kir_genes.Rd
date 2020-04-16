@@ -2,7 +2,7 @@
 % Please edit documentation in R/MiDAS_class.R
 \name{prepareMiDAS_kir_genes}
 \alias{prepareMiDAS_kir_genes}
-\title{Prepare MiDAS data on HLA genes level}
+\title{Prepare MiDAS data on KIR genes level}
 \usage{
 prepareMiDAS_kir_genes(kir_calls, ...)
 }
@@ -15,5 +15,5 @@ prepareMiDAS_kir_genes(kir_calls, ...)
 Matrix
 }
 \description{
-Prepare MiDAS data on HLA genes level
+\code{kir_counts} data frame is joined with other inputs.
 }

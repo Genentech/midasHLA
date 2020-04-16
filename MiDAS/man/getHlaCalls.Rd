@@ -4,18 +4,18 @@
 \name{getHlaCalls}
 \alias{getHlaCalls}
 \alias{getHlaCalls,MiDAS-method}
-\title{Extract HLA calls from MiDAS  object.}
+\title{Extract HLA calls from MiDAS object.}
 \usage{
 getHlaCalls(object)
 
 \S4method{getHlaCalls}{MiDAS}(object)
 }
 \arguments{
-\item{object}{\link{\code{MiDAS}} object}
+\item{object}{\code{\link{MiDAS}} object}
 }
 \value{
-String giving name of object's inheritance model.
+Data frame with object's HLA calls.
 }
 \description{
-Extract HLA calls from MiDAS  object.
+Extract HLA calls from MiDAS object.
 }

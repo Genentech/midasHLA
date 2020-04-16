@@ -17,5 +17,9 @@ prepareMiDAS_allele_group(hla_calls, inheritance_model, ...)
 Matrix
 }
 \description{
-Prepare MiDAS data on HLA allele's groups level
+\code{hla_calls} are transformed to HLA alleles groups using Bw4/6, C1/2 and
+Bw4+A23+A24+A32 dictionaries shipped with the package. Than they are
+transformed to counts under \code{inheritance_model} of choice (see
+\code{\link{hlaToVariable}} and \code{\link{hlaCallsToCounts}} for more
+details).
 }

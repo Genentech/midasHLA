@@ -18,5 +18,9 @@ prepareMiDAS_aa_level(hla_calls, inheritance_model, indels = TRUE,
 Matrix
 }
 \description{
-Prepare MiDAS data on HLA amino acid level
+\code{hla_calls} are first converted to amino acid level, taking only
+variable positions under consideration. Than variable amino acid positions
+are transformed to counts under \code{inheritance_model} of choice (see
+\code{\link{hlaToAAVariation}} and \code{\link{aaVariationToCounts}} for more
+details).
 }
