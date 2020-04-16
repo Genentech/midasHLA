@@ -268,7 +268,8 @@ analyzeConditionalAssociations <- function(object,
     results <- lapply(results, tidy, exponentiate = exponentiate)
     results <- bind_rows(results)
 
-    results <- results[results[["term"]] %in% backquote(new_variables), ]
+    mask_new_vars <- backquote(results[["term"]]) %in% backquote(new_variables)
+    results <- results[mask_new_vars, ]
 
     nc <- ifelse(is.null(n_correction), length(results$p.value), n_correction)
     assert_that(
