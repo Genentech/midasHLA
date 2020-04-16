@@ -1,3 +1,7 @@
+## 0.0.9042 - 17/04/20
++ removes unused pvalue_cutoff argument from runMiDAS function
++ fixes bug with conditional testing of glm models
+
 ## 0.0.9041 - 9/04/20
 + fixes problem with placeholder (dummy variable) being constant. This caused coxme function to throw errors upon model definition.
 
