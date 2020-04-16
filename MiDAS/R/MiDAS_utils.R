@@ -1275,3 +1275,27 @@ checkPhenotypeFormat <- function(data_frame) {
 
   return(TRUE)
 }
+
+#' Assert kir calls data frame format
+#'
+#' \code{checkKirCallsFormat} asserts if kir calls data frame have proper
+#' format.
+#'
+#' @param kir_calls Data frame containing KIR calls, as return by
+#'   \code{\link{readKirCalls}} function.
+#'
+#' @return Logical indicating if \code{kir_calls} follows kir calls data frame
+#'   format. Otherwise raise error.
+#'
+#' @family assert functions
+#'
+#' @importFrom assertthat assert_that see_if
+#' @examples
+#' file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
+#' kir_calls <- readKirCalls(file)
+#' checkKirCallsFormat(kir_calls)
+#'
+#' @export
+checkKirCallsFormat <- function(kir_calls) { # TODO
+  return(TRUE)
+}
