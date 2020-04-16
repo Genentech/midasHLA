@@ -438,3 +438,27 @@ test_that("object has placeholder", {
     "placeholder 'foo' could not be found in object's formula"
   )
 })
+
+test_that("phenotype data is properly formatted", {
+  pheno <- data.frame(
+    ID = 1:5,
+    letter = LETTERS[1:5]
+  )
+
+  expect_equal(checkPhenotypeFormat(pheno), TRUE)
+
+  expect_error(
+    checkPhenotypeFormat(LETTERS),
+    "LETTERS have to be a data frame"
+  )
+
+  expect_error(
+    checkPhenotypeFormat(data.frame()),
+    "data.frame\\(\\) have to have at least 1 row and 2 columns"
+  )
+
+  expect_error(
+    checkPhenotypeFormat(pheno[, 2, drop = FALSE]),
+    "pheno\\[, 2, drop = FALSE\\] have to have at least 1 row and 2 columns"
+  )
+})

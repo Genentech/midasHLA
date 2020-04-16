@@ -1232,3 +1232,46 @@ getObjectDetails <- function(object) {
 
   return(object_details)
 }
+
+#' Assert phenotype data
+#'
+#' \code{checkPhenotypeFormat} asserts if phenotype data frame has proper format.
+#'
+#' @param data_frame Data frame containing phenotype data used to construct
+#'   \link{\code{MiDAS}} object.
+#'
+#' @return Logical indicating if \code{data_frame} is properly formatted.
+#'   Otherwise raise error.
+#'
+#' @family assert functions
+#'
+#' @importFrom assertthat assert_that see_if
+#' @examples
+#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+#' pheno <- read.table(pheno_file, header = TRUE)
+#' checkPhenotypeFormat(pheno)
+#'
+checkPhenotypeFormat <- function(data_frame) {
+  data_frame_name <- deparse(substitute(data_frame))
+  assert_that(
+    see_if(
+      is.data.frame(data_frame),
+      msg = sprintf("%s have to be a data frame",
+                    data_frame_name)
+    ),
+    see_if(
+      nrow(data_frame) >= 1 & ncol(data_frame) >= 2,
+      msg = sprintf("%s have to have at least 1 row and 2 columns",
+                    data_frame_name)
+    ),
+    see_if(
+      colnames(data_frame)[1] == "ID",
+      msg = sprintf(
+        "first column in %s must be named 'ID'",
+        data_frame_name
+      )
+    )
+  )
+
+  return(TRUE)
+}
