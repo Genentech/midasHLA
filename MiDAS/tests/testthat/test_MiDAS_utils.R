@@ -462,3 +462,12 @@ test_that("phenotype data is properly formatted", {
     "pheno\\[, 2, drop = FALSE\\] have to have at least 1 row and 2 columns"
   )
 })
+
+test_that("check if function exists", {
+  expect_equal(functionExists("lm"), TRUE)
+
+  expect_error(
+    assertthat::assert_that(functionExists("foo")),
+    "Function foo could not be found."
+  )
+})

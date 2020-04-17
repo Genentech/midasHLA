@@ -1299,3 +1299,28 @@ checkPhenotypeFormat <- function(data_frame) {
 checkKirCallsFormat <- function(kir_calls) { # TODO
   return(TRUE)
 }
+
+#' Check if function can be found in environment
+#'
+#' \code{functionExists} check if function exists
+#'
+#' @param name String giving name of function to check.
+#'
+#' @return Logical indicating if function exists.
+#'
+#' @family assert functions
+#'
+functionExists <- function(name) {
+  fun <- get0(name)
+  test <- is.function(fun)
+
+  return(test)
+}
+
+#' Error message for functionExists
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(functionExists) <- function(call, env) {
+  sprintf("Function %s could not be found.", call$name)
+}
