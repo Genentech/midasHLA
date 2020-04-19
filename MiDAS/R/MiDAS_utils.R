@@ -1233,11 +1233,11 @@ getObjectDetails <- function(object) {
   return(object_details)
 }
 
-#' Assert phenotype data
+#' Assert colData data
 #'
-#' \code{checkPhenotypeFormat} asserts if phenotype data frame has proper format.
+#' \code{checkColDataFormat} asserts if colData data frame has proper format.
 #'
-#' @param data_frame Data frame containing phenotype data used to construct
+#' @param data_frame Data frame containing colData data used to construct
 #'   \link{\code{MiDAS}} object.
 #'
 #' @return Logical indicating if \code{data_frame} is properly formatted.
@@ -1249,9 +1249,9 @@ getObjectDetails <- function(object) {
 #' @examples
 #' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
 #' pheno <- read.table(pheno_file, header = TRUE)
-#' checkPhenotypeFormat(pheno)
+#' checkColDataFormat(pheno)
 #'
-checkPhenotypeFormat <- function(data_frame) {
+checkColDataFormat <- function(data_frame) {
   data_frame_name <- deparse(substitute(data_frame))
   assert_that(
     see_if(
