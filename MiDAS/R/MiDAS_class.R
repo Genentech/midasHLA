@@ -175,6 +175,22 @@ setMethod(
   }
 )
 
+#' @rdname as.data.frame
+#'
+# setMethod(
+#   f = "as.data.frame",
+#   signature = "MiDAS",
+#   definition = function(x, row.names = NULL, optional = FALSE, ...) {
+#     x <- colData(x)
+#     callNextMethod(x, row.names = NULL, optional = FALSE, ...)
+#   }
+# )
+as.data.frame.MiDAS <- function(x, row.names = NULL, optional = FALSE, ...) {
+    x <- colData(x)
+    as.data.frame(x, row.names = NULL, optional = FALSE, ...)
+}
+
+
 #' Prepare MiDAS object for statistical analysis
 #'
 #' \code{prepareMiDAS} transform HLA alleles calls and KIR calls according

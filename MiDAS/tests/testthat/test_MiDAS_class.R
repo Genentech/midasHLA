@@ -128,6 +128,28 @@ test_that("MiDAS object's kir_calls is extracted correctly", {
   expect_equal(getKirCalls(midas), kir_calls)
 })
 
+test_that("MiDAS's as.data.frame method works properly", {
+  kir_calls_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  kir_calls <- readKirCalls(kir_calls_file, counts = TRUE)
+  kir_calls <- kir_calls[1:20, ]
+
+  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
+
+  midas <- prepareMiDAS(
+    kir_calls = kir_calls,
+    colData = pheno,
+    inheritance_model = "additive",
+    analysis_type = character()
+  )
+
+  midas_df <- as.data.frame(midas)
+  test_midas_df <- colData(midas)
+  test_midas_df <- as.data.frame(test_midas_df)
+
+  expect_equal(midas_df, test_midas_df)
+})
+
 test_that("MiDAS object is prepared properly", {
   rleft_join <- function(init, ..., by = "ID") {
     df <- Reduce(function(...)
