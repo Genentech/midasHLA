@@ -199,7 +199,7 @@ as.data.frame.MiDAS <- function(x, row.names = NULL, optional = FALSE, ...) {
 #' @inheritParams checkHlaCallsFormat
 #' @inheritParams checkKirCallsFormat
 #' @inheritParams hlaCallsToCounts
-#' @param phenotype Data frame holding additional variables like phenotypic
+#' @param colData Data frame holding additional variables like phenotypic
 #'   observations or covariates. It have to contain \code{'ID'} column holding
 #'   samples indentifires corresponding to indentifires in \code{hla_calls} and
 #'   \code{kir_calls}. Importantly rows of \code{hla_calls} and
@@ -228,7 +228,7 @@ as.data.frame.MiDAS <- function(x, row.names = NULL, optional = FALSE, ...) {
 #'
 #' # create MiDAS object
 #' midas <- MiDAS(hla_calls = hla_calls,
-#'                phenotype = phenotype,
+#'                colData = phenotype,
 #'                inheritance_model = "additive",
 #'                analysis_type = "hla_allele"
 #' )
@@ -240,7 +240,7 @@ as.data.frame.MiDAS <- function(x, row.names = NULL, optional = FALSE, ...) {
 #' @export
 prepareMiDAS <- function(hla_calls = NULL,
                          kir_calls = NULL,
-                         phenotype,
+                         colData,
                          inheritance_model = c("additive", "dominant", "recessive"),
                          analysis_type = c(
                            "hla_allele",
@@ -266,7 +266,7 @@ prepareMiDAS <- function(hla_calls = NULL,
     if (! is.null(kir_calls)) {
       checkKirCallsFormat(kir_calls)
     } else { TRUE },
-    checkPhenotypeFormat(phenotype),
+    checkColDataFormat(colData),
     is.string(inheritance_model),
     stringMatches(inheritance_model, inheritance_model_choice),
     is.character(analysis_type),
@@ -305,8 +305,8 @@ prepareMiDAS <- function(hla_calls = NULL,
     experiments[[at]] <- experiment
   }
 
-  phenotype <-
-    DataFrame(phenotype, row.names = phenotype[["ID"]], check.names = TRUE)
+  colData <-
+    DataFrame(colData, row.names = colData[["ID"]], check.names = TRUE)
 
   metadata <- list(
     inheritance_model = inheritance_model,
@@ -315,7 +315,7 @@ prepareMiDAS <- function(hla_calls = NULL,
 
   mae <- MultiAssayExperiment(
     experiments = experiments,
-    colData = phenotype,
+    colData = colData,
     metadata = metadata
   )
 

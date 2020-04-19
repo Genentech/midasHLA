@@ -68,7 +68,7 @@ test_that("MiDAS object's inheritance model is extracted correctly", {
 
   midas <- prepareMiDAS(
     hla_calls = hla_calls,
-    phenotype = pheno,
+    colData = pheno,
     inheritance_model = "additive",
     analysis_type = character()
   )
@@ -85,7 +85,7 @@ test_that("MiDAS object's analysis_type is extracted correctly", {
 
   midas <- prepareMiDAS(
     hla_calls = hla_calls,
-    phenotype = pheno,
+    colData = pheno,
     inheritance_model = "additive",
     analysis_type = "hla_allele"
   )
@@ -102,7 +102,7 @@ test_that("MiDAS object's hla_calls is extracted correctly", {
 
   midas <- prepareMiDAS(
     hla_calls = hla_calls,
-    phenotype = pheno,
+    colData = pheno,
     inheritance_model = "additive",
     analysis_type = character()
   )
@@ -120,7 +120,7 @@ test_that("MiDAS object's kir_calls is extracted correctly", {
 
   midas <- prepareMiDAS(
     kir_calls = kir_calls,
-    phenotype = pheno,
+    colData = pheno,
     inheritance_model = "additive",
     analysis_type = character()
   )
@@ -184,7 +184,7 @@ test_that("MiDAS object is prepared properly", {
     midas <- prepareMiDAS(
       hla_calls = hla_calls,
       kir_calls = kir_calls,
-      phenotype = phenotype,
+      colData = phenotype,
       inheritance_model = args$inheritance_model,
       analysis_type = c(
         "hla_allele",
@@ -217,27 +217,27 @@ test_that("MiDAS object is prepared properly", {
   # )
 
   expect_error(
-    prepareMiDAS(hla_calls = hla_calls, phenotype = cars[1:2, ]),
-    "first column in phenotype must be named 'ID'"
+    prepareMiDAS(hla_calls = hla_calls, colData = cars[1:2, ]),
+    "first column in colData must be named 'ID'"
   )
 
   expect_error(
-    prepareMiDAS(hla_calls = hla_calls, phenotype = phenotype, inheritance_model = 1),
+    prepareMiDAS(hla_calls = hla_calls, colData = phenotype, inheritance_model = 1),
     "inheritance_model is not a string \\(a length one character vector\\)."
   )
 
   expect_error(
-    prepareMiDAS(hla_calls = hla_calls, phenotype = phenotype, inheritance_model = "foo"),
+    prepareMiDAS(hla_calls = hla_calls, colData = phenotype, inheritance_model = "foo"),
     "inheritance_model should be one of \"additive\", \"dominant\", \"recessive\"."
   )
 
   expect_error(
-    prepareMiDAS(hla_calls = hla_calls, phenotype = phenotype, inheritance_model = "additive", analysis_type = 1),
+    prepareMiDAS(hla_calls = hla_calls, colData = phenotype, inheritance_model = "additive", analysis_type = 1),
     "analysis_type is not a character vector"
   )
 
   expect_error(
-    prepareMiDAS(hla_calls = hla_calls, phenotype = phenotype, inheritance_model = "additive", analysis_type = "foo"),
+    prepareMiDAS(hla_calls = hla_calls, colData = phenotype, inheritance_model = "additive", analysis_type = "foo"),
     "analysis_type should match values \"hla_allele\", \"aa_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"hla_kir_interactions\"."
   )
 })
