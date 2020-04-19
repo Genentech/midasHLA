@@ -1216,23 +1216,26 @@ subsetMiDASByFreq <-
 #' \describe{
 #'   \item{formula_vars}{Character containing names of variables in object
 #'     formula}
-#'   \item{data}{Data frame associated with object}
+#'   \item{data}{MiDAS object associated with model}
 #'   \item{data_vars}{Character containing names of variables in object data}
-#'   \item{data_labels}{Character containing labels of variables in object data}
 #' }
-#' @importFrom assertthat assert_that
+#'
+#' @importFrom MultiAssayExperiment colData
 #'
 getObjectDetails <- function(object) {
   object_call <- getCall(object)
   object_env <- attr(object$terms, ".Environment")
   object_formula <- eval(object_call[["formula"]], envir = object_env)
   object_data <- eval(object_call[["data"]], envir = object_env)
+  data_vars <- c(
+    unlist(rownames(object_data)),
+    colnames(colData(object_data))
+  )
 
   object_details <- list(
     formula_vars = all.vars(object_formula),
     data = object_data,
-    data_vars = colnames(object_data)[-1],
-    data_labels = label(object_data[, -1])
+    data_vars = data_vars
   )
 
   return(object_details)
