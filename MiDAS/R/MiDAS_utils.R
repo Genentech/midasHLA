@@ -432,22 +432,20 @@ updateModel <- function(object,
 #' Assert statistical model
 #'
 #' \code{checkStatisticalModel} asserts if object is an existing fit from a
-#' model function such as lm, glm and many others.
+#' model function such as lm, glm and many others. Containing MiDAS object as
+#' its data atribute.
 #'
 #' @inheritParams updateModel
 #'
 #' @return Logical indicating if \code{object} is an existing fit from a
-#' model function such as lm, glm and many others. Otherwise raise error.
+#' model function such as lm, glm and many others. ontaining MiDAS object as
+#' its data atribute. Otherwise raise error.
 #'
 #' @family assert functions
 #'
 #' @importFrom assertthat assert_that see_if
 #' @importFrom stats getCall
-#' @examples
-#' object <- lm(dist ~ speed, data = cars)
-#' checkStatisticalModel(object)
 #'
-#' @export
 checkStatisticalModel <- function(object) { # TODO simplyfy output of this function; or something like object is not a stat model: potential problem bla bla
   assert_that(
     is.object(object),
@@ -470,8 +468,15 @@ checkStatisticalModel <- function(object) { # TODO simplyfy output of this funct
 
   object_data <- eval(object_call[["data"]], envir = object_env)
   assert_that(
-    ! is.null(object_data) & is.data.frame(object_data),
-    msg = "object need to have data attribute defined"
+    see_if(
+      ! is.null(object_data),
+      msg = "object need to have data attribute defined"
+    ),
+    see_if(
+      is(object_data, "MiDAS"),
+      msg = "object's data need to be an object of class MiDAS"
+    ),
+    validObject(object_data)
   )
 }
 

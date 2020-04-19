@@ -199,33 +199,54 @@ test_that("HLA statistical models are updated properly", {
 
 
 test_that("statistical models are statistical model", {
-  object <- lm(speed ~ dist, data = cars)
+  kir_calls_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  kir_calls <- readKirCalls(kir_calls_file, counts = TRUE)
+  kir_calls <- kir_calls[1:20, ]
+  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
+
+  midas <- prepareMiDAS(
+    kir_calls = kir_calls,
+    colData = pheno,
+    inheritance_model = "additive",
+    analysis_type = character()
+  )
+
+  object <- lm(OS ~ OS_DIED, data = midas)
   expect_equal(checkStatisticalModel(object), TRUE)
 
   expect_error(checkStatisticalModel(list(1)),
                "object is required to have the internal OBJECT bit set"
   )
 
-  expect_error(updateModel(speed ~ cars),
+  expect_error(checkStatisticalModel(speed ~ cars),
                "object have to have an attribute 'call'"
   )
 
   fake_model <- list(call = list(formula = "foo"))
   class(fake_model) <- "fake"
-  expect_error(updateModel(fake_model),
+  expect_error(checkStatisticalModel(fake_model),
                "object have to be a model with defined formula"
   )
 
   fake_model <- list(call = list(formula = 1 ~ 1))
   class(fake_model) <- "fake"
-  expect_error(updateModel(fake_model),
+  expect_error(checkStatisticalModel(fake_model),
                "object need to have data attribute defined"
   )
 
   fake_model <- list(call = list(formula = 1 ~ 1, data = "bigData"))
   class(fake_model) <- "fake"
-  expect_error(updateModel(fake_model),
-               "object need to have data attribute defined"
+  expect_error(checkStatisticalModel(fake_model),
+               "object's data need to be an object of class MiDAS"
+  )
+
+  fake_data <- midas
+  metadata(fake_data) <- NULL
+  fake_model <- list(call = list(formula = 1 ~ 1, data = fake_data))
+  class(fake_model) <- "fake"
+  expect_error(checkStatisticalModel(fake_model),
+               "inheritance_model is not a string \\(a length one character vector\\)."
   )
 })
 
