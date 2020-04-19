@@ -128,6 +128,24 @@ test_that("MiDAS object's kir_calls is extracted correctly", {
   expect_equal(getKirCalls(midas), kir_calls)
 })
 
+test_that("MiDAS object's placeholder is extracted correctly", {
+  kir_calls_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  kir_calls <- readKirCalls(kir_calls_file, counts = TRUE)
+  kir_calls <- kir_calls[1:20, ]
+
+  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
+
+  midas <- prepareMiDAS(
+    kir_calls = kir_calls,
+    colData = pheno,
+    inheritance_model = "additive",
+    analysis_type = character()
+  )
+
+  expect_equal(getPlaceholder(midas), "term")
+})
+
 test_that("MiDAS's as.data.frame method works properly", {
   kir_calls_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
   kir_calls <- readKirCalls(kir_calls_file, counts = TRUE)
@@ -232,13 +250,45 @@ test_that("MiDAS object is prepared properly", {
   )
 
   expect_error(
-    prepareMiDAS(hla_calls = hla_calls, colData = phenotype, inheritance_model = "additive", analysis_type = 1),
+    prepareMiDAS(
+      hla_calls = hla_calls,
+      colData = phenotype,
+      inheritance_model = "additive",
+      analysis_type = 1
+    ),
     "analysis_type is not a character vector"
   )
 
   expect_error(
-    prepareMiDAS(hla_calls = hla_calls, colData = phenotype, inheritance_model = "additive", analysis_type = "foo"),
+    prepareMiDAS(
+      hla_calls = hla_calls,
+      colData = phenotype,
+      inheritance_model = "additive",
+      analysis_type = "foo"
+    ),
     "analysis_type should match values \"hla_allele\", \"aa_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"hla_kir_interactions\"."
+  )
+
+  expect_error(
+    prepareMiDAS(
+      hla_calls = hla_calls,
+      colData = phenotype,
+      inheritance_model = "additive",
+      analysis_type = "hla_allele",
+      placeholder = 1
+    ),
+    "placeholder is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(
+    prepareMiDAS(
+      hla_calls = hla_calls,
+      colData = phenotype,
+      inheritance_model = "additive",
+      analysis_type = "hla_allele",
+      placeholder = "AGE"
+    ),
+    "Placeholder 'AGE' can not be used, it is alredy used as column name in one of the inputs."
   )
 })
 

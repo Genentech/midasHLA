@@ -63,6 +63,15 @@ setValidity(Class = "MiDAS", method = function(object) {
     stringMatches(
       x = inheritance_model,
       choice = c("additive", "dominant", "recessive")
+    ),
+    is.string(getPlaceholder(object)),
+    see_if(
+      ! getPlaceholder(object) %in% unlist(rownames(object)),
+      msg = sprintf("Placeholder '%s' is used in one of the experiments", getPlaceholder(object))
+    ),
+    see_if(
+      getPlaceholder(object) %in% colnames(colData(object)),
+      msg = sprintf("Placeholder '%s' can not be found in object's colData", getPlaceholder(object))
     )
   )
 
@@ -175,6 +184,34 @@ setMethod(
   }
 )
 
+#' @name getPlaceholder
+#'
+#' @title Extract placeholder name from MiDAS object.
+#'
+#' @param object \code{\link{MiDAS}} object.
+#'
+#' @return String giving object's placeholder.
+#'
+#' @export
+setGeneric(
+  name = "getPlaceholder",
+  def = function(object) standardGeneric("getPlaceholder")
+)
+
+#' @rdname getPlaceholder
+#'
+#' @importFrom S4Vectors metadata
+#'
+setMethod(
+  f = "getPlaceholder",
+  signature = "MiDAS",
+  definition = function (object) {
+    placeholder <- metadata(object)$placeholder
+
+    return(placeholder)
+  }
+)
+
 #' @rdname as.data.frame
 #'
 # setMethod(
@@ -209,7 +246,7 @@ as.data.frame.MiDAS <- function(x, row.names = NULL, optional = FALSE, ...) {
 #'   \code{"aa_level"}, \code{"allele_g_group"}, \code{"allele_supertype"},
 #'   \code{"allele_group"}, \code{"kir_genes"}, \code{"hla_kir_interactions"}.
 #'   See details for further explanations.
-#'
+#' @param placeholder String
 #' @param ... Attributes used in data transformation.
 #'
 #' @return Object of class \code{\link{MiDAS}}
@@ -251,6 +288,7 @@ prepareMiDAS <- function(hla_calls = NULL,
                            "kir_genes",
                            "hla_kir_interactions"
                          ),
+                         placeholder = "term",
                          ...
 ) {
   inheritance_model_choice <- eval(formals()[["inheritance_model"]])
@@ -270,7 +308,15 @@ prepareMiDAS <- function(hla_calls = NULL,
     is.string(inheritance_model),
     stringMatches(inheritance_model, inheritance_model_choice),
     is.character(analysis_type),
-    characterMatches(analysis_type, analysis_type_choice)
+    characterMatches(analysis_type, analysis_type_choice),
+    is.string(placeholder),
+    see_if(
+      !placeholder %in% c(colnames(hla_calls), colnames(kir_calls), colnames(colData)),
+      msg = sprintf(
+        "Placeholder '%s' can not be used, it is alredy used as column name in one of the inputs.",
+        placeholder
+      )
+    )
   )
 
   dot.args <- if (...length()) {
@@ -305,12 +351,16 @@ prepareMiDAS <- function(hla_calls = NULL,
     experiments[[at]] <- experiment
   }
 
+  # insert placeholder
+  colData[[placeholder]] <- runif(nrow(colData))
+
   colData <-
     DataFrame(colData, row.names = colData[["ID"]], check.names = TRUE)
 
   metadata <- list(
     inheritance_model = inheritance_model,
-    analysis_type = analysis_type
+    analysis_type = analysis_type,
+    placeholder = placeholder
   )
 
   mae <- MultiAssayExperiment(
