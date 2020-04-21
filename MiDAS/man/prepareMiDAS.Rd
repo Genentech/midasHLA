@@ -8,8 +8,8 @@
 prepareMiDAS(hla_calls = NULL, kir_calls = NULL, colData,
   inheritance_model = c("additive", "dominant", "recessive"),
   analysis_type = c("hla_allele", "aa_level", "allele_g_group",
-  "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions"),
-  placeholder = "term", ...)
+  "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions",
+  "hla_divergence"), placeholder = "term", ...)
 
 prepareMiDAS_hla_allele(hla_calls, inheritance_model, ...)
 }

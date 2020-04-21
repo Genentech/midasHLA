@@ -211,7 +211,8 @@ test_that("MiDAS object is prepared properly", {
         "allele_supertype",
         "allele_group",
         "kir_genes",
-        "hla_kir_interactions"
+        "hla_kir_interactions",
+        "hla_divergence"
       )
     )
     validObject(midas)
@@ -494,6 +495,31 @@ test_that("MiDAS data for hla_kir_interactions analysis is prepared properly", {
       kir_counts = args$kir_calls
     )
     experiment_test <- dfToExperimentMat(kir_calls)
+
+    expect_equal(experiment, experiment_test)
+  }
+})
+
+test_that("MiDAS data for hla_kir_interactions analysis is prepared properly", {
+  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(hla_calls_file)
+
+  args_c <- expand.grid(
+    "",
+    stringsAsFactors = FALSE
+  )
+
+  for (i in 1:nrow(args_c)) {
+    args <- as.list(args_c[i, , drop = FALSE])
+    args$hla_calls <- hla_calls
+    experiment <- do.call(prepareMiDAS_hla_divergence, args)
+
+    experiment_test <- hlaCallsGranthamDistance(
+      hla_calls = hla_calls,
+      genes = c("A", "B", "C")
+    )
+    experiment_test <- rowMeans(experiment_test[-1])
+    experiment_test <- dfToExperimentMat(experiment_test)
 
     expect_equal(experiment, experiment_test)
   }

@@ -291,7 +291,8 @@ prepareMiDAS <- function(hla_calls = NULL,
                            "allele_supertype",
                            "allele_group",
                            "kir_genes",
-                           "hla_kir_interactions"
+                           "hla_kir_interactions",
+                           "hla_divergence"
                          ),
                          placeholder = "term",
                          ...
@@ -591,6 +592,8 @@ prepareMiDAS_kir_genes <- function(kir_calls, ...) {
 #'
 #' @return Matrix
 #'
+#' @importFrom magrittr %>%
+#'
 prepareMiDAS_hla_kir_interactions <- function(hla_calls, kir_calls, ...) {
   hla_kir_interactions <-
     getHlaKirInteractions(
@@ -600,6 +603,29 @@ prepareMiDAS_hla_kir_interactions <- function(hla_calls, kir_calls, ...) {
     dfToExperimentMat()
 
   return(hla_kir_interactions)
+}
+
+#' Prepare MiDAS data on HLA divergence level
+#'
+#' Distances between Class I alleles are calculated using Grantham distance,
+#' as implemented in \code{hlaCallsGranthamDistance} function. Additionally
+#' average distance in Class I genese is calculated.
+#'
+#' @param hla_calls Data frame
+#' @param ... Not used
+#'
+#' @return Matrix
+#'
+prepareMiDAS_hla_divergence <- function(hla_calls, ...) {
+  hla_divergence <-
+    hlaCallsGranthamDistance(
+      hla_calls = hla_calls,
+      genes = c("A", "B", "C")
+    )
+  hla_divergence$ABC_avg <- rowMeans(hla_divergence[-1])
+  experiment_mat <- dfToExperimentMat(hla_divergence)
+
+  return(experiment_mat)
 }
 
 #' Filter midas object
