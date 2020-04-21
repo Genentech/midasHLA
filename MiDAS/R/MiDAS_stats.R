@@ -268,7 +268,8 @@ analyzeConditionalAssociations <- function(object,
     results <- lapply(results, tidy, exponentiate = exponentiate)
     results <- bind_rows(results)
 
-    results <- results[results[["term"]] %in% backquote(new_variables), ]
+    mask_new_vars <- backquote(results[["term"]]) %in% backquote(new_variables)
+    results <- results[mask_new_vars, ]
 
     nc <- ifelse(is.null(n_correction), length(results$p.value), n_correction)
     assert_that(
@@ -309,11 +310,14 @@ analyzeConditionalAssociations <- function(object,
     i <- i + 1
   }
 
+  if (length(best) == 0) {
+    warn("No significant variables found. Returning empty table.") # Tibble to be more precise?
+  }
+
   if (keep) {
     results <- best
   } else {
     if (length(best) == 0) {
-      warn("No significant variables found. Returning empty table.") # Tibble to be more precise?
       results <- results[0, ]
     } else {
       results <- lapply(best, function(res) {
@@ -352,7 +356,7 @@ analyzeConditionalAssociations <- function(object,
 #' covar <- read.table(covar_file, header = TRUE)
 #' midas_data <- prepareMiDAS(hla_calls, pheno, covar, analysis_type = "aa_level")
 #' object <- lm(OS ~ AGE + SEX, data = midas_data)
-#' aaPosOmnibusTest(object, aa_pos = c("B_11", "E_107", "A_246"))
+#' aaPosOmnibusTest(object, aa_pos = c("B_35", "E_128", "A_270"))
 #'
 #' @importFrom assertthat assert_that see_if is.string
 #' @importFrom broom tidy

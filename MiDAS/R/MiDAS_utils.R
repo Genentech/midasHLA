@@ -1105,95 +1105,6 @@ assertthat::on_failure(objectHasPlaceholder) <- function(call, env) {
   )
 }
 
-#' Subset MiDAS data by frequency
-#'
-#' \code{subsetMiDASByFreq} subsets \code{midas_data} selecting variables that
-#' meet frequency criteria. Only variables of "integer" type are considered for
-#' filtration, variables of other types (eg. "float") are returend unaffected.
-#'
-#' TODO write unit tests
-#'
-#' @param midas_data
-#' @param lower_frequency_cutoff
-#' @param upper_frequency_cutoff
-#'
-#' @examples
-#' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-#' hla_calls <- readHlaCalls(hla_calls_file)
-#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-#' pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
-#' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-#' covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-#' midas_data <- prepareMiDAS(hla_calls = hla_calls,
-#'                            pheno = pheno,
-#'                            covar = covar,
-#'                            analysis_type = "hla_allele",
-#'                            inheritance_model = "additive"
-#' )
-#' subsetMiDASByFreq(midas_data,
-#'                   lower_frequency_cutoff = 0.1,
-#'                   upper_frequency_cutoff = 0.9
-#' )
-#'
-#'
-#' @importFrom assertthat assert_that
-#' @importFrom dplyr filter select
-#' @importFrom magrittr %>%
-#' @importFrom rlang .data
-#'
-subsetMiDASByFreq <-
-  function(midas_data,
-           lower_frequency_cutoff = NULL,
-           upper_frequency_cutoff = NULL) {
-  # assert_that(
-  #   checkMiDASData,
-  #   isNumberOrNULL(lower_frequency_cutoff),
-  #   isNumberOrNULL(upper_frequency_cutoff)
-  # )
-
-  integers_labels <- midas_analysis_types %>%
-    filter(.data$type == "integer") %>%
-    `[[`("analysis_type")
-  mask_integers <- label(midas_data) %in% integers_labels
-  integer_vars <- colnames(midas_data)[mask_integers]
-
-  inheritance_model <- attr(midas_data, "call")$inheritance_model
-
-  if (length(integer_vars)) {
-    lower_frequency_cutoff <- ifelse(
-      test = is.null(lower_frequency_cutoff),
-      yes = 0,
-      no = lower_frequency_cutoff
-    )
-    upper_frequency_cutoff <- ifelse(
-      test = is.null(upper_frequency_cutoff),
-      yes = Inf,
-      no = upper_frequency_cutoff
-    )
-
-    vars_to_drop <- midas_data %>%
-      select("ID", !!integer_vars) %>%
-      getCountsFrequencies() %>% # add inheritance_model param to countsFrequencies
-      filter(
-        (.data$Counts < lower_frequency_cutoff & lower_frequency_cutoff >= 1) |
-        (.data$Freq < lower_frequency_cutoff & lower_frequency_cutoff < 1) |
-        (.data$Counts > upper_frequency_cutoff & upper_frequency_cutoff >= 1) |
-        (.data$Freq > upper_frequency_cutoff & upper_frequency_cutoff < 1)
-      ) %>%
-      `[[`("term")
-
-
-    midas_data <- midas_data[, ! colnames(midas_data) %in% vars_to_drop]
-
-    assert_that(
-      ncol(midas_data) > 1, # ID column
-      msg = "None of the variables passed selection criteria. Revisit your choice of 'lower_frequency_cutoff' and 'upper_frequency_cutoff' arguments."
-    )
-  }
-
-  return(midas_data)
-}
-
 #' Get attributes of statistical model object
 #'
 #' \code{getObjectDetails} extracts some of the statistical model object
@@ -1403,4 +1314,177 @@ assertthat::on_failure(isClass) <- function(call, env) {
          deparse(call$class),
          "."
   )
+}
+
+#' Grantham distance
+#'
+#' \code{distGrantham} calculates normalized Grantham distance between two
+#' amino acid sequences.
+#'
+#' Distance between amino acid sequences is normalized by length of compared
+#' sequences.
+#'
+#' Lengths of \code{aa1} and \code{aa2} must be equal.
+#'
+#' @param aa1 Character vector giving amino acid sequence using one letter
+#'   codings. Each element must correspond to single amino acid.
+#' @param aa2 Character vector giving amino acid sequence using one letter
+#'   codings. Each element must correspond to single amino acid.
+#'
+#' @return Integer normalized Grantham distance between \code{aa1} and \
+#'   code{aa2}.
+#'
+#' @examples
+#' distGrantham(
+#'   aa1 = c("A", "S", "W"),
+#'   aa2 = c("A", "S", "V")
+#' )
+#'
+#' @importFrom assertthat assert_that see_if
+#'
+#' @export
+distGrantham <- function(aa1, aa2) {
+  assert_that(
+    is.character(aa1),
+    is.character(aa2),
+    see_if(
+      length(aa1) == length(aa2),
+      msg = "aa1 and aa2 must have equal lengths."
+    )
+  )
+
+  idx <- paste(aa1, aa2, sep = "")
+  assert_that(
+    all(test <- idx %in% names(dict_dist_grantham)),
+    msg = sprintf(
+      fmt = "%s are not valid amino acids pairs",
+      paste(idx[! test], collapse = ", ")
+    )
+  )
+
+  d <- sum(dict_dist_grantham[idx]) / length(idx)
+
+  return(d)
+}
+
+#' Calculate Grantham disttance between alleles
+#'
+#' \code{hlaCallsGranthamDistance} calculate distance between HLA alleles using
+#' distance of choice.
+#'
+#' The Grantham distance is calculated for pairs of alleles for HLA gene.
+#'
+#' In case of missing alleles \code{NA} are returned.
+#'
+#' Grantham distance is calculated only for class I HLA alleles. First
+#' exons forming the variable region in the peptide binding groove (i.e.,
+#' exon 2 and 3) are selected (positions 1-182 in IMGT/HLA alignments, however
+#' here we take 2-182 as many 1st positions are missing). Then all the alleles
+#' containing gaps, stop codons or indels are discarded. Finally distance is
+#' calculated for each pair.
+#'
+#' @inheritParams checkHlaCallsFormat
+#' @param genes Character vector spcifying genes for which allelic distance
+#'   should be calculated.
+#'
+#' @return Data frame of normalized Grantham distances between pairs of alleles
+#'   for each specified HLA gene. First column (\code{ID}) is the same as in
+#'   \code{hla_calls}, further columns are named as given by \code{genes} and
+#'   contain numeric values.
+#'
+#' @importFrom assertthat assert_that is.string noNA see_if
+#' @importFrom magrittr %>%
+#' @importFrom rlang warn
+#' @importFrom stats na.omit
+#'
+#' @examples
+#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(file)
+#' hlaCallsGranthamDistance(hla_calls, genes = "A")
+#'
+#' @export
+hlaCallsGranthamDistance <- function(hla_calls, genes = c("A", "B", "C")) {
+  assert_that(
+    checkHlaCallsFormat(hla_calls),
+    is.character(genes),
+    noNA(genes)
+  )
+
+  hla_calls_colnames <- colnames(hla_calls)
+  target_genes <- hla_calls_colnames %>% # find genes present in hla_calls
+    `[`(-1) %>% # discard ID column
+    gsub(pattern = "_[0-9]+", replacement = "") %>%
+    unique()
+  assert_that(
+    characterMatches(x = genes, choice = target_genes) # asset is buggy hlaAlleleDistance(hla_calls, genes = c("A", "B", "FA"))
+  )
+  target_genes <- genes
+
+  d <- list(ID = hla_calls[, 1, drop = TRUE])
+  for (gene in target_genes) {
+    if (! gene %in% c("A", "B", "C")) {
+      warn(sprintf("Grantham distance is calculated only for class I HLA alleles. Ommiting gene %s", gene))
+      next()
+    }
+
+    sel <- paste0(gene, c("_1", "_2"))
+    pairs <- hla_calls[, sel]
+    resolution <- getAlleleResolution(unlist(pairs)) %>%
+      na.omit()
+    assert_that( # this should become obsolete
+      see_if(
+        all(resolution == resolution[1]),
+        msg = sprintf("Allele resolutions for gene %s are not equal", gene)
+      )
+    )
+
+    # process alignment
+    alignment <-hlaAlignmentGrantham(gene, resolution[1])
+
+    allele_numbers <- rownames(alignment)
+    d[[gene]] <- vapply(
+      X = 1:nrow(pairs),
+      FUN = function(i) {
+        allele1 <- pairs[i, 1]
+        allele2 <- pairs[i, 2]
+        if (allele1 %in% allele_numbers && allele2 %in% allele_numbers) {
+          aa1 <- alignment[allele1, ]
+          aa2 <- alignment[allele2, ]
+          distGrantham(aa1, aa2)
+        } else {
+          warn(
+            sprintf(
+              fmt = "Alleles %s could not be found in the alignmnet coercing to NA",
+              paste(allele1, allele1, sep = ", ")
+            )
+          )
+          as.numeric(NA)
+        }
+      },
+      FUN.VALUE = numeric(length = 1L)
+    )
+  }
+
+  hla_dist <- data.frame(d, stringsAsFactors = FALSE)
+
+  return(hla_dist)
+}
+
+#' Helper function alignment for Grantham distance calculations
+#'
+#' \code{hlaAlignmentGrantham} get HLA alignment processed so that grantham
+#' distance between alleles can be calculated. Processing includes extracting
+#' exons 1 and 2, masking indels, gaps and stop codons.
+#'
+#' @param alignment Matrix containing HLA alleles amino acids level alignment.
+#'
+hlaAlignmentGrantham <- function(gene, resolution) {
+  alignment <- readHlaAlignments(
+    gene = gene,
+    resolution = resolution,
+    trim = TRUE
+  )
+  alignment <- alignment[, 2:182] # select exons 2 and 3 w/o 1st position as it is biased towards missing data
+  mask <- apply(alignment, 1, function(x) any(x == "" | x == "X" | x == ".")) # mask gaps, stop codons, indels
+  alignment <- alignment[! mask, ]
 }

@@ -243,12 +243,11 @@ test_that("MiDAS associations are analyzed properly", {
         "allele_supertype",
         "allele_group",
         "kir_genes",
-        "hla_kir_interactions"
+        "hla_kir_interactions",
+        "hla_divergence"
       ),
       inheritance_model = "additive"
     )
-
-
 
   #
   mode <- "linear"
@@ -487,14 +486,14 @@ test_that("amino acid omnibus test works fine", {
   covar <- read.table(covar_file, header = TRUE)
   midas_data <- prepareMiDAS(hla_calls, pheno, covar, analysis_type = "aa_level")
   object <- lm(OS ~ AGE + SEX + term, data = midas_data)
-  omnibus_res <- aaPosOmnibusTest(object, aa_pos = c("B_11", "E_107", "A_246"))
+  omnibus_res <- aaPosOmnibusTest(object, aa_pos = c("B_35", "E_128", "A_270"))
 
-  obj_B11 <- lm(OS ~ AGE + SEX + B_11_A + B_11_S + term, data = midas_data)
-  obj_E107 <- lm(OS ~ AGE + SEX + E_107_R + E_107_G + term, data = midas_data)
-  obj_A246 <- lm(OS ~ AGE + SEX + A_246_A + A_246_S + term, data = midas_data)
-  LRT <- lapply(list(obj_B11, obj_E107, obj_A246), LRTest, mod0 = object)
+  obj_B35 <- lm(OS ~ AGE + SEX + B_35_A + B_35_S + term, data = midas_data)
+  obj_E128 <- lm(OS ~ AGE + SEX + E_128_R + E_128_G + term, data = midas_data)
+  obj_A270 <- lm(OS ~ AGE + SEX + A_270_A + A_270_S + term, data = midas_data)
+  LRT <- lapply(list(obj_B35, obj_E128, obj_A270), LRTest, mod0 = object)
   omnibus_res_test <- data.frame(
-    aa_pos = c("B_11", "E_107", "A_246"),
+    aa_pos = c("B_35", "E_128", "A_270"),
     residues = c("A, S", "R, G", "A, S"),
     d.f. = c(1, 1, 1),
     statistic = sapply(LRT, `[[`, "statistic"),
@@ -511,12 +510,12 @@ test_that("amino acid omnibus test works fine", {
   )
 
   expect_error(
-    aaPosOmnibusTest(object, c("B_11", "E_107", "A_246"), correction = 1),
+    aaPosOmnibusTest(object, c("B_35", "E_128", "A_270"), correction = 1),
     "correction is not a string \\(a length one character vector\\)."
   )
 
   expect_error(
-    aaPosOmnibusTest(object, c("B_11", "E_107", "A_246"), n_correction = 1.5),
+    aaPosOmnibusTest(object, c("B_35", "E_128", "A_270"), n_correction = 1.5),
     "n_correction is not a count \\(a single positive integer\\) or NULL."
   )
 
@@ -526,7 +525,7 @@ test_that("amino acid omnibus test works fine", {
   )
 
   expect_error(
-    aaPosOmnibusTest(object, c("B_11", "E_107", "A_246"), n_correction = 1),
+    aaPosOmnibusTest(object, c("B_35", "E_128", "A_270"), n_correction = 1),
     "n_correction must be at least 3."
   )
 })

@@ -1,0 +1,104 @@
+---
+title: "Grantham's distance calculation -- notes"
+author: "Maciej Migdal"
+date: "02 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Grantham distance calculation
+The Grantham distance is a quantitative pairwise distance in which the
+physiochemical properties of amino acids. Given a particular locus with two
+alleles, the sequences of the peptide-binding domains of each allele are
+aligned, and the Grantham distance is calculated as the sum of amino acid
+differences (taking into account the biochemical composition, polarity and
+volume of each amino acid) along the sequences of the peptide-binding domains,
+following the formula:
+
+  $Grantham\ distance = \sum D_{ij} = \sum [\alpha(c_i - c_j)^2 + \beta(p_i - p_j)^2) + \gamma(v_i - v_j)^2]^{0.5})$ (Eq1) [1]
+
+where:
+  $i$, $j$ are two homologus aa at given position in the alignment
+  $D$ is the Grantham distance between aa
+  $c$, $p$, $v$ are composition, polarity and volume of aa
+  $\alpha$, $\beta$, $\gamma$ are constants (found in original work by Grantham [3])
+
+The final Grantham distance is claculated by normalizing the value from Eq1 by
+the length of the alignment. [1]
+
+In practice the Eq1 can be easly solved for all 19 aa pairs. Even better
+Grantham already did it in his original work. Thus we can altogether forget
+about later part of Eq1 and use only $\sum D_{ij}$ to calculate distance between 
+two aligned aa sequences.
+
+```{r}
+# based on https://gist.github.com/danielecook/501f03650bca6a3db31ff3af2d413d2a
+grantham_matrix <- readr::read_tsv("grantham_distance_matrix_full.tsv")
+grantham_dist <- grantham_matrix %>% 
+  tidyr::gather(SECOND, SCORE, -FIRST)
+
+calculate_grantham <- function(a1, a2) {
+  (grantham_dist %>% dplyr::filter(FIRST == a1, SECOND == a2))$SCORE
+}
+
+ser_arg <- calculate_grantham("S", "R")
+
+ar_ki <-  calculate_grantham("A", "R") + calculate_grantham("K", "I")
+```
+
+Thus the distance between Serine and Arginine is 110.
+
+The distance between two made up dipeptides *AR* and *KI* is 214. And it's 
+normalized value is 107.
+
+# Grantham distance in HLA studies
+In case of HLA studies allele divergence is considered by calculating distance
+between variable regions in peptide binding groove. Those consist out of exons
+2 and 3 for class I alleles and exon 2 for class II alleles.
+
+For the class I alleles exons 2 and 3 are located at positions *1-182* of the 
+reference alleles, according to alignment files at IPD-IMGT/HLA database. In 
+practice location *1* for most of the alleles is not given, so *2-182* might be
+a more reasonable choice.
+
+```{r}
+hla_alignments_a <- MiDAS::readHlaAlignments(gene = "A", trim = FALSE, resolution = 4)
+a_exons_2_3 <- hla_alignments_a[, 1:182]
+```
+
+Now we have all the information in place to calculate normalized Grantham 
+distances between pair of HLA-A alleles! Let sample 100 alleles and have a
+estimate on Grantham distance distribution for HLA-A.
+
+```{r}
+calculateGranthamAlleleDist <- function(allele1, allele2) {
+  # here we ommit positions with unknown characters
+  unk_i1 <- allele1 == "" | allele1 == "X" # stop codon is X
+  unk_i2 <- allele2 == "" | allele2 == "X"
+  allele1 <- allele1[! unk_i1 & ! unk_i2]
+  allele2 <- allele2[! unk_i1 & ! unk_i2]
+  sum(vapply(
+    1:length(allele1),
+    FUN = function(i) calculate_grantham(allele1[i], allele2[i]) / length(allele1),
+    FUN.VALUE = numeric(length = 1)
+    ))
+}
+
+samp <- a_exons_2_3[sample(1:nrow(a_exons_2_3), 100), ]
+samp_comb <- combn(x = rownames(samp), m = 2, simplify = FALSE)
+gd_dist <- vapply(
+  X = samp_comb, 
+  FUN = function(x) {
+    calculateGranthamAlleleDist(a_exons_2_3[x[1], ], a_exons_2_3[x[2], ])
+  },
+  FUN.VALUE = numeric(length = 1))
+hist(gd_dist)
+```
+
+# Literature
+[1] https://www.nature.com/articles/s41591-019-0639-4?draft=marketing#Sec2
+[2] https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6106954/
+[3] https://science.sciencemag.org/content/sci/185/4154/862.full.pdf

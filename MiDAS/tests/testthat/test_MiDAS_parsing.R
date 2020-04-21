@@ -157,7 +157,7 @@ test_that("HLA allele alignments are read properly", {
   fake_aln[grepl("Prot", fake_aln)] <- "Prot"
   fake_aln_tmp <- tempfile()
   writeLines(text = fake_aln, con = fake_aln_tmp)
-  expect_error(readHlaAlignments(fake_aln_tmp),
+  expect_error(readHlaAlignments(fake_aln_tmp, trim=TRUE),
                "start codon is not marked properly in the input file"
   )
   unlink(fake_aln_tmp)
