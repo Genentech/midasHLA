@@ -5,11 +5,11 @@
 \alias{prepareMiDAS_hla_allele}
 \title{Prepare MiDAS object for statistical analysis}
 \usage{
-prepareMiDAS(hla_calls = NULL, kir_calls = NULL, phenotype,
+prepareMiDAS(hla_calls = NULL, kir_calls = NULL, colData,
   inheritance_model = c("additive", "dominant", "recessive"),
   analysis_type = c("hla_allele", "aa_level", "allele_g_group",
   "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions"),
-  ...)
+  placeholder = "term", ...)
 
 prepareMiDAS_hla_allele(hla_calls, inheritance_model, ...)
 }
@@ -20,7 +20,7 @@ prepareMiDAS_hla_allele(hla_calls, inheritance_model, ...)
 \item{kir_calls}{Data frame containing KIR calls, as return by
 \code{\link{readKirCalls}} function.}
 
-\item{phenotype}{Data frame holding additional variables like phenotypic
+\item{colData}{Data frame holding additional variables like phenotypic
 observations or covariates. It have to contain \code{'ID'} column holding
 samples indentifires corresponding to indentifires in \code{hla_calls} and
 \code{kir_calls}. Importantly rows of \code{hla_calls} and
@@ -38,6 +38,8 @@ should be prepared. Valid choices are \code{"hla_allele"},
 \code{"aa_level"}, \code{"allele_g_group"}, \code{"allele_supertype"},
 \code{"allele_group"}, \code{"kir_genes"}, \code{"hla_kir_interactions"}.
 See details for further explanations.}
+
+\item{placeholder}{String}
 
 \item{...}{Attributes used in data transformation.}
 }
@@ -60,6 +62,10 @@ for  more details).
 hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 hla_calls <- readHlaCalls(hla_calls_file)
 
+# read kir calls file
+kir_calls_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+kir_calls <- readKirCalls(kir_calls_file, counts = TRUE)
+
 # read phenotypic data and covariates
 pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
 pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
@@ -68,10 +74,11 @@ covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
 phenotype <- left_join(pheno, covar, by ="ID")
 
 # create MiDAS object
-midas <- MiDAS(hla_calls = hla_calls,
-               phenotype = phenotype,
-               inheritance_model = "additive",
-               analysis_type = "hla_allele"
+midas <- prepareMiDAS(hla_calls = hla_calls,
+                      kir_calls = kir_calls,
+                      colData = phenotype,
+                      inheritance_model = "additive",
+                      analysis_type = "hla_allele"
 )
 
 }

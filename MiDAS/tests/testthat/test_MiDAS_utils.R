@@ -234,20 +234,6 @@ test_that("statistical models are statistical model", {
   expect_error(checkStatisticalModel(fake_model),
                "object need to have data attribute defined"
   )
-
-  fake_model <- list(call = list(formula = 1 ~ 1, data = "bigData"))
-  class(fake_model) <- "fake"
-  expect_error(checkStatisticalModel(fake_model),
-               "object's data need to be an object of class MiDAS"
-  )
-
-  fake_data <- midas
-  metadata(fake_data) <- NULL
-  fake_model <- list(call = list(formula = 1 ~ 1, data = fake_data))
-  class(fake_model) <- "fake"
-  expect_error(checkStatisticalModel(fake_model),
-               "inheritance_model is not a string \\(a length one character vector\\)."
-  )
 })
 
 test_that("is counts or zeros", {
@@ -490,5 +476,14 @@ test_that("check if function exists", {
   expect_error(
     assertthat::assert_that(functionExists("foo")),
     "Function foo could not be found."
+  )
+})
+
+test_that("is class", {
+  expect_equal(isClass("foo", "character"), TRUE)
+
+  expect_error(
+    assertthat::assert_that(isClassOrNULL("foo", "bar")),
+    "\"foo\" must be an instance of \"bar\"."
   )
 })

@@ -811,11 +811,12 @@ formatResults <- function(results,
 #' Variables frequencies are counted in reference to sample size, depending on
 #' the inheritance model under which the counts table has been generated one
 #' might need to take under consideration both gene copies. Here sample size is
-#' assumed to be depended on both gene copies if any count is greater than
-#' \code{1} (`n / (2 * j)` where `n` is the number of term occurrences and `j`
-#' is the sample size). If this is not the case the sample size is taken as is
+#' assumed to be depended on both gene copies for \code{"additive"} inheritance
+#' model (`n / (2 * j)` where `n` is the number of term occurrences and `j`
+#' is the sample size). For other models the sample size is taken as is
 #' (`n / j`).
 #'
+#' @inheritParams hlaCallsToCounts
 #' @param counts_table Data frame containing variables counts, such as produced
 #'   by \code{\link{hlaCallsToCounts}}.
 #'
@@ -830,16 +831,20 @@ formatResults <- function(results,
 #' hla_counts <- hlaCallsToCounts(hla_calls, inheritance_model = "additive")
 #' getCountsFrequencies(hla_counts)
 #'
-#' @importFrom assertthat assert_that
+#' @importFrom assertthat assert_that is.string
 #' @importFrom formattable percent
 #'
 #' @export
-getCountsFrequencies <- function(counts_table) {
+getCountsFrequencies <- function(counts_table,
+                                 inheritance_model = c("dominant", "recessive", "additive")) {
+  inheritance_model_choice <-  eval(formals()[["inheritance_model"]])
   assert_that(
     is.data.frame(counts_table),
     see_if(colnames(counts_table)[1] == "ID",
            msg = "first column of counts_table must be named ID"
-    )
+    ),
+    is.string(inheritance_model),
+    stringMatches(inheritance_model, choice = inheritance_model_choice)
   )
 
   counts_table <- counts_table[-1]
@@ -847,8 +852,7 @@ getCountsFrequencies <- function(counts_table) {
   counts_sums <- colSums(counts_table, na.rm = TRUE)
 
   # Under additive inheritance model population size equals 2 * nrow(counts_table), in other cases it's 1 * nrow(counts_table)
-  # here we are taking guess at it, which might be wrong especially in smaller population sizes
-  pop_mul <- ifelse(max(counts_table, na.rm = TRUE) > 1, 2, 1)
+  pop_mul <- ifelse(inheritance_model == "additive", 2, 1)
   counts_freq <- counts_sums / (pop_mul * nrow(counts_table))
 
   counts_df <- data.frame(

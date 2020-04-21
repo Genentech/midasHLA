@@ -74,6 +74,6 @@ analyzeAssociations(object = object,
 \code{\link[stats]{p.adjust}}, \code{\link[broom]{tidy}}
 
 Other MiDAS statistical functions: \code{\link{analyzeConditionalAssociations}},
-  \code{\link{runMiDASv2}}, \code{\link{runMiDAS}}
+  \code{\link{runMiDAS}}
 }
 \concept{MiDAS statistical functions}

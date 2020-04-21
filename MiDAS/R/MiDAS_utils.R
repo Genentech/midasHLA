@@ -467,17 +467,8 @@ checkStatisticalModel <- function(object) { # TODO simplyfy output of this funct
   )
 
   object_data <- eval(object_call[["data"]], envir = object_env)
-  assert_that(
-    see_if(
-      ! is.null(object_data),
-      msg = "object need to have data attribute defined"
-    ),
-    see_if(
-      is(object_data, "MiDAS"),
-      msg = "object's data need to be an object of class MiDAS"
-    ),
-    validObject(object_data)
-  )
+  assert_that(!is.null(object_data),
+              msg = "object need to have data attribute defined")
 }
 
 #' Check if vector contains only counts or zeros
@@ -1331,4 +1322,85 @@ functionExists <- function(name) {
 #'
 assertthat::on_failure(functionExists) <- function(call, env) {
   sprintf("Function %s could not be found.", call$name)
+}
+
+
+#' Add variables frequencies to runMiDAS results
+#'
+#' This is a helper function
+#'
+#' @param midas MiDAS object
+#' @param test_covar String giving name of test covariate
+#'
+#' @importFrom dplyr filter left_join rename select
+#' @importFrom magrittr %>%
+#' @importFrom rlang !! :=
+#'
+runMiDASGetVarsFreq <- function(midas, analysis_type, test_covar) {
+  variables_freq <- midas[[analysis_type]] %>%
+    experimentMatToDf() %>%
+    getCountsFrequencies(inheritance_model = getInheritanceModel(midas)) %>%
+    rename(Ntotal = .data$Counts, Ntotal.frequency = .data$Freq)
+
+  test_covar_vals <- factor(colData(midas)[[test_covar]])
+  if (nlevels(test_covar_vals) == 2) {
+    ids <- rownames(colData(midas))
+
+    lvl1_ids <- ids[test_covar_vals == levels(test_covar_vals)[1]]
+    lvl1_freq <- midas[[analysis_type]] %>%
+      experimentMatToDf() %>%
+      filter(.data[["ID"]] %in% lvl1_ids) %>%
+      getCountsFrequencies(inheritance_model = getInheritanceModel(midas)) %>%
+      rename(
+        !!sprintf("N(%s=%s)", test_covar, levels(test_covar_vals)[1]) := .data$Counts,
+        !!sprintf("N.frequency(%s=%s)", test_covar, levels(test_covar_vals)[1]) := .data$Freq
+      )
+    variables_freq <- left_join(variables_freq, lvl1_freq, by = "term")
+
+    lvl2_ids <- ids[test_covar_vals == levels(test_covar_vals)[2]]
+    lvl2_freq <- midas[[analysis_type]] %>%
+      experimentMatToDf() %>%
+      filter(.data[["ID"]] %in% lvl2_ids) %>%
+      getCountsFrequencies(inheritance_model = getInheritanceModel(midas)) %>%
+      rename(
+        !!sprintf("N(%s=%s)", test_covar, levels(test_covar_vals)[2]) := .data$Counts,
+        !!sprintf("N.frequency(%s=%s)", test_covar, levels(test_covar_vals)[2]) := .data$Freq
+      )
+    variables_freq <- left_join(variables_freq, lvl2_freq, by = "term")
+  }
+
+  return(variables_freq)
+}
+
+#' Check if object is of class x
+#'
+#' \code{isClassOrNULL} checks if object is an instance of a specified class or
+#' is null.
+#'
+#' @param x object to test.
+#' @param class String specifying class to test.
+#'
+#' @return Logical indicating if \code{x} is an instance of \code{class}.
+#'
+#' @family assert functions
+#'
+#' @importFrom assertthat assert_that
+#' @importFrom methods is
+#'
+isClass <- function(x, class) {
+  test <- is(x, class)
+
+  return(test)
+}
+
+#' Error message for isClass
+#'
+#' @inheritParams assertthat::on_failure
+#'
+assertthat::on_failure(isClass) <- function(call, env) {
+  paste0(deparse(call$x),
+         " must be an instance of ",
+         deparse(call$class),
+         "."
+  )
 }

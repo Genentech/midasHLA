@@ -4,11 +4,19 @@
 \alias{getCountsFrequencies}
 \title{Calculate variables frequencies}
 \usage{
-getCountsFrequencies(counts_table)
+getCountsFrequencies(counts_table, inheritance_model = c("dominant",
+  "recessive", "additive"))
 }
 \arguments{
 \item{counts_table}{Data frame containing variables counts, such as produced
 by \code{\link{hlaCallsToCounts}}.}
+
+\item{inheritance_model}{String specifying inheritance model to use.
+Available choices are \code{"dominant"}, \code{"recessive"},
+\code{"additive"}. In \code{"dominant"} model homozygotes and heterozygotes
+are coded as \code{1}. In \code{"recessive"} model homozygotes are coded as
+\code{1} and all other as \code{0}. In \code{"additive"} model homozygotes
+are coded as \code{2} and heterozygotes as \code{1}.}
 }
 \value{
 Data frame containing variables, its corresponding total counts
@@ -22,9 +30,9 @@ table, such as produced by \code{\link{hlaCallsToCounts}}.
 Variables frequencies are counted in reference to sample size, depending on
 the inheritance model under which the counts table has been generated one
 might need to take under consideration both gene copies. Here sample size is
-assumed to be depended on both gene copies if any count is greater than
-\code{1} (`n / (2 * j)` where `n` is the number of term occurrences and `j`
-is the sample size). If this is not the case the sample size is taken as is
+assumed to be depended on both gene copies for \code{"additive"} inheritance
+model (`n / (2 * j)` where `n` is the number of term occurrences and `j`
+is the sample size). For other models the sample size is taken as is
 (`n / j`).
 }
 \examples{

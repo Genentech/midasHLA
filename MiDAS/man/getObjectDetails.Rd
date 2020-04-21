@@ -15,9 +15,8 @@ List with following elemnts:
 \describe{
   \item{formula_vars}{Character containing names of variables in object
     formula}
-  \item{data}{Data frame associated with object}
+  \item{data}{MiDAS object associated with model}
   \item{data_vars}{Character containing names of variables in object data}
-  \item{data_labels}{Character containing labels of variables in object data}
 }
 }
 \description{
