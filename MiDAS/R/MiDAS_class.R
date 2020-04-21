@@ -256,6 +256,10 @@ as.data.frame.MiDAS <- function(x, row.names = NULL, optional = FALSE, ...) {
 #' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(hla_calls_file)
 #'
+#' # read kir calls file
+#' kir_calls_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+#' kir_calls <- readKirCalls(kir_calls_file, counts = TRUE)
+#'
 #' # read phenotypic data and covariates
 #' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
 #' pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
@@ -264,10 +268,11 @@ as.data.frame.MiDAS <- function(x, row.names = NULL, optional = FALSE, ...) {
 #' phenotype <- left_join(pheno, covar, by ="ID")
 #'
 #' # create MiDAS object
-#' midas <- MiDAS(hla_calls = hla_calls,
-#'                colData = phenotype,
-#'                inheritance_model = "additive",
-#'                analysis_type = "hla_allele"
+#' midas <- prepareMiDAS(hla_calls = hla_calls,
+#'                       kir_calls = kir_calls,
+#'                       colData = phenotype,
+#'                       inheritance_model = "additive",
+#'                       analysis_type = "hla_allele"
 #' )
 #'
 #' @importFrom assertthat assert_that see_if
@@ -673,6 +678,9 @@ dfToExperimentMat <- function(df) {
   cols <- df[["ID"]]
   mat <- t(subset(df, select = -ID))
   colnames(mat) <- cols
+
+  # convert to apropiate type
+  mat <- type.convert(mat, as.is = TRUE)
 
   return(mat)
 }
