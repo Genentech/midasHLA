@@ -35,3 +35,4 @@ Collate:
     'MiDAS_summarise.R'
     'MiDAS_transformationFunctions.R'
     'MiDAS_utils.R'
+    'data.R'

@@ -581,7 +581,7 @@ runMiDAS <- function(object,
 #'
 runMiDASMode <- function(x, mode) attr(x, mode)
 
-#' @rdnames runMiDAS #TODO fix documentation not being found
+#' @rdname runMiDAS
 #'
 #' @title runMiDAS linear mode
 #'

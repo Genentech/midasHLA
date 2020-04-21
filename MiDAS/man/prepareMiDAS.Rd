@@ -5,7 +5,6 @@
 \alias{prepareMiDAS_hla_allele}
 \title{Prepare MiDAS object for statistical analysis}
 \usage{
-<<<<<<< HEAD
 prepareMiDAS(hla_calls = NULL, kir_calls = NULL, colData,
   inheritance_model = c("additive", "dominant", "recessive"),
   analysis_type = c("hla_allele", "aa_level", "allele_g_group",
@@ -13,14 +12,6 @@ prepareMiDAS(hla_calls = NULL, kir_calls = NULL, colData,
   placeholder = "term", ...)
 
 prepareMiDAS_hla_allele(hla_calls, inheritance_model, ...)
-=======
-prepareMiDAS(hla_calls, ..., kir_counts = NULL,
-  analysis_type = c("hla_allele", "aa_level", "expression_level",
-  "allele_g_group", "allele_supertype", "allele_group", "kir_genes",
-  "hla_kir_interactions", "hla_divergence", "custom"),
-  inheritance_model = "additive", placeholder = "term",
-  indels = TRUE, unkchar = FALSE)
->>>>>>> devel
 }
 \arguments{
 \item{hla_calls}{Data frame containing HLA allele calls, as return by
@@ -29,20 +20,11 @@ prepareMiDAS(hla_calls, ..., kir_counts = NULL,
 \item{kir_calls}{Data frame containing KIR calls, as return by
 \code{\link{readKirCalls}} function.}
 
-<<<<<<< HEAD
 \item{colData}{Data frame holding additional variables like phenotypic
 observations or covariates. It have to contain \code{'ID'} column holding
 samples indentifires corresponding to indentifires in \code{hla_calls} and
 \code{kir_calls}. Importantly rows of \code{hla_calls} and
 \code{kir_calls} without corresponding phenotype are discarded.}
-=======
-\item{analysis_type}{Character vector indicating analysis type for which data
-should be prepared. Valid choices are \code{"hla_allele"},
-\code{"aa_level"}, \code{"expression_level"}, \code{"allele_group"},
-\code{"hla_divergence"}, \code{"custom"}. Each prepared variable will
-be labeled with corresponding
-\code{analysis_type}. See details for further explanations.}
->>>>>>> devel
 
 \item{inheritance_model}{String specifying inheritance model to use.
 Available choices are \code{"dominant"}, \code{"recessive"},
@@ -71,77 +53,9 @@ Matrix
 to selected analysis creating \code{\link{MiDAS}} object.
 }
 \details{
-<<<<<<< HEAD
 \code{'hla_allele'} - \code{hla_calls} are transformed into counts
 under \code{inheritance_model} of choice (see \code{\link{hlaCallsToCounts}}
 for  more details).
-=======
-Data frames passed as arguments to the function are joined using
-\code{hla_calls} as a reference. As a consequence all samples with HLA data
-are kept, independent of whether there's actually phenotypes / covariates.
-Moreover phenotypes / covariates without HLA data are discarded.
-
-\code{...} should be data frames with first column holding sample IDs and
-named \code{ID}. Those should correspond to \code{ID} column in
-\code{hla_calls} and \code{kir_counts}.
-
-Choices for \code{analysis_type}:
-\describe{
-  \item{\code{hla_allele}}{
-    \code{hla_calls} are transformed into counts under
-    \code{inheritance_model} of choice (see \code{\link{hlaCallsToCounts}}
-    for more details).
-  }
-  \item{\code{aa_level}}{
-    \code{hla_calls} are first converted to amino acid level, taking only
-    variable positions under consideration. Than variable amino acid
-    positions are transformed to counts under \code{inheritance_model} of
-    choice (see \code{\link{hlaToAAVariation}} and
-    \code{\link{aaVariationToCounts}} for more details).
-  }
-  \item{\code{expression_level}}{
-    \code{hla_calls} are transformed to expression levels using expression
-    dictionaries shipped with package (see \code{\link{hlaToVariable}} for
-    more details). Expression levels from both alleles are summed into single
-    variable for each HLA gene.
-  }
-  \item{\code{allele_g_group}}{
-    \code{hla_calls} are transformed to HLA alleles groups using G group
-    dictionary shipped with the package. Than they are transformed to counts
-    under \code{inheritance_model} of choice (see \code{\link{hlaToVariable}}
-    and \code{\link{hlaCallsToCounts}} for more details).
-  }
-. \item{\code{allele_supertype}}{
-    \code{hla_calls} are transformed to HLA alleles groups using supertypes
-    dictionary shipped with the package. Than they are transformed to counts
-    under \code{inheritance_model} of choice (see \code{\link{hlaToVariable}}
-    and \code{\link{hlaCallsToCounts}} for more details).
-  }
-  \item{\code{allele_group}}{
-    \code{hla_calls} are transformed to HLA alleles groups using Bw4/6, C1/2
-    and Bw4+A23+A24+A32 dictionaries shipped with the package. Than they are
-    transformed to counts under \code{inheritance_model} of choice
-    (see \code{\link{hlaToVariable}} and \code{\link{hlaCallsToCounts}} for
-    more details).
-  }
-  \item{\code{kir_genes}}{
-    \code{kir_counts} data frame is joined with other inputs.
-  }
-  \item{\code{hla_kir_interactions}}{
-    \code{hla_calls} are processed with \code{kir_counts} into HLA - KIR
-    interactions variables (see \code{\link{getHlaKirInteractions}} for more
-    details).
-  }
-  \item{\code{hla_divergence}}{
-    Distances between Class I alleles are calculated using Grantham distance,
-    as implemented in \code{hlaCallsGranthamDistance} function. Additionally
-    average distance in Class I genese is calculated.
-  }
-  \item{\code{custom}}{
-    No data transformation is done. All inputs are joined together.
-  }
-}
->>>>>>> devel
 }
 \examples{
 # read hla calls file
