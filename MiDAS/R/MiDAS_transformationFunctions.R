@@ -80,24 +80,32 @@ hlaToAAVariation <- function(hla_calls,
     gene_names_uniq <- gene_names_uniq[av_genes_idx]
   }
 
-  hla_resolution <- vapply(X = gene_names_uniq,
-                           FUN = function(x) {
-                             x_numbers <- unlist(hla_calls[, gene_names == x])
-                             x_res <- getAlleleResolution(na.omit(x_numbers))
-                             return(min(x_res))
-                           },
-                           FUN.VALUE = numeric(length = 1),
-                           USE.NAMES = TRUE
-  )
+  # hla_resolution <- vapply(X = gene_names_uniq,
+  #                          FUN = function(x) {
+  #                            x_numbers <- unlist(hla_calls[, gene_names == x])
+  #                            x_res <- getAlleleResolution(na.omit(x_numbers))
+  #                            return(min(x_res))
+  #                          },
+  #                          FUN.VALUE = numeric(length = 1),
+  #                          USE.NAMES = TRUE
+  # )
 
   # read alignment matrices and convert to desired resolution
   hla_aln <- lapply(X = gene_names_uniq,
                     FUN = function(x) {
-                      aln <- readHlaAlignments(
-                        gene = x,
-                        resolution = hla_resolution[x],
-                        unkchar = "*"
+                      alns <- lapply(
+                        X = c(2, 4, 6, 8),
+                        FUN = function(res) {
+                          readHlaAlignments(
+                            gene = x,
+                            resolution = res,
+                            unkchar = "*"
+                          )
+                        }
                       )
+                      aln <- do.call(rbind, alns)
+                      aln <- aln[! duplicated(rownames(aln)), ]
+
                       return(aln)
                     }
   )
@@ -107,8 +115,20 @@ hlaToAAVariation <- function(hla_calls,
   for (i in 1:length(gene_names_uniq)) {
     x_calls <- hla_calls[, gene_names == gene_names_uniq[i]]
 
+    # mark alleles w/o reference as NAs
+    x_calls_unlist <- unlist(x_calls)
+    ref_allele <- rownames(hla_aln[[i]])
+    mask_alleles_wo_ref <- ! x_calls_unlist %in% ref_allele
+    if (any(mask_alleles_wo_ref, na.rm = TRUE)) {
+      warn(sprintf(
+        "Alignments for alleles %s are not available and will be omitted.",
+        paste(x_calls_unlist[! mask_alleles_wo_ref], collapse = ", ")
+      ))
+      x_calls_unlist[mask_alleles_wo_ref] <- NA
+    }
+
     # check if there is possibility for variability
-    x_calls_uniq <- na.omit(unique(unlist(x_calls)))
+    x_calls_uniq <- na.omit(unique(x_calls_unlist))
     if (length(x_calls_uniq) <= 1) next()
 
     # get variable aa positions
