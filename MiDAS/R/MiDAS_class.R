@@ -214,14 +214,7 @@ setMethod(
 
 #' @rdname as.data.frame
 #'
-# setMethod(
-#   f = "as.data.frame",
-#   signature = "MiDAS",
-#   definition = function(x, row.names = NULL, optional = FALSE, ...) {
-#     x <- colData(x)
-#     callNextMethod(x, row.names = NULL, optional = FALSE, ...)
-#   }
-# )
+#' @export
 as.data.frame.MiDAS <- function(x, row.names = NULL, optional = FALSE, ...) {
     x <- colData(x)
     as.data.frame(x, row.names = NULL, optional = FALSE, ...)
