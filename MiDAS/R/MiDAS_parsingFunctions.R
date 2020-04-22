@@ -244,7 +244,7 @@ readHlaAlignments <- function(file,
                                            resolution = resolution
   )
   unique_numbers <- ! duplicated(allele_numbers)
-  aln <- aln[unique_numbers, ]
+  aln <- aln[unique_numbers, , drop = FALSE]
   rownames(aln) <- allele_numbers[unique_numbers]
 
 
