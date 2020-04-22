@@ -3,6 +3,7 @@ context("Transforming MiDAS objects")
 test_that("Amino acids variability is infered correctly", {
   hla_calls <- system.file("extdata/HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(hla_calls)
+  # hla_calls <- MiDAS_tut_HLA
   aa_variation <-
     hlaToAAVariation(hla_calls,
                      indels = TRUE,
