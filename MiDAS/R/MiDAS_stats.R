@@ -602,7 +602,6 @@ runMiDASMode(runMiDAS, mode = "linear") <- function(object,
                                                      exponentiate = FALSE,
                                                      ...) {
   # all runMiDAS's formal arguments should be already asserted
-
   object_details <- getObjectDetails(object)
 
   # only experiments of class matrix can be used here
@@ -638,16 +637,18 @@ runMiDASMode(runMiDAS, mode = "linear") <- function(object,
 
   # format linear results
   ## add variables frequencies
-  results <-
-    left_join(
-      results,
-      runMiDASGetVarsFreq(
-        midas = object_details$data,
-        analysis_type = analysis_type,
-        test_covar = object_details$formula_vars[1]
-      ),
-      by = "term"
-    )
+  if (typeof(object_details$data[[analysis_type]]) == "integer") {
+    results <-
+      left_join(
+        results,
+        runMiDASGetVarsFreq(
+          midas = object_details$data,
+          analysis_type = analysis_type,
+          test_covar = object_details$formula_vars[1]
+        ),
+        by = "term"
+      )
+  }
 
   ## rename term
   term_name <- switch (analysis_type,
@@ -747,35 +748,37 @@ runMiDASMode(runMiDAS, mode = "conditional") <- function(object,
                        "term"
   )
 
-  if (keep) {
-    results <- lapply(
-      X = results,
-      FUN = function(x) {
-        x <-
-          left_join(
-            x,
-            runMiDASGetVarsFreq(
-              midas = object_details$data,
-              analysis_type = analysis_type,
-              test_covar = object_details$formula_vars[1]
-            ),
-            by = "term"
-          )
-        rename(.data = x, !! term_name := .data$term)
-      }
-    )
-  } else {
-    results <-
-      left_join(
-        results,
-        runMiDASGetVarsFreq(
-          midas = object_details$data,
-          analysis_type = analysis_type,
-          test_covar = object_details$formula_vars[1]
-        ),
-        by = "term"
+  if (typeof(object_details$data[[analysis_type]]) == "integer") {
+    if (keep) {
+      results <- lapply(
+        X = results,
+        FUN = function(x) {
+          x <-
+            left_join(
+              x,
+              runMiDASGetVarsFreq(
+                midas = object_details$data,
+                analysis_type = analysis_type,
+                test_covar = object_details$formula_vars[1]
+              ),
+              by = "term"
+            )
+          rename(.data = x, !! term_name := .data$term)
+        }
       )
-    results <- rename(results, !! term_name := .data$term)
+    } else {
+      results <-
+        left_join(
+          results,
+          runMiDASGetVarsFreq(
+            midas = object_details$data,
+            analysis_type = analysis_type,
+            test_covar = object_details$formula_vars[1]
+          ),
+          by = "term"
+        )
+      results <- rename(results, !! term_name := .data$term)
+    }
   }
 
   return(results)

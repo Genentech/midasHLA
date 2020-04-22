@@ -148,12 +148,15 @@ test_that("HLA statistical models are updated properly", {
   pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-  midas_data <-
-    prepareMiDAS(hla_calls,
-                     pheno,
-                     covar,
-                     analysis_type = "hla_allele",
-                     inheritance_model = "additive")
+  coldata <- dplyr::left_join(pheno, covar, by = "ID")
+  midas <-
+    prepareMiDAS(
+      hla_calls,
+      colData = coldata,
+      analysis_type = "hla_allele",
+      inheritance_model = "additive"
+    )
+  midas_data <- midasToWide(midas, analysis_type = "hla_allele")
   coxmod <- coxph(Surv(OS, OS_DIED) ~ 1, data = midas_data)
   coxmod$call$data <- midas_data
   coxmod_test <- coxph(Surv(OS, OS_DIED) ~ `A*01:01`, data = midas_data)
@@ -452,20 +455,20 @@ test_that("phenotype data is properly formatted", {
     letter = LETTERS[1:5]
   )
 
-  expect_equal(checkPhenotypeFormat(pheno), TRUE)
+  expect_equal(checkColDataFormat(pheno), TRUE)
 
   expect_error(
-    checkPhenotypeFormat(LETTERS),
+    checkColDataFormat(LETTERS),
     "LETTERS have to be a data frame"
   )
 
   expect_error(
-    checkPhenotypeFormat(data.frame()),
+    checkColDataFormat(data.frame()),
     "data.frame\\(\\) have to have at least 1 row and 2 columns"
   )
 
   expect_error(
-    checkPhenotypeFormat(pheno[, 2, drop = FALSE]),
+    checkColDataFormat(pheno[, 2, drop = FALSE]),
     "pheno\\[, 2, drop = FALSE\\] have to have at least 1 row and 2 columns"
   )
 })

@@ -518,7 +518,7 @@ test_that("MiDAS data for hla_kir_interactions analysis is prepared properly", {
       hla_calls = hla_calls,
       genes = c("A", "B", "C")
     )
-    experiment_test <- rowMeans(experiment_test[-1])
+    experiment_test$ABC_avg <- rowMeans(experiment_test[-1])
     experiment_test <- dfToExperimentMat(experiment_test)
 
     expect_equal(experiment, experiment_test)

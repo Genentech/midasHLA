@@ -259,7 +259,8 @@ test_that("MiDAS associations are analyzed properly", {
       "allele_supertype",
       "allele_group",
       "kir_genes",
-      "hla_kir_interactions"
+      "hla_kir_interactions",
+      "hla_divergence"
     )
   for (analysis_type in analysis_type_choice) {
     object <- lm(OS_DIED ~ AGE + SEX + term, data = midas)
@@ -274,13 +275,16 @@ test_that("MiDAS associations are analyzed properly", {
     test_variables <- rownames(midas[[analysis_type]])
     test_res <-
       analyzeAssociations(object, variables = test_variables, exponentiate = FALSE)
-    variables_freq <-
-      MiDAS:::runMiDASGetVarsFreq(
-        midas = midas,
-        analysis_type = analysis_type,
-        test_covar = all.vars(formula(object))[1]
-      )
-    test_res <- dplyr::left_join(test_res, variables_freq, by = "term")
+
+    if (typeof(midas[[analysis_type]]) == "integer") {
+      variables_freq <-
+        MiDAS:::runMiDASGetVarsFreq(
+          midas = midas,
+          analysis_type = analysis_type,
+          test_covar = all.vars(formula(object))[1]
+        )
+      test_res <- dplyr::left_join(test_res, variables_freq, by = "term")
+    }
 
     term_name <- switch (analysis_type,
                          "hla_allele" = "allele",
@@ -311,7 +315,8 @@ test_that("MiDAS associations are analyzed properly", {
       "allele_supertype",
       "allele_group",
       "kir_genes",
-      "hla_kir_interactions"
+      "hla_kir_interactions",
+      "hla_divergence"
     )
   for (analysis_type in analysis_type_choice) {
     object <- lm(OS_DIED ~ AGE + SEX + term, data = midas)
@@ -334,13 +339,16 @@ test_that("MiDAS associations are analyzed properly", {
         th = th,
         keep = keep
       )
-    variables_freq <-
-      MiDAS:::runMiDASGetVarsFreq(
-        midas = midas,
-        analysis_type = analysis_type,
-        test_covar = all.vars(formula(object))[1]
-      )
-    test_res <- dplyr::left_join(test_res, variables_freq, by = "term")
+
+    if (typeof(midas[[analysis_type]]) == "integer") {
+      variables_freq <-
+        MiDAS:::runMiDASGetVarsFreq(
+          midas = midas,
+          analysis_type = analysis_type,
+          test_covar = all.vars(formula(object))[1]
+        )
+      test_res <- dplyr::left_join(test_res, variables_freq, by = "term")
+    }
 
     term_name <- switch (analysis_type,
                          "hla_allele" = "allele",
@@ -371,7 +379,8 @@ test_that("MiDAS associations are analyzed properly", {
       "allele_supertype",
       "allele_group",
       "kir_genes",
-      "hla_kir_interactions"
+      "hla_kir_interactions",
+      "hla_divergence"
     )
   for (analysis_type in analysis_type_choice) {
     object <- lm(OS_DIED ~ AGE + SEX + term, data = midas)
@@ -394,13 +403,18 @@ test_that("MiDAS associations are analyzed properly", {
         th = th,
         keep = keep
       )
-    variables_freq <-
-      MiDAS:::runMiDASGetVarsFreq(
-        midas = midas,
-        analysis_type = analysis_type,
-        test_covar = all.vars(formula(object))[1]
-      )
-    test_res <- lapply(test_res, function(x) dplyr::left_join(x, variables_freq, by = "term"))
+
+    if (typeof(midas[[analysis_type]]) == "integer") {
+      variables_freq <-
+        MiDAS:::runMiDASGetVarsFreq(
+          midas = midas,
+          analysis_type = analysis_type,
+          test_covar = all.vars(formula(object))[1]
+        )
+      test_res <-
+        lapply(test_res, function(x)
+          dplyr::left_join(x, variables_freq, by = "term"))
+    }
 
     term_name <- switch (analysis_type,
                          "hla_allele" = "allele",
@@ -484,7 +498,15 @@ test_that("amino acid omnibus test works fine", {
   pheno <- read.table(pheno_file, header = TRUE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE)
-  midas_data <- prepareMiDAS(hla_calls, pheno, covar, analysis_type = "aa_level")
+  coldata <- dplyr::left_join(pheno, covar, by = "ID")
+  midas <-
+    prepareMiDAS(
+      hla_calls,
+      colData = coldata,
+      inheritance_model = "dominant",
+      analysis_type = "aa_level"
+    )
+  midas_data <- midasToWide(midas, analysis_type = "aa_level")
   object <- lm(OS ~ AGE + SEX + term, data = midas_data)
   omnibus_res <- aaPosOmnibusTest(object, aa_pos = c("B_35", "E_128", "A_270"))
 
@@ -494,8 +516,8 @@ test_that("amino acid omnibus test works fine", {
   LRT <- lapply(list(obj_B35, obj_E128, obj_A270), LRTest, mod0 = object)
   omnibus_res_test <- data.frame(
     aa_pos = c("B_35", "E_128", "A_270"),
-    residues = c("A, S", "R, G", "A, S"),
-    d.f. = c(1, 1, 1),
+    residues = c("A, S", "G, R", "A, S"),
+    d.f. = sapply(LRT, `[[`, "dof"),
     statistic = sapply(LRT, `[[`, "statistic"),
     p.value = sapply(LRT, `[[`, "p.value"),
     p.adjusted = p.adjust(sapply(LRT, `[[`, "p.value"), method = "bonferroni"),
