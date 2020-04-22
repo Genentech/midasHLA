@@ -55,6 +55,8 @@ hla_calls <- readHlaCalls(hla_calls_file)
 kable(hla_calls) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
   scroll_box(width = "100%", height = "200px")
+
+coldata <- dplyr::left_join(pheno, covar, by = "ID")
 ```
 
 ## Creating midas data sets
@@ -67,8 +69,7 @@ alleles supertypes. This can be controled using `analysis_type` argument.
 
 ```{r creating_midas_data_set}
 midas_data <- prepareMiDAS(hla_calls = hla_calls,
-                               pheno = pheno,
-                               covar = covar,
+                               colData = coldata,
                                analysis_type = "hla_allele",
                                inheritance_model = "additive"
 )
@@ -82,7 +83,7 @@ kable(midas_data) %>%
 ```{r association_analysis}
 # Logistic regression
 object <- glm(OS_DIED ~ AGE + SEX + term, data = midas_data, family = binomial(link = "logit"))
-glm_results <- runMiDAS(object, analysis_type = "hla_allele")
+glm_results <- runMiDAS(object, mode = "linear", analysis_type = "hla_allele")
 
 kable(glm_results) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
@@ -90,7 +91,7 @@ kable(glm_results) %>%
 
 # Linear regression
 object <- lm(OS ~ AGE + SEX + term, data = midas_data)
-lm_results <-  runMiDAS(object, analysis_type = "hla_allele")
+lm_results <-  runMiDAS(object, mode = "linear", analysis_type = "hla_allele")
 
 kable(lm_results) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
@@ -99,7 +100,7 @@ kable(lm_results) %>%
 # Cox survival analysis
 library("survival")
 object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX + term, data = midas_data)
-coxph_results <- runMiDAS(object, analysis_type = "hla_allele")
+coxph_results <- runMiDAS(object, mode = "linear", analysis_type = "hla_allele")
 
 kable(lm_results) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
@@ -115,11 +116,9 @@ variables in one go.
 
 ```{r hla_to_variables}
 midas_data <- prepareMiDAS(hla_calls = hla_calls,
-                               pheno = pheno,
-                               covar = covar,
+                               colData = coldata,
                                analysis_type = c("hla_allele", 
                                                  "aa_level", 
-                                                 "expression_level", 
                                                  "allele_g_group", 
                                                  "allele_supertype", 
                                                  "allele_group"
@@ -132,7 +131,7 @@ kable(midas_data) %>%
   scroll_box(width = "100%", height = "200px")
 
 object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX + term, data = midas_data)
-coxph_results <- runMiDAS(object, analysis_type = "hla_allele", conditional = TRUE)
+coxph_results <- runMiDAS(object, mode = "linear", analysis_type = "hla_allele", conditional = TRUE)
 
 kable(coxph_results) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
