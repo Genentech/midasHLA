@@ -46,6 +46,7 @@ is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
 \link[stats]{p.adjust}.
 }
 \examples{
+\dontrun{
 library("survival")
 hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 hla_calls <- readHlaCalls(hla_calls_file)
@@ -68,6 +69,7 @@ object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX + term, data = midas_data)
 analyzeAssociations(object = object,
                     variables = c("B*14:02", "DRB1*11:01")
 )
+}
 
 }
 \seealso{

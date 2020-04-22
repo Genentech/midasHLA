@@ -36,15 +36,3 @@ with extended model, that is created by including effect of amino acid
 residues at each position in \code{aa_pos}. Amino acid effect is assumend to
 be simply additive.
 }
-\examples{
-hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-hla_calls <- readHlaCalls(hla_calls_file)
-pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-pheno <- read.table(pheno_file, header = TRUE)
-covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-covar <- read.table(covar_file, header = TRUE)
-midas_data <- prepareMiDAS(hla_calls, pheno, covar, analysis_type = "aa_level")
-object <- lm(OS ~ AGE + SEX, data = midas_data)
-aaPosOmnibusTest(object, aa_pos = c("B_35", "E_128", "A_270"))
-
-}

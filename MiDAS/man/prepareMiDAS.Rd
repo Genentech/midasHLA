@@ -58,6 +58,7 @@ under \code{inheritance_model} of choice (see \code{\link{hlaCallsToCounts}}
 for  more details).
 }
 \examples{
+\dontrun{
 # read hla calls file
 hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 hla_calls <- readHlaCalls(hla_calls_file)
@@ -80,5 +81,6 @@ midas <- prepareMiDAS(hla_calls = hla_calls,
                       inheritance_model = "additive",
                       analysis_type = "hla_allele"
 )
+}
 
 }

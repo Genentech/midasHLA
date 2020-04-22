@@ -19,7 +19,7 @@ Logical indicating if \code{kir_calls} follows kir calls data frame
 format.
 }
 \examples{
-file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
+file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
 kir_calls <- readKirCalls(file)
 checkKirCallsFormat(kir_calls)
 

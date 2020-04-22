@@ -725,6 +725,7 @@ countsToHlaCalls <- function(counts) {
 #'   \code{\link{analyzeConditionalAssociations}}.
 #'
 #' @examples
+#' \dontrun{
 #' hla_calls <- readHlaCalls(system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS"))
 #' pheno <- read.table(
 #'   system.file("extdata", "pheno_example.txt", package = "MiDAS"),
@@ -738,6 +739,7 @@ countsToHlaCalls <- function(counts) {
 #'               select_cols = c("allele" = "term", "p.value"),
 #'               format = "html",
 #'               header = "HLA allelic associations")
+#' }
 #'
 #' @importFrom assertthat assert_that
 #' @importFrom dplyr arrange filter select
@@ -826,10 +828,12 @@ formatResults <- function(results,
 #' @seealso \code{\link{hlaCallsToCounts}}
 #'
 #' @examples
+#' \dontrun{
 #' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(file)
 #' hla_counts <- hlaCallsToCounts(hla_calls, inheritance_model = "additive")
 #' getCountsFrequencies(hla_counts)
+#' }
 #'
 #' @importFrom assertthat assert_that is.string
 #' @importFrom formattable percent

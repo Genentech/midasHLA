@@ -31,6 +31,7 @@
 #' @seealso \code{\link[stats]{p.adjust}}, \code{\link[broom]{tidy}}
 #'
 #' @examples
+#' \dontrun{
 #' library("survival")
 #' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(hla_calls_file)
@@ -53,6 +54,7 @@
 #' analyzeAssociations(object = object,
 #'                     variables = c("B*14:02", "DRB1*11:01")
 #' )
+#' }
 #'
 #' @importFrom assertthat assert_that see_if is.string
 #' @importFrom broom tidy
@@ -168,6 +170,7 @@ analyzeAssociations <- function(object,
 #' @seealso \code{\link[stats]{p.adjust}}, \code{\link[broom]{tidy}}
 #'
 #' @examples
+#' \dontrun{
 #' library("survival")
 #' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(hla_calls_file)
@@ -189,6 +192,7 @@ analyzeAssociations <- function(object,
 #'                             th = 0.05,
 #'                             rss_th = 1e-07
 #' )
+#' }
 #'
 #' @importFrom assertthat assert_that is.number is.string
 #' @importFrom dplyr bind_rows tibble
@@ -347,17 +351,6 @@ analyzeConditionalAssociations <- function(object,
 #' @return Data frame containing omnibus test results for specified amino acid
 #'   positions.
 #'
-#' @examples
-#' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-#' hla_calls <- readHlaCalls(hla_calls_file)
-#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-#' pheno <- read.table(pheno_file, header = TRUE)
-#' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-#' covar <- read.table(covar_file, header = TRUE)
-#' midas_data <- prepareMiDAS(hla_calls, pheno, covar, analysis_type = "aa_level")
-#' object <- lm(OS ~ AGE + SEX, data = midas_data)
-#' aaPosOmnibusTest(object, aa_pos = c("B_35", "E_128", "A_270"))
-#'
 #' @importFrom assertthat assert_that see_if is.string
 #' @importFrom broom tidy
 #' @importFrom dplyr bind_cols mutate select
@@ -490,6 +483,7 @@ aaPosOmnibusTest <- function(object,
 #' @seealso \code{\link[stats]{p.adjust}}, \code{\link[broom]{tidy}}
 #'
 #' @examples
+#' \dontrun{
 #' # read hla calls file
 #' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(hla_calls_file)
@@ -518,6 +512,7 @@ aaPosOmnibusTest <- function(object,
 #'
 #' # run analysis
 #' runMiDAS(object, mode = "linear", analysis_type = "hla_allele")
+#' }
 #'
 #' @importFrom assertthat assert_that is.number is.string
 #'
@@ -536,12 +531,14 @@ runMiDAS <- function(object,
   )
   object_details <- getObjectDetails(object)
 
+  mode_choice <- names(attributes(runMiDAS))
+  mode_choice <- mode_choice[! mode_choice %in% "srcref"]
   assert_that(
     isClass(object_details$data, "MiDAS"),
     validObject(object_details$data),
     objectHasPlaceholder(object, getPlaceholder(object_details$data)),
     is.string(mode),
-    stringMatches(mode, choice = names(attributes(runMiDAS))[-1]),
+    stringMatches(mode, choice = mode_choice),
     is.string(analysis_type),
     stringMatches(analysis_type, choice = getAnalysisType(object_details$data)),
     is.string(correction),
@@ -595,12 +592,12 @@ runMiDASMode <- function(x, mode) attr(x, mode)
 #' @importFrom rlang call_modify !! :=
 #'
 runMiDASMode(runMiDAS, mode = "linear") <- function(object,
-                                                     mode,
-                                                     analysis_type,
-                                                     correction = "bonferroni",
-                                                     n_correction = NULL,
-                                                     exponentiate = FALSE,
-                                                     ...) {
+                                                    mode,
+                                                    analysis_type,
+                                                    correction = "bonferroni",
+                                                    n_correction = NULL,
+                                                    exponentiate = FALSE,
+                                                    ...) {
   # all runMiDAS's formal arguments should be already asserted
   object_details <- getObjectDetails(object)
 

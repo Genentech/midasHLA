@@ -37,6 +37,7 @@ Character vector of formatted table source code.
 latex format.
 }
 \examples{
+\dontrun{
 hla_calls <- readHlaCalls(system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS"))
 pheno <- read.table(
   system.file("extdata", "pheno_example.txt", package = "MiDAS"),
@@ -50,6 +51,7 @@ formatResults(res,
               select_cols = c("allele" = "term", "p.value"),
               format = "html",
               header = "HLA allelic associations")
+}
 
 }
 \seealso{

@@ -18,9 +18,11 @@ Logical indicating if \code{data_frame} is properly formatted.
 \code{checkColDataFormat} asserts if colData data frame has proper format.
 }
 \examples{
+\dontrun{
 pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
 pheno <- read.table(pheno_file, header = TRUE)
 checkColDataFormat(pheno)
+}
 
 }
 \seealso{

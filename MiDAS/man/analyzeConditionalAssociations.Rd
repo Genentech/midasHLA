@@ -58,6 +58,7 @@ more significant variables based on a self-defined threshold.
 Selection criteria is the p-value from the test on coefficients values.
 }
 \examples{
+\dontrun{
 library("survival")
 hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 hla_calls <- readHlaCalls(hla_calls_file)
@@ -79,6 +80,7 @@ analyzeConditionalAssociations(object,
                             th = 0.05,
                             rss_th = 1e-07
 )
+}
 
 }
 \seealso{

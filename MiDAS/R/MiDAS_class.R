@@ -245,6 +245,7 @@ as.data.frame.MiDAS <- function(x, row.names = NULL, optional = FALSE, ...) {
 #' @return Object of class \code{\link{MiDAS}}
 #'
 #' @examples
+#' \dontrun{
 #' # read hla calls file
 #' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(hla_calls_file)
@@ -267,6 +268,7 @@ as.data.frame.MiDAS <- function(x, row.names = NULL, optional = FALSE, ...) {
 #'                       inheritance_model = "additive",
 #'                       analysis_type = "hla_allele"
 #' )
+#' }
 #'
 #' @importFrom assertthat assert_that see_if
 #' @importFrom MultiAssayExperiment ExperimentList MultiAssayExperiment

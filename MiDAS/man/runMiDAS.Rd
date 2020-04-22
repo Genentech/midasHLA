@@ -58,6 +58,7 @@ is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
 \link[stats]{p.adjust}. Check there to get more details.
 }
 \examples{
+\dontrun{
 # read hla calls file
 hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 hla_calls <- readHlaCalls(hla_calls_file)
@@ -86,6 +87,7 @@ object <- lm(OS ~ AGE + SEX + term, data = midas)
 
 # run analysis
 runMiDAS(object, mode = "linear", analysis_type = "hla_allele")
+}
 
 }
 \seealso{

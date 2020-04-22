@@ -36,10 +36,12 @@ is the sample size). For other models the sample size is taken as is
 (`n / j`).
 }
 \examples{
+\dontrun{
 file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 hla_calls <- readHlaCalls(file)
 hla_counts <- hlaCallsToCounts(hla_calls, inheritance_model = "additive")
 getCountsFrequencies(hla_counts)
+}
 
 }
 \seealso{

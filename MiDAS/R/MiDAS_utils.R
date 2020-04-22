@@ -1157,9 +1157,11 @@ getObjectDetails <- function(object) {
 #'
 #' @importFrom assertthat assert_that see_if
 #' @examples
+#' \dontrun{
 #' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
 #' pheno <- read.table(pheno_file, header = TRUE)
 #' checkColDataFormat(pheno)
+#' }
 #'
 checkColDataFormat <- function(data_frame) {
   data_frame_name <- deparse(substitute(data_frame))
@@ -1201,7 +1203,7 @@ checkColDataFormat <- function(data_frame) {
 #'
 #' @importFrom assertthat assert_that see_if
 #' @examples
-#' file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
+#' file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
 #' kir_calls <- readKirCalls(file)
 #' checkKirCallsFormat(kir_calls)
 #'
