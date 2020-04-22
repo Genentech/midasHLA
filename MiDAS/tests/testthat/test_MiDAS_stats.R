@@ -221,7 +221,7 @@ test_that("Stepwise conditional alleles subset selection", {
 test_that("MiDAS associations are analyzed properly", {
   hla_calls_file <-
     system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(hla_calls_file)
+  hla_calls <- readHlaCalls(hla_calls_file)[, 1:11] # TODO this was taking tooo much time
   kir_file <-
     system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
   kir_calls <- readKirCalls(kir_file, counts = TRUE)
