@@ -113,7 +113,7 @@ hlaToAAVariation <- function(hla_calls,
   # get aa variations for each gene
   aa_variation <- list()
   for (i in 1:length(gene_names_uniq)) {
-    x_calls <- hla_calls[, gene_names == gene_names_uniq[i]]
+    x_calls <- hla_calls[, gene_names == gene_names_uniq[i], drop = FALSE]
 
     # mark alleles w/o reference as NAs
     x_calls_unlist <- unlist(x_calls)
@@ -153,7 +153,7 @@ hlaToAAVariation <- function(hla_calls,
                   },
                   FUN.VALUE = numeric(length = 2)
     ))
-    var_aln <- var_aln[, ord]
+    var_aln <- var_aln[, ord, drop = FALSE]
 
     aa_variation[[length(aa_variation) + 1]] <- var_aln
   }
