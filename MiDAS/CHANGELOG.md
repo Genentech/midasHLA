@@ -1,3 +1,6 @@
+## 0.0.9046 - 10/05/20
++ fixes bug causing prepareMiDAS to fail on 1 row hla_calls input for 'aa_level' analysis_type
+
 ## 0.0.9045 - 10/05/20
 + fix bug treating NA values as distinct amino acid, that was adding false columns to amino acids counts
 
