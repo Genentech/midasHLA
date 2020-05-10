@@ -119,10 +119,10 @@ hlaToAAVariation <- function(hla_calls,
     x_calls_unlist <- unlist(x_calls)
     ref_allele <- rownames(hla_aln[[i]])
     mask_alleles_wo_ref <- ! x_calls_unlist %in% ref_allele
-    if (any(mask_alleles_wo_ref, na.rm = TRUE)) {
+    if (any(mask_alleles_wo_ref[! is.na(x_calls_unlist)], na.rm = TRUE)) {
       warn(sprintf(
         "Alignments for alleles %s are not available and will be omitted.",
-        paste(x_calls_unlist[! mask_alleles_wo_ref], collapse = ", ")
+        paste(x_calls_unlist[mask_alleles_wo_ref], collapse = ", ")
       ))
       x_calls_unlist[mask_alleles_wo_ref] <- NA
     }
