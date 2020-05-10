@@ -1,4 +1,7 @@
-## 0.0.9043 - 10/05/20
+## 0.0.9045 - 10/05/20
++ fix bug treating NA values as distinct amino acid, that was adding false columns to amino acids counts
+
+## 0.0.9044 - 10/05/20
 + changes amino acids numbering scheme to addhere with EBI convention where numbering starts from -30 position
 
 ## 0.0.9043 - 22/04/20
