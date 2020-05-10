@@ -533,6 +533,7 @@ getHlaFrequencies <- function(hla_calls) {
 #'
 #' @importFrom assertthat assert_that is.string
 #' @importFrom qdapTools mtabulate
+#' @importFrom stats na.omit
 #'
 #' @export
 aaVariationToCounts <- function(aa_variation,
@@ -560,10 +561,12 @@ aaVariationToCounts <- function(aa_variation,
   aa_ids <- gsub("_[12]_AA", "", aa_ids)
   aa_counts <- lapply(1:(ncol(aa_counts)),
                          function(i) {
-                           paste(aa_ids[i], aa_counts[, i], sep = "_")
+                           x <- paste(aa_ids[i], aa_counts[, i], sep = "_")
+                           x[is.na(aa_counts[, i])] <- NA
+                           return(x)
                          }
   )
-  ord <- unique(unlist(aa_counts))
+  ord <- na.omit(unique(unlist(aa_counts)))
   aa_counts <- do.call(rbind, aa_counts)
   aa_counts <- mtabulate(as.data.frame(aa_counts, stringsAsFactors = FALSE))
   rownames(aa_counts) <- NULL
