@@ -28,6 +28,16 @@ for (file in alignment_files) {
   raw_alignment_seq <- stri_split_regex(raw_alignment_line, "\\s+")
   raw_alignment_seq <- unlist(raw_alignment_seq)[-c(1, 2)]
   first_codon_idx <- nchar(stri_flatten(raw_alignment_seq))
+  
+  # find AA positions numbers
+  if (first_codon_idx > 1) {
+    aln_colnames <- c(seq(1 - first_codon_idx, -1, 1),
+                      seq(1, ncol(alignment) + 1 - first_codon_idx, 1)
+    )
+  } else {
+    aln_colnames <- seq(1, ncol(alignment) + 1 - first_codon_idx, 1)
+  }
+  colnames(alignment) <- aln_colnames
 
   cached_aln_obj <- list(alignment, first_codon_idx)
   gene <- gsub(".*/([A-Z]+[0-9]*)_prot.txt", "\\1", file)

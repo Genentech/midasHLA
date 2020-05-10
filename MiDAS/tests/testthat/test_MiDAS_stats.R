@@ -1006,15 +1006,15 @@ test_that("amino acid omnibus test works fine", {
   covar <- read.table(covar_file, header = TRUE)
   midas_data <- prepareMiDAS(hla_calls, pheno, covar, analysis_type = "aa_level")
   object <- lm(OS ~ AGE + SEX + term, data = midas_data)
-  omnibus_res <- aaPosOmnibusTest(object, aa_pos = c("B_35", "E_128", "A_270"))
+  omnibus_res <- aaPosOmnibusTest(object, aa_pos = c("A_17", "A_90", "A_166"))
 
-  obj_B35 <- lm(OS ~ AGE + SEX + B_35_A + B_35_S + term, data = midas_data)
-  obj_E128 <- lm(OS ~ AGE + SEX + E_128_R + E_128_G + term, data = midas_data)
-  obj_A270 <- lm(OS ~ AGE + SEX + A_270_A + A_270_S + term, data = midas_data)
-  LRT <- lapply(list(obj_B35, obj_E128, obj_A270), LRTest, mod0 = object)
+  obj_A17 <- lm(OS ~ AGE + SEX + A_17_R + A_17_S + term, data = midas_data)
+  obj_A90 <- lm(OS ~ AGE + SEX + A_90_A + A_90_D + term, data = midas_data)
+  obj_A166 <- lm(OS ~ AGE + SEX + A_166_E + A_166_D + term, data = midas_data)
+  LRT <- lapply(list(obj_A17, obj_A90, obj_A166), LRTest, mod0 = object)
   omnibus_res_test <- data.frame(
-    aa_pos = c("B_35", "E_128", "A_270"),
-    residues = c("A, S", "R, G", "A, S"),
+    aa_pos = c("A_17", "A_90", "A_166"),
+    residues = c("R, S", "A, D", "E, D"),
     d.f. = c(1, 1, 1),
     statistic = sapply(LRT, `[[`, "statistic"),
     p.value = sapply(LRT, `[[`, "p.value"),
@@ -1030,12 +1030,12 @@ test_that("amino acid omnibus test works fine", {
   )
 
   expect_error(
-    aaPosOmnibusTest(object, c("B_35", "E_128", "A_270"), correction = 1),
+    aaPosOmnibusTest(object, c("A_17", "A_90", "A_166"), correction = 1),
     "correction is not a string \\(a length one character vector\\)."
   )
 
   expect_error(
-    aaPosOmnibusTest(object, c("B_35", "E_128", "A_270"), n_correction = 1.5),
+    aaPosOmnibusTest(object, c("A_17", "A_90", "A_166"), n_correction = 1.5),
     "n_correction is not a count \\(a single positive integer\\) or NULL."
   )
 
@@ -1045,7 +1045,7 @@ test_that("amino acid omnibus test works fine", {
   )
 
   expect_error(
-    aaPosOmnibusTest(object, c("B_35", "E_128", "A_270"), n_correction = 1),
+    aaPosOmnibusTest(object, c("A_17", "A_90", "A_166"), n_correction = 1),
     "n_correction must be at least 3."
   )
 })
