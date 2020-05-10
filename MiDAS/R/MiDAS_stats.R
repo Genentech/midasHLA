@@ -1022,7 +1022,7 @@ prepareMiDAS <- function(hla_calls,
 #' covar <- read.table(covar_file, header = TRUE)
 #' midas_data <- prepareMiDAS(hla_calls, pheno, covar, analysis_type = "aa_level")
 #' object <- lm(OS ~ AGE + SEX, data = midas_data)
-#' aaPosOmnibusTest(object, aa_pos = c("B_35", "E_128", "A_270"))
+#' aaPosOmnibusTest(object, aa_pos = c("A_17", "A_90", "A_166"))
 #'
 #' @importFrom assertthat assert_that see_if is.string
 #' @importFrom broom tidy

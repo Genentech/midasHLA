@@ -143,7 +143,7 @@ hlaToAAVariation <- function(hla_calls,
       mask <- 1:nrow(hla_aln[[i]]) # This is tmp solution as NAs in character index gives oob error
       names(mask) <- rownames(hla_aln[[i]])
       x <- hla_aln[[i]][mask[x_calls[, allele]], var_pos, drop = FALSE]
-      colnames(x) <- paste0(allele, "_", "AA_", var_pos)
+      colnames(x) <- paste0(allele, "_", "AA_", colnames(x))
       return(x)
     })
     var_aln <- do.call(cbind, var_aln)
