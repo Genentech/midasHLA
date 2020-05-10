@@ -1,3 +1,6 @@
+## 0.0.9043 - 10/05/20
++ changes amino acids numbering scheme to addhere with EBI convention where numbering starts from -30 position
+
 ## 0.0.9043 - 22/04/20
 + fixes hlaToAAVariation failing on mixed resolution hla_calls input
 + adds warning when allele can not be found in the reference alignment
