@@ -215,9 +215,10 @@ setMethod(
 #' @rdname as.data.frame
 #'
 #' @export
-as.data.frame.MiDAS <- function(x, row.names = NULL, optional = FALSE, ...) {
-    x <- colData(x)
-    as.data.frame(x, row.names = NULL, optional = FALSE, ...)
+as.data.frame.MiDAS <- function(x) {
+  midasToWide(midas,
+              analysis_type = getAnalysisType(midas),
+              placeholder = getPlaceholder(midas))
 }
 
 
