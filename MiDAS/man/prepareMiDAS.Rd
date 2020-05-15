@@ -7,7 +7,7 @@
 \usage{
 prepareMiDAS(hla_calls = NULL, kir_calls = NULL, colData,
   inheritance_model = c("additive", "dominant", "recessive"),
-  analysis_type = c("hla_allele", "aa_level", "allele_g_group",
+  experiment = c("hla_allele", "aa_level", "allele_g_group",
   "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions",
   "hla_divergence"), placeholder = "term", ...)
 
@@ -33,7 +33,7 @@ are coded as \code{1}. In \code{"recessive"} model homozygotes are coded as
 \code{1} and all other as \code{0}. In \code{"additive"} model homozygotes
 are coded as \code{2} and heterozygotes as \code{1}.}
 
-\item{analysis_type}{Character vector indicating analysis type for which data
+\item{experiment}{Character vector indicating analysis type for which data
 should be prepared. Valid choices are \code{"hla_allele"},
 \code{"aa_level"}, \code{"allele_g_group"}, \code{"allele_supertype"},
 \code{"allele_group"}, \code{"kir_genes"}, \code{"hla_kir_interactions"}.
@@ -79,7 +79,7 @@ midas <- prepareMiDAS(hla_calls = hla_calls,
                       kir_calls = kir_calls,
                       colData = phenotype,
                       inheritance_model = "additive",
-                      analysis_type = "hla_allele"
+                      experiment = "hla_allele"
 )
 }
 

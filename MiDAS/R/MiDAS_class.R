@@ -22,8 +22,8 @@
 #' function.
 #'
 #' Experiments slots available for \code{\link{runMiDAS}} function are defined
-#' in object's metadata under \code{analysis_type} variable. It can be accessed
-#' using \code{\link{getAnalysisType}} function.
+#' in object's metadata under \code{experiment} variable. It can be accessed
+#' using \code{\link{getExperiments}} function.
 #'
 #' @importFrom methods setClass
 #' @importClassesFrom MultiAssayExperiment MultiAssayExperiment
@@ -42,7 +42,7 @@ MiDAS <- setClass(
 #' defined, accepted values are \code{"additive"}, \code{"dominant"},
 #' \code{"recessive"}.
 #'
-#' \code{analysis_type} metadata's variable used to determine analyses available
+#' \code{experiment} metadata's variable used to determine analyses available
 #' via \code{\link{runMiDAS}} is optional and does not determine object
 #' validity.
 #'
@@ -102,7 +102,7 @@ setMethod(
   definition = function (object) metadata(object)$inheritance_model
 )
 
-#' @name getAnalysisType
+#' @name getExperiments
 #'
 #' @title Extract available analysis types from MiDAS object.
 #'
@@ -112,18 +112,18 @@ setMethod(
 #'
 #' @export
 setGeneric(
-  name = "getAnalysisType",
-  def = function(object) standardGeneric("getAnalysisType")
+  name = "getExperiments",
+  def = function(object) standardGeneric("getExperiments")
 )
 
-#' @rdname getAnalysisType
+#' @rdname getExperiments
 #'
 #' @importFrom S4Vectors metadata
 #'
 setMethod(
-  f = "getAnalysisType",
+  f = "getExperiments",
   signature = "MiDAS",
-  definition = function (object) metadata(object)$analysis_type
+  definition = function (object) metadata(object)$experiment
 )
 
 #' @name getHlaCalls
@@ -215,10 +215,9 @@ setMethod(
 #' @rdname as.data.frame
 #'
 #' @export
-as.data.frame.MiDAS <- function(x) {
-  midasToWide(midas,
-              analysis_type = getAnalysisType(midas),
-              placeholder = getPlaceholder(midas))
+as.data.frame.MiDAS <- function(x, ...) {
+  midasToWide(object = x,
+              experiment = getExperiments(x))
 }
 
 
@@ -235,7 +234,7 @@ as.data.frame.MiDAS <- function(x) {
 #'   samples indentifires corresponding to indentifires in \code{hla_calls} and
 #'   \code{kir_calls}. Importantly rows of \code{hla_calls} and
 #'   \code{kir_calls} without corresponding phenotype are discarded.
-#' @param analysis_type Character vector indicating analysis type for which data
+#' @param experiment Character vector indicating analysis type for which data
 #'   should be prepared. Valid choices are \code{"hla_allele"},
 #'   \code{"aa_level"}, \code{"allele_g_group"}, \code{"allele_supertype"},
 #'   \code{"allele_group"}, \code{"kir_genes"}, \code{"hla_kir_interactions"}.
@@ -267,12 +266,13 @@ as.data.frame.MiDAS <- function(x) {
 #'                       kir_calls = kir_calls,
 #'                       colData = phenotype,
 #'                       inheritance_model = "additive",
-#'                       analysis_type = "hla_allele"
+#'                       experiment = "hla_allele"
 #' )
 #' }
 #'
 #' @importFrom assertthat assert_that see_if
 #' @importFrom MultiAssayExperiment ExperimentList MultiAssayExperiment
+#' @importFrom rlang is_empty
 #' @importFrom S4Vectors DataFrame
 #'
 #' @export
@@ -280,7 +280,7 @@ prepareMiDAS <- function(hla_calls = NULL,
                          kir_calls = NULL,
                          colData,
                          inheritance_model = c("additive", "dominant", "recessive"),
-                         analysis_type = c(
+                         experiment = c(
                            "hla_allele",
                            "aa_level",
                            "allele_g_group",
@@ -294,7 +294,7 @@ prepareMiDAS <- function(hla_calls = NULL,
                          ...
 ) {
   inheritance_model_choice <- eval(formals()[["inheritance_model"]])
-  analysis_type_choice <- eval(formals()[["analysis_type"]])
+  experiment_choice <- eval(formals()[["experiment"]])
   assert_that(
     see_if(
       ! is.null(hla_calls) | ! is.null(kir_calls),
@@ -309,8 +309,8 @@ prepareMiDAS <- function(hla_calls = NULL,
     checkColDataFormat(colData),
     is.string(inheritance_model),
     stringMatches(inheritance_model, inheritance_model_choice),
-    is.character(analysis_type),
-    characterMatches(analysis_type, analysis_type_choice),
+    is.character(experiment),
+    characterMatches(experiment, experiment_choice),
     is.string(placeholder),
     see_if(
       !placeholder %in% c(colnames(hla_calls), colnames(kir_calls), colnames(colData)),
@@ -322,7 +322,7 @@ prepareMiDAS <- function(hla_calls = NULL,
   )
 
   dot.args <- if (...length()) {
-    as.list(...)
+    list(...)
   } else {
     list()
   }
@@ -338,19 +338,19 @@ prepareMiDAS <- function(hla_calls = NULL,
   }
 
   # prepare data for different analyses types
-  for (at in analysis_type) {
-    fun <- paste0("prepareMiDAS_", at)
+  for (e in experiment) {
+    fun <- paste0("prepareMiDAS_", e)
     args <- list(
       hla_calls = hla_calls,
       kir_calls = kir_calls,
       inheritance_model = inheritance_model
     )
     args <- c(args, dot.args)
-    experiment <- do.call(
+    E <- do.call(
       what = fun,
       args = args
     )
-    experiments[[at]] <- experiment
+    experiments[[e]] <- E
   }
 
   # insert placeholder
@@ -361,7 +361,7 @@ prepareMiDAS <- function(hla_calls = NULL,
 
   metadata <- list(
     inheritance_model = inheritance_model,
-    analysis_type = analysis_type,
+    experiment = experiment,
     placeholder = placeholder
   )
 
@@ -390,6 +390,10 @@ prepareMiDAS <- function(hla_calls = NULL,
 #' @return Matrix
 #'
 prepareMiDAS_hla_allele <- function(hla_calls, inheritance_model, ...) {
+  assert_that(
+    checkHlaCallsFormat(hla_calls)
+  )
+
   hla_allele <- hlaCallsToCounts(
     hla_calls = hla_calls,
     inheritance_model = inheritance_model
@@ -422,6 +426,7 @@ prepareMiDAS_aa_level <- function(hla_calls,
                                   unkchar = FALSE,
                                   ...) {
   assert_that(
+    checkHlaCallsFormat(hla_calls),
     is.flag(indels),
     is.flag(unkchar)
   )
@@ -455,6 +460,10 @@ prepareMiDAS_aa_level <- function(hla_calls,
 prepareMiDAS_allele_g_group <- function(hla_calls,
                                         inheritance_model,
                                         ...) {
+  assert_that(
+    checkHlaCallsFormat(hla_calls)
+  )
+
   lib <- "allele_HLA_Ggroup"
   allele_g_group <- hlaToVariable(hla_calls = hla_calls,
                                   dictionary = lib,
@@ -493,6 +502,10 @@ prepareMiDAS_allele_g_group <- function(hla_calls,
 #' @importFrom assertthat assert_that
 #'
 prepareMiDAS_allele_supertype <- function(hla_calls, inheritance_model, ...) {
+  assert_that(
+    checkHlaCallsFormat(hla_calls)
+  )
+
   lib <- "allele_HLA_supertype"
   allele_supertype <- hlaToVariable(hla_calls = hla_calls,
                                     dictionary = lib,
@@ -533,6 +546,10 @@ prepareMiDAS_allele_supertype <- function(hla_calls, inheritance_model, ...) {
 #' @importFrom assertthat assert_that
 #'
 prepareMiDAS_allele_group <- function(hla_calls, inheritance_model, ...) {
+  assert_that(
+    checkHlaCallsFormat(hla_calls)
+  )
+
   lib <- c(
     "allele_HLA-B_Bw",
     "allele_HLA_Bw4+A23+A24+A32",
@@ -568,7 +585,13 @@ prepareMiDAS_allele_group <- function(hla_calls, inheritance_model, ...) {
 #'
 #' @return Matrix
 #'
+#' @importFrom assertthat assert_that
+#'
 prepareMiDAS_kir_genes <- function(kir_calls, ...) {
+  assert_that(
+    checkKirCallsFormat(kir_calls)
+  )
+
   kir_genes <-
     kir_calls %>%
     dfToExperimentMat()
@@ -591,6 +614,11 @@ prepareMiDAS_kir_genes <- function(kir_calls, ...) {
 #' @importFrom magrittr %>%
 #'
 prepareMiDAS_hla_kir_interactions <- function(hla_calls, kir_calls, ...) {
+  assert_that(
+    checkHlaCallsFormat(hla_calls),
+    checkKirCallsFormat(hla_calls)
+  )
+
   hla_kir_interactions <-
     getHlaKirInteractions(
       hla_calls = hla_calls,
@@ -646,7 +674,7 @@ filterMiDAS <- function(object, filter_by = c("hla_allele_frequency"), ...) {
     inheritance_model = getInheritanceModel(object),
     hla_calls = getHlaCalls(object),
     kir_calls = getKirCalls(object),
-    analysis_types = names(object)
+    experiments = names(object)
   )
 
   # for (by in filter_by) {
@@ -657,32 +685,37 @@ filterMiDAS <- function(object, filter_by = c("hla_allele_frequency"), ...) {
 #' Transform MiDAS to wide format data.frame
 #'
 #' @param object Object of class MiDAS
-#' @param analysis_type Character
+#' @param experiment Character
 #' @param placeholder String
 #'
 #' @return Data frame
 #'
 #' @importFrom assertthat assert_that
 #' @importFrom dplyr filter mutate
-#' @importFrom MultiAssayExperiment longFormat
+#' @importFrom MultiAssayExperiment longFormat colData
 #' @importFrom rlang !! :=
 #' @importFrom tidyr spread
 #'
-midasToWide <- function(object, analysis_type, placeholder = "term") {
+midasToWide <- function(object, experiment) {
   assert_that(
     validObject(object),
-    is.character(analysis_type),
-    characterMatches(analysis_type, names(object))
+    is.character(experiment),
+    characterMatches(experiment, names(object))
   )
 
-  wide_df <-
-    object[, , analysis_type] %>%
-    longFormat(colDataCols = TRUE) %>%
-    as.data.frame() %>%
-    subset(select = -assay) %>%
-    subset(select = -colname) %>%
-    spread(key = "rowname", value = "value") %>%
-    mutate(!!placeholder := 1)
+  if (length(experiment)) {
+    wide_df <-
+      object[, , experiment] %>%
+      longFormat(colDataCols = TRUE) %>%
+      as.data.frame() %>%
+      subset(select = -assay) %>%
+      subset(select = -colname) %>%
+      spread(key = "rowname", value = "value")
+  } else {
+    wide_df <-
+      colData(object) %>%
+      as.data.frame()
+  }
 
   return(wide_df)
 }

@@ -153,10 +153,10 @@ test_that("HLA statistical models are updated properly", {
     prepareMiDAS(
       hla_calls,
       colData = coldata,
-      analysis_type = "hla_allele",
+      experiment = "hla_allele",
       inheritance_model = "additive"
     )
-  midas_data <- midasToWide(midas, analysis_type = "hla_allele")
+  midas_data <- midasToWide(midas, experiment = "hla_allele")
   coxmod <- coxph(Surv(OS, OS_DIED) ~ 1, data = midas_data)
   coxmod$call$data <- midas_data
   coxmod_test <- coxph(Surv(OS, OS_DIED) ~ `A*01:01`, data = midas_data)
@@ -212,7 +212,7 @@ test_that("statistical models are statistical model", {
     kir_calls = kir_calls,
     colData = pheno,
     inheritance_model = "additive",
-    analysis_type = character()
+    experiment = character()
   )
 
   object <- lm(OS ~ OS_DIED, data = midas)

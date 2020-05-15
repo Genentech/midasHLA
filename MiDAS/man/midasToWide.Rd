@@ -4,12 +4,12 @@
 \alias{midasToWide}
 \title{Transform MiDAS to wide format data.frame}
 \usage{
-midasToWide(object, analysis_type, placeholder = "term")
+midasToWide(object, experiment)
 }
 \arguments{
 \item{object}{Object of class MiDAS}
 
-\item{analysis_type}{Character}
+\item{experiment}{Character}
 
 \item{placeholder}{String}
 }

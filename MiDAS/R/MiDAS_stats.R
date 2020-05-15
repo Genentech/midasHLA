@@ -42,7 +42,7 @@
 #' midas_data <- prepareMiDAS(hla_calls = hla_calls,
 #'                                pheno = pheno,
 #'                                covar = covar,
-#'                                analysis_type = "hla_allele",
+#'                                experiment = "hla_allele",
 #'                                inheritance_model = "additive"
 #' )
 #'
@@ -181,7 +181,7 @@ analyzeAssociations <- function(object,
 #' midas_data <- prepareMiDAS(hla_calls = hla_calls,
 #'                              pheno = pheno,
 #'                              covar = covar,
-#'                              analysis_type = "hla_allele",
+#'                              experiment = "hla_allele",
 #'                              inheritance_model = "additive"
 #' )
 #'
@@ -454,10 +454,10 @@ aaPosOmnibusTest <- function(object,
 #' statistical model specified by user. Function is intended for use with
 #' \code{\link{prepareMiDAS}}. See examples section.
 #'
-#' \code{analysis_type} is used to select an experiment from \code{MiDAS} object
+#' \code{experiment} is used to select an experiment from \code{MiDAS} object
 #' associated with \code{object} using. In standard work flow data are first
 #' processed using \code{\link{prepareMiDAS}} creating experiments with
-#' transformed data for given \code{analysis_type}. Next user constructs the
+#' transformed data for given \code{experiment}. Next user constructs the
 #' statistical model using function of choice (eg. \code{lm}. \code{coxph}).
 #' Than \code{runMiDAS} is used to evaluate specified model uder \code{mode}
 #' of choice. See the details of different \code{mode}'s implmenetions for
@@ -470,7 +470,7 @@ aaPosOmnibusTest <- function(object,
 #' @inheritParams analyzeAssociations
 #' @param mode String indicating analysis mode. See details for further
 #'   explenations.
-#' @param analysis_type String indicating the experiment associated with
+#' @param experiment String indicating the experiment associated with
 #'   \code{object}'s \code{MiDAS} data to use. Valid values includes:
 #'   \code{"hla_allele"}, \code{"aa_level"}, \code{"allele_g_group"},
 #'   \code{"allele_supertype"}, \code{"allele_group"}, \code{"kir_genes"},
@@ -504,14 +504,14 @@ aaPosOmnibusTest <- function(object,
 #'                       kir_calls = kir_calls,
 #'                       colData = phenotype,
 #'                       inheritance_model = "additive",
-#'                       analysis_type = "hla_allele"
+#'                       experiment = "hla_allele"
 #' )
 #'
 #' # constructs statistical model
 #' object <- lm(OS ~ AGE + SEX + term, data = midas)
 #'
 #' # run analysis
-#' runMiDAS(object, mode = "linear", analysis_type = "hla_allele")
+#' runMiDAS(object, mode = "linear", experiment = "hla_allele")
 #' }
 #'
 #' @importFrom assertthat assert_that is.number is.string
@@ -519,7 +519,7 @@ aaPosOmnibusTest <- function(object,
 #' @export
 runMiDAS <- function(object,
                       mode,
-                      analysis_type,
+                      experiment,
                       correction = "bonferroni",
                       n_correction = NULL,
                       exponentiate = FALSE,
@@ -539,8 +539,8 @@ runMiDAS <- function(object,
     objectHasPlaceholder(object, getPlaceholder(object_details$data)),
     is.string(mode),
     stringMatches(mode, choice = mode_choice),
-    is.string(analysis_type),
-    stringMatches(analysis_type, choice = getAnalysisType(object_details$data)),
+    is.string(experiment),
+    stringMatches(experiment, choice = getExperiments(object_details$data)),
     is.string(correction),
     isCountOrNULL(n_correction),
     isTRUEorFALSE(exponentiate)
@@ -549,7 +549,7 @@ runMiDAS <- function(object,
   results <- runMiDASMode(runMiDAS, mode = mode)(
     object = object,
     mode = mode,
-    analysis_type = analysis_type,
+    experiment = experiment,
     correction = correction,
     n_correction,
     exponentiate = exponentiate,
@@ -593,7 +593,7 @@ runMiDASMode <- function(x, mode) attr(x, mode)
 #'
 runMiDASMode(runMiDAS, mode = "linear") <- function(object,
                                                     mode,
-                                                    analysis_type,
+                                                    experiment,
                                                     correction = "bonferroni",
                                                     n_correction = NULL,
                                                     exponentiate = FALSE,
@@ -603,18 +603,18 @@ runMiDASMode(runMiDAS, mode = "linear") <- function(object,
 
   # only experiments of class matrix can be used here
   assert_that(
-    isClass(object_details$data[[analysis_type]], "matrix"),
+    isClass(object_details$data[[experiment]], "matrix"),
     msg = sprintf("%s mode does not support analysis type %s",
                   mode,
-                  analysis_type)
+                  experiment)
   )
 
   # get test covariates names
-  test_var <- rownames(object_details$data[[analysis_type]])
+  test_var <- rownames(object_details$data[[experiment]])
 
   # insert data for analysis
   placeholder <- getPlaceholder(object_details$data)
-  data <- midasToWide(object_details$data, analysis_type, placeholder)
+  data <- midasToWide(object_details$data, experiment)
   object$call <- call_modify(object$call, data = data)
   object <- eval(object)
 
@@ -634,13 +634,13 @@ runMiDASMode(runMiDAS, mode = "linear") <- function(object,
 
   # format linear results
   ## add variables frequencies
-  if (typeof(object_details$data[[analysis_type]]) == "integer") {
+  if (typeof(object_details$data[[experiment]]) == "integer") {
     results <-
       left_join(
         results,
         runMiDASGetVarsFreq(
           midas = object_details$data,
-          analysis_type = analysis_type,
+          experiment = experiment,
           test_covar = object_details$formula_vars[1]
         ),
         by = "term"
@@ -648,7 +648,7 @@ runMiDASMode(runMiDAS, mode = "linear") <- function(object,
   }
 
   ## rename term
-  term_name <- switch (analysis_type,
+  term_name <- switch (experiment,
                        "hla_allele" = "allele",
                        "aa_level" = "aa",
                        "expression_level" = "allele",
@@ -685,7 +685,7 @@ runMiDASMode(runMiDAS, mode = "linear") <- function(object,
 #'
 runMiDASMode(runMiDAS, mode = "conditional") <- function(object,
                                                      mode,
-                                                     analysis_type,
+                                                     experiment,
                                                      correction = "bonferroni",
                                                      n_correction = NULL,
                                                      exponentiate = FALSE,
@@ -699,18 +699,18 @@ runMiDASMode(runMiDAS, mode = "conditional") <- function(object,
 
   # only experiments of class matrix can be used here
   assert_that(
-    isClass(object_details$data[[analysis_type]], "matrix"),
+    isClass(object_details$data[[experiment]], "matrix"),
     msg = sprintf("%s mode is not supported for analysis type %s",
                   mode,
-                  analysis_type)
+                  experiment)
   )
 
   # get test covariates names
-  test_var <- rownames(object_details$data[[analysis_type]])
+  test_var <- rownames(object_details$data[[experiment]])
 
   # insert data for analysis
   placeholder <- getPlaceholder(object_details$data)
-  data <- midasToWide(object_details$data, analysis_type, placeholder)
+  data <- midasToWide(object_details$data, experiment)
   object$call <- call_modify(object$call, data = data)
   object <- eval(object)
 
@@ -733,7 +733,7 @@ runMiDASMode(runMiDAS, mode = "conditional") <- function(object,
   )
 
   # format conditional results
-  term_name <- switch (analysis_type,
+  term_name <- switch (experiment,
                        "hla_allele" = "allele",
                        "aa_level" = "aa",
                        "expression_level" = "allele",
@@ -745,7 +745,7 @@ runMiDASMode(runMiDAS, mode = "conditional") <- function(object,
                        "term"
   )
 
-  if (typeof(object_details$data[[analysis_type]]) == "integer") {
+  if (typeof(object_details$data[[experiment]]) == "integer") {
     if (keep) {
       results <- lapply(
         X = results,
@@ -755,7 +755,7 @@ runMiDASMode(runMiDAS, mode = "conditional") <- function(object,
               x,
               runMiDASGetVarsFreq(
                 midas = object_details$data,
-                analysis_type = analysis_type,
+                experiment = experiment,
                 test_covar = object_details$formula_vars[1]
               ),
               by = "term"
@@ -769,7 +769,7 @@ runMiDASMode(runMiDAS, mode = "conditional") <- function(object,
           results,
           runMiDASGetVarsFreq(
             midas = object_details$data,
-            analysis_type = analysis_type,
+            experiment = experiment,
             test_covar = object_details$formula_vars[1]
           ),
           by = "term"

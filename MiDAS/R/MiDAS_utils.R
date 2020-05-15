@@ -1209,7 +1209,8 @@ checkColDataFormat <- function(data_frame) {
 #'
 #' @export
 checkKirCallsFormat <- function(kir_calls) { # TODO
-  return(TRUE)
+  test <- is.data.frame(kir_calls)
+  return(test)
 }
 
 #' Check if function can be found in environment
@@ -1249,8 +1250,8 @@ assertthat::on_failure(functionExists) <- function(call, env) {
 #' @importFrom magrittr %>%
 #' @importFrom rlang !! :=
 #'
-runMiDASGetVarsFreq <- function(midas, analysis_type, test_covar) {
-  variables_freq <- midas[[analysis_type]] %>%
+runMiDASGetVarsFreq <- function(midas, experiment, test_covar) {
+  variables_freq <- midas[[experiment]] %>%
     experimentMatToDf() %>%
     getCountsFrequencies(inheritance_model = getInheritanceModel(midas)) %>%
     rename(Ntotal = .data$Counts, Ntotal.frequency = .data$Freq)
@@ -1260,7 +1261,7 @@ runMiDASGetVarsFreq <- function(midas, analysis_type, test_covar) {
     ids <- rownames(colData(midas))
 
     lvl1_ids <- ids[test_covar_vals == levels(test_covar_vals)[1]]
-    lvl1_freq <- midas[[analysis_type]] %>%
+    lvl1_freq <- midas[[experiment]] %>%
       experimentMatToDf() %>%
       filter(.data[["ID"]] %in% lvl1_ids) %>%
       getCountsFrequencies(inheritance_model = getInheritanceModel(midas)) %>%
@@ -1271,7 +1272,7 @@ runMiDASGetVarsFreq <- function(midas, analysis_type, test_covar) {
     variables_freq <- left_join(variables_freq, lvl1_freq, by = "term")
 
     lvl2_ids <- ids[test_covar_vals == levels(test_covar_vals)[2]]
-    lvl2_freq <- midas[[analysis_type]] %>%
+    lvl2_freq <- midas[[experiment]] %>%
       experimentMatToDf() %>%
       filter(.data[["ID"]] %in% lvl2_ids) %>%
       getCountsFrequencies(inheritance_model = getInheritanceModel(midas)) %>%

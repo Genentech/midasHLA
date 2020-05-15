@@ -4,7 +4,7 @@
 \alias{runMiDAS}
 \title{Run MiDAS statistical analysis}
 \usage{
-runMiDAS(object, mode, analysis_type, correction = "bonferroni",
+runMiDAS(object, mode, experiment, correction = "bonferroni",
   n_correction = NULL, exponentiate = FALSE, ...)
 }
 \arguments{
@@ -14,7 +14,7 @@ others.}
 \item{mode}{String indicating analysis mode. See details for further
 explenations.}
 
-\item{analysis_type}{String indicating the experiment associated with
+\item{experiment}{String indicating the experiment associated with
 \code{object}'s \code{MiDAS} data to use. Valid values includes:
 \code{"hla_allele"}, \code{"aa_level"}, \code{"allele_g_group"},
 \code{"allele_supertype"}, \code{"allele_group"}, \code{"kir_genes"},
@@ -44,10 +44,10 @@ statistical model specified by user. Function is intended for use with
 \code{\link{prepareMiDAS}}. See examples section.
 }
 \details{
-\code{analysis_type} is used to select an experiment from \code{MiDAS} object
+\code{experiment} is used to select an experiment from \code{MiDAS} object
 associated with \code{object} using. In standard work flow data are first
 processed using \code{\link{prepareMiDAS}} creating experiments with
-transformed data for given \code{analysis_type}. Next user constructs the
+transformed data for given \code{experiment}. Next user constructs the
 statistical model using function of choice (eg. \code{lm}. \code{coxph}).
 Than \code{runMiDAS} is used to evaluate specified model uder \code{mode}
 of choice. See the details of different \code{mode}'s implmenetions for
@@ -79,14 +79,14 @@ midas <- prepareMiDAS(hla_calls = hla_calls,
                       kir_calls = kir_calls,
                       colData = phenotype,
                       inheritance_model = "additive",
-                      analysis_type = "hla_allele"
+                      experiment = "hla_allele"
 )
 
 # constructs statistical model
 object <- lm(OS ~ AGE + SEX + term, data = midas)
 
 # run analysis
-runMiDAS(object, mode = "linear", analysis_type = "hla_allele")
+runMiDAS(object, mode = "linear", experiment = "hla_allele")
 }
 
 }

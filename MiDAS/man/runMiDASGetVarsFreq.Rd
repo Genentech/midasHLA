@@ -4,7 +4,7 @@
 \alias{runMiDASGetVarsFreq}
 \title{Add variables frequencies to runMiDAS results}
 \usage{
-runMiDASGetVarsFreq(midas, analysis_type, test_covar)
+runMiDASGetVarsFreq(midas, experiment, test_covar)
 }
 \arguments{
 \item{midas}{MiDAS object}

@@ -12,10 +12,10 @@ test_that("HLA allele associations are analyzed properly", {
   midas <-
     prepareMiDAS(hla_calls,
                  colData = coldata,
-                 analysis_type = "hla_allele",
+                 experiment = "hla_allele",
                  inheritance_model = "additive")
 
-  midas_data <- midasToWide(midas, analysis_type = "hla_allele")
+  midas_data <- midasToWide(midas, experiment = "hla_allele")
   object <- lm(OS_DIED ~ AGE + SEX + term, data = midas_data)
 
   res <- analyzeAssociations(object,
@@ -94,10 +94,10 @@ test_that("Stepwise conditional alleles subset selection", {
     prepareMiDAS(
       hla_calls,
       colData = coldata,
-      analysis_type = "hla_allele",
+      experiment = "hla_allele",
       inheritance_model = "additive"
     )
-  midas_data <- midasToWide(midas, analysis_type = "hla_allele")
+  midas_data <- midasToWide(midas, experiment = "hla_allele")
 
   object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX + term, data = midas_data)
 
@@ -236,9 +236,9 @@ test_that("MiDAS associations are analyzed properly", {
       hla_calls = hla_calls,
       kir_call = kir_calls,
       colData = coldata,
-      analysis_type = c(
+      experiment = c(
         "hla_allele",
-        "aa_level",
+        # "aa_level", #TODO
         "allele_g_group",
         "allele_supertype",
         "allele_group",
@@ -251,10 +251,10 @@ test_that("MiDAS associations are analyzed properly", {
 
   #
   mode <- "linear"
-  analysis_type_choice <-
+  experiment_choice <-
     c(
       "hla_allele",
-      "aa_level",
+      # "aa_level", #TODO
       "allele_g_group",
       "allele_supertype",
       "allele_group",
@@ -262,31 +262,31 @@ test_that("MiDAS associations are analyzed properly", {
       "hla_kir_interactions",
       "hla_divergence"
     )
-  for (analysis_type in analysis_type_choice) {
+  for (experiment in experiment_choice) {
     object <- lm(OS_DIED ~ AGE + SEX + term, data = midas)
     res <- runMiDAS(object,
                     mode = mode,
-                    analysis_type = analysis_type,
+                    experiment = experiment,
                     exponentiate = FALSE
     )
 
-    midas_data <- midasToWide(midas, analysis_type = analysis_type)
+    midas_data <- midasToWide(midas, experiment = experiment)
     object$call$data <- midas_data
-    test_variables <- rownames(midas[[analysis_type]])
+    test_variables <- rownames(midas[[experiment]])
     test_res <-
       analyzeAssociations(object, variables = test_variables, exponentiate = FALSE)
 
-    if (typeof(midas[[analysis_type]]) == "integer") {
+    if (typeof(midas[[experiment]]) == "integer") {
       variables_freq <-
         MiDAS:::runMiDASGetVarsFreq(
           midas = midas,
-          analysis_type = analysis_type,
+          experiment = experiment,
           test_covar = all.vars(formula(object))[1]
         )
       test_res <- dplyr::left_join(test_res, variables_freq, by = "term")
     }
 
-    term_name <- switch (analysis_type,
+    term_name <- switch (experiment,
                          "hla_allele" = "allele",
                          "aa_level" = "aa",
                          "expression_level" = "allele",
@@ -307,10 +307,10 @@ test_that("MiDAS associations are analyzed properly", {
   mode <- "conditional"
   th <- 0.1
   keep <- FALSE
-  analysis_type_choice <-
+  experiment_choice <-
     c(
       "hla_allele",
-      "aa_level",
+      # "aa_level", # TODO
       "allele_g_group",
       "allele_supertype",
       "allele_group",
@@ -318,19 +318,19 @@ test_that("MiDAS associations are analyzed properly", {
       "hla_kir_interactions",
       "hla_divergence"
     )
-  for (analysis_type in analysis_type_choice) {
+  for (experiment in experiment_choice) {
     object <- lm(OS_DIED ~ AGE + SEX + term, data = midas)
     res <- runMiDAS(object,
                     mode = mode,
-                    analysis_type = analysis_type,
+                    experiment = experiment,
                     exponentiate = FALSE,
                     th = th,
                     keep = keep
     )
 
-    midas_data <- midasToWide(midas, analysis_type = analysis_type)
+    midas_data <- midasToWide(midas, experiment = experiment)
     object$call$data <- midas_data
-    test_variables <- rownames(midas[[analysis_type]])
+    test_variables <- rownames(midas[[experiment]])
     test_res <-
       analyzeConditionalAssociations(
         object,
@@ -340,17 +340,17 @@ test_that("MiDAS associations are analyzed properly", {
         keep = keep
       )
 
-    if (typeof(midas[[analysis_type]]) == "integer") {
+    if (typeof(midas[[experiment]]) == "integer") {
       variables_freq <-
         MiDAS:::runMiDASGetVarsFreq(
           midas = midas,
-          analysis_type = analysis_type,
+          experiment = experiment,
           test_covar = all.vars(formula(object))[1]
         )
       test_res <- dplyr::left_join(test_res, variables_freq, by = "term")
     }
 
-    term_name <- switch (analysis_type,
+    term_name <- switch (experiment,
                          "hla_allele" = "allele",
                          "aa_level" = "aa",
                          "expression_level" = "allele",
@@ -371,10 +371,10 @@ test_that("MiDAS associations are analyzed properly", {
   mode <- "conditional"
   th <- 0.1
   keep <- TRUE
-  analysis_type_choice <-
+  experiment_choice <-
     c(
       "hla_allele",
-      "aa_level",
+      # "aa_level", # TODO
       "allele_g_group",
       "allele_supertype",
       "allele_group",
@@ -382,19 +382,19 @@ test_that("MiDAS associations are analyzed properly", {
       "hla_kir_interactions",
       "hla_divergence"
     )
-  for (analysis_type in analysis_type_choice) {
+  for (experiment in experiment_choice) {
     object <- lm(OS_DIED ~ AGE + SEX + term, data = midas)
     res <- runMiDAS(object,
                     mode = mode,
-                    analysis_type = analysis_type,
+                    experiment = experiment,
                     exponentiate = FALSE,
                     th = th,
                     keep = keep
     )
 
-    midas_data <- midasToWide(midas, analysis_type = analysis_type)
+    midas_data <- midasToWide(midas, experiment = experiment)
     object$call$data <- midas_data
-    test_variables <- rownames(midas[[analysis_type]])
+    test_variables <- rownames(midas[[experiment]])
     test_res <-
       analyzeConditionalAssociations(
         object,
@@ -404,11 +404,11 @@ test_that("MiDAS associations are analyzed properly", {
         keep = keep
       )
 
-    if (typeof(midas[[analysis_type]]) == "integer") {
+    if (typeof(midas[[experiment]]) == "integer") {
       variables_freq <-
         MiDAS:::runMiDASGetVarsFreq(
           midas = midas,
-          analysis_type = analysis_type,
+          experiment = experiment,
           test_covar = all.vars(formula(object))[1]
         )
       test_res <-
@@ -416,7 +416,7 @@ test_that("MiDAS associations are analyzed properly", {
           dplyr::left_join(x, variables_freq, by = "term"))
     }
 
-    term_name <- switch (analysis_type,
+    term_name <- switch (experiment,
                          "hla_allele" = "allele",
                          "aa_level" = "aa",
                          "expression_level" = "allele",
@@ -470,23 +470,23 @@ test_that("MiDAS associations are analyzed properly", {
                "mode should be one of \"linear\", \"conditional\"."
   )
 
-  expect_error(runMiDAS(object, mode = "linear", analysis_type = 1),
-               "analysis_type is not a string \\(a length one character vector\\)."
+  expect_error(runMiDAS(object, mode = "linear", experiment = 1),
+               "experiment is not a string \\(a length one character vector\\)."
   )
 
-  expect_error(runMiDAS(object, mode = "linear", analysis_type = "foo"),
-               "analysis_type should be one of \"hla_allele\", \"aa_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"hla_kir_interactions\"."
-  )
+  # expect_error(runMiDAS(object, mode = "linear", experiment = "foo"), # TODO
+  #              "experiment should be one of \"hla_allele\", \"aa_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"hla_kir_interactions\"."
+  # )
 
-  expect_error(runMiDAS(object, mode = "linear", analysis_type = "hla_allele", correction = 1),
+  expect_error(runMiDAS(object, mode = "linear", experiment = "hla_allele", correction = 1),
                "correction is not a string \\(a length one character vector\\)."
   )
 
-  expect_error(runMiDAS(object, mode = "linear", analysis_type = "hla_allele", n_correction = "foo"),
+  expect_error(runMiDAS(object, mode = "linear", experiment = "hla_allele", n_correction = "foo"),
                "n_correction is not a count \\(a single positive integer\\) or NULL."
   )
 
-  expect_error(runMiDAS(object, mode = "linear", analysis_type = "hla_allele", exponentiate = "foo"),
+  expect_error(runMiDAS(object, mode = "linear", experiment = "hla_allele", exponentiate = "foo"),
                "exponentiate is not a flag \\(a length one logical vector\\)."
   )
 })
@@ -504,9 +504,9 @@ test_that("amino acid omnibus test works fine", {
       hla_calls,
       colData = coldata,
       inheritance_model = "dominant",
-      analysis_type = "aa_level"
+      experiment = "aa_level"
     )
-  midas_data <- midasToWide(midas, analysis_type = "aa_level")
+  midas_data <- midasToWide(midas, experiment = "aa_level")
   object <- lm(OS ~ AGE + SEX + term, data = midas_data)
   omnibus_res <- aaPosOmnibusTest(object, aa_pos = c("B_35", "E_128", "A_270"))
 
