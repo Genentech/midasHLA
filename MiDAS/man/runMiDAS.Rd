@@ -2,17 +2,24 @@
 % Please edit documentation in R/MiDAS_stats.R
 \name{runMiDAS}
 \alias{runMiDAS}
+\alias{runMiDAS_linear}
+\alias{runMiDAS_conditional}
 \title{Run MiDAS statistical analysis}
 \usage{
-runMiDAS(object, mode, experiment, correction = "bonferroni",
+runMiDAS(object, experiment, conditional = FALSE, omnibus = FALSE,
+  correction = "bonferroni", n_correction = NULL,
+  exponentiate = FALSE, ...)
+
+runMiDAS_linear(object, experiment, correction = "bonferroni",
   n_correction = NULL, exponentiate = FALSE, ...)
+
+runMiDAS_conditional(object, experiment, correction = "bonferroni",
+  n_correction = NULL, exponentiate = FALSE, th = 0.05,
+  keep = FALSE, rss_th = 1e-07, ...)
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many
 others.}
-
-\item{mode}{String indicating analysis mode. See details for further
-explenations.}
 
 \item{experiment}{String indicating the experiment associated with
 \code{object}'s \code{MiDAS} data to use. Valid values includes:
@@ -20,6 +27,10 @@ explenations.}
 \code{"allele_supertype"}, \code{"allele_group"}, \code{"kir_genes"},
 \code{"hla_kir_interactions"}. See \code{link{prepareMiDAS}} for more
 informations.}
+
+\item{conditional}{Logical flag,}
+
+\item{omnibus}{Logical flag.}
 
 \item{correction}{String specifying multiple testing correction method. See
 details for further information.}
@@ -34,6 +45,22 @@ the coefficient estimates. Internally this is passed to
 \code{\link[broom]{tidy}}. This is typical for logistic and multinomial
 regressions, but a bad idea if there is no log or logit link. Defaults to
 FALSE.}
+
+\item{th}{Number specifying p-value threshold for a variable to be considered
+significant.}
+
+\item{keep}{Logical flag indicating if the output should be a list of results
+resulting from each selection step. Default is to return only the final
+result.}
+
+\item{rss_th}{Number specifying residual sum of squares threshold at which
+function should stop adding additional variables. As the residual sum of
+squares approaches \code{0} the perfect fit is obtained making further
+attempts at variables selection nonsense, thus function is stopped. This
+behavior can be controlled using \code{rss_th}.}
+
+\item{mode}{String indicating analysis mode. See details for further
+explenations.}
 }
 \value{
 Tibble containing analysis results.
@@ -56,6 +83,20 @@ more details.
 \code{correction} specifies p-value adjustment method to use, common choice
 is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
 \link[stats]{p.adjust}. Check there to get more details.
+
+statistical analysis is performed iteratively
+  on each variable in selected experiment. This is done by substituting
+  \code{placeholder} in the \code{object}'s formula with each variable in the
+  experiment.
+
+statistical analysis is performed in a
+  stepwise conditional testing manner, adding the previous top-associated
+  variable as a covariate to \code{object}'s formula. The analysis stops
+  when there is no more siginifcant variabls, based on self-defined
+  threshold. The p-values of variables are used as the selection criteria.
+  This proces is reapeated for each variable available in the selected
+  experiment. This is done by substituting \code{placeholder} in the
+  \code{object}'s formula with each variable in the experiment.
 }
 \examples{
 \dontrun{

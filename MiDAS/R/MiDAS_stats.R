@@ -476,6 +476,8 @@ aaPosOmnibusTest <- function(object,
 #'   \code{"allele_supertype"}, \code{"allele_group"}, \code{"kir_genes"},
 #'   \code{"hla_kir_interactions"}. See \code{link{prepareMiDAS}} for more
 #'   informations.
+#' @param conditional Logical flag,
+#' @param omnibus Logical flag.
 #'
 #' @return Tibble containing analysis results.
 #'
@@ -518,27 +520,26 @@ aaPosOmnibusTest <- function(object,
 #'
 #' @export
 runMiDAS <- function(object,
-                      mode,
-                      experiment,
-                      correction = "bonferroni",
-                      n_correction = NULL,
-                      exponentiate = FALSE,
-                      ...
-                      ) {
+                     experiment,
+                     conditional = FALSE,
+                     omnibus = FALSE,
+                     correction = "bonferroni",
+                     n_correction = NULL,
+                     exponentiate = FALSE,
+                     ...
+                    ) {
   assert_that(
     checkStatisticalModel(object),
     hasTidyMethod(class(object)[1L])
   )
   object_details <- getObjectDetails(object)
 
-  mode_choice <- names(attributes(runMiDAS))
-  mode_choice <- mode_choice[! mode_choice %in% "srcref"]
   assert_that(
     isClass(object_details$data, "MiDAS"),
     validObject(object_details$data),
     objectHasPlaceholder(object, getPlaceholder(object_details$data)),
-    is.string(mode),
-    stringMatches(mode, choice = mode_choice),
+    isTRUEorFALSE(conditional),
+    isTRUEorFALSE(omnibus),
     is.string(experiment),
     stringMatches(experiment, choice = getExperiments(object_details$data)),
     is.string(correction),
@@ -546,9 +547,8 @@ runMiDAS <- function(object,
     isTRUEorFALSE(exponentiate)
   )
 
-  results <- runMiDASMode(runMiDAS, mode = mode)(
+  args <- list(
     object = object,
-    mode = mode,
     experiment = experiment,
     correction = correction,
     n_correction,
@@ -556,33 +556,20 @@ runMiDAS <- function(object,
     ...
   )
 
+  results <- if (! conditional && ! omnibus) {
+    do.call(runMiDAS_linear, args)
+  } else if (conditional && ! omnibus) {
+    do.call(runMiDAS_conditional, args)
+  }
+
   return(results)
 }
 
-#' @rdname runMiDASMode
-#'
-#' @title Helper for defining runMiDAS modes
-#'
-#' @param x runMiDAS mode function
-#' @param which String attribute name
-#'
-`runMiDASMode<-` <- function(x, value, mode) {
-  stopifnot(is.function(x), all(names(formals(runMiDAS)) %in% names(formals(value)))) # here we check that all formals of runMiDAS are included in specific mode function, it throws its errors upon documentiontion generation
-  attr(x, mode) <- value
-  x
-}
-
-#' @rdname runMiDASMode
-#'
-#' @title Helper for accessing runMiDAS modes
-#'
-runMiDASMode <- function(x, mode) attr(x, mode)
-
 #' @rdname runMiDAS
 #'
-#' @title runMiDAS linear mode
+#' @title runMiDAS linear
 #'
-#' @details mode \code{linear} - statistical analysis is performed iteratively
+#' @details statistical analysis is performed iteratively
 #'   on each variable in selected experiment. This is done by substituting
 #'   \code{placeholder} in the \code{object}'s formula with each variable in the
 #'   experiment.
@@ -591,21 +578,19 @@ runMiDASMode <- function(x, mode) attr(x, mode)
 #' @importFrom dplyr rename
 #' @importFrom rlang call_modify !! :=
 #'
-runMiDASMode(runMiDAS, mode = "linear") <- function(object,
-                                                    mode,
-                                                    experiment,
-                                                    correction = "bonferroni",
-                                                    n_correction = NULL,
-                                                    exponentiate = FALSE,
-                                                    ...) {
+runMiDAS_linear <- function(object,
+                           experiment,
+                           correction = "bonferroni",
+                           n_correction = NULL,
+                           exponentiate = FALSE,
+                           ...) {
   # all runMiDAS's formal arguments should be already asserted
   object_details <- getObjectDetails(object)
 
   # only experiments of class matrix can be used here
   assert_that(
     isClass(object_details$data[[experiment]], "matrix"),
-    msg = sprintf("%s mode does not support analysis type %s",
-                  mode,
+    msg = sprintf("Unconditional runMiDAS does not support experiment %s",
                   experiment)
   )
 
@@ -666,9 +651,9 @@ runMiDASMode(runMiDAS, mode = "linear") <- function(object,
 
 #' @rdname runMiDAS
 #'
-#' @title runMiDAS conditional mode
+#' @title runMiDAS conditional
 #'
-#' @details mode \code{conditional} - statistical analysis is performed in a
+#' @details statistical analysis is performed in a
 #'   stepwise conditional testing manner, adding the previous top-associated
 #'   variable as a covariate to \code{object}'s formula. The analysis stops
 #'   when there is no more siginifcant variabls, based on self-defined
@@ -683,16 +668,15 @@ runMiDASMode(runMiDAS, mode = "linear") <- function(object,
 #' @importFrom dplyr rename bind_rows
 #' @importFrom rlang call_modify !! :=
 #'
-runMiDASMode(runMiDAS, mode = "conditional") <- function(object,
-                                                     mode,
-                                                     experiment,
-                                                     correction = "bonferroni",
-                                                     n_correction = NULL,
-                                                     exponentiate = FALSE,
-                                                     th = 0.05,
-                                                     keep = FALSE,
-                                                     rss_th = 1e-07,
-                                                     ...) {
+runMiDAS_conditional <- function(object,
+                                experiment,
+                                correction = "bonferroni",
+                                n_correction = NULL,
+                                exponentiate = FALSE,
+                                th = 0.05,
+                                keep = FALSE,
+                                rss_th = 1e-07,
+                                ...) {
   # all formals of runMiDAS should be already asserted
 
   object_details <- getObjectDetails(object)
@@ -700,8 +684,7 @@ runMiDASMode(runMiDAS, mode = "conditional") <- function(object,
   # only experiments of class matrix can be used here
   assert_that(
     isClass(object_details$data[[experiment]], "matrix"),
-    msg = sprintf("%s mode is not supported for analysis type %s",
-                  mode,
+    msg = sprintf("Conditional runMiDAS does not supported experiment %s",
                   experiment)
   )
 

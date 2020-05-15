@@ -250,7 +250,8 @@ test_that("MiDAS associations are analyzed properly", {
     )
 
   #
-  mode <- "linear"
+  conditional = FALSE
+  omnibus = FALSE
   experiment_choice <-
     c(
       "hla_allele",
@@ -265,7 +266,8 @@ test_that("MiDAS associations are analyzed properly", {
   for (experiment in experiment_choice) {
     object <- lm(OS_DIED ~ AGE + SEX + term, data = midas)
     res <- runMiDAS(object,
-                    mode = mode,
+                    conditional = conditional,
+                    omnibus = omnibus,
                     experiment = experiment,
                     exponentiate = FALSE
     )
@@ -304,7 +306,8 @@ test_that("MiDAS associations are analyzed properly", {
   }
 
   #
-  mode <- "conditional"
+  conditional <- TRUE
+  omnibus <- FALSE
   th <- 0.1
   keep <- FALSE
   experiment_choice <-
@@ -321,7 +324,8 @@ test_that("MiDAS associations are analyzed properly", {
   for (experiment in experiment_choice) {
     object <- lm(OS_DIED ~ AGE + SEX + term, data = midas)
     res <- runMiDAS(object,
-                    mode = mode,
+                    conditional = conditional,
+                    omnibus = omnibus,
                     experiment = experiment,
                     exponentiate = FALSE,
                     th = th,
@@ -368,7 +372,8 @@ test_that("MiDAS associations are analyzed properly", {
   }
 
   #
-  mode <- "conditional"
+  conditional <- TRUE
+  omnibus <- FALSE
   th <- 0.1
   keep <- TRUE
   experiment_choice <-
@@ -385,7 +390,8 @@ test_that("MiDAS associations are analyzed properly", {
   for (experiment in experiment_choice) {
     object <- lm(OS_DIED ~ AGE + SEX + term, data = midas)
     res <- runMiDAS(object,
-                    mode = mode,
+                    conditional = conditional,
+                    omnibus = omnibus,
                     experiment = experiment,
                     exponentiate = FALSE,
                     th = th,
@@ -462,32 +468,52 @@ test_that("MiDAS associations are analyzed properly", {
     "placeholder 'term' could not be found in object's formula"
   )
 
-  expect_error(runMiDAS(object, mode = 1),
-               "mode is not a string \\(a length one character vector\\)."
-  )
-
-  expect_error(runMiDAS(object, mode = "foo"),
-               "mode should be one of \"linear\", \"conditional\"."
-  )
-
-  expect_error(runMiDAS(object, mode = "linear", experiment = 1),
+  expect_error(runMiDAS(object, experiment = 1),
                "experiment is not a string \\(a length one character vector\\)."
   )
 
-  # expect_error(runMiDAS(object, mode = "linear", experiment = "foo"), # TODO
+  # expect_error(runMiDAS(object, experiment = "foo"), # TODO
   #              "experiment should be one of \"hla_allele\", \"aa_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"hla_kir_interactions\"."
   # )
 
-  expect_error(runMiDAS(object, mode = "linear", experiment = "hla_allele", correction = 1),
+  expect_error(runMiDAS(object, experiment = "hla_allele", conditional = 1),
+               "conditional is not a flag \\(a length one logical vector\\)."
+  )
+
+  expect_error(
+    runMiDAS(
+      object,
+      experiment = "hla_allele",
+      conditional = TRUE,
+      omnibus = 1
+    ),
+    "omnibus is not a flag \\(a length one logical vector\\)."
+  )
+
+  expect_error(runMiDAS(object, experiment = "hla_allele", correction = 1),
                "correction is not a string \\(a length one character vector\\)."
   )
 
-  expect_error(runMiDAS(object, mode = "linear", experiment = "hla_allele", n_correction = "foo"),
-               "n_correction is not a count \\(a single positive integer\\) or NULL."
+  expect_error(
+    runMiDAS(
+      object,
+      experiment = "hla_allele",
+      conditional = TRUE,
+      omnibus = FALSE,
+      n_correction = "foo"
+    ),
+    "n_correction is not a count \\(a single positive integer\\) or NULL."
   )
 
-  expect_error(runMiDAS(object, mode = "linear", experiment = "hla_allele", exponentiate = "foo"),
-               "exponentiate is not a flag \\(a length one logical vector\\)."
+  expect_error(
+    runMiDAS(
+      object,
+      experiment = "hla_allele",
+      conditional = TRUE,
+      omnibus = FALSE,
+      exponentiate = "foo"
+    ),
+    "exponentiate is not a flag \\(a length one logical vector\\)."
   )
 })
 
