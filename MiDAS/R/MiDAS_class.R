@@ -762,3 +762,84 @@ experimentMatToDf <- function(mat) {
 
   return(df)
 }
+
+#' Filter experiment by frequency
+#'
+#' Helper function for experiments filtering
+#'
+#' @param experiment Matrix of type integer
+#' @param inheritance_model String matching one of values
+#'   \code{"dominant", "recessive", "additive"}
+#' @param lower_frequency_cutoff Number of positive value or \code{NULL}
+#' @param upper_frequency_cutoff Number of positive value or \code{NULL}
+#'
+#' @return Matrix
+#'
+#' @importFrom assertthat assert_that see_if is.number is.string
+#' @importFrom dplyr filter
+#' @importFrom magrittr %>%
+#'
+filterExperimentByFrequency <- function(experiment,
+                                        inheritance_model = c("dominant", "recessive", "additive"),
+                                        lower_frequency_cutoff,
+                                        upper_frequency_cutoff) {
+  inheritance_model_choice <- eval(formals()[["inheritance_model"]])
+  assert_that(
+    is.matrix(experiment),
+    see_if(typeof(experiment) == "integer",
+           msg = "experiment must be of type integer"
+    ),
+    is.string(inheritance_model),
+    stringMatches(inheritance_model, inheritance_model_choice),
+    isNumberOrNULL(lower_frequency_cutoff),
+    if (! is.null(lower_frequency_cutoff)) {
+        see_if(lower_frequency_cutoff >= 0,
+             msg = "lower_frequency_cutoff must be a number greater than 0."
+      )
+    } else TRUE,
+    isNumberOrNULL(upper_frequency_cutoff),
+    if (! is.null(upper_frequency_cutoff)) {
+      see_if(upper_frequency_cutoff >= 0,
+             msg = "upper_frequency_cutoff must be a number greater than 0."
+      )
+    } else TRUE,
+    if (! is.null(lower_frequency_cutoff) && ! is.null(upper_frequency_cutoff)) {
+      see_if(! lower_frequency_cutoff > upper_frequency_cutoff,
+             msg = "lower_frequency_cutoff cannot be higher than upper_frequency_cutoff."
+      )
+    } else TRUE
+  )
+
+  lower_frequency_cutoff <- ifelse(is.null(lower_frequency_cutoff), -Inf, lower_frequency_cutoff)
+  upper_frequency_cutoff <- ifelse(is.null(upper_frequency_cutoff), Inf, upper_frequency_cutoff)
+  freqs_are_float <- lower_frequency_cutoff <= 1 && upper_frequency_cutoff <= 1
+  variables_freq <- experiment %>%
+    getExperimentFrequencies(inheritance_model = inheritance_model) %>%
+    filter(.data$Counts > lower_frequency_cutoff |
+             freqs_are_float) %>%
+    filter(.data$Freq > lower_frequency_cutoff |
+            ! freqs_are_float) %>%
+    filter(.data$Counts < upper_frequency_cutoff |
+             freqs_are_float) %>%
+    filter(.data$Freq < upper_frequency_cutoff |
+            ! freqs_are_float)
+  variables <- variables_freq$term
+  experiment <- experiment[variables, ]
+
+  return(experiment)
+}
+
+#' Get experiment frequencies
+#'
+#' Temporary function TODO
+#'
+getExperimentFrequencies <- function(experiment, inheritance_model) {
+  experiment_transposed <- t(experiment)
+  ID <- rownames(experiment_transposed)
+  df <-
+    as.data.frame(experiment_transposed,
+                  stringsAsFactors = FALSE,
+                  make.names = FALSE)
+  df <- cbind(ID = ID, df)
+  getCountsFrequencies(df, inheritance_model = inheritance_model)
+}

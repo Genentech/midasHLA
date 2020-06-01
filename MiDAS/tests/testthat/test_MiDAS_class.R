@@ -525,3 +525,235 @@ test_that("MiDAS data for hla_kir_interactions analysis is prepared properly", {
     expect_equal(experiment, experiment_test)
   }
 })
+
+test_that("Experiments are filtered correctly", {
+  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(hla_calls_file)
+  kir_calls_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  kir_calls <- readKirCalls(kir_calls_file, counts = TRUE)
+  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
+  midas <- prepareMiDAS(
+    hla_calls = hla_calls,
+    kir_calls = kir_calls,
+    colData = pheno,
+    inheritance_model = "additive",
+    experiment = c("hla_allele", "allele_supertype", "kir_genes", "hla_divergence")
+  )
+
+  # filtering works as expected for fractions
+  experiment <- midas[["hla_allele"]]
+  inheritance_model <- "additive"
+  lower_frequency_cutoff <- 0.54
+  upper_frequency_cutoff <- 0.56
+  experiment_filtered <- filterExperimentByFrequency(
+    experiment = experiment,
+    inheritance_model = inheritance_model,
+    lower_frequency_cutoff = lower_frequency_cutoff,
+    upper_frequency_cutoff = upper_frequency_cutoff
+  )
+  expected_vars <- c("DPB1*04:01", "DRB4*01:03", "H*01:01", "K*01:02")
+  expect_equal(experiment_filtered, experiment[expected_vars, ])
+
+  # filtering works as expected for counts
+  experiment <- midas[["hla_allele"]]
+  inheritance_model <- "additive"
+  lower_frequency_cutoff <- 6
+  upper_frequency_cutoff <- 7
+  experiment_filtered <- filterExperimentByFrequency(
+    experiment = experiment,
+    inheritance_model = inheritance_model,
+    lower_frequency_cutoff = lower_frequency_cutoff,
+    upper_frequency_cutoff = upper_frequency_cutoff
+  )
+  expected_vars <-
+    c("B*07:02",
+      "C*07:02",
+      "DMA*01:02",
+      "DPB1*02:01",
+      "DQA1*05:01",
+      "DQB1*02:01")
+  expect_equal(experiment_filtered, experiment[expected_vars, ])
+
+  # filtering works as expected for boundry conditions NULL, NULL
+  experiment <- midas[["hla_allele"]]
+  inheritance_model <- "additive"
+  lower_frequency_cutoff <- NULL
+  upper_frequency_cutoff <- NULL
+  experiment_filtered <- filterExperimentByFrequency(
+    experiment = experiment,
+    inheritance_model = inheritance_model,
+    lower_frequency_cutoff = lower_frequency_cutoff,
+    upper_frequency_cutoff = upper_frequency_cutoff
+  )
+  expected_vars <- rownames(experiment)
+  expect_equal(experiment_filtered, experiment[expected_vars, ])
+
+  # filtering works as expected for boundry conditions 0, 0
+  experiment <- midas[["hla_allele"]]
+  inheritance_model <- "additive"
+  lower_frequency_cutoff <- 0
+  upper_frequency_cutoff <- 0
+  experiment_filtered <- filterExperimentByFrequency(
+    experiment = experiment,
+    inheritance_model = inheritance_model,
+    lower_frequency_cutoff = lower_frequency_cutoff,
+    upper_frequency_cutoff = upper_frequency_cutoff
+  )
+  expected_vars <- character(0L)
+  expect_equal(experiment_filtered, experiment[expected_vars, ])
+
+  # filtering works as expected for boundry conditions 1, 1
+  experiment <- midas[["hla_allele"]]
+  inheritance_model <- "additive"
+  lower_frequency_cutoff <- 1
+  upper_frequency_cutoff <- 1
+  experiment_filtered <- filterExperimentByFrequency(
+    experiment = experiment,
+    inheritance_model = inheritance_model,
+    lower_frequency_cutoff = lower_frequency_cutoff,
+    upper_frequency_cutoff = upper_frequency_cutoff
+  )
+  expected_vars <- character(0L)
+  expect_equal(experiment_filtered, experiment[expected_vars, ])
+
+  # experiment must be a matrix
+  experiment <- LETTERS
+  inheritance_model <- "additive"
+  lower_frequency_cutoff <- 0.1
+  upper_frequency_cutoff <- 0.5
+  expect_error(
+    filterExperimentByFrequency(
+      experiment = experiment,
+      inheritance_model = inheritance_model,
+      lower_frequency_cutoff = lower_frequency_cutoff,
+      upper_frequency_cutoff = upper_frequency_cutoff
+    ),
+    "experiment is not a matrix"
+  )
+
+  # experiment must be of type integer
+  experiment <- matrix(LETTERS)
+  inheritance_model <- "additive"
+  lower_frequency_cutoff <- 0.1
+  upper_frequency_cutoff <- 0.5
+  expect_error(
+    filterExperimentByFrequency(
+      experiment = experiment,
+      inheritance_model = inheritance_model,
+      lower_frequency_cutoff = lower_frequency_cutoff,
+      upper_frequency_cutoff = upper_frequency_cutoff
+    ),
+    "experiment must be of type integer"
+  )
+
+  # inheritance_model must be a string
+  experiment <- midas[["hla_allele"]]
+  inheritance_model <- 1
+  lower_frequency_cutoff <- "foo"
+  upper_frequency_cutoff <- 0.5
+  expect_error(
+    filterExperimentByFrequency(
+      experiment = experiment,
+      inheritance_model = inheritance_model,
+      lower_frequency_cutoff = lower_frequency_cutoff,
+      upper_frequency_cutoff = upper_frequency_cutoff
+    ),
+    "inheritance_model is not a string \\(a length one character vector\\)."
+  )
+
+  # inheritance_model must match allowed values
+  experiment <- midas[["hla_allele"]]
+  inheritance_model <- "foo"
+  lower_frequency_cutoff <- 0
+  upper_frequency_cutoff <- 1
+  inheritance_model_vals <- formals(filterExperimentByFrequency)
+  inheritance_model_vals <- inheritance_model_vals[["inheritance_model"]]
+  inheritance_model_vals <- eval(inheritance_model_vals)
+  inheritance_model_vals <- paste(inheritance_model_vals, collapse = "\", \"")
+  inheritance_model_vals <- paste0("\"", inheritance_model_vals, "\"")
+  expect_error(
+    filterExperimentByFrequency(
+      experiment = experiment,
+      inheritance_model = inheritance_model,
+      lower_frequency_cutoff = lower_frequency_cutoff,
+      upper_frequency_cutoff = upper_frequency_cutoff
+    ),
+    sprintf("inheritance_model should be one of %s.", inheritance_model_vals)
+  )
+
+  # lower_frequency_cutof must be a number
+  experiment <- midas[["hla_allele"]]
+  inheritance_model <- "additive"
+  lower_frequency_cutoff <- "foo"
+  upper_frequency_cutoff <- 0.5
+  expect_error(
+    filterExperimentByFrequency(
+      experiment = experiment,
+      inheritance_model = inheritance_model,
+      lower_frequency_cutoff = lower_frequency_cutoff,
+      upper_frequency_cutoff = upper_frequency_cutoff
+    ),
+    "lower_frequency_cutoff is not a number \\(a length one numeric vector\\)."
+  )
+
+  # lower_frequency_cutof must be positive
+  experiment <- midas[["hla_allele"]]
+  inheritance_model <- "additive"
+  lower_frequency_cutoff <- -1
+  upper_frequency_cutoff <- 0.5
+  expect_error(
+    filterExperimentByFrequency(
+      experiment = experiment,
+      inheritance_model = inheritance_model,
+      lower_frequency_cutoff = lower_frequency_cutoff,
+      upper_frequency_cutoff = upper_frequency_cutoff
+    ),
+    "lower_frequency_cutoff must be a number greater than 0."
+  )
+
+  # upper_frequency_cutoff must be a number
+  experiment <- midas[["hla_allele"]]
+  inheritance_model <- "additive"
+  lower_frequency_cutoff <- 0.5
+  upper_frequency_cutoff <- "foo"
+  expect_error(
+    filterExperimentByFrequency(
+      experiment = experiment,
+      inheritance_model = inheritance_model,
+      lower_frequency_cutoff = lower_frequency_cutoff,
+      upper_frequency_cutoff = upper_frequency_cutoff
+    ),
+    "upper_frequency_cutoff is not a number \\(a length one numeric vector\\)."
+  )
+
+  # upper_frequency_cutoff must be positive
+  experiment <- midas[["hla_allele"]]
+  inheritance_model <- "additive"
+  lower_frequency_cutoff <- 0
+  upper_frequency_cutoff <- -1
+  expect_error(
+    filterExperimentByFrequency(
+      experiment = experiment,
+      inheritance_model = inheritance_model,
+      lower_frequency_cutoff = lower_frequency_cutoff,
+      upper_frequency_cutoff = upper_frequency_cutoff
+    ),
+    "upper_frequency_cutoff must be a number greater than 0."
+  )
+
+  # lower_frequency_cutoff is lower than upper_frequency_cutoff
+  experiment <- midas[["hla_allele"]]
+  inheritance_model <- "additive"
+  lower_frequency_cutoff <- 5
+  upper_frequency_cutoff <- 1
+  expect_error(
+    filterExperimentByFrequency(
+      experiment = experiment,
+      inheritance_model = inheritance_model,
+      lower_frequency_cutoff = lower_frequency_cutoff,
+      upper_frequency_cutoff = upper_frequency_cutoff
+    ),
+    "lower_frequency_cutoff cannot be higher than upper_frequency_cutoff."
+  )
+})
