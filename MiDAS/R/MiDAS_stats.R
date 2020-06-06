@@ -468,8 +468,7 @@ aaPosOmnibusTest <- function(object,
 #' \link[stats]{p.adjust}. Check there to get more details.
 #'
 #' @inheritParams analyzeAssociations
-#' @param mode String indicating analysis mode. See details for further
-#'   explenations.
+#' @inheritParams filterByFrequency
 #' @param experiment String indicating the experiment associated with
 #'   \code{object}'s \code{MiDAS} data to use. Valid values includes:
 #'   \code{"hla_allele"}, \code{"aa_level"}, \code{"allele_g_group"},
@@ -478,6 +477,7 @@ aaPosOmnibusTest <- function(object,
 #'   informations.
 #' @param conditional Logical flag,
 #' @param omnibus Logical flag.
+#' @param ... other arguments
 #'
 #' @return Tibble containing analysis results.
 #'
@@ -523,6 +523,8 @@ runMiDAS <- function(object,
                      experiment,
                      conditional = FALSE,
                      omnibus = FALSE,
+                     lower_frequency_cutoff = NULL,
+                     upper_frequency_cutoff = NULL,
                      correction = "bonferroni",
                      n_correction = NULL,
                      exponentiate = FALSE,
@@ -538,20 +540,35 @@ runMiDAS <- function(object,
     isClass(object_details$data, "MiDAS"),
     validObject(object_details$data),
     objectHasPlaceholder(object, getPlaceholder(object_details$data)),
-    isTRUEorFALSE(conditional),
-    isTRUEorFALSE(omnibus),
     is.string(experiment),
     stringMatches(experiment, choice = getExperiments(object_details$data)),
+    isTRUEorFALSE(conditional),
+    isTRUEorFALSE(omnibus),
+    validateFrequencyCutoffs(lower_frequency_cutoff, upper_frequency_cutoff),
     is.string(correction),
     isCountOrNULL(n_correction),
     isTRUEorFALSE(exponentiate)
   )
 
+  if (! is.null(lower_frequency_cutoff) || ! is.null(upper_frequency_cutoff)) {
+    object_details$data <-
+      filterByFrequency(
+        object = object_details$data,
+        experiment = experiment,
+        lower_frequency_cutoff = lower_frequency_cutoff,
+        upper_frequency_cutoff = upper_frequency_cutoff
+      )
+    assert_that(
+      length(object_details$data[, , experiment]) != 0,
+      msg = "No variables available for analysis, please revisit your filtration criteria."
+    )
+  }
+
   args <- list(
-    object = object,
+    object_details = object_details,
     experiment = experiment,
     correction = correction,
-    n_correction,
+    n_correction = n_correction,
     exponentiate = exponentiate,
     ...
   )
@@ -574,19 +591,18 @@ runMiDAS <- function(object,
 #'   \code{placeholder} in the \code{object}'s formula with each variable in the
 #'   experiment.
 #'
+#' @param object_details TODO
+#'
 #' @importFrom assertthat assert_that
 #' @importFrom dplyr rename
 #' @importFrom rlang call_modify !! :=
 #'
-runMiDAS_linear <- function(object,
-                           experiment,
-                           correction = "bonferroni",
-                           n_correction = NULL,
-                           exponentiate = FALSE,
-                           ...) {
-  # all runMiDAS's formal arguments should be already asserted
-  object_details <- getObjectDetails(object)
-
+runMiDAS_linear <- function(object_details,
+                            experiment,
+                            correction = "bonferroni",
+                            n_correction = NULL,
+                            exponentiate = FALSE,
+                            ...) {
   # only experiments of class matrix can be used here
   assert_that(
     isClass(object_details$data[[experiment]], "matrix"),
@@ -594,14 +610,13 @@ runMiDAS_linear <- function(object,
                   experiment)
   )
 
-  # get test covariates names
   test_var <- rownames(object_details$data[[experiment]])
+  placeholder <- getPlaceholder(object_details$data)
 
   # insert data for analysis
-  placeholder <- getPlaceholder(object_details$data)
   data <- midasToWide(object_details$data, experiment)
-  object$call <- call_modify(object$call, data = data)
-  object <- eval(object)
+  call <- call_modify(object_details$call, data = data)
+  object <- eval(call)
 
   # run analysis
   results <- analyzeAssociations(object,
@@ -668,19 +683,15 @@ runMiDAS_linear <- function(object,
 #' @importFrom dplyr rename bind_rows
 #' @importFrom rlang call_modify !! :=
 #'
-runMiDAS_conditional <- function(object,
-                                experiment,
-                                correction = "bonferroni",
-                                n_correction = NULL,
-                                exponentiate = FALSE,
-                                th = 0.05,
-                                keep = FALSE,
-                                rss_th = 1e-07,
-                                ...) {
-  # all formals of runMiDAS should be already asserted
-
-  object_details <- getObjectDetails(object)
-
+runMiDAS_conditional <- function(object_details,
+                                 experiment,
+                                 correction = "bonferroni",
+                                 n_correction = NULL,
+                                 exponentiate = FALSE,
+                                 th = 0.05,
+                                 keep = FALSE,
+                                 rss_th = 1e-07,
+                                 ...) {
   # only experiments of class matrix can be used here
   assert_that(
     isClass(object_details$data[[experiment]], "matrix"),
@@ -690,12 +701,12 @@ runMiDAS_conditional <- function(object,
 
   # get test covariates names
   test_var <- rownames(object_details$data[[experiment]])
+  placeholder <- getPlaceholder(object_details$data)
 
   # insert data for analysis
-  placeholder <- getPlaceholder(object_details$data)
   data <- midasToWide(object_details$data, experiment)
-  object$call <- call_modify(object$call, data = data)
-  object <- eval(object)
+  call <- call_modify(object_details$call, data = data)
+  object <- eval(call)
 
   # run analysis
   results <- analyzeConditionalAssociations(

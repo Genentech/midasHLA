@@ -7,15 +7,17 @@
 \title{Run MiDAS statistical analysis}
 \usage{
 runMiDAS(object, experiment, conditional = FALSE, omnibus = FALSE,
+  lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL,
   correction = "bonferroni", n_correction = NULL,
   exponentiate = FALSE, ...)
 
-runMiDAS_linear(object, experiment, correction = "bonferroni",
+runMiDAS_linear(object_details, experiment, correction = "bonferroni",
   n_correction = NULL, exponentiate = FALSE, ...)
 
-runMiDAS_conditional(object, experiment, correction = "bonferroni",
-  n_correction = NULL, exponentiate = FALSE, th = 0.05,
-  keep = FALSE, rss_th = 1e-07, ...)
+runMiDAS_conditional(object_details, experiment,
+  correction = "bonferroni", n_correction = NULL,
+  exponentiate = FALSE, th = 0.05, keep = FALSE, rss_th = 1e-07,
+  ...)
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many
@@ -32,6 +34,10 @@ informations.}
 
 \item{omnibus}{Logical flag.}
 
+\item{lower_frequency_cutoff}{Number}
+
+\item{upper_frequency_cutoff}{Number}
+
 \item{correction}{String specifying multiple testing correction method. See
 details for further information.}
 
@@ -46,6 +52,10 @@ the coefficient estimates. Internally this is passed to
 regressions, but a bad idea if there is no log or logit link. Defaults to
 FALSE.}
 
+\item{...}{other arguments}
+
+\item{object_details}{TODO}
+
 \item{th}{Number specifying p-value threshold for a variable to be considered
 significant.}
 
@@ -58,9 +68,6 @@ function should stop adding additional variables. As the residual sum of
 squares approaches \code{0} the perfect fit is obtained making further
 attempts at variables selection nonsense, thus function is stopped. This
 behavior can be controlled using \code{rss_th}.}
-
-\item{mode}{String indicating analysis mode. See details for further
-explenations.}
 }
 \value{
 Tibble containing analysis results.

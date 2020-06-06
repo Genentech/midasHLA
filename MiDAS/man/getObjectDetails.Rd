@@ -13,10 +13,10 @@ others.}
 \value{
 List with following elemnts:
 \describe{
+  \item{call}{Object's call}
   \item{formula_vars}{Character containing names of variables in object
     formula}
   \item{data}{MiDAS object associated with model}
-  \item{data_vars}{Character containing names of variables in object data}
 }
 }
 \description{

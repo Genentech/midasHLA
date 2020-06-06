@@ -495,10 +495,6 @@ isCountsOrZeros <- function(x, na.rm = TRUE) {
   return(test)
 }
 
-#' Error message for isCountsOrZeros
-#'
-#' @inheritParams assertthat::on_failure
-#'
 assertthat::on_failure(isCountsOrZeros) <- function(call, env) {
   paste0("values in ", deparse(call$x), " are not counts (a positive integers) or zeros.")
 }
@@ -519,10 +515,6 @@ isCharacterOrNULL <- function(x) {
   return(test)
 }
 
-#' Error message for isCharacterOrNULL
-#'
-#' @inheritParams assertthat::on_failure
-#'
 assertthat::on_failure(isCharacterOrNULL) <- function(call, env) {
   paste0(deparse(call$x), " is not a character vector or NULL.")
 }
@@ -546,10 +538,6 @@ isNumberOrNULL <- function(x) {
   return(test)
 }
 
-#' Error message for isNumberOrNULL
-#'
-#' @inheritParams assertthat::on_failure
-#'
 assertthat::on_failure(isNumberOrNULL) <- function(call, env) {
   paste0(deparse(call$x),
          " is not a number (a length one numeric vector) or NULL."
@@ -575,10 +563,6 @@ isStringOrNULL <- function(x) {
   return(test)
 }
 
-#' Error message for isStringOrNULL
-#'
-#' @inheritParams assertthat::on_failure
-#'
 assertthat::on_failure(isStringOrNULL) <- function(call, env) {
   paste0(deparse(call$x),
          " is not a string (a length one character vector) or NULL."
@@ -603,10 +587,6 @@ stringMatches <- function(x, choice) {
   return(test)
 }
 
-#' Error message for stringMatches
-#'
-#' @inheritParams assertthat::on_failure
-#'
 assertthat::on_failure(stringMatches) <- function(call, env) {
   paste0(deparse(call$x),
          ' should be one of "',
@@ -634,10 +614,6 @@ isFlagOrNULL <- function(x) {
   return(test)
 }
 
-#' Error message for isFlagOrNULL
-#'
-#' @inheritParams assertthat::on_failure
-#'
 assertthat::on_failure(isFlagOrNULL) <- function(call, env) {
   paste0(deparse(call$x),
          " is not a flag (a length one logical vector) or NULL."
@@ -688,16 +664,15 @@ listMiDASDictionaries <- function(pattern = ".*",
 #' @importFrom assertthat assert_that
 characterMatches <- function(x, choice) {
   assert_that(is.character(x))
-  test <- x %in% choice
-  test <- all(test)
+  test <- if (length(x)) {
+    all(x %in% choice)
+  } else {
+    FALSE
+  }
 
   return(test)
 }
 
-#' Error message for characterMatches
-#'
-#' @inheritParams assertthat::on_failure
-#'
 assertthat::on_failure(characterMatches) <- function(call, env) {
   paste0(deparse(call$x),
          ' should match values "',
@@ -726,10 +701,6 @@ isClassOrNULL <- function(x, class) {
   return(test)
 }
 
-#' Error message for isClassOrNULL
-#'
-#' @inheritParams assertthat::on_failure
-#'
 assertthat::on_failure(isClassOrNULL) <- function(call, env) {
   paste0(deparse(call$x),
          " must be an instance of ",
@@ -860,10 +831,6 @@ colnamesMatches <- function(x, cols) {
   return(test)
 }
 
-#' Error message for colnamesMatches
-#'
-#' @inheritParams assertthat::on_failure
-#'
 assertthat::on_failure(colnamesMatches) <- function(call, env) {
   curr_colnames <- colnames(eval(call$x, envir = env))
   future_colnames <- eval(call$cols, envir = env)
@@ -944,10 +911,6 @@ isCountOrNULL <- function(x) {
   return(test)
 }
 
-#' Error message for isCountOrNULL
-#'
-#' @inheritParams assertthat::on_failure
-#'
 assertthat::on_failure(isCountOrNULL) <- function(call, env) {
   paste0(deparse(call$x),
          " is not a count (a single positive integer) or NULL."
@@ -973,10 +936,6 @@ isTRUEorFALSE <- function(x) {
   return(test)
 }
 
-#' Error message for isTRUEorFALSE
-#'
-#' @inheritParams assertthat::on_failure
-#'
 assertthat::on_failure(isTRUEorFALSE) <- function(call, env) {
   paste0(deparse(call$x),
          " is not a flag (a length one logical vector)."
@@ -1002,10 +961,6 @@ hasTidyMethod <- function(class) {
   return(test)
 }
 
-#' Error message for hasTidyMethod
-#'
-#' @inheritParams assertthat::on_failure
-#'
 assertthat::on_failure(hasTidyMethod) <- function(call, env) {
   paste0("tidy function for object of class ",
          deparse(call$class),
@@ -1094,10 +1049,6 @@ objectHasPlaceholder <- function(object, placeholder) {
   return(test)
 }
 
-#' Error message for objectHasPlaceholder
-#'
-#' @inheritParams assertthat::on_failure
-#'
 assertthat::on_failure(objectHasPlaceholder) <- function(call, env) {
   paste0("placeholder '",
          eval(call$placeholder, envir = env),
@@ -1116,10 +1067,10 @@ assertthat::on_failure(objectHasPlaceholder) <- function(call, env) {
 #'
 #' @return List with following elemnts:
 #' \describe{
+#'   \item{call}{Object's call}
 #'   \item{formula_vars}{Character containing names of variables in object
 #'     formula}
 #'   \item{data}{MiDAS object associated with model}
-#'   \item{data_vars}{Character containing names of variables in object data}
 #' }
 #'
 #' @importFrom MultiAssayExperiment colData
@@ -1129,15 +1080,11 @@ getObjectDetails <- function(object) {
   object_env <- attr(object$terms, ".Environment")
   object_formula <- eval(object_call[["formula"]], envir = object_env)
   object_data <- eval(object_call[["data"]], envir = object_env)
-  data_vars <- c(
-    unlist(rownames(object_data)),
-    colnames(colData(object_data))
-  )
 
   object_details <- list(
+    call = object_call,
     formula_vars = all.vars(object_formula),
-    data = object_data,
-    data_vars = data_vars
+    data = object_data
   )
 
   return(object_details)
@@ -1148,7 +1095,7 @@ getObjectDetails <- function(object) {
 #' \code{checkColDataFormat} asserts if colData data frame has proper format.
 #'
 #' @param data_frame Data frame containing colData data used to construct
-#'   \link{\code{MiDAS}} object.
+#'   \code{\link{MiDAS}} object.
 #'
 #' @return Logical indicating if \code{data_frame} is properly formatted.
 #'   Otherwise raise error.
@@ -1230,10 +1177,6 @@ functionExists <- function(name) {
   return(test)
 }
 
-#' Error message for functionExists
-#'
-#' @inheritParams assertthat::on_failure
-#'
 assertthat::on_failure(functionExists) <- function(call, env) {
   sprintf("Function %s could not be found.", call$name)
 }
@@ -1244,6 +1187,7 @@ assertthat::on_failure(functionExists) <- function(call, env) {
 #' This is a helper function
 #'
 #' @param midas MiDAS object
+#' @param experiment String
 #' @param test_covar String giving name of test covariate
 #'
 #' @importFrom dplyr filter left_join rename select
@@ -1252,8 +1196,7 @@ assertthat::on_failure(functionExists) <- function(call, env) {
 #'
 runMiDASGetVarsFreq <- function(midas, experiment, test_covar) {
   variables_freq <- midas[[experiment]] %>%
-    experimentMatToDf() %>%
-    getCountsFrequencies(inheritance_model = getInheritanceModel(midas)) %>%
+    getExperimentFrequencies(inheritance_model = getInheritanceModel(midas)) %>%
     rename(Ntotal = .data$Counts, Ntotal.frequency = .data$Freq)
 
   test_covar_vals <- factor(colData(midas)[[test_covar]])
@@ -1261,10 +1204,9 @@ runMiDASGetVarsFreq <- function(midas, experiment, test_covar) {
     ids <- rownames(colData(midas))
 
     lvl1_ids <- ids[test_covar_vals == levels(test_covar_vals)[1]]
-    lvl1_freq <- midas[[experiment]] %>%
-      experimentMatToDf() %>%
-      filter(.data[["ID"]] %in% lvl1_ids) %>%
-      getCountsFrequencies(inheritance_model = getInheritanceModel(midas)) %>%
+    lvl1_freq <- midas[, lvl1_ids] %>%
+      `[[`(experiment) %>%
+      getExperimentFrequencies(inheritance_model = getInheritanceModel(midas)) %>%
       rename(
         !!sprintf("N(%s=%s)", test_covar, levels(test_covar_vals)[1]) := .data$Counts,
         !!sprintf("N.frequency(%s=%s)", test_covar, levels(test_covar_vals)[1]) := .data$Freq
@@ -1272,10 +1214,9 @@ runMiDASGetVarsFreq <- function(midas, experiment, test_covar) {
     variables_freq <- left_join(variables_freq, lvl1_freq, by = "term")
 
     lvl2_ids <- ids[test_covar_vals == levels(test_covar_vals)[2]]
-    lvl2_freq <- midas[[experiment]] %>%
-      experimentMatToDf() %>%
-      filter(.data[["ID"]] %in% lvl2_ids) %>%
-      getCountsFrequencies(inheritance_model = getInheritanceModel(midas)) %>%
+    lvl2_freq <- midas[, lvl2_ids] %>%
+      `[[`(experiment) %>%
+      getExperimentFrequencies(inheritance_model = getInheritanceModel(midas)) %>%
       rename(
         !!sprintf("N(%s=%s)", test_covar, levels(test_covar_vals)[2]) := .data$Counts,
         !!sprintf("N.frequency(%s=%s)", test_covar, levels(test_covar_vals)[2]) := .data$Freq
@@ -1307,10 +1248,6 @@ isClass <- function(x, class) {
   return(test)
 }
 
-#' Error message for isClass
-#'
-#' @inheritParams assertthat::on_failure
-#'
 assertthat::on_failure(isClass) <- function(call, env) {
   paste0(deparse(call$x),
          " must be an instance of ",
@@ -1413,11 +1350,7 @@ hlaCallsGranthamDistance <- function(hla_calls, genes = c("A", "B", "C")) {
     noNA(genes)
   )
 
-  hla_calls_colnames <- colnames(hla_calls)
-  target_genes <- hla_calls_colnames %>% # find genes present in hla_calls
-    `[`(-1) %>% # discard ID column
-    gsub(pattern = "_[0-9]+", replacement = "") %>%
-    unique()
+  target_genes <- getHlaCallsGenes(hla_calls)
   assert_that(
     characterMatches(x = genes, choice = target_genes) # asset is buggy hlaAlleleDistance(hla_calls, genes = c("A", "B", "FA"))
   )
@@ -1479,7 +1412,8 @@ hlaCallsGranthamDistance <- function(hla_calls, genes = c("A", "B", "C")) {
 #' distance between alleles can be calculated. Processing includes extracting
 #' exons 1 and 2, masking indels, gaps and stop codons.
 #'
-#' @param alignment Matrix containing HLA alleles amino acids level alignment.
+#' @param gene Character
+#' @param resolution Number
 #'
 hlaAlignmentGrantham <- function(gene, resolution) {
   alignment <- readHlaAlignments(
@@ -1490,4 +1424,152 @@ hlaAlignmentGrantham <- function(gene, resolution) {
   alignment <- alignment[, 2:182] # select exons 2 and 3 w/o 1st position as it is biased towards missing data
   mask <- apply(alignment, 1, function(x) any(x == "" | x == "X" | x == ".")) # mask gaps, stop codons, indels
   alignment <- alignment[! mask, ]
+}
+
+#' Validate frequency cutoffs
+#'
+#' \code{validateFrequencyCutoffs} checks if \code{lower_frequency_cutoff} and
+#' \code{upper_frequency_cutoff} are valid.
+#'
+#' \code{lower_frequency_cutoff} and \code{upper_frequency_cutoff} should be a
+#' positive numbers, giving either frequency or counts.
+#' \code{lower_frequency_cutoff} has to be lower than
+#' \code{upper_frequency_cutoff}.
+#'
+#' @param lower_frequency_cutoff Number
+#' @param upper_frequency_cutoff Number
+#'
+#' @return Logical indicating if \code{lower_frequency_cutoff} and
+#'   \code{upper_frequency_cutoff} are valid.
+#'
+#' @family assert functions
+#'
+#' @importFrom assertthat assert_that see_if
+#'
+validateFrequencyCutoffs <- function(lower_frequency_cutoff, upper_frequency_cutoff) {
+  assert_that(
+    isNumberOrNULL(lower_frequency_cutoff),
+    if (! is.null(lower_frequency_cutoff)) {
+      see_if(lower_frequency_cutoff >= 0,
+             msg = "lower_frequency_cutoff must be a number greater than 0."
+      )
+    } else TRUE,
+    isNumberOrNULL(upper_frequency_cutoff),
+    if (! is.null(upper_frequency_cutoff)) {
+      see_if(upper_frequency_cutoff >= 0,
+             msg = "upper_frequency_cutoff must be a number greater than 0."
+      )
+    } else TRUE,
+    if (! is.null(lower_frequency_cutoff) && ! is.null(upper_frequency_cutoff)) {
+      see_if(! lower_frequency_cutoff > upper_frequency_cutoff,
+             msg = "lower_frequency_cutoff cannot be higher than upper_frequency_cutoff."
+      )
+    } else TRUE,
+    if (! is.null(lower_frequency_cutoff) && ! is.null(upper_frequency_cutoff)) {
+      see_if((lower_frequency_cutoff <= 1 && upper_frequency_cutoff <= 1) ||
+               (lower_frequency_cutoff >= 1 && upper_frequency_cutoff >= 1),
+             msg = "Both lower_frequency_cutoff and upper_frequency_cutoff have to be either frequencies or counts."
+      )
+    } else TRUE
+  )
+}
+
+#' Get HLA calls genes
+#'
+#' \code{getHlaCallsGenes} get's genes found in HLA calls.
+#'
+#' @inheritParams checkHlaCallsFormat
+#'
+#' @return Character vector of genes in \code{hla_calls}.
+#'
+#' @importFrom assertthat assert_that
+#'
+getHlaCallsGenes <- function(hla_calls) {
+  assert_that(
+    checkHlaCallsFormat(hla_calls)
+  )
+
+  genes <- hla_calls %>%
+    colnames() %>%
+    `[`(-1) %>% # discard ID column
+    gsub(pattern = "_[0-9]+", replacement = "") %>%
+    unique()
+
+  return(genes)
+}
+
+#' Helper transform data frame to experiment matrix
+#'
+#' Function deletes 'ID' column from a \code{df}, then transpose it and sets
+#' the colum names to values from deleted 'ID' column.
+#'
+#' @param df Data frame
+#'
+#' @return Matrix
+#'
+#' @importFrom utils type.convert
+#'
+dfToExperimentMat <- function(df) {
+  cols <- df[["ID"]]
+  mat <- t(subset(df, select = -ID))
+  colnames(mat) <- cols
+
+  # convert to apropiate type
+  mat <- type.convert(mat, as.is = TRUE)
+
+  return(mat)
+}
+
+#' Helper transform experiment matrix to data frame
+#'
+#' Function transpose \code{mat} and inserts colum names of input \code{mat} as
+#' a 'ID' column.
+#'
+#' @param mat Matrix
+#'
+#' @return Data frame
+#'
+experimentMatToDf <- function(mat) {
+  ID <- colnames(mat)
+  df <-
+    as.data.frame(
+      t(mat),
+      stringsAsFactors = FALSE,
+      make.names = FALSE
+    )
+  rownames(df) <- NULL
+  df <- cbind(ID, df, stringsAsFactors = FALSE)
+
+  return(df)
+}
+
+#' Transform MiDAS to wide format data.frame
+#'
+#' @param object Object of class MiDAS
+#' @param experiment Character
+#'
+#' @return Data frame
+#'
+#' @importFrom assertthat assert_that
+#' @importFrom methods validObject
+#' @importFrom MultiAssayExperiment longFormat colData
+#' @importFrom tidyr spread
+#'
+midasToWide <- function(object, experiment) {
+  assert_that(
+    validObject(object),
+    is.character(experiment),
+    characterMatches(experiment, getExperiments(object))
+  )
+
+  object <- object[, , experiment]
+  wide_df <-
+    object %>%
+    longFormat(colDataCols = TRUE) %>%
+    as.data.frame() %>%
+    subset(select = -assay) %>%
+    subset(select = -colname) %>%
+    spread(key = "rowname", value = "value")
+
+  return(wide_df)
 }

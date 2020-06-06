@@ -8,7 +8,7 @@ checkColDataFormat(data_frame)
 }
 \arguments{
 \item{data_frame}{Data frame containing colData data used to construct
-\link{\code{MiDAS}} object.}
+\code{\link{MiDAS}} object.}
 }
 \value{
 Logical indicating if \code{data_frame} is properly formatted.
@@ -43,6 +43,7 @@ Other assert functions: \code{\link{characterMatches}},
   \code{\link{isStringOrNULL}},
   \code{\link{isTRUEorFALSE}},
   \code{\link{objectHasPlaceholder}},
-  \code{\link{stringMatches}}
+  \code{\link{stringMatches}},
+  \code{\link{validateFrequencyCutoffs}}
 }
 \concept{assert functions}

@@ -12,6 +12,12 @@ prepareMiDAS_aa_level(hla_calls, inheritance_model, indels = TRUE,
 
 \item{inheritance_model}{String}
 
+\item{indels}{Logical indicating whether indels should be considered when
+checking variability.}
+
+\item{unkchar}{Logical indicating whether unknown characters in the alignment
+should be considered when checking variability.}
+
 \item{...}{Not used}
 }
 \value{

@@ -1,4 +1,5 @@
 #' @include MiDAS_class.R
+NULL
 
 #' MiDAS class
 #'
@@ -25,7 +26,7 @@
 #' in object's metadata under \code{experiment} variable. It can be accessed
 #' using \code{\link{getExperiments}} function.
 #'
-#' @importFrom methods setClass
+#' @importFrom methods setClass new
 #' @importClassesFrom MultiAssayExperiment MultiAssayExperiment
 #'
 #' @export
@@ -34,20 +35,20 @@ MiDAS <- setClass(
   contains = "MultiAssayExperiment"
 )
 
-#' Validity method for class MiDAS
-#'
-#' Valid \code{MiDAS} object must contain hla_calls or kir_calls experiment in
-#' proper \link[=readHlaCalls]{HLA calls} or \link[=readKirCalls]{KIR calls}
-#' format. It also have to have \code{inheritance_model} metadata's variable
-#' defined, accepted values are \code{"additive"}, \code{"dominant"},
-#' \code{"recessive"}.
-#'
-#' \code{experiment} metadata's variable used to determine analyses available
-#' via \code{\link{runMiDAS}} is optional and does not determine object
-#' validity.
-#'
-#' @importFrom assertthat assert_that is.string see_if
-#'
+# Validity method for class MiDAS
+#
+# Valid \code{MiDAS} object must contain hla_calls or kir_calls experiment in
+# proper \link[=readHlaCalls]{HLA calls} or \link[=readKirCalls]{KIR calls}
+# format. It also have to have \code{inheritance_model} metadata's variable
+# defined, accepted values are \code{"additive"}, \code{"dominant"},
+# \code{"recessive"}.
+#
+# \code{experiment} metadata's variable used to determine analyses available
+# via \code{\link{runMiDAS}} is optional and does not determine object
+# validity.
+#
+# @importFrom assertthat assert_that is.string see_if
+#
 setValidity(Class = "MiDAS", method = function(object) {
   hla_calls <- getHlaCalls(object)
   kir_calls <- getKirCalls(object)
@@ -78,7 +79,7 @@ setValidity(Class = "MiDAS", method = function(object) {
   return(TRUE)
 })
 
-#' @name getInheritanceModel
+#' @rdname MiDAS-class
 #'
 #' @title Extract inheritance model from MiDAS object.
 #'
@@ -92,7 +93,7 @@ setGeneric(
   def = function(object) standardGeneric("getInheritanceModel")
 )
 
-#' @rdname getInheritanceModel
+#' @rdname MiDAS-class
 #'
 #' @importFrom S4Vectors metadata
 #'
@@ -102,7 +103,7 @@ setMethod(
   definition = function (object) metadata(object)$inheritance_model
 )
 
-#' @name getExperiments
+#' @rdname MiDAS-class
 #'
 #' @title Extract available analysis types from MiDAS object.
 #'
@@ -116,7 +117,7 @@ setGeneric(
   def = function(object) standardGeneric("getExperiments")
 )
 
-#' @rdname getExperiments
+#' @rdname MiDAS-class
 #'
 #' @importFrom S4Vectors metadata
 #'
@@ -126,7 +127,7 @@ setMethod(
   definition = function (object) metadata(object)$experiment
 )
 
-#' @name getHlaCalls
+#' @rdname MiDAS-class
 #'
 #' @title Extract HLA calls from MiDAS object.
 #'
@@ -140,7 +141,7 @@ setGeneric(
   def = function(object) standardGeneric("getHlaCalls")
 )
 
-#' @rdname getHlaCalls
+#' @rdname MiDAS-class
 #'
 setMethod(
   f = "getHlaCalls",
@@ -155,7 +156,7 @@ setMethod(
   }
 )
 
-#' @name getKirCalls
+#' @rdname MiDAS-class
 #'
 #' @title Extract KIR calls from MiDAS object.
 #'
@@ -169,7 +170,7 @@ setGeneric(
   def = function(object) standardGeneric("getKirCalls")
 )
 
-#' @rdname getKirCalls
+#' @rdname MiDAS-class
 #'
 setMethod(
   f = "getKirCalls",
@@ -184,7 +185,7 @@ setMethod(
   }
 )
 
-#' @name getPlaceholder
+#' @rdname MiDAS-class
 #'
 #' @title Extract placeholder name from MiDAS object.
 #'
@@ -198,7 +199,7 @@ setGeneric(
   def = function(object) standardGeneric("getPlaceholder")
 )
 
-#' @rdname getPlaceholder
+#' @rdname MiDAS-class
 #'
 #' @importFrom S4Vectors metadata
 #'
@@ -212,14 +213,131 @@ setMethod(
   }
 )
 
+#' @rdname MiDAS-class
+#'
+#' @title Calculate variables frequencies for given experiment in MiDAS object.
+#'
+#' @param object \code{\link{MiDAS}} object.
+#' @param experiment String specifying experiment.
+#'
+#' @return Data frame containing variables, its corresponding total counts
+#'   and frequencies.
+#'
+#' Variables frequencies are counted in reference to sample size, depending on
+#' the inheritance model under which the counts table has been generated one
+#' might need to take under consideration both gene copies. Here sample size is
+#' assumed to be depended on both gene copies for \code{"additive"} inheritance
+#' model (`n / (2 * j)` where `n` is the number of term occurrences and `j`
+#' is the sample size). For other models the sample size is taken as is
+#' (`n / j`).
+#'
+#' @export
+setGeneric(
+  name = "getFrequencies",
+  def = function(object, experiment) standardGeneric("getFrequencies")
+)
+
+#' @rdname MiDAS-class
+#'
+#' @importFrom assertthat assert_that is.string
+#' @importFrom S4Vectors metadata
+#'
+setMethod(
+  f = "getFrequencies",
+  signature = "MiDAS",
+  definition = function (object, experiment) {
+    assert_that(
+      is.string(experiment),
+      stringMatches(experiment, getExperiments(object))
+    )
+    mat <- object[[experiment]]
+    assert_that(
+      is.matrix(mat) && isCountsOrZeros(mat),
+      msg = sprintf("Frequencies can not be calculated for experiment '%s'",
+                    experiment
+            )
+    )
+    inheritance_model <- getInheritanceModel(object)
+    freq <- getExperimentFrequencies(mat, inheritance_model)
+
+    return(freq)
+  }
+)
+
+#' @rdname MiDAS-class
+#'
+#' @title Filter MiDAS object by frqeuncy
+#'
+#' @param object \code{\link{MiDAS}} object
+#' @param experiment Matrix
+#' @param lower_frequency_cutoff Number
+#' @param upper_frequency_cutoff Number
+#'
+#' @return Object of class MiDAS.
+#'
+#' @importFrom assertthat assert_that is.string see_if
+#' @importFrom methods validObject
+#'
+#' @export
+setGeneric(
+  name = "filterByFrequency",
+  def = function(object,
+                 experiment,
+                 lower_frequency_cutoff,
+                 upper_frequency_cutoff) {
+    standardGeneric("filterByFrequency")
+  }
+)
+
+#' @rdname MiDAS-class
+#'
+#' @importFrom assertthat assert_that is.string
+#' @importFrom S4Vectors metadata
+#'
+setMethod(
+  f = "filterByFrequency",
+  signature = "MiDAS",
+  definition = function(object,
+                        experiment,
+                        lower_frequency_cutoff = NULL,
+                        upper_frequency_cutoff = NULL) {
+
+  assert_that(
+    is.character(experiment),
+    characterMatches(experiment, getExperiments(object)),
+    validateFrequencyCutoffs(lower_frequency_cutoff, upper_frequency_cutoff)
+  )
+
+  inheritance_model <- getInheritanceModel(object)
+  for (ex in experiment) {
+    mat <- object[[ex]]
+    assert_that(
+      is.matrix(mat) && isCountsOrZeros(mat),
+      msg = sprintf("Frequency filtration does not support experiment '%s'", ex)
+    )
+    object[[ex]] <- filterExperimentByFrequency(
+      experiment = mat,
+      inheritance_model = inheritance_model,
+      lower_frequency_cutoff = lower_frequency_cutoff,
+      upper_frequency_cutoff = upper_frequency_cutoff
+    )
+  }
+
+  return(object)
+})
+
+#' Coerce MiDAS to Data Frame
+#'
 #' @rdname as.data.frame
+#' @method as.data.frame MiDAS
+#'
+#' @inheritParams as.data.frame
 #'
 #' @export
 as.data.frame.MiDAS <- function(x, ...) {
   midasToWide(object = x,
               experiment = getExperiments(x))
 }
-
 
 #' Prepare MiDAS object for statistical analysis
 #'
@@ -231,15 +349,18 @@ as.data.frame.MiDAS <- function(x, ...) {
 #' @inheritParams hlaCallsToCounts
 #' @param colData Data frame holding additional variables like phenotypic
 #'   observations or covariates. It have to contain \code{'ID'} column holding
-#'   samples indentifires corresponding to indentifires in \code{hla_calls} and
+#'   samples identifiers corresponding to identifiers in \code{hla_calls} and
 #'   \code{kir_calls}. Importantly rows of \code{hla_calls} and
 #'   \code{kir_calls} without corresponding phenotype are discarded.
 #' @param experiment Character vector indicating analysis type for which data
 #'   should be prepared. Valid choices are \code{"hla_allele"},
 #'   \code{"aa_level"}, \code{"allele_g_group"}, \code{"allele_supertype"},
-#'   \code{"allele_group"}, \code{"kir_genes"}, \code{"hla_kir_interactions"}.
+#'   \code{"allele_group"}, \code{"kir_genes"}, \code{"hla_kir_interactions"},
+#'   \code{"hla_divergence"}.
 #'   See details for further explanations.
 #' @param placeholder String
+#' @param lower_frequency_cutoff Number
+#' @param upper_frequency_cutoff Number
 #' @param ... Attributes used in data transformation.
 #'
 #' @return Object of class \code{\link{MiDAS}}
@@ -273,6 +394,7 @@ as.data.frame.MiDAS <- function(x, ...) {
 #' @importFrom assertthat assert_that see_if
 #' @importFrom MultiAssayExperiment ExperimentList MultiAssayExperiment
 #' @importFrom rlang is_empty
+#' @importFrom stats runif
 #' @importFrom S4Vectors DataFrame
 #'
 #' @export
@@ -291,6 +413,8 @@ prepareMiDAS <- function(hla_calls = NULL,
                            "hla_divergence"
                          ),
                          placeholder = "term",
+                         lower_frequency_cutoff = NULL,
+                         upper_frequency_cutoff = NULL,
                          ...
 ) {
   inheritance_model_choice <- eval(formals()[["inheritance_model"]])
@@ -350,6 +474,19 @@ prepareMiDAS <- function(hla_calls = NULL,
       what = fun,
       args = args
     )
+
+    # frequency filter
+    if ((!is.null(lower_frequency_cutoff) ||
+         !is.null(upper_frequency_cutoff))
+        && is.integer(E)) {
+      E <- filterExperimentByFrequency(
+        experiment = E,
+        inheritance_model = inheritance_model,
+        lower_frequency_cutoff = lower_frequency_cutoff,
+        upper_frequency_cutoff = upper_frequency_cutoff
+      )
+    }
+
     experiments[[e]] <- E
   }
 
@@ -411,7 +548,7 @@ prepareMiDAS_hla_allele <- function(hla_calls, inheritance_model, ...) {
 #' \code{\link{hlaToAAVariation}} and \code{\link{aaVariationToCounts}} for more
 #' details).
 #'
-#' @inheritParams aaVariationToCounts
+#' @inheritParams hlaToAAVariation
 #' @param hla_calls Data frame
 #' @param inheritance_model String
 #' @param ... Not used
@@ -641,205 +778,19 @@ prepareMiDAS_hla_kir_interactions <- function(hla_calls, kir_calls, ...) {
 #' @return Matrix
 #'
 prepareMiDAS_hla_divergence <- function(hla_calls, ...) {
+  genes <- getHlaCallsGenes(hla_calls)
+  assert_that(
+    any(c("A", "B", "C") %in% genes),
+    msg = "Grantham distance can be calculated only for class I HLA alleles (A, B, C)."
+  )
+
   hla_divergence <-
     hlaCallsGranthamDistance(
       hla_calls = hla_calls,
-      genes = c("A", "B", "C")
+      genes = genes[genes %in% c("A", "B", "C")]
     )
   hla_divergence$ABC_avg <- rowMeans(hla_divergence[-1])
   experiment_mat <- dfToExperimentMat(hla_divergence)
 
   return(experiment_mat)
-}
-
-#' Filter midas object
-#'
-#' @inheritParams MiDAS
-#' @param filter Character giving suffix of filter function.
-#'
-#' @return Object of class MiDAS.
-#'
-#' @importFrom assertthat assert_that
-#'
-filterMiDAS <- function(object, filter_by = c("hla_allele_frequency"), ...) {
-  filter_by_choices <- eval(formals()[["filter_by"]])
-  assert_that(
-    validObject(object),
-    is.character(filter_by),
-    characterMatches(filter_by, filter_by_choices)
-  )
-
-  # get informations required for recreating MiDAS object
-  midas_components <- list(
-    inheritance_model = getInheritanceModel(object),
-    hla_calls = getHlaCalls(object),
-    kir_calls = getKirCalls(object),
-    experiments = names(object)
-  )
-
-  # for (by in filter_by) {
-  #
-  # }
-}
-
-#' Transform MiDAS to wide format data.frame
-#'
-#' @param object Object of class MiDAS
-#' @param experiment Character
-#' @param placeholder String
-#'
-#' @return Data frame
-#'
-#' @importFrom assertthat assert_that
-#' @importFrom dplyr filter mutate
-#' @importFrom MultiAssayExperiment longFormat colData
-#' @importFrom rlang !! :=
-#' @importFrom tidyr spread
-#'
-midasToWide <- function(object, experiment) {
-  assert_that(
-    validObject(object),
-    is.character(experiment),
-    characterMatches(experiment, names(object))
-  )
-
-  if (length(experiment)) {
-    wide_df <-
-      object[, , experiment] %>%
-      longFormat(colDataCols = TRUE) %>%
-      as.data.frame() %>%
-      subset(select = -assay) %>%
-      subset(select = -colname) %>%
-      spread(key = "rowname", value = "value")
-  } else {
-    wide_df <-
-      colData(object) %>%
-      as.data.frame()
-  }
-
-  return(wide_df)
-}
-
-#' Helper transform data frame to experiment matrix
-#'
-#' Function deletes 'ID' column from a \code{df}, then transpose it and sets
-#' the columnames to values from deleted 'ID' column.
-#'
-#' @param df Data frame
-#'
-#' @return Matrix
-#'
-dfToExperimentMat <- function(df) {
-  cols <- df[["ID"]]
-  mat <- t(subset(df, select = -ID))
-  colnames(mat) <- cols
-
-  # convert to apropiate type
-  mat <- type.convert(mat, as.is = TRUE)
-
-  return(mat)
-}
-
-#' Helper transform experimentt matrix to data frame
-#'
-#' Function transpose \code{mat} and inserts columnames of input \code{mat} as
-#' a 'ID' column.
-#'
-#' @param mat Matrix
-#'
-#' @return Data frame
-#'
-experimentMatToDf <- function(mat) {
-  ID <- colnames(mat)
-  df <-
-    as.data.frame(
-      t(mat),
-      stringsAsFactors = FALSE,
-      make.names = FALSE
-    )
-  rownames(df) <- NULL
-  df <- cbind(ID, df, stringsAsFactors = FALSE)
-
-  return(df)
-}
-
-#' Filter experiment by frequency
-#'
-#' Helper function for experiments filtering
-#'
-#' @param experiment Matrix of type integer
-#' @param inheritance_model String matching one of values
-#'   \code{"dominant", "recessive", "additive"}
-#' @param lower_frequency_cutoff Number of positive value or \code{NULL}
-#' @param upper_frequency_cutoff Number of positive value or \code{NULL}
-#'
-#' @return Matrix
-#'
-#' @importFrom assertthat assert_that see_if is.number is.string
-#' @importFrom dplyr filter
-#' @importFrom magrittr %>%
-#'
-filterExperimentByFrequency <- function(experiment,
-                                        inheritance_model = c("dominant", "recessive", "additive"),
-                                        lower_frequency_cutoff,
-                                        upper_frequency_cutoff) {
-  inheritance_model_choice <- eval(formals()[["inheritance_model"]])
-  assert_that(
-    is.matrix(experiment),
-    see_if(typeof(experiment) == "integer",
-           msg = "experiment must be of type integer"
-    ),
-    is.string(inheritance_model),
-    stringMatches(inheritance_model, inheritance_model_choice),
-    isNumberOrNULL(lower_frequency_cutoff),
-    if (! is.null(lower_frequency_cutoff)) {
-        see_if(lower_frequency_cutoff >= 0,
-             msg = "lower_frequency_cutoff must be a number greater than 0."
-      )
-    } else TRUE,
-    isNumberOrNULL(upper_frequency_cutoff),
-    if (! is.null(upper_frequency_cutoff)) {
-      see_if(upper_frequency_cutoff >= 0,
-             msg = "upper_frequency_cutoff must be a number greater than 0."
-      )
-    } else TRUE,
-    if (! is.null(lower_frequency_cutoff) && ! is.null(upper_frequency_cutoff)) {
-      see_if(! lower_frequency_cutoff > upper_frequency_cutoff,
-             msg = "lower_frequency_cutoff cannot be higher than upper_frequency_cutoff."
-      )
-    } else TRUE
-  )
-
-  lower_frequency_cutoff <- ifelse(is.null(lower_frequency_cutoff), -Inf, lower_frequency_cutoff)
-  upper_frequency_cutoff <- ifelse(is.null(upper_frequency_cutoff), Inf, upper_frequency_cutoff)
-  freqs_are_float <- lower_frequency_cutoff <= 1 && upper_frequency_cutoff <= 1
-  variables_freq <- experiment %>%
-    getExperimentFrequencies(inheritance_model = inheritance_model) %>%
-    filter(.data$Counts > lower_frequency_cutoff |
-             freqs_are_float) %>%
-    filter(.data$Freq > lower_frequency_cutoff |
-            ! freqs_are_float) %>%
-    filter(.data$Counts < upper_frequency_cutoff |
-             freqs_are_float) %>%
-    filter(.data$Freq < upper_frequency_cutoff |
-            ! freqs_are_float)
-  variables <- variables_freq$term
-  experiment <- experiment[variables, ]
-
-  return(experiment)
-}
-
-#' Get experiment frequencies
-#'
-#' Temporary function TODO
-#'
-getExperimentFrequencies <- function(experiment, inheritance_model) {
-  experiment_transposed <- t(experiment)
-  ID <- rownames(experiment_transposed)
-  df <-
-    as.data.frame(experiment_transposed,
-                  stringsAsFactors = FALSE,
-                  make.names = FALSE)
-  df <- cbind(ID = ID, df)
-  getCountsFrequencies(df, inheritance_model = inheritance_model)
 }

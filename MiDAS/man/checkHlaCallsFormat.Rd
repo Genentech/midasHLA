@@ -42,6 +42,7 @@ Other assert functions: \code{\link{characterMatches}},
   \code{\link{isStringOrNULL}},
   \code{\link{isTRUEorFALSE}},
   \code{\link{objectHasPlaceholder}},
-  \code{\link{stringMatches}}
+  \code{\link{stringMatches}},
+  \code{\link{validateFrequencyCutoffs}}
 }
 \concept{assert functions}

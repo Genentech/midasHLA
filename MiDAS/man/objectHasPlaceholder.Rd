@@ -35,6 +35,7 @@ Other assert functions: \code{\link{characterMatches}},
   \code{\link{isCountsOrZeros}},
   \code{\link{isFlagOrNULL}}, \code{\link{isNumberOrNULL}},
   \code{\link{isStringOrNULL}},
-  \code{\link{isTRUEorFALSE}}, \code{\link{stringMatches}}
+  \code{\link{isTRUEorFALSE}}, \code{\link{stringMatches}},
+  \code{\link{validateFrequencyCutoffs}}
 }
 \concept{assert functions}

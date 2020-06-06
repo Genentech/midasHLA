@@ -212,7 +212,7 @@ test_that("statistical models are statistical model", {
     kir_calls = kir_calls,
     colData = pheno,
     inheritance_model = "additive",
-    experiment = character()
+    experiment = "kir_genes"
   )
 
   object <- lm(OS ~ OS_DIED, data = midas)
@@ -536,5 +536,128 @@ test_that("Between allele Grantham distance is calculated properly", {
   expect_error(
     hlaCallsGranthamDistance(hla_calls_bad, genes = "A"),
     "Allele resolutions for gene A are not equal"
+  )
+})
+
+test_that("Frequency cutoffs validation", {
+  # lower_frequency_cutof must be a number
+  lower_frequency_cutoff <- "foo"
+  upper_frequency_cutoff <- 0.5
+  expect_error(
+    validateFrequencyCutoffs(lower_frequency_cutoff, upper_frequency_cutoff),
+    "lower_frequency_cutoff is not a number \\(a length one numeric vector\\)."
+  )
+
+  # lower_frequency_cutof must be positive
+  lower_frequency_cutoff <- -1
+  upper_frequency_cutoff <- 0.5
+  expect_error(
+    validateFrequencyCutoffs(lower_frequency_cutoff, upper_frequency_cutoff),
+    "lower_frequency_cutoff must be a number greater than 0."
+  )
+
+  # upper_frequency_cutoff must be a number
+  lower_frequency_cutoff <- 0.5
+  upper_frequency_cutoff <- "foo"
+  expect_error(
+    validateFrequencyCutoffs(lower_frequency_cutoff, upper_frequency_cutoff),
+    "upper_frequency_cutoff is not a number \\(a length one numeric vector\\)."
+  )
+
+  # upper_frequency_cutoff must be positive
+  lower_frequency_cutoff <- 0
+  upper_frequency_cutoff <- -1
+  expect_error(
+    validateFrequencyCutoffs(lower_frequency_cutoff, upper_frequency_cutoff),
+    "upper_frequency_cutoff must be a number greater than 0."
+  )
+
+  # lower_frequency_cutoff is lower than upper_frequency_cutoff
+  lower_frequency_cutoff <- 5
+  upper_frequency_cutoff <- 1
+  expect_error(
+    validateFrequencyCutoffs(lower_frequency_cutoff, upper_frequency_cutoff),
+    "lower_frequency_cutoff cannot be higher than upper_frequency_cutoff."
+  )
+
+  # Both lower_frequency_cutoff and upper_frequency_cutoff have to be either frequencies or counts
+  lower_frequency_cutoff <- 0.5
+  upper_frequency_cutoff <- 2
+  expect_error(
+    validateFrequencyCutoffs(lower_frequency_cutoff, upper_frequency_cutoff),
+    "Both lower_frequency_cutoff and upper_frequency_cutoff have to be either frequencies or counts."
+  )
+})
+
+test_that("getHlaCallsGenes", {
+  file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(file)[, 1:5]
+  genes <- getHlaCallsGenes(hla_calls)
+  expect_equal(genes, c("A", "B"))
+})
+
+test_that("dfToExperimentMat", {
+  file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(file)
+  mat <- dfToExperimentMat(hla_calls)
+  ids <- hla_calls[["ID"]]
+  test_mat <- hla_calls[, -1]
+  test_mat <- t(test_mat)
+  colnames(test_mat) <- ids
+  expect_equal(mat, test_mat)
+})
+
+test_that("experimentMatToDf", {
+  file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(file)
+  ids <- hla_calls[["ID"]]
+  mat <- hla_calls[, -1]
+  mat <- t(mat)
+  colnames(mat) <- ids
+  expect_equal(experimentMatToDf(mat), hla_calls)
+})
+
+test_that("midasToWide", {
+  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(hla_calls_file)[1:5, 1:5]
+
+  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)[1:5, ]
+
+  midas <- prepareMiDAS(
+    hla_calls = hla_calls,
+    colData = pheno,
+    inheritance_model = "additive",
+    experiment = "hla_allele"
+  )
+
+  wide <- midasToWide(midas, "hla_allele")
+  test_wide <- data.frame(
+    primary = c("PAT1", "PAT2", "PAT3", "PAT4", "PAT5"),
+    ID = c("PAT1", "PAT2", "PAT3", "PAT4", "PAT5"),
+    OS = c(280L, 458L, 415L, 211L, 631L),
+    OS_DIED = c(1L, 0L, 0L, 1L, 0L),
+    term = wide$term, # there is a rounding error
+    `A*01:01` = c(0L, 0L, 2L, 0L, 0L),
+    `A*02:01` = c(2L, 2L, 0L, 1L, 0L),
+    `A*02:06` = c(0L, 0L, 0L, 1L, 0L),
+    `A*26:01` = c(0L, 0L, 0L, 0L, 2L),
+    `B*07:02` = c(0L, 0L, 0L, 0L, 2L),
+    `B*08:01` = c(0L, 0L, 2L, 0L, 0L),
+    `B*13:02` = c(1L, 0L, 0L, 0L, 0L),
+    `B*15:01` = c(1L, 0L, 0L, 0L, 0L),
+    `B*27:05` = c(0L, 0L, 0L, 1L, 0L),
+    `B*40:01` = c(0L, 1L, 0L, 1L, 0L),
+    `B*57:01` = c(0L, 1L, 0L, 0L, 0L),
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
+  expect_equal(wide, test_wide)
+
+  expect_error(midasToWide(midas, 1), "experiment is not a character vector")
+
+  expect_error(
+    midasToWide(midas, "foo"),
+    "experiment should match values \"hla_allele\"."
   )
 })

@@ -9,6 +9,8 @@ runMiDASGetVarsFreq(midas, experiment, test_covar)
 \arguments{
 \item{midas}{MiDAS object}
 
+\item{experiment}{String}
+
 \item{test_covar}{String giving name of test covariate}
 }
 \description{

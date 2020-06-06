@@ -438,6 +438,70 @@ test_that("MiDAS associations are analyzed properly", {
     expect_equal(lapply(res, as.data.frame), lapply(test_res, as.data.frame))
   }
 
+  # frequency filtration
+  conditional <- FALSE
+  omnibus <- FALSE
+  experiment_choice <-
+    c(
+      "hla_allele",
+      "allele_supertype"
+    )
+  lower_frequency_cutoff <- 0.02
+  upper_frequency_cutoff <- 0.06
+  for (experiment in experiment_choice) {
+    object <- lm(OS_DIED ~ AGE + SEX + term, data = midas)
+    res <- runMiDAS(object,
+                    conditional = conditional,
+                    omnibus = omnibus,
+                    experiment = experiment,
+                    lower_frequency_cutoff = lower_frequency_cutoff,
+                    upper_frequency_cutoff = upper_frequency_cutoff,
+                    exponentiate = FALSE
+    )
+
+    midas_filtered <-
+      filterByFrequency(
+        object = midas,
+        experiment = experiment,
+        lower_frequency_cutoff = lower_frequency_cutoff,
+        upper_frequency_cutoff = upper_frequency_cutoff
+      )
+    test_variables <- rownames(midas_filtered[[experiment]])
+    midas_data <- midasToWide(midas_filtered, experiment = experiment)
+    object$call$data <- midas_data
+    test_res <- analyzeAssociations(
+      object = object,
+      variables = test_variables,
+      exponentiate = FALSE
+    )
+
+    if (typeof(midas_filtered[[experiment]]) == "integer") {
+      variables_freq <-
+        runMiDASGetVarsFreq(
+          midas = midas_filtered,
+          experiment = experiment,
+          test_covar = all.vars(formula(object))[1]
+        )
+      test_res <-
+        dplyr::left_join(test_res, variables_freq, by = "term")
+    }
+
+    term_name <- switch (experiment,
+                         "hla_allele" = "allele",
+                         "aa_level" = "aa",
+                         "expression_level" = "allele",
+                         "allele_g_group" = "g.group",
+                         "allele_supertype" = "supertype",
+                         "allele_group" = "allele.group",
+                         "kir_genes" = "kir.gene",
+                         "hla_kir_interactions" = "hla.kir.interaction",
+                         "term"
+    )
+    test_res <- dplyr::rename(test_res, !!term_name := term)
+
+    expect_equal(lapply(res, as.data.frame), lapply(test_res, as.data.frame))
+  }
+
   #
   object <- lm(OS_DIED ~ AGE + SEX + term, data = midas)
 
@@ -472,9 +536,9 @@ test_that("MiDAS associations are analyzed properly", {
                "experiment is not a string \\(a length one character vector\\)."
   )
 
-  # expect_error(runMiDAS(object, experiment = "foo"), # TODO
-  #              "experiment should be one of \"hla_allele\", \"aa_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"hla_kir_interactions\"."
-  # )
+  expect_error(runMiDAS(object, experiment = "foo"),
+               "experiment should be one of \"hla_allele\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"hla_kir_interactions\", \"hla_divergence\"."
+  )
 
   expect_error(runMiDAS(object, experiment = "hla_allele", conditional = 1),
                "conditional is not a flag \\(a length one logical vector\\)."
@@ -515,6 +579,28 @@ test_that("MiDAS associations are analyzed properly", {
     ),
     "exponentiate is not a flag \\(a length one logical vector\\)."
   )
+
+  expect_error(
+    runMiDAS(
+      object,
+      experiment = "hla_divergence",
+      conditional = FALSE,
+      lower_frequency_cutoff = 0.1,
+      upper_frequency_cutoff = 0.8
+    ),
+    "Frequency filtration does not support experiment 'hla_divergence'"
+  )
+
+  expect_error(
+    runMiDAS(
+      object,
+      experiment = "hla_allele",
+      lower_frequency_cutoff = 0.53,
+      upper_frequency_cutoff = 0.56
+    ),
+    "No variables available for analysis, please revisit your filtration criteria."
+  )
+
 })
 
 test_that("amino acid omnibus test works fine", {

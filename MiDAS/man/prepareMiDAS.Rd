@@ -9,7 +9,8 @@ prepareMiDAS(hla_calls = NULL, kir_calls = NULL, colData,
   inheritance_model = c("additive", "dominant", "recessive"),
   experiment = c("hla_allele", "aa_level", "allele_g_group",
   "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions",
-  "hla_divergence"), placeholder = "term", ...)
+  "hla_divergence"), placeholder = "term",
+  lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL, ...)
 
 prepareMiDAS_hla_allele(hla_calls, inheritance_model, ...)
 }
@@ -22,7 +23,7 @@ prepareMiDAS_hla_allele(hla_calls, inheritance_model, ...)
 
 \item{colData}{Data frame holding additional variables like phenotypic
 observations or covariates. It have to contain \code{'ID'} column holding
-samples indentifires corresponding to indentifires in \code{hla_calls} and
+samples identifiers corresponding to identifiers in \code{hla_calls} and
 \code{kir_calls}. Importantly rows of \code{hla_calls} and
 \code{kir_calls} without corresponding phenotype are discarded.}
 
@@ -36,10 +37,15 @@ are coded as \code{2} and heterozygotes as \code{1}.}
 \item{experiment}{Character vector indicating analysis type for which data
 should be prepared. Valid choices are \code{"hla_allele"},
 \code{"aa_level"}, \code{"allele_g_group"}, \code{"allele_supertype"},
-\code{"allele_group"}, \code{"kir_genes"}, \code{"hla_kir_interactions"}.
+\code{"allele_group"}, \code{"kir_genes"}, \code{"hla_kir_interactions"},
+\code{"hla_divergence"}.
 See details for further explanations.}
 
 \item{placeholder}{String}
+
+\item{lower_frequency_cutoff}{Number}
+
+\item{upper_frequency_cutoff}{Number}
 
 \item{...}{Attributes used in data transformation.}
 }

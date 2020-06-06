@@ -36,6 +36,7 @@ Other assert functions: \code{\link{characterMatches}},
   \code{\link{isFlagOrNULL}}, \code{\link{isNumberOrNULL}},
   \code{\link{isStringOrNULL}},
   \code{\link{isTRUEorFALSE}},
-  \code{\link{objectHasPlaceholder}}
+  \code{\link{objectHasPlaceholder}},
+  \code{\link{validateFrequencyCutoffs}}
 }
 \concept{assert functions}

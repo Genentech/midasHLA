@@ -825,70 +825,6 @@ formatResults <- function(results,
   return(results)
 }
 
-#' Calculate variables frequencies
-#'
-#' \code{getCountsFrequencies} calculate variables frequencies based on counts
-#' table, such as produced by \code{\link{hlaCallsToCounts}}.
-#'
-#' Variables frequencies are counted in reference to sample size, depending on
-#' the inheritance model under which the counts table has been generated one
-#' might need to take under consideration both gene copies. Here sample size is
-#' assumed to be depended on both gene copies for \code{"additive"} inheritance
-#' model (`n / (2 * j)` where `n` is the number of term occurrences and `j`
-#' is the sample size). For other models the sample size is taken as is
-#' (`n / j`).
-#'
-#' @inheritParams hlaCallsToCounts
-#' @param counts_table Data frame containing variables counts, such as produced
-#'   by \code{\link{hlaCallsToCounts}}.
-#'
-#' @return Data frame containing variables, its corresponding total counts
-#'   and frequencies.
-#'
-#' @seealso \code{\link{hlaCallsToCounts}}
-#'
-#' @examples
-#' \dontrun{
-#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-#' hla_calls <- readHlaCalls(file)
-#' hla_counts <- hlaCallsToCounts(hla_calls, inheritance_model = "additive")
-#' getCountsFrequencies(hla_counts)
-#' }
-#'
-#' @importFrom assertthat assert_that is.string
-#' @importFrom formattable percent
-#'
-#' @export
-getCountsFrequencies <- function(counts_table,
-                                 inheritance_model = c("dominant", "recessive", "additive")) {
-  inheritance_model_choice <-  eval(formals()[["inheritance_model"]])
-  assert_that(
-    is.data.frame(counts_table),
-    see_if(colnames(counts_table)[1] == "ID",
-           msg = "first column of counts_table must be named ID"
-    ),
-    is.string(inheritance_model),
-    stringMatches(inheritance_model, choice = inheritance_model_choice)
-  )
-
-  counts_table <- counts_table[-1]
-  assert_that(isCountsOrZeros(counts_table))
-  counts_sums <- colSums(counts_table, na.rm = TRUE)
-
-  # Under additive inheritance model population size equals 2 * nrow(counts_table), in other cases it's 1 * nrow(counts_table)
-  pop_mul <- ifelse(inheritance_model == "additive", 2, 1)
-  counts_freq <- counts_sums / (pop_mul * nrow(counts_table))
-
-  counts_df <- data.frame(
-    term = colnames(counts_table),
-    Counts = counts_sums,
-    Freq = percent(counts_freq),
-    stringsAsFactors = FALSE
-  )
-
-  return(counts_df)
-}
-
 #' Pretty format association analysis results
 #'
 #' \code{kableResults} formats results table to specified format. It uses
@@ -1185,4 +1121,111 @@ getHlaKirInteractions <- function(hla_calls,
   interactions <- countsToVariables(counts, dictionary = interactions_dict)
 
   return(interactions)
+}
+
+#' Filter experiment by frequency
+#'
+#' Helper function for experiments filtering
+#'
+#' @param experiment Matrix of type integer
+#' @param inheritance_model String matching one of values
+#'   \code{"dominant", "recessive", "additive"}
+#' @param lower_frequency_cutoff Number of positive value or \code{NULL}
+#' @param upper_frequency_cutoff Number of positive value or \code{NULL}
+#'
+#' @return Matrix
+#'
+#' @importFrom assertthat assert_that see_if is.number is.string
+#' @importFrom dplyr filter
+#' @importFrom magrittr %>%
+#'
+filterExperimentByFrequency <- function(experiment,
+                                        inheritance_model = c("dominant", "recessive", "additive"),
+                                        lower_frequency_cutoff = NULL,
+                                        upper_frequency_cutoff = NULL) {
+  inheritance_model_choice <- eval(formals()[["inheritance_model"]])
+  assert_that(
+    is.matrix(experiment),
+    isCountsOrZeros(experiment),
+    is.string(inheritance_model),
+    stringMatches(inheritance_model, inheritance_model_choice),
+    validateFrequencyCutoffs(lower_frequency_cutoff, upper_frequency_cutoff)
+  )
+
+  lower_frequency_cutoff <- ifelse(is.null(lower_frequency_cutoff), -Inf, lower_frequency_cutoff)
+  upper_frequency_cutoff <- ifelse(is.null(upper_frequency_cutoff), Inf, upper_frequency_cutoff)
+  freqs_are_float <- lower_frequency_cutoff <= 1 || upper_frequency_cutoff <= 1
+  variables_freq <- experiment %>%
+    getExperimentFrequencies(inheritance_model = inheritance_model) %>%
+    filter(.data$Counts > lower_frequency_cutoff |
+             freqs_are_float) %>%
+    filter(.data$Freq > lower_frequency_cutoff |
+             ! freqs_are_float) %>%
+    filter(.data$Counts < upper_frequency_cutoff |
+             freqs_are_float) %>%
+    filter(.data$Freq < upper_frequency_cutoff |
+             ! freqs_are_float)
+  variables <- variables_freq$term
+  experiment <- experiment[variables, , drop = FALSE]
+
+  return(experiment)
+}
+
+#' Calculate variables frequencies TODO
+#'
+#' \code{getExperimentFrequencies} calculate variables frequencies based on counts
+#' table, such as produced by \code{\link{hlaCallsToCounts}}.
+#'
+#' Variables frequencies are counted in reference to sample size, depending on
+#' the inheritance model under which the counts table has been generated one
+#' might need to take under consideration both gene copies. Here sample size is
+#' assumed to be depended on both gene copies for \code{"additive"} inheritance
+#' model (`n / (2 * j)` where `n` is the number of term occurrences and `j`
+#' is the sample size). For other models the sample size is taken as is
+#' (`n / j`).
+#'
+#' @inheritParams hlaCallsToCounts
+#' @param experiment Matrix
+#' @param inheritance_model String
+#'
+#' @return Data frame containing variables, its corresponding total counts
+#'   and frequencies.
+#'
+#' @seealso \code{\link{hlaCallsToCounts}}
+#'
+#' @examples
+#' \dontrun{
+#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' hla_calls <- readHlaCalls(file)
+#' hla_counts <- hlaCallsToCounts(hla_calls, inheritance_model = "additive")
+#' getExperimentFrequencies(hla_counts)
+#' }
+#'
+#' @importFrom assertthat assert_that is.string
+#' @importFrom formattable percent
+#'
+#' @export
+getExperimentFrequencies <- function(experiment,
+                                     inheritance_model = c("dominant", "recessive", "additive")) {
+  inheritance_model_choice <-  eval(formals()[["inheritance_model"]])
+  assert_that(
+    is.matrix(experiment),
+    isCountsOrZeros(experiment),
+    is.string(inheritance_model),
+    stringMatches(inheritance_model, choice = inheritance_model_choice)
+  )
+
+  # Under additive inheritance model population size equals 2 * nrow(counts_table), in other cases it's 1 * nrow(counts_table)
+  counts_sums <- rowSums(experiment, na.rm = TRUE)
+  pop_mul <- ifelse(inheritance_model == "additive", 2, 1)
+  counts_freq <- counts_sums / (pop_mul * ncol(experiment))
+
+  counts_df <- data.frame(
+    term = rownames(experiment),
+    Counts = counts_sums,
+    Freq = percent(counts_freq),
+    stringsAsFactors = FALSE
+  )
+
+  return(counts_df)
 }
