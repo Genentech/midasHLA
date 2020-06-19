@@ -634,7 +634,7 @@ runMiDAS_linear <- function(object_details,
 
   # format linear results
   ## add variables frequencies
-  if (typeof(object_details$data[[experiment]]) == "integer") {
+  if (isCountsOrZeros(object_details$data[[experiment]])) {
     results <-
       left_join(
         results,
@@ -739,7 +739,7 @@ runMiDAS_conditional <- function(object_details,
                        "term"
   )
 
-  if (typeof(object_details$data[[experiment]]) == "integer") {
+  if (isCountsOrZeros(object_details$data[[experiment]])) {
     if (keep) {
       results <- lapply(
         X = results,
