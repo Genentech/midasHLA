@@ -1193,39 +1193,58 @@ filterExperimentByFrequency <- function(experiment,
 #'
 #' @seealso \code{\link{hlaCallsToCounts}}
 #'
-#' @examples
-#' \dontrun{
-#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-#' hla_calls <- readHlaCalls(file)
-#' hla_counts <- hlaCallsToCounts(hla_calls, inheritance_model = "additive")
-#' getExperimentFrequencies(hla_counts)
-#' }
-#'
 #' @importFrom assertthat assert_that is.string
 #' @importFrom formattable percent
+#' @importFrom SummarizedExperiment assay
 #'
-#' @export
-getExperimentFrequencies <- function(experiment,
-                                     inheritance_model = c("dominant", "recessive", "additive")) {
-  inheritance_model_choice <-  eval(formals()[["inheritance_model"]])
-  assert_that(
-    is.matrix(experiment),
-    isCountsOrZeros(experiment),
-    is.string(inheritance_model),
-    stringMatches(inheritance_model, choice = inheritance_model_choice)
-  )
+getExperimentFrequencies <-
+  function(experiment,
+           inheritance_model = c("dominant", "recessive", "additive")) {
+    UseMethod("getExperimentFrequencies", experiment)
+  }
 
-  # Under additive inheritance model population size equals 2 * nrow(counts_table), in other cases it's 1 * nrow(counts_table)
-  counts_sums <- rowSums(experiment, na.rm = TRUE)
-  pop_mul <- ifelse(inheritance_model == "additive", 2, 1)
-  counts_freq <- counts_sums / (pop_mul * ncol(experiment))
+#' @rdname getExperimentFrequencies
+#' @method getExperimentFrequencies matrix
+#'
+#' @inheritParams getExperimentFrequencies
+#'
+getExperimentFrequencies.matrix <-
+  function(experiment,
+           inheritance_model = c("dominant", "recessive", "additive")) {
+    inheritance_model_choice <-  eval(formals()[["inheritance_model"]])
+    assert_that(
+      is.matrix(experiment),
+      isCountsOrZeros(experiment),
+      is.string(inheritance_model),
+      stringMatches(inheritance_model, choice = inheritance_model_choice)
+    )
 
-  counts_df <- data.frame(
-    term = rownames(experiment),
-    Counts = counts_sums,
-    Freq = percent(counts_freq),
-    stringsAsFactors = FALSE
-  )
+    # Under additive inheritance model population size equals 2 * nrow(counts_table), in other cases it's 1 * nrow(counts_table)
+    counts_sums <- rowSums(experiment, na.rm = TRUE)
+    pop_mul <- ifelse(inheritance_model == "additive", 2, 1)
+    counts_freq <- counts_sums / (pop_mul * ncol(experiment))
 
-  return(counts_df)
-}
+    counts_df <- data.frame(
+      term = rownames(experiment),
+      Counts = counts_sums,
+      Freq = percent(counts_freq),
+      stringsAsFactors = FALSE
+    )
+
+    return(counts_df)
+  }
+
+#' @rdname getExperimentFrequencies
+#' @method getExperimentFrequencies SummarizedExperiment
+#'
+#' @inheritParams getExperimentFrequencies
+#'
+getExperimentFrequencies.SummarizedExperiment <-
+  function(experiment,
+           inheritance_model) {
+    counts <- assay(experiment)
+    getExperimentFrequencies(experiment = counts,
+                             inheritance_model = inheritance_model
+    )
+  }
+

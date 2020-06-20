@@ -661,3 +661,26 @@ test_that("midasToWide", {
     "experiment should match values \"hla_allele\"."
   )
 })
+
+test_that("isExperimentCountsOrZeros", {
+  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(hla_calls_file)[1:5, 1:5]
+
+  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)[1:5, ]
+
+  midas <- prepareMiDAS(
+    hla_calls = hla_calls,
+    colData = pheno,
+    inheritance_model = "additive",
+    experiment = c("hla_allele", "aa_level")
+  )
+
+  expect_equal(isExperimentCountsOrZeros(midas[["hla_allele"]]), TRUE)
+
+  expect_equal(isExperimentCountsOrZeros(midas[["aa_level"]]), TRUE)
+
+  expect_equal(isExperimentCountsOrZeros(matrix(runif(15), nrow = 3)), FALSE)
+
+  expect_equal(isExperimentCountsOrZeros(LETTERS), FALSE)
+})

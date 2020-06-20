@@ -4,6 +4,7 @@
 \alias{runMiDAS}
 \alias{runMiDAS_linear}
 \alias{runMiDAS_conditional}
+\alias{runMiDAS_linear_omnibus}
 \title{Run MiDAS statistical analysis}
 \usage{
 runMiDAS(object, experiment, conditional = FALSE, omnibus = FALSE,
@@ -11,13 +12,18 @@ runMiDAS(object, experiment, conditional = FALSE, omnibus = FALSE,
   correction = "bonferroni", n_correction = NULL,
   exponentiate = FALSE, ...)
 
-runMiDAS_linear(object_details, experiment, correction = "bonferroni",
-  n_correction = NULL, exponentiate = FALSE, ...)
+runMiDAS_linear(call, midas, experiment, test_covar,
+  correction = "bonferroni", n_correction = NULL,
+  exponentiate = FALSE, ...)
 
-runMiDAS_conditional(object_details, experiment,
+runMiDAS_conditional(call, midas, experiment, test_covar,
   correction = "bonferroni", n_correction = NULL,
   exponentiate = FALSE, th = 0.05, keep = FALSE, rss_th = 1e-07,
   ...)
+
+runMiDAS_linear_omnibus(call, midas, experiment, test_covar,
+  correction = "bonferroni", n_correction = NULL,
+  exponentiate = FALSE, ...)
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many
@@ -54,8 +60,6 @@ FALSE.}
 
 \item{...}{other arguments}
 
-\item{object_details}{TODO}
-
 \item{th}{Number specifying p-value threshold for a variable to be considered
 significant.}
 
@@ -68,6 +72,8 @@ function should stop adding additional variables. As the residual sum of
 squares approaches \code{0} the perfect fit is obtained making further
 attempts at variables selection nonsense, thus function is stopped. This
 behavior can be controlled using \code{rss_th}.}
+
+\item{object_details}{TODO}
 }
 \value{
 Tibble containing analysis results.
@@ -104,6 +110,12 @@ statistical analysis is performed in a
   This proces is reapeated for each variable available in the selected
   experiment. This is done by substituting \code{placeholder} in the
   \code{object}'s formula with each variable in the experiment.
+
+statistical analysis is performed iteratively on groups of variables
+  like residues at particular amino acid position, using likelyhood ratio
+  test. This is done by substituting \code{placeholder} in the
+  \code{object}'s formula with linear combination of variable in particular
+  group.
 }
 \examples{
 \dontrun{

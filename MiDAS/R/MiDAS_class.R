@@ -215,6 +215,41 @@ setMethod(
 
 #' @rdname MiDAS-class
 #'
+#' @title Extract omnibus groups from MiDAS object.
+#'
+#' @param object \code{\link{MiDAS}} object.
+#' @param experiment String specifying experiment.
+#'
+#' @return Character vector of omnibus groups for given experiment.
+#'
+#' @export
+setGeneric(
+  name = "getOmnibusGroups",
+  def = function(object, experiment) standardGeneric("getOmnibusGroups")
+)
+
+#' @rdname MiDAS-class
+#'
+#' @importFrom assertthat assert_that is.string
+#' @importFrom S4Vectors metadata
+#'
+setMethod(
+  f = "getOmnibusGroups",
+  signature = "MiDAS",
+  definition = function (object, experiment) {
+    assert_that(is.string(experiment))
+    se <- object[[experiment]]
+    assert_that(
+      isClass(se, "SummarizedExperiment")
+    )
+    omnibus_groups <- metadata(se)$omnibus_groups
+
+    return(omnibus_groups)
+  }
+)
+
+#' @rdname MiDAS-class
+#'
 #' @title Calculate variables frequencies for given experiment in MiDAS object.
 #'
 #' @param object \code{\link{MiDAS}} object.
@@ -334,6 +369,7 @@ setMethod(
 #' @inheritParams as.data.frame
 #'
 #' @export
+#'
 as.data.frame.MiDAS <- function(x, ...) {
   midasToWide(object = x,
               experiment = getExperiments(x))
@@ -556,6 +592,7 @@ prepareMiDAS_hla_allele <- function(hla_calls, inheritance_model, ...) {
 #' @return Matrix
 #'
 #' @importFrom assertthat assert_that is.flag
+#' @importFrom SummarizedExperiment SummarizedExperiment
 #'
 prepareMiDAS_aa_level <- function(hla_calls,
                                   inheritance_model,
@@ -568,7 +605,7 @@ prepareMiDAS_aa_level <- function(hla_calls,
     is.flag(unkchar)
   )
 
-  hla_aa <-
+  counts <-
     hlaToAAVariation(
       hla_calls = hla_calls,
       indels = indels,
@@ -576,6 +613,25 @@ prepareMiDAS_aa_level <- function(hla_calls,
     ) %>%
     aaVariationToCounts(inheritance_model = inheritance_model) %>%
     dfToExperimentMat()
+  vars <- counts %>%
+    rownames()
+  pos <- vars %>%
+    gsub(pattern = "_[A-Z]$", replacement = "") %>%
+    unique()
+  omnibus_groups <- lapply(
+    pos,
+    FUN = function(p) {
+      grep(pattern = paste0("^", p, "_"),
+           x = vars,
+           value = TRUE)
+    }
+  )
+  names(omnibus_groups) <- pos
+
+  hla_aa <- SummarizedExperiment(
+    assays = counts,
+    metadata = list(omnibus_groups = omnibus_groups)
+  )
 
   return(hla_aa)
 }

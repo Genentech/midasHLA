@@ -2,10 +2,18 @@
 % Please edit documentation in R/MiDAS_transformationFunctions.R
 \name{getExperimentFrequencies}
 \alias{getExperimentFrequencies}
+\alias{getExperimentFrequencies.matrix}
+\alias{getExperimentFrequencies.SummarizedExperiment}
 \title{Calculate variables frequencies TODO}
 \usage{
 getExperimentFrequencies(experiment, inheritance_model = c("dominant",
   "recessive", "additive"))
+
+\method{getExperimentFrequencies}{matrix}(experiment,
+  inheritance_model = c("dominant", "recessive", "additive"))
+
+\method{getExperimentFrequencies}{SummarizedExperiment}(experiment,
+  inheritance_model)
 }
 \arguments{
 \item{experiment}{Matrix}
@@ -28,15 +36,6 @@ assumed to be depended on both gene copies for \code{"additive"} inheritance
 model (`n / (2 * j)` where `n` is the number of term occurrences and `j`
 is the sample size). For other models the sample size is taken as is
 (`n / j`).
-}
-\examples{
-\dontrun{
-file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-hla_calls <- readHlaCalls(file)
-hla_counts <- hlaCallsToCounts(hla_calls, inheritance_model = "additive")
-getExperimentFrequencies(hla_counts)
-}
-
 }
 \seealso{
 \code{\link{hlaCallsToCounts}}

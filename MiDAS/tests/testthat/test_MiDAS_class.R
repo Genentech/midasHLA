@@ -146,6 +146,23 @@ test_that("MiDAS object's placeholder is extracted correctly", {
   expect_equal(getPlaceholder(midas), "term")
 })
 
+test_that("MiDAS object's omnibus groups are extracted correctly", {
+  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(hla_calls_file)
+
+  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
+
+  midas <- prepareMiDAS(
+    hla_calls = hla_calls,
+    colData = pheno,
+    inheritance_model = "additive",
+    experiment = "aa_level"
+  )
+
+  expect_equal(getOmnibusGroups(midas), NULL)
+})
+
 test_that("MiDAS object's frequencies are extracted correctly", {
   hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(hla_calls_file)[1:5, 1:5]
@@ -389,35 +406,46 @@ test_that("MiDAS data for hla_allele analysis is prepared properly", {
   ))
 })
 
-# test_that("MiDAS data for aa_level analysis is prepared properly", { # TODO
-#   hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-#   hla_calls <- readHlaCalls(hla_calls_file)
-#
-#   args_c <- expand.grid(
-#     inheritance_model = c("dominant", "recessive", "additive"),
-#     indels = c(TRUE, FALSE),
-#     unkchar = c(TRUE, FALSE),
-#     stringsAsFactors = FALSE
-#   )
-#
-#   for (i in 1:nrow(args_c)) {
-#     args <- as.list(args_c[i, , drop = FALSE])
-#     args$hla_calls <- hla_calls
-#     experiment <- do.call(prepareMiDAS_aa_level, args)
-#
-#     experiment_test <-
-#       hlaToAAVariation(
-#         hla_calls = args$hla_calls,
-#         indels = args$indels,
-#         unkchar = args$unkchar
-#       )
-#     experiment_test <-
-#       aaVariationToCounts(experiment_test, inheritance_model = args$inheritance_model)
-#     experiment_test <- dfToExperimentMat(experiment_test)
-#
-#     expect_equal(experiment, experiment_test)
-#   }
-# })
+test_that("MiDAS data for aa_level analysis is prepared properly", { # TODO
+  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(hla_calls_file)
+
+  args_c <- expand.grid(
+    inheritance_model = c("dominant", "recessive", "additive"),
+    indels = c(TRUE, FALSE),
+    unkchar = c(TRUE, FALSE),
+    stringsAsFactors = FALSE
+  )
+
+  for (i in 1:nrow(args_c)) {
+    args <- as.list(args_c[i, , drop = FALSE])
+    args$hla_calls <- hla_calls
+    experiment <- do.call(prepareMiDAS_aa_level, args)
+
+    counts <-
+      hlaToAAVariation(
+        hla_calls = args$hla_calls,
+        indels = args$indels,
+        unkchar = args$unkchar
+      )
+    counts <-
+      aaVariationToCounts(counts, inheritance_model = args$inheritance_model)
+    counts <- dfToExperimentMat(counts)
+    pos <- gsub("_[A-Z]$", "", rownames(counts))
+    pos <- unique(pos)
+    omnibus_groups <- lapply(pos, function(p) {
+      grep(pattern = paste0("^", p, "_"),
+           x = rownames(counts),
+           value = TRUE)
+    })
+    names(omnibus_groups) <- pos
+    experiment_test <-
+      SummarizedExperiment(assays = counts,
+                           metadata = list(omnibus_groups = omnibus_groups))
+
+    expect_equal(experiment, experiment_test)
+  }
+})
 
 test_that("MiDAS data for allele_g_group analysis is prepared properly", {
   hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")

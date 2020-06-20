@@ -1552,6 +1552,7 @@ experimentMatToDf <- function(mat) {
 #'
 #' @importFrom assertthat assert_that
 #' @importFrom methods validObject
+#' @importFrom magrittr %>%
 #' @importFrom MultiAssayExperiment longFormat colData
 #' @importFrom tidyr spread
 #'
@@ -1572,4 +1573,29 @@ midasToWide <- function(object, experiment) {
     spread(key = "rowname", value = "value")
 
   return(wide_df)
+}
+
+#' Check if frequencies can be calculated for an experiment
+#'
+#' \code{isExperimentCountsOrZeros} checks if experiment contains only positive
+#' integers or zeros.
+#'
+#' @param x Matrix or SummarizedExperiment object.
+#' @param na.rm Logical indicating if \code{NA} values should be accepted.
+#'
+#' @return Logical indicating if \code{x} contains only positive integers or
+#'   zeros.
+#'
+#' @family assert functions
+#'
+isExperimentCountsOrZeros <- function(x, na.rm = TRUE) {
+  test <- if (is.matrix(x)) {
+    isCountsOrZeros(x)
+  } else if (isClass(x, "SummarizedExperiment")) {
+    isCountsOrZeros(assay(x))
+  } else {
+    FALSE
+  }
+
+  return(test)
 }

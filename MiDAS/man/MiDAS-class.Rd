@@ -14,6 +14,8 @@
 \alias{getKirCalls,MiDAS-method}
 \alias{getPlaceholder}
 \alias{getPlaceholder,MiDAS-method}
+\alias{getOmnibusGroups}
+\alias{getOmnibusGroups,MiDAS-method}
 \alias{getFrequencies}
 \alias{getFrequencies,MiDAS-method}
 \alias{filterByFrequency}
@@ -39,6 +41,10 @@ getKirCalls(object)
 getPlaceholder(object)
 
 \S4method{getPlaceholder}{MiDAS}(object)
+
+getOmnibusGroups(object, experiment)
+
+\S4method{getOmnibusGroups}{MiDAS}(object, experiment)
 
 getFrequencies(object, experiment)
 
@@ -69,6 +75,10 @@ filterByFrequency(object, experiment, lower_frequency_cutoff,
 
 \item{object}{\code{\link{MiDAS}} object.}
 
+\item{object}{\code{\link{MiDAS}} object.}
+
+\item{experiment}{String specifying experiment.}
+
 \item{object}{\code{\link{MiDAS}} object}
 
 \item{experiment}{Matrix}
@@ -83,6 +93,8 @@ Data frame with object's HLA calls.
 Data frame with object's KIR calls.
 
 String giving object's placeholder.
+
+Character vector of omnibus groups for given experiment.
 
 Data frame containing variables, its corresponding total counts
   and frequencies.

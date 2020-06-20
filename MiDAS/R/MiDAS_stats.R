@@ -335,21 +335,19 @@ analyzeConditionalAssociations <- function(object,
   return(results)
 }
 
-#' Amino acid position omnibus test
+#' Omnibus test
 #'
-#' \code{aaPosOmnibusTest} calculate overall p-value for amino acid position
-#' using likelihood rato test.
+#' \code{OmnibusTest} calculate overall p-value for linear combination of
+#' vairables using likelihood rato test.
 #'
 #' Likelihood ratio test is conducted by comparing model given in \code{object}
-#' with extended model, that is created by including effect of amino acid
-#' residues at each position in \code{aa_pos}. Amino acid effect is assumend to
-#' be simply additive.
+#' with extended model, that is created by including effect of variables given
+#' in \code{variables} as thie linear combination.
 #'
 #' @inheritParams analyzeAssociations
-#' @inheritParams summariseAAPosition
+#' @param omnibus_groups List of character vectors
 #'
-#' @return Data frame containing omnibus test results for specified amino acid
-#'   positions.
+#' @return Data frame containing omnibus test results for specified variables.
 #'
 #' @importFrom assertthat assert_that see_if is.string
 #' @importFrom broom tidy
@@ -357,62 +355,27 @@ analyzeConditionalAssociations <- function(object,
 #' @importFrom stats p.adjust
 #' @importFrom rlang .data
 #'
-#' @export
-aaPosOmnibusTest <- function(object,
-                             aa_pos,
-                             correction = "bonferroni",
-                             n_correction = NULL) {
-  assert_that(
-    checkStatisticalModel(object)
-  )
-  object_call <- getCall(object)
-  object_env <- attr(object$terms, ".Environment")
-  object_data <- eval(object_call[["data"]], envir = object_env)
-  object_variables <- colnames(object_data)[-1]
-  base_vars <- all.vars(object_call$formula)
-
-  assert_that(
-    is.character(aa_pos), # proper check on aa_pos format is missing!
-    is.string(correction),
-    isCountOrNULL(n_correction)
-  )
-
-  variables <- lapply(
-    X = aa_pos,
-    FUN = function(x) {
-      pattern <- paste0(x, "_")
-      resids <- grep(
-        pattern = pattern,
-        x = object_variables,
-        fixed = TRUE,
-        value = TRUE
-      )
-      resids <- resids[! resids %in% base_vars] # discard residues used as covariates
-      assert_that(
-        length(resids) != 0,
-        msg = sprintf("amino acid position %s could not be found.", x)
-      )
-
-      return(resids)
-    }
-  )
-
+omnibusTest <- function(object,
+                        omnibus_groups,
+                        placeholder = "term",
+                        correction = "bonferroni",
+                        n_correction = NULL) {
   results <- lapply(
-    X = variables,
+    X = omnibus_groups,
     FUN = function(x) tryCatch(
       expr = LRTest(
         object,
         updateModel(
           object = object,
           x = x,
-          backquote = TRUE,
-          collapse = " + "
+          collapse = " + ",
+          backquote = TRUE
         )
       ),
       error = function(e) {
         msg <- sprintf(
-          "Error occurred while processing variable %s:\n\t%s",
-          gsub("_[A-Z]", "", x[1]), # output aa_pos in err message
+          "Error occurred while processing variables %s:\n\t%s",
+          toString(x), # output aa_pos in err message
           conditionMessage(e)
         )
         warn(msg)
@@ -422,16 +385,11 @@ aaPosOmnibusTest <- function(object,
     )
   )
 
+  terms <-names(results)
   results <- bind_rows(results) %>%
     mutate(
-      residues = gsub("[A-Z]+_[0-9]+_", "", .data$term),
-      term = aa_pos
-    ) %>%
-    select(aa_pos = .data$term,
-           .data$residues,
-           d.f. = .data$dof,
-           .data$statistic,
-           .data$p.value
+      variables = term,
+      term = terms
     )
 
   nc <- ifelse(is.null(n_correction), length(results$p.value), n_correction)
@@ -565,8 +523,10 @@ runMiDAS <- function(object,
   }
 
   args <- list(
-    object_details = object_details,
+    call = object_details$call,
+    midas = object_details$data,
     experiment = experiment,
+    test_covar = object_details$formula_vars[1],
     correction = correction,
     n_correction = n_correction,
     exponentiate = exponentiate,
@@ -591,31 +551,24 @@ runMiDAS <- function(object,
 #'   \code{placeholder} in the \code{object}'s formula with each variable in the
 #'   experiment.
 #'
-#' @param object_details TODO
-#'
 #' @importFrom assertthat assert_that
 #' @importFrom dplyr rename
 #' @importFrom rlang call_modify !! :=
 #'
-runMiDAS_linear <- function(object_details,
+runMiDAS_linear <- function(call,
+                            midas,
                             experiment,
+                            test_covar,
                             correction = "bonferroni",
                             n_correction = NULL,
                             exponentiate = FALSE,
                             ...) {
-  # only experiments of class matrix can be used here
-  assert_that(
-    isClass(object_details$data[[experiment]], "matrix"),
-    msg = sprintf("Unconditional runMiDAS does not support experiment %s",
-                  experiment)
-  )
-
-  test_var <- rownames(object_details$data[[experiment]])
-  placeholder <- getPlaceholder(object_details$data)
+  test_var <- rownames(midas[[experiment]])
+  placeholder <- getPlaceholder(midas)
 
   # insert data for analysis
-  data <- midasToWide(object_details$data, experiment)
-  call <- call_modify(object_details$call, data = data)
+  data <- midasToWide(midas, experiment)
+  call <- call_modify(substitute(call), data = data)
   object <- eval(call)
 
   # run analysis
@@ -634,14 +587,14 @@ runMiDAS_linear <- function(object_details,
 
   # format linear results
   ## add variables frequencies
-  if (isCountsOrZeros(object_details$data[[experiment]])) {
+  if (isExperimentCountsOrZeros(midas[[experiment]])) {
     results <-
       left_join(
         results,
         runMiDASGetVarsFreq(
-          midas = object_details$data,
+          midas = midas,
           experiment = experiment,
-          test_covar = object_details$formula_vars[1]
+          test_covar = test_covar
         ),
         by = "term"
       )
@@ -683,8 +636,10 @@ runMiDAS_linear <- function(object_details,
 #' @importFrom dplyr rename bind_rows
 #' @importFrom rlang call_modify !! :=
 #'
-runMiDAS_conditional <- function(object_details,
+runMiDAS_conditional <- function(call,
+                                 midas,
                                  experiment,
+                                 test_covar,
                                  correction = "bonferroni",
                                  n_correction = NULL,
                                  exponentiate = FALSE,
@@ -692,20 +647,13 @@ runMiDAS_conditional <- function(object_details,
                                  keep = FALSE,
                                  rss_th = 1e-07,
                                  ...) {
-  # only experiments of class matrix can be used here
-  assert_that(
-    isClass(object_details$data[[experiment]], "matrix"),
-    msg = sprintf("Conditional runMiDAS does not supported experiment %s",
-                  experiment)
-  )
-
   # get test covariates names
-  test_var <- rownames(object_details$data[[experiment]])
-  placeholder <- getPlaceholder(object_details$data)
+  test_var <- rownames(midas[[experiment]])
+  placeholder <- getPlaceholder(midas)
 
   # insert data for analysis
-  data <- midasToWide(object_details$data, experiment)
-  call <- call_modify(object_details$call, data = data)
+  data <- midasToWide(midas, experiment)
+  call <- call_modify(substitute(call), data = data)
   object <- eval(call)
 
   # run analysis
@@ -739,7 +687,7 @@ runMiDAS_conditional <- function(object_details,
                        "term"
   )
 
-  if (isCountsOrZeros(object_details$data[[experiment]])) {
+  if (isExperimentCountsOrZeros(midas[[experiment]])) {
     if (keep) {
       results <- lapply(
         X = results,
@@ -748,9 +696,9 @@ runMiDAS_conditional <- function(object_details,
             left_join(
               x,
               runMiDASGetVarsFreq(
-                midas = object_details$data,
+                midas = midas,
                 experiment = experiment,
-                test_covar = object_details$formula_vars[1]
+                test_covar = test_covar
               ),
               by = "term"
             )
@@ -762,9 +710,9 @@ runMiDAS_conditional <- function(object_details,
         left_join(
           results,
           runMiDASGetVarsFreq(
-            midas = object_details$data,
+            midas = midas,
             experiment = experiment,
-            test_covar = object_details$formula_vars[1]
+            test_covar = test_covar
           ),
           by = "term"
         )
@@ -774,3 +722,82 @@ runMiDAS_conditional <- function(object_details,
 
   return(results)
 }
+
+#' @rdname runMiDAS
+#'
+#' @title runMiDAS linear omnibus
+#'
+#' @details statistical analysis is performed iteratively on groups of variables
+#'   like residues at particular amino acid position, using likelyhood ratio
+#'   test. This is done by substituting \code{placeholder} in the
+#'   \code{object}'s formula with linear combination of variable in particular
+#'   group.
+#'
+#' @param object_details TODO
+#'
+#' @importFrom assertthat assert_that
+#' @importFrom dplyr rename
+#' @importFrom rlang call_modify !! :=
+#'
+runMiDAS_linear_omnibus <- function(call,
+                                    midas,
+                                    experiment,
+                                    test_covar,
+                                    correction = "bonferroni",
+                                    n_correction = NULL,
+                                    exponentiate = FALSE,
+                                    ...) {
+  test_var <- rownames(midas[[experiment]])
+  placeholder <- getPlaceholder(midas)
+  omnibus_groups <- getOmnibusGroups(midas, experiment)
+
+  # insert data for analysis
+  data <- midasToWide(midas, experiment)
+  call <- call_modify(substitute(call), data = data)
+  object <- eval(call)
+
+  # run analysis
+  results <- omnibusTest(object = object,
+                         omnibus_groups = omnibus_groups,
+                         placeholder = placeholder,
+                         correction = correction,
+                         n_correction = n_correction
+  )
+
+  assert_that(
+    nrow(results) > 0,
+    msg = "Could not process any variables. Please check warning messages for more informations (warnings())."
+  )
+
+  # format linear results
+  ## add variables frequencies
+  if (isExperimentCountsOrZeros(midas[[experiment]])) {
+    results <-
+      left_join(
+        results,
+        runMiDASGetVarsFreq(
+          midas = midas,
+          experiment = experiment,
+          test_covar = test_covar
+        ),
+        by = "term"
+      )
+  }
+
+  ## rename term
+  term_name <- switch (experiment,
+                       "hla_allele" = "allele",
+                       "aa_level" = "aa",
+                       "expression_level" = "allele",
+                       "allele_g_group" = "g.group",
+                       "allele_supertype" = "supertype",
+                       "allele_group" = "allele.group",
+                       "kir_genes" = "kir.gene",
+                       "hla_kir_interactions" = "hla.kir.interaction",
+                       "term"
+  )
+  results <- rename(results, !! term_name := .data$term)
+
+  return(results)
+}
+

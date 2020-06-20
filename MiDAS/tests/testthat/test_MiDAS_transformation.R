@@ -724,30 +724,59 @@ test_that("Experiments are filtered correctly", {
   )
 })
 
-test_that("Experiment are converted into frequencies", {
-  file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(file)
-  hla_counts <- hlaCallsToCounts(hla_calls, inheritance_model = "additive")
-  experiment <- dfToExperimentMat(hla_counts)
-  hla_freq <- getExperimentFrequencies(experiment, inheritance_model = "additive")
-  hla_freq <- hla_freq[, c("term", "Freq")]
-  colnames(hla_freq) <- c("allele", "Freq")
-  rownames(hla_freq) <- NULL
-  test_hla_freq <- getHlaFrequencies(hla_calls)
-  if (all(class(test_hla_freq$Freq) == c("formattable", "numeric"))) {
-    stop("other freq functions are already updated delete this fix")
-  }
-  test_hla_freq$Freq <- formattable::percent(test_hla_freq$Freq)
-  expect_equal(hla_freq, test_hla_freq)
+test_that("getExperimentFrequencies", {
+  # matirx
+  experiment_matrix <- matrix(
+    data = c(0, 2, 0, 0, 0,
+             0, 2, 0, 0, 0,
+             2, 0, 0, 0, 0,
+             0, 1, 1, 0, 0,
+             0, 0, 0, 0, 0
+    ),
+    nrow = 5,
+    ncol = 5,
+    dimnames = list(
+      c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
+      c("PAT1", "PAT2", "PAT3", "PAT4", "PAT5")
+    )
+  )
 
-  expect_error(getExperimentFrequencies("foo"), "experiment is not a matrix")
+  # additive
+  experiment_matrix_freq <-
+    getExperimentFrequencies(experiment_matrix, "additive")
+  experiment_matrix_freq_test <- data.frame(
+    term = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
+    Counts = c(2, 5, 1, 0, 0),
+    Freq = formattable::percent(c(0.2, 0.5, 0.1, 0, 0), 2L),
+    row.names = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
+    stringsAsFactors = FALSE
+  )
+  expect_equal(experiment_matrix_freq, experiment_matrix_freq_test)
 
-  expect_error(getExperimentFrequencies(as.matrix(hla_counts)),
+  # dominant
+  experiment_matrix[experiment_matrix == 2] <- 1
+  experiment_matrix_freq <-
+    getExperimentFrequencies(experiment_matrix, "dominant")
+  experiment_matrix_freq_test <- data.frame(
+    term = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
+    Counts = c(1, 3, 1, 0, 0),
+    Freq = formattable::percent(c(0.2, 0.6, 0.2, 0, 0), 2L),
+    row.names = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
+    stringsAsFactors = FALSE
+  )
+  expect_equal(experiment_matrix_freq, experiment_matrix_freq_test)
+
+  # SummarizedExperiment
+  experiment_se <- SummarizedExperiment::SummarizedExperiment(experiment_matrix)
+  experiment_se_freq <- getExperimentFrequencies(experiment_se, "dominant")
+  expect_equal(experiment_matrix_freq, experiment_matrix_freq_test)
+
+  expect_error(getExperimentFrequencies(as.matrix(LETTERS)),
                "values in experiment are not counts \\(a positive integers\\) or zeros.")
 
-  expect_error(getExperimentFrequencies(experiment, 1),
+  expect_error(getExperimentFrequencies(experiment_matrix, 1),
                "inheritance_model is not a string \\(a length one character vector\\).")
 
-  expect_error(getExperimentFrequencies(experiment, "foo"),
+  expect_error(getExperimentFrequencies(experiment_matrix, "foo"),
                "inheritance_model should be one of \"dominant\", \"recessive\", \"additive\".")
 })

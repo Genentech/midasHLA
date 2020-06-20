@@ -620,7 +620,7 @@ test_that("amino acid omnibus test works fine", {
     )
   midas_data <- midasToWide(midas, experiment = "aa_level")
   object <- lm(OS ~ AGE + SEX + term, data = midas_data)
-  omnibus_res <- aaPosOmnibusTest(object, aa_pos = c("B_35", "E_128", "A_270"))
+  omnibus_res <- omnibusTest(object, aa_pos = c("B_35", "E_128", "A_270"))
 
   obj_B35 <- lm(OS ~ AGE + SEX + B_35_A + B_35_S + term, data = midas_data)
   obj_E128 <- lm(OS ~ AGE + SEX + E_128_R + E_128_G + term, data = midas_data)
@@ -639,27 +639,23 @@ test_that("amino acid omnibus test works fine", {
 
   # Tests for checkStatisticalModel errors are ommitted here
 
-  expect_error(aaPosOmnibusTest(object, aa_pos = 1:5),
-               "aa_pos is not a character vector"
-  )
-
   expect_error(
-    aaPosOmnibusTest(object, c("B_35", "E_128", "A_270"), correction = 1),
+    omnibusTest(object, c("B_35", "E_128", "A_270"), correction = 1),
     "correction is not a string \\(a length one character vector\\)."
   )
 
   expect_error(
-    aaPosOmnibusTest(object, c("B_35", "E_128", "A_270"), n_correction = 1.5),
+    omnibusTest(object, c("B_35", "E_128", "A_270"), n_correction = 1.5),
     "n_correction is not a count \\(a single positive integer\\) or NULL."
   )
 
   expect_error(
-    aaPosOmnibusTest(object, "FOO_2"),
+    omnibusTest(object, "FOO_2"),
     "amino acid position FOO_2 could not be found."
   )
 
   expect_error(
-    aaPosOmnibusTest(object, c("B_35", "E_128", "A_270"), n_correction = 1),
+    omnibusTest(object, c("B_35", "E_128", "A_270"), n_correction = 1),
     "n_correction must be at least 3."
   )
 })
