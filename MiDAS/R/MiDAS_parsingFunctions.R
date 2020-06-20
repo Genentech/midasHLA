@@ -189,22 +189,32 @@ readHlaAlignments <- function(file,
                    )
     )
 
+    # find AA positions numbers
+    aln_raw <- aln_raw[nonempty_lines]
+    raw_first_codon_idx <- nchar(stri_subset_fixed(aln_raw, "Prot")[1])
+    raw_alignment_line <- stri_sub(aln_raw[allele_lines][1],
+                                   1,
+                                   raw_first_codon_idx
+    )
+    raw_alignment_seq <- stri_split_regex(raw_alignment_line, "\\s+")
+    raw_alignment_seq <- unlist(raw_alignment_seq)[-c(1, 2)]
+    first_codon_idx <- nchar(stri_flatten(raw_alignment_seq))
+    assert_that(
+      see_if(is.count(first_codon_idx),
+             msg = "start codon is not marked properly in the input file"
+      )
+    )
+    if (first_codon_idx > 1) {
+      aln_colnames <- c(seq(1 - first_codon_idx, -1, 1),
+                        seq(1, ncol(aln) + 1 - first_codon_idx, 1)
+                      )
+    } else {
+      aln_colnames <- seq(1, ncol(aln) + 1 - first_codon_idx, 1)
+    }
+    colnames(aln) <- aln_colnames
+
     # discard aa '5 to start codon of mature protein
     if (trim) {
-      aln_raw <- aln_raw[nonempty_lines]
-      raw_first_codon_idx <- nchar(stri_subset_fixed(aln_raw, "Prot")[1])
-      raw_alignment_line <- stri_sub(aln_raw[allele_lines][1],
-                                     1,
-                                     raw_first_codon_idx
-      )
-      raw_alignment_seq <- stri_split_regex(raw_alignment_line, "\\s+")
-      raw_alignment_seq <- unlist(raw_alignment_seq)[-c(1, 2)]
-      first_codon_idx <- nchar(stri_flatten(raw_alignment_seq))
-      assert_that(
-        see_if(is.count(first_codon_idx),
-               msg = "start codon is not marked properly in the input file"
-        )
-      )
       aln <- aln[, first_codon_idx:ncol(aln)]
     }
   } else {
@@ -246,8 +256,6 @@ readHlaAlignments <- function(file,
   unique_numbers <- ! duplicated(allele_numbers)
   aln <- aln[unique_numbers, , drop = FALSE]
   rownames(aln) <- allele_numbers[unique_numbers]
-
-
 
   return(aln)
 }

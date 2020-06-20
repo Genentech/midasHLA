@@ -113,16 +113,16 @@ hlaToAAVariation <- function(hla_calls,
   # get aa variations for each gene
   aa_variation <- list()
   for (i in 1:length(gene_names_uniq)) {
-    x_calls <- hla_calls[, gene_names == gene_names_uniq[i]]
+    x_calls <- hla_calls[, gene_names == gene_names_uniq[i], drop = FALSE]
 
     # mark alleles w/o reference as NAs
     x_calls_unlist <- unlist(x_calls)
     ref_allele <- rownames(hla_aln[[i]])
     mask_alleles_wo_ref <- ! x_calls_unlist %in% ref_allele
-    if (any(mask_alleles_wo_ref, na.rm = TRUE)) {
+    if (any(mask_alleles_wo_ref[! is.na(x_calls_unlist)], na.rm = TRUE)) {
       warn(sprintf(
         "Alignments for alleles %s are not available and will be omitted.",
-        paste(x_calls_unlist[! mask_alleles_wo_ref], collapse = ", ")
+        paste(x_calls_unlist[mask_alleles_wo_ref], collapse = ", ")
       ))
       x_calls_unlist[mask_alleles_wo_ref] <- NA
     }
@@ -143,7 +143,7 @@ hlaToAAVariation <- function(hla_calls,
       mask <- 1:nrow(hla_aln[[i]]) # This is tmp solution as NAs in character index gives oob error
       names(mask) <- rownames(hla_aln[[i]])
       x <- hla_aln[[i]][mask[x_calls[, allele]], var_pos, drop = FALSE]
-      colnames(x) <- paste0(allele, "_", "AA_", var_pos)
+      colnames(x) <- paste0(allele, "_", "AA_", colnames(x))
       return(x)
     })
     var_aln <- do.call(cbind, var_aln)
@@ -153,7 +153,7 @@ hlaToAAVariation <- function(hla_calls,
                   },
                   FUN.VALUE = numeric(length = 2)
     ))
-    var_aln <- var_aln[, ord]
+    var_aln <- var_aln[, ord, drop = FALSE]
 
     aa_variation[[length(aa_variation) + 1]] <- var_aln
   }
@@ -533,6 +533,7 @@ getHlaFrequencies <- function(hla_calls) {
 #'
 #' @importFrom assertthat assert_that is.string
 #' @importFrom qdapTools mtabulate
+#' @importFrom stats na.omit
 #'
 #' @export
 aaVariationToCounts <- function(aa_variation,
@@ -560,10 +561,12 @@ aaVariationToCounts <- function(aa_variation,
   aa_ids <- gsub("_[12]_AA", "", aa_ids)
   aa_counts <- lapply(1:(ncol(aa_counts)),
                          function(i) {
-                           paste(aa_ids[i], aa_counts[, i], sep = "_")
+                           x <- paste(aa_ids[i], aa_counts[, i], sep = "_")
+                           x[is.na(aa_counts[, i])] <- NA
+                           return(x)
                          }
   )
-  ord <- unique(unlist(aa_counts))
+  ord <- na.omit(unique(unlist(aa_counts)))
   aa_counts <- do.call(rbind, aa_counts)
   aa_counts <- mtabulate(as.data.frame(aa_counts, stringsAsFactors = FALSE))
   rownames(aa_counts) <- NULL
