@@ -367,8 +367,8 @@ checkAdditionalData <- function(data_frame,
 #'   others.
 #' @param x Character vector specifying variables to be added to model.
 #' @param placeholder String specifying term to substitute with value from
-#'   \code{x}. Can be used only if \code{x} is a string. Ignored if set to
-#'   \code{NULL}.
+#'   \code{x}. If more than one variable is passed in \code{x} all of them will
+#'   be bracketed. Ignored if set to \code{NULL}.
 #' @param backquote Logical indicating if added variables should be quoted.
 #'   Elements of this vector are recycled over \code{x}. Only relevant if
 #'   \code{x} is of type character.
@@ -386,6 +386,9 @@ checkAdditionalData <- function(data_frame,
 #' object <- lm(dist ~ 1, data = cars)
 #' updateModel(object, "dist")
 #'
+#' object <- lm(Sepal.Length ~ Petal.Width*Species, iris)
+#' updateModel(object, c("Sepal.Width", "Petal.Length"), placeholde = "Petal.Width")
+#'
 #' @export
 updateModel <- function(object,
                         x,
@@ -396,10 +399,6 @@ updateModel <- function(object,
     checkStatisticalModel(object),
     is.character(x),
     isStringOrNULL(placeholder),
-    see_if(
-      ! (! is.null(placeholder) && length(x) != 1),
-      msg = "placeholder argument can be used only with one new variable in x."
-    ),
     isTRUEorFALSE(backquote),
     is.string(collapse)
   )
@@ -413,6 +412,7 @@ updateModel <- function(object,
   if (is.null(placeholder)) {
     x <- paste0(". ~ . + ", paste(x, collapse = collapse))
   } else {
+    x <- paste0("(", paste(x, collapse = collapse), ")")
     object_call <- getCall(object)
     object_form <- object_call[["formula"]] %>%
       eval(envir = object_env)

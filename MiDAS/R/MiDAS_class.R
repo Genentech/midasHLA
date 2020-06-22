@@ -238,11 +238,12 @@ setMethod(
   signature = "MiDAS",
   definition = function (object, experiment) {
     assert_that(is.string(experiment))
-    se <- object[[experiment]]
-    assert_that(
-      isClass(se, "SummarizedExperiment")
-    )
-    omnibus_groups <- metadata(se)$omnibus_groups
+    experiment <- object[[experiment]]
+    omnibus_groups <- if (isClass(experiment, "SummarizedExperiment")) {
+      metadata(experiment)$omnibus_groups
+    } else {
+      NULL
+    }
 
     return(omnibus_groups)
   }
@@ -360,6 +361,70 @@ setMethod(
 
   return(object)
 })
+
+#' @rdname MiDAS-class
+#'
+#' @title Filter MiDAS object by omnibus groups
+#'
+#' @param object \code{\link{MiDAS}} object
+#' @param experiment Matrix
+#' @param groups Character
+#'
+#' @return Object of class MiDAS.
+#'
+#' @importFrom assertthat assert_that is.string see_if
+#' @importFrom methods validObject
+#'
+#' @export
+setGeneric(
+  name = "filterByOmnibusGroups",
+  def = function(object,
+                 experiment,
+                 groups) {
+    standardGeneric("filterByOmnibusGroups")
+  }
+)
+
+#' @rdname MiDAS-class
+#'
+#' @importFrom assertthat assert_that is.string see_if
+#' @importFrom S4Vectors metadata
+#'
+setMethod(
+  f = "filterByOmnibusGroups",
+  signature = "MiDAS",
+  definition = function(object,
+                        experiment,
+                        groups) {
+    assert_that(
+      is.string(experiment),
+      characterMatches(experiment, getExperiments(object)),
+      is.character(groups)
+    )
+    omnibus_groups <- getOmnibusGroups(object, experiment)
+    assert_that(
+      see_if(
+        !is.null(omnibus_groups),
+        msg = sprintf(
+          "Omnibus groups filtration does not support experiment %s",
+          experiment
+        )
+      ),
+      see_if(
+        isClass(object[[experiment]], "SummarizedExperiment"),
+        msg = sprintf(
+          "Omnibus groups filtration does not support experiment %s",
+          experiment
+        )
+      ),
+      characterMatches(groups, names(omnibus_groups))
+    )
+
+    mask <- unlist(omnibus_groups[groups])
+    object <- object[mask, ]
+
+    return(object)
+  })
 
 #' Coerce MiDAS to Data Frame
 #'
@@ -616,7 +681,7 @@ prepareMiDAS_aa_level <- function(hla_calls,
   vars <- counts %>%
     rownames()
   pos <- vars %>%
-    gsub(pattern = "_[A-Z]$", replacement = "") %>%
+    gsub(pattern = "_.{1}$", replacement = "") %>%
     unique()
   omnibus_groups <- lapply(
     pos,

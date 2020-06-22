@@ -173,15 +173,6 @@ test_that("HLA statistical models are updated properly", {
                "placeholder is not a string \\(a length one character vector\\)."
   )
 
-  expect_error(
-    updateModel(
-      coxmod,
-      x = c("A*01:01", "A*01:02"),
-      placeholder = "foo"
-    ),
-    "placeholder argument can be used only with one new variable in x."
-  )
-
   expect_error(updateModel(coxmod, x = "A*01:01", backquote = 1),
                "backquote is not a flag \\(a length one logical vector\\)."
   )

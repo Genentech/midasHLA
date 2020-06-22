@@ -14,8 +14,8 @@ others.}
 \item{x}{Character vector specifying variables to be added to model.}
 
 \item{placeholder}{String specifying term to substitute with value from
-\code{x}. Can be used only if \code{x} is a string. Ignored if set to
-\code{NULL}.}
+\code{x}. If more than one variable is passed in \code{x} all of them will
+be bracketed. Ignored if set to \code{NULL}.}
 
 \item{backquote}{Logical indicating if added variables should be quoted.
 Elements of this vector are recycled over \code{x}. Only relevant if
@@ -33,5 +33,8 @@ Updated fit of input model.
 \examples{
 object <- lm(dist ~ 1, data = cars)
 updateModel(object, "dist")
+
+object <- lm(Sepal.Length ~ Petal.Width*Species, iris)
+updateModel(object, c("Sepal.Width", "Petal.Length"), placeholde = "Petal.Width")
 
 }

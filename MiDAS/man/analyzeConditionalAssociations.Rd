@@ -16,8 +16,8 @@ others.}
 tests.}
 
 \item{placeholder}{String specifying term to substitute with value from
-\code{x}. Can be used only if \code{x} is a string. Ignored if set to
-\code{NULL}.}
+\code{x}. If more than one variable is passed in \code{x} all of them will
+be bracketed. Ignored if set to \code{NULL}.}
 
 \item{correction}{String specifying multiple testing correction method. See
 details for further information.}

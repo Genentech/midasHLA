@@ -620,42 +620,24 @@ test_that("amino acid omnibus test works fine", {
     )
   midas_data <- midasToWide(midas, experiment = "aa_level")
   object <- lm(OS ~ AGE + SEX + term, data = midas_data)
-  omnibus_res <- omnibusTest(object, aa_pos = c("B_35", "E_128", "A_270"))
+  omnibus_groups <- list(
+    A_77 = c("A_77_D", "A_77_N", "A_77_S"),
+    A_79 = c("A_79_G", "A_79_R")
+  )
+  omnibus_res <- omnibusTest(object, omnibus_groups)
 
-  obj_A17 <- lm(OS ~ AGE + SEX + A_17_R + A_17_S + term, data = midas_data)
-  obj_A90 <- lm(OS ~ AGE + SEX + A_90_A + A_90_D + term, data = midas_data)
-  obj_A166 <- lm(OS ~ AGE + SEX + A_166_E + A_166_D + term, data = midas_data)
-  LRT <- lapply(list(obj_A17, obj_A90, obj_A166), LRTest, mod0 = object)
+  obj_A77 <- lm(OS ~ AGE + SEX + A_77_D + A_77_N + A_77_S + term, data = midas_data)
+  obj_A79 <- lm(OS ~ AGE + SEX + A_79_G + A_79_R + term, data = midas_data)
+  LRT <- lapply(list(obj_A77, obj_A79), LRTest, mod0 = object)
   omnibus_res_test <- data.frame(
-    aa_pos = c("B_35", "E_128", "A_270"),
-    residues = c("A, S", "G, R", "A, S"),
-    d.f. = sapply(LRT, `[[`, "dof"),
+    group = c("A_77", "A_79"),
+    term = c("A_77_D, A_77_N, A_77_S", "A_79_G, A_79_R"),
+    dof = sapply(LRT, `[[`, "dof"),
+    logLik = sapply(LRT, `[[`, "logLik"),
     statistic = sapply(LRT, `[[`, "statistic"),
     p.value = sapply(LRT, `[[`, "p.value"),
     p.adjusted = p.adjust(sapply(LRT, `[[`, "p.value"), method = "bonferroni"),
     stringsAsFactors = FALSE
   )
   expect_equal(omnibus_res, omnibus_res_test)
-
-  # Tests for checkStatisticalModel errors are ommitted here
-
-  expect_error(
-    omnibusTest(object, c("B_35", "E_128", "A_270"), correction = 1),
-    "correction is not a string \\(a length one character vector\\)."
-  )
-
-  expect_error(
-    omnibusTest(object, c("B_35", "E_128", "A_270"), n_correction = 1.5),
-    "n_correction is not a count \\(a single positive integer\\) or NULL."
-  )
-
-  expect_error(
-    omnibusTest(object, "FOO_2"),
-    "amino acid position FOO_2 could not be found."
-  )
-
-  expect_error(
-    omnibusTest(object, c("B_35", "E_128", "A_270"), n_correction = 1),
-    "n_correction must be at least 3."
-  )
 })

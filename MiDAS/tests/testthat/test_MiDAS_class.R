@@ -160,7 +160,17 @@ test_that("MiDAS object's omnibus groups are extracted correctly", {
     experiment = "aa_level"
   )
 
-  expect_equal(getOmnibusGroups(midas), NULL)
+  expect_equal(getOmnibusGroups(midas, "aa_level")[1:3],
+               list(
+                 `A_-15` = c("A_-15_V", "A_-15_L"),
+                 `A_-11` = c("A_-11_S", "A_-11_L"),
+                 A_9 = c("A_9_F", "A_9_Y", "A_9_S")
+               ))
+
+  expect_error(
+    getOmnibusGroups(midas, 1),
+    "experiment is not a string \\(a length one character vector\\)."
+  )
 })
 
 test_that("MiDAS object's frequencies are extracted correctly", {
@@ -431,7 +441,7 @@ test_that("MiDAS data for aa_level analysis is prepared properly", { # TODO
     counts <-
       aaVariationToCounts(counts, inheritance_model = args$inheritance_model)
     counts <- dfToExperimentMat(counts)
-    pos <- gsub("_[A-Z]$", "", rownames(counts))
+    pos <- gsub("_.{1}$", "", rownames(counts))
     pos <- unique(pos)
     omnibus_groups <- lapply(pos, function(p) {
       grep(pattern = paste0("^", p, "_"),
@@ -679,5 +689,43 @@ test_that("MiDAS is filtered correctly", {
       upper_frequency_cutoff = upper_frequency_cutoff
     ),
     "Frequency filtration does not support experiment 'hla_divergence'"
+  )
+})
+
+test_that("filterByOmnibusGroups", {
+  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(hla_calls_file)
+  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
+  midas <- prepareMiDAS(
+    hla_calls = hla_calls,
+    colData = pheno,
+    inheritance_model = "additive",
+    experiment = c("hla_allele", "aa_level")
+  )
+
+  # filtration works as expected
+  experiment <- "aa_level"
+  mask <- c("A_83", "A_90")
+  filtered_midas <-
+    filterByOmnibusGroups(
+      object = midas,
+      experiment = experiment,
+      groups = mask
+    )
+  test_filtered_midas <- midas
+  mask <- c("A_83_G", "A_83_R", "A_90_A", "A_90_D")
+  test_filtered_midas <- test_filtered_midas[mask, ]
+  expect_equal(filtered_midas, test_filtered_midas)
+
+  # unsported experiments raise error
+  experiment <- "hla_divergence"
+  expect_error(
+    filterByOmnibusGroups(
+      object = midas,
+      experiment = experiment,
+      groups = mask
+    ),
+    "Omnibus groups filtration does not support experiment 'hla_allele'"
   )
 })

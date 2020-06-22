@@ -349,11 +349,8 @@ analyzeConditionalAssociations <- function(object,
 #'
 #' @return Data frame containing omnibus test results for specified variables.
 #'
-#' @importFrom assertthat assert_that see_if is.string
-#' @importFrom broom tidy
-#' @importFrom dplyr bind_cols mutate select
+#' @importFrom dplyr bind_cols
 #' @importFrom stats p.adjust
-#' @importFrom rlang .data
 #'
 omnibusTest <- function(object,
                         omnibus_groups,
@@ -385,12 +382,7 @@ omnibusTest <- function(object,
     )
   )
 
-  terms <-names(results)
-  results <- bind_rows(results) %>%
-    mutate(
-      variables = term,
-      term = terms
-    )
+  results <- bind_rows(results, .id = "group")
 
   nc <- ifelse(is.null(n_correction), length(results$p.value), n_correction)
   assert_that(
@@ -537,6 +529,8 @@ runMiDAS <- function(object,
     do.call(runMiDAS_linear, args)
   } else if (conditional && ! omnibus) {
     do.call(runMiDAS_conditional, args)
+  } else if (! conditional && omnibus) {
+    do.call(runMiDAS_linear_omnibus, args)
   }
 
   return(results)
@@ -736,7 +730,8 @@ runMiDAS_conditional <- function(call,
 #' @param object_details TODO
 #'
 #' @importFrom assertthat assert_that
-#' @importFrom dplyr rename
+#' @importFrom dplyr as_tibble mutate select
+#' @importFrom magrittr %>%
 #' @importFrom rlang call_modify !! :=
 #'
 runMiDAS_linear_omnibus <- function(call,
@@ -747,9 +742,13 @@ runMiDAS_linear_omnibus <- function(call,
                                     n_correction = NULL,
                                     exponentiate = FALSE,
                                     ...) {
+  omnibus_groups <- getOmnibusGroups(midas, experiment)
+  assert_that(
+    ! is.null(omnibus_groups),
+    msg = sprintf("Omnibus test does not support experiment %s", experiment)
+  )
   test_var <- rownames(midas[[experiment]])
   placeholder <- getPlaceholder(midas)
-  omnibus_groups <- getOmnibusGroups(midas, experiment)
 
   # insert data for analysis
   data <- midasToWide(midas, experiment)
@@ -769,35 +768,30 @@ runMiDAS_linear_omnibus <- function(call,
     msg = "Could not process any variables. Please check warning messages for more informations (warnings())."
   )
 
-  # format linear results
-  ## add variables frequencies
-  if (isExperimentCountsOrZeros(midas[[experiment]])) {
-    results <-
-      left_join(
-        results,
-        runMiDASGetVarsFreq(
-          midas = midas,
-          experiment = experiment,
-          test_covar = test_covar
-        ),
-        by = "term"
-      )
-  }
-
-  ## rename term
+  # format linear omnibus results
+  group_name <- switch (experiment,
+                       "aa_level" = "aa_pos",
+                       "group"
+  )
+  term_prefix <- switch (experiment,
+                         "aa_level" = "[A-Z0-9]+_-*[0-9]+_",
+                         ""
+  )
   term_name <- switch (experiment,
-                       "hla_allele" = "allele",
-                       "aa_level" = "aa",
-                       "expression_level" = "allele",
-                       "allele_g_group" = "g.group",
-                       "allele_supertype" = "supertype",
-                       "allele_group" = "allele.group",
-                       "kir_genes" = "kir.gene",
-                       "hla_kir_interactions" = "hla.kir.interaction",
+                       "aa_level" = "residue",
                        "term"
   )
-  results <- rename(results, !! term_name := .data$term)
+  results <- results %>%
+    as_tibble() %>%
+    mutate(term = gsub(term_prefix, "", .data$term)) %>%
+    select(
+      !! group_name := .data$group,
+      !! term_name := .data$term,
+      .data$dof,
+      .data$statistic,
+      .data$p.value,
+      .data$p.adjusted
+    )
 
   return(results)
 }
-
