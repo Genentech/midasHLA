@@ -36,6 +36,6 @@ kirHaplotypeToCounts(x)
 
 }
 \seealso{
-\code{\link{readKirCalls}}, \code{\link{getHlaKirInteractions}},
-  \code{\link{checkKirCountsFormat}}, \code{\link{prepareMiDAS}}.
+\code{\link{readKPICalls}}, \code{\link{getHlaKirInteractions}},
+  \code{\link{checkKirCallsFormat}}, \code{\link{prepareMiDAS}}.
 }

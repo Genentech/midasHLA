@@ -20,6 +20,8 @@
 \alias{getFrequencies,MiDAS-method}
 \alias{filterByFrequency}
 \alias{filterByFrequency,MiDAS-method}
+\alias{filterByOmnibusGroups}
+\alias{filterByOmnibusGroups,MiDAS-method}
 \title{MiDAS class}
 \usage{
 getInheritanceModel(object)
@@ -55,6 +57,10 @@ filterByFrequency(object, experiment, lower_frequency_cutoff,
 
 \S4method{filterByFrequency}{MiDAS}(object, experiment,
   lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL)
+
+filterByOmnibusGroups(object, experiment, groups)
+
+\S4method{filterByOmnibusGroups}{MiDAS}(object, experiment, groups)
 }
 \arguments{
 \item{object}{\code{\link{MiDAS}} object}
@@ -65,6 +71,8 @@ filterByFrequency(object, experiment, lower_frequency_cutoff,
 
 \item{upper_frequency_cutoff}{Number}
 
+\item{groups}{Character}
+
 \item{object}{\code{\link{MiDAS}} object}
 
 \item{object}{\code{\link{MiDAS}} object}
@@ -78,6 +86,10 @@ filterByFrequency(object, experiment, lower_frequency_cutoff,
 \item{object}{\code{\link{MiDAS}} object.}
 
 \item{experiment}{String specifying experiment.}
+
+\item{object}{\code{\link{MiDAS}} object}
+
+\item{experiment}{Matrix}
 
 \item{object}{\code{\link{MiDAS}} object}
 
@@ -108,6 +120,8 @@ is the sample size). For other models the sample size is taken as is
 (`n / j`).
 
 Object of class MiDAS.
+
+Object of class MiDAS.
 }
 \description{
 The \code{MiDAS} class is a \code{\link{MultiAssayExperiment}} object
@@ -116,7 +130,7 @@ transformations required for MiDAS analysis.
 }
 \details{
 A object of class \code{MiDAS} have at least one of
-\link[=readHlaCalls]{HLA calls} or \link[=readKirCalls]{KIR calls} experiment
+\link[=readHlaCalls]{HLA calls} or \link[=readKPICalls]{KIR calls} experiment
 matrices defined (they can be accessed using \code{\link{getHlaCalls}} and
 \code{\link{getKirCalls}} functions).
 

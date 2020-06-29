@@ -5,12 +5,13 @@
 \alias{runMiDAS_linear}
 \alias{runMiDAS_conditional}
 \alias{runMiDAS_linear_omnibus}
+\alias{runMiDAS_conditional_omnibus}
 \title{Run MiDAS statistical analysis}
 \usage{
 runMiDAS(object, experiment, conditional = FALSE, omnibus = FALSE,
-  lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL,
-  correction = "bonferroni", n_correction = NULL,
-  exponentiate = FALSE, ...)
+  omnibus_groups_filter = NULL, lower_frequency_cutoff = NULL,
+  upper_frequency_cutoff = NULL, correction = "bonferroni",
+  n_correction = NULL, exponentiate = FALSE, ...)
 
 runMiDAS_linear(call, midas, experiment, test_covar,
   correction = "bonferroni", n_correction = NULL,
@@ -24,6 +25,10 @@ runMiDAS_conditional(call, midas, experiment, test_covar,
 runMiDAS_linear_omnibus(call, midas, experiment, test_covar,
   correction = "bonferroni", n_correction = NULL,
   exponentiate = FALSE, ...)
+
+runMiDAS_conditional_omnibus(call, midas, experiment, test_covar,
+  correction = "bonferroni", n_correction = NULL, keep = FALSE, th,
+  rss_th = 1e-07, exponentiate = FALSE, ...)
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many
@@ -39,6 +44,8 @@ informations.}
 \item{conditional}{Logical flag,}
 
 \item{omnibus}{Logical flag.}
+
+\item{omnibus_groups_filter}{Character}
 
 \item{lower_frequency_cutoff}{Number}
 
@@ -72,6 +79,8 @@ function should stop adding additional variables. As the residual sum of
 squares approaches \code{0} the perfect fit is obtained making further
 attempts at variables selection nonsense, thus function is stopped. This
 behavior can be controlled using \code{rss_th}.}
+
+\item{object_details}{TODO}
 
 \item{object_details}{TODO}
 }
@@ -116,6 +125,13 @@ statistical analysis is performed iteratively on groups of variables
   test. This is done by substituting \code{placeholder} in the
   \code{object}'s formula with linear combination of variable in particular
   group.
+
+statistical analysis is performed iteratively on groups of variables
+  like residues at particular amino acid position, using likelyhood ratio
+  test. This is done by substituting \code{placeholder} in the
+  \code{object}'s formula with linear combination of variable in particular
+  group. In each iteration best variable from previous one is added to
+  formula.
 }
 \examples{
 \dontrun{
@@ -125,7 +141,7 @@ hla_calls <- readHlaCalls(hla_calls_file)
 
 # read kir calls file
 kir_calls_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
-kir_calls <- readKirCalls(kir_calls_file, counts = TRUE)
+kir_calls <- readKPICalls(kir_calls_file, counts = TRUE)
 
 # read phenotypic data and covariates
 pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")

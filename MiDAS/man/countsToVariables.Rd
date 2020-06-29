@@ -50,7 +50,7 @@ Dictionaries shipped with the package:
 }
 \examples{
 file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
-kir_counts <- readKirCalls(file)
+kir_counts <- readKPICalls(file)
 countsToVariables(kir_counts, "kir_haplotypes")
 
 }

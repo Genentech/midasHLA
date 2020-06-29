@@ -2,34 +2,39 @@
 % Please edit documentation in R/MiDAS_utils.R
 \name{checkKirCallsFormat}
 \alias{checkKirCallsFormat}
-\title{Assert kir calls data frame format}
+\title{Assert KIR counts data frame format}
 \usage{
-checkKirCallsFormat(kir_calls)
+checkKirCallsFormat(kir_calls, accept.null = FALSE)
 }
 \arguments{
-\item{kir_calls}{Data frame containing KIR calls, as return by
-\code{\link{readKirCalls}} function.}
+\item{kir_calls}{Data frame containing KIR gene counts, as returned by
+\code{\link{readKPICalls}} function.}
+
+\item{accept.null}{Logical indicating if NULL \code{kir_calls} should be
+accepted.}
 }
 \value{
-Logical indicating if \code{kir_calls} follows kir calls data frame
+Logical indicating if \code{kir_calls} follow KIR counts data frame
   format. Otherwise raise error.
 }
 \description{
-\code{checkKirCallsFormat} asserts if kir calls data frame have proper
+\code{checkKirCallsFormat} asserts if KIR counts data frame have proper
 format.
 }
 \examples{
 file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
-kir_calls <- readKirCalls(file)
+kir_calls <- readKPICalls(file)
 checkKirCallsFormat(kir_calls)
 
 }
 \seealso{
+\code{\link{readKPICalls}}, \code{\link{getHlaKirInteractions}},
+  \code{\link{kirHaplotypeToCounts}}, \code{\link{prepareMiDAS}}.
+
 Other assert functions: \code{\link{characterMatches}},
   \code{\link{checkAdditionalData}},
   \code{\link{checkColDataFormat}},
   \code{\link{checkHlaCallsFormat}},
-  \code{\link{checkKirCountsFormat}},
   \code{\link{checkStatisticalModel}},
   \code{\link{colnamesMatches}},
   \code{\link{functionExists}},

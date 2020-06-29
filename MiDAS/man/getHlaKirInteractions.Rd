@@ -13,7 +13,7 @@ getHlaKirInteractions(hla_calls, kir_counts,
 \code{\link{readHlaCalls}} function.}
 
 \item{kir_counts}{Data frame containing KIR genes counts, as return by
-\code{\link{readKirCalls}}.}
+\code{\link{readKPICalls}}.}
 
 \item{interactions_dict}{Path to the file containing HLA - KIR interactions
 matchings. See details for further details.}
@@ -43,7 +43,7 @@ file created based on Pende, et al. 2019.
 hla_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 hla_calls <- readHlaCalls(hla_file)
 kir_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
-kir_counts <- readKirCalls(kir_file, counts = TRUE)
+kir_counts <- readKPICalls(kir_file, counts = TRUE)
 getHlaKirInteractions(hla_calls, kir_counts)
 
 }
