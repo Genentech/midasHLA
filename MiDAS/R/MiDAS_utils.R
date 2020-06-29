@@ -765,7 +765,7 @@ kirHaplotypeToCounts <- function(x,
     )),
     msg = sprintf(
       fmt = "%s haplotype was not found in hap_dict",
-      paste(x_split_unlist[! haps_match], collapse = ", ")
+      paste(unique(x_split_unlist[! haps_match]), collapse = ", ")
     )
   )
 
