@@ -8,7 +8,7 @@ NULL
 #' transformations required for MiDAS analysis.
 #'
 #' A object of class \code{MiDAS} have at least one of
-#' \link[=readHlaCalls]{HLA calls} or \link[=readKirCalls]{KIR calls} experiment
+#' \link[=readHlaCalls]{HLA calls} or \link[=readKPICalls]{KIR calls} experiment
 #' matrices defined (they can be accessed using \code{\link{getHlaCalls}} and
 #' \code{\link{getKirCalls}} functions).
 #'
@@ -38,7 +38,7 @@ MiDAS <- setClass(
 # Validity method for class MiDAS
 #
 # Valid \code{MiDAS} object must contain hla_calls or kir_calls experiment in
-# proper \link[=readHlaCalls]{HLA calls} or \link[=readKirCalls]{KIR calls}
+# proper \link[=readHlaCalls]{HLA calls} or \link[=readKPICalls]{KIR calls}
 # format. It also have to have \code{inheritance_model} metadata's variable
 # defined, accepted values are \code{"additive"}, \code{"dominant"},
 # \code{"recessive"}.
@@ -474,7 +474,7 @@ as.data.frame.MiDAS <- function(x, ...) {
 #'
 #' # read kir calls file
 #' kir_calls_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
-#' kir_calls <- readKirCalls(kir_calls_file, counts = TRUE)
+#' kir_calls <- readKPICalls(kir_calls_file, counts = TRUE)
 #'
 #' # read phenotypic data and covariates
 #' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")

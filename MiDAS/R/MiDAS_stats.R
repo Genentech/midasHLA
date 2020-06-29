@@ -442,7 +442,7 @@ omnibusTest <- function(object,
 #'
 #' # read kir calls file
 #' kir_calls_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
-#' kir_calls <- readKirCalls(kir_calls_file, counts = TRUE)
+#' kir_calls <- readKPICalls(kir_calls_file, counts = TRUE)
 #'
 #' # read phenotypic data and covariates
 #' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")

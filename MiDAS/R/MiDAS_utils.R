@@ -729,8 +729,8 @@ assertthat::on_failure(isClassOrNULL) <- function(call, env) {
 #' @return Data frame with haplotypes and corresponding gene counts. \code{NA}'s
 #'   in \code{x} are removed during conversion.
 #'
-#' @seealso \code{\link{readKirCalls}}, \code{\link{getHlaKirInteractions}},
-#'   \code{\link{checkKirCountsFormat}}, \code{\link{prepareMiDAS}}.
+#' @seealso \code{\link{readKPICalls}}, \code{\link{getHlaKirInteractions}},
+#'   \code{\link{checkKirCallsFormat}}, \code{\link{prepareMiDAS}}.
 #'
 #' @examples
 #' x <- c(NA, "1+3|16+3", "1+1", NA)
@@ -844,11 +844,11 @@ assertthat::on_failure(colnamesMatches) <- function(call, env) {
 
 #' Assert KIR counts data frame format
 #'
-#' \code{checkKirCountsFormat} asserts if KIR counts data frame have proper
+#' \code{checkKirCallsFormat} asserts if KIR counts data frame have proper
 #' format.
 #'
 #' @param kir_counts Data frame containing KIR gene counts, as returned by
-#'   \code{\link{readKirCalls}} function.
+#'   \code{\link{readKPICalls}} function.
 #' @param accept.null Logical indicating if NULL \code{kir_counts} should be
 #'   accepted.
 #'
@@ -857,17 +857,17 @@ assertthat::on_failure(colnamesMatches) <- function(call, env) {
 #'
 #' @family assert functions
 #'
-#' @seealso \code{\link{readKirCalls}}, \code{\link{getHlaKirInteractions}},
+#' @seealso \code{\link{readKPICalls}}, \code{\link{getHlaKirInteractions}},
 #'   \code{\link{kirHaplotypeToCounts}}, \code{\link{prepareMiDAS}}.
 #'
 #' @importFrom assertthat assert_that see_if
 #' @examples
 #' file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
-#' kir_counts <- readKirCalls(file)
-#' checkKirCountsFormat(kir_counts)
+#' kir_counts <- readKPICalls(file)
+#' checkKirCallsFormat(kir_counts)
 #'
 #' @export
-checkKirCountsFormat <- function(kir_counts,
+checkKirCallsFormat <- function(kir_counts,
                                  accept.null = FALSE) {
   if (! (is.null(kir_counts) & accept.null)) {
     kir_counts_name <- deparse(substitute(kir_counts))
@@ -1133,31 +1133,6 @@ checkColDataFormat <- function(data_frame) {
   )
 
   return(TRUE)
-}
-
-#' Assert kir calls data frame format
-#'
-#' \code{checkKirCallsFormat} asserts if kir calls data frame have proper
-#' format.
-#'
-#' @param kir_calls Data frame containing KIR calls, as return by
-#'   \code{\link{readKirCalls}} function.
-#'
-#' @return Logical indicating if \code{kir_calls} follows kir calls data frame
-#'   format. Otherwise raise error.
-#'
-#' @family assert functions
-#'
-#' @importFrom assertthat assert_that see_if
-#' @examples
-#' file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
-#' kir_calls <- readKirCalls(file)
-#' checkKirCallsFormat(kir_calls)
-#'
-#' @export
-checkKirCallsFormat <- function(kir_calls) { # TODO
-  test <- is.data.frame(kir_calls)
-  return(test)
 }
 
 #' Check if function can be found in environment

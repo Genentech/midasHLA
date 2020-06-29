@@ -165,7 +165,7 @@ test_that("HLA allele alignments are read properly", {
 
 test_that("KIR haplotype calls are read properly", {
   file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
-  kir_calls <- readKirCalls(file, counts = FALSE)
+  kir_calls <- readKPICalls(file, counts = FALSE)
   kir_calls_test <- read.table(file = file,
                                header = TRUE,
                                sep = "\t",
@@ -174,37 +174,37 @@ test_that("KIR haplotype calls are read properly", {
   )
   expect_equal(kir_calls, kir_calls_test)
 
-  kir_calls <- readKirCalls(file)
+  kir_calls <- readKPICalls(file)
   kir_counts_test <- kirHaplotypeToCounts(kir_calls_test[, 2, drop = TRUE])
   kir_counts_test <- cbind(ID = kir_calls$ID, kir_counts_test[, -1], stringsAsFactors = FALSE)
   rownames(kir_counts_test) <- NULL
   expect_equal(kir_calls, kir_counts_test)
 
-  expect_error(readKirCalls(file = "foo"), "Path 'foo' does not exist")
+  expect_error(readKPICalls(file = "foo"), "Path 'foo' does not exist")
 
-  expect_error(readKirCalls(file, hap_dict = "foo"), "Path 'foo' does not exist")
+  expect_error(readKPICalls(file, hap_dict = "foo"), "Path 'foo' does not exist")
 
-  expect_error(readKirCalls(file, counts = "foo"),
+  expect_error(readKPICalls(file, counts = "foo"),
                "counts is not a flag \\(a length one logical vector\\).")
 
-  expect_error(readKirCalls(file, binary = "foo"),
+  expect_error(readKPICalls(file, binary = "foo"),
                "binary is not a flag \\(a length one logical vector\\).")
 
-  expect_error(readKirCalls(file, na.strings = 1),
+  expect_error(readKPICalls(file, na.strings = 1),
                "na.strings is not a character vector")
 
   extracol_file <- tempfile()
-  kir_calls <- readKirCalls(file, counts = FALSE)
+  kir_calls <- readKPICalls(file, counts = FALSE)
   write.table(kir_calls[, c(1, 2, 2)], file = extracol_file, sep = "\t")
-  expect_error(readKirCalls(extracol_file),
+  expect_error(readKPICalls(extracol_file),
                "KIR haplotypes calls table should have 2 columns, not 3")
   unlink(extracol_file)
 
   badhap_file <- tempfile()
-  kir_calls <- readKirCalls(file, counts = FALSE)
+  kir_calls <- readKPICalls(file, counts = FALSE)
   kir_calls[1, 2] <- "foo"
   write.table(kir_calls, file = badhap_file, sep = "\t")
-  expect_error(readKirCalls(badhap_file),
+  expect_error(readKPICalls(badhap_file),
                "rows 1 of input file contains unexpected characters")
   unlink(badhap_file)
 })

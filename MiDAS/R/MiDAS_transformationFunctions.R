@@ -960,7 +960,7 @@ kableResults <- function(results,
 #'
 #' @examples
 #' file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
-#' kir_counts <- readKirCalls(file)
+#' kir_counts <- readKPICalls(file)
 #' countsToVariables(kir_counts, "kir_haplotypes")
 #'
 #' @importFrom assertthat assert_that is.string
@@ -972,7 +972,7 @@ countsToVariables <- function(counts,
                               na.value = NA,
                               nacols.rm = TRUE) {
   assert_that(
-    checkKirCountsFormat(counts),
+    checkKirCallsFormat(counts),
     see_if(length(na.value) == 1, msg = "na.value length must equal 1."),
     isTRUEorFALSE(nacols.rm)
   )
@@ -1054,7 +1054,7 @@ countsToVariables <- function(counts,
 #'
 #' @inheritParams checkHlaCallsFormat
 #' @param kir_counts Data frame containing KIR genes counts, as return by
-#'   \code{\link{readKirCalls}}.
+#'   \code{\link{readKPICalls}}.
 #' @param interactions_dict Path to the file containing HLA - KIR interactions
 #'   matchings. See details for further details.
 #'
@@ -1065,7 +1065,7 @@ countsToVariables <- function(counts,
 #' hla_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(hla_file)
 #' kir_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
-#' kir_counts <- readKirCalls(kir_file, counts = TRUE)
+#' kir_counts <- readKPICalls(kir_file, counts = TRUE)
 #' getHlaKirInteractions(hla_calls, kir_counts)
 #'
 #' @importFrom assertthat assert_that is.string
@@ -1080,7 +1080,7 @@ getHlaKirInteractions <- function(hla_calls,
                                   interactions_dict = system.file("extdata", "Match_counts_hla_kir_interactions.txt", package = "MiDAS")) {
   assert_that(
     checkHlaCallsFormat(hla_calls),
-    checkKirCountsFormat(kir_counts),
+    checkKirCallsFormat(kir_counts),
     is.string(interactions_dict)
   )
   id_matches <- hla_calls[, 1, drop = TRUE] %in% kir_counts[, 1, drop = TRUE] %>%
