@@ -357,14 +357,21 @@ omnibusTest <- function(object,
                         placeholder = "term",
                         correction = "bonferroni",
                         n_correction = NULL) {
+  mod0 <- updateModel(
+    object = object,
+    x = "0",
+    placeholder = placeholder,
+    backquote = FALSE
+  )
   results <- lapply(
     X = omnibus_groups,
     FUN = function(x) tryCatch(
       expr = LRTest(
-        object,
+        mod0,
         updateModel(
           object = object,
           x = x,
+          placeholder = placeholder,
           collapse = " + ",
           backquote = TRUE
         )
@@ -381,7 +388,6 @@ omnibusTest <- function(object,
       }
     )
   )
-
   results <- bind_rows(results, .id = "group")
 
   nc <- ifelse(is.null(n_correction), length(results$p.value), n_correction)
@@ -427,6 +433,7 @@ omnibusTest <- function(object,
 #'   informations.
 #' @param conditional Logical flag,
 #' @param omnibus Logical flag.
+#' @param omnibus_groups_filter Character
 #' @param ... other arguments
 #'
 #' @return Tibble containing analysis results.
@@ -473,6 +480,7 @@ runMiDAS <- function(object,
                      experiment,
                      conditional = FALSE,
                      omnibus = FALSE,
+                     omnibus_groups_filter = NULL,
                      lower_frequency_cutoff = NULL,
                      upper_frequency_cutoff = NULL,
                      correction = "bonferroni",
@@ -494,11 +502,22 @@ runMiDAS <- function(object,
     stringMatches(experiment, choice = getExperiments(object_details$data)),
     isTRUEorFALSE(conditional),
     isTRUEorFALSE(omnibus),
+    isCharacterOrNULL(omnibus_groups_filter),
     validateFrequencyCutoffs(lower_frequency_cutoff, upper_frequency_cutoff),
     is.string(correction),
     isCountOrNULL(n_correction),
     isTRUEorFALSE(exponentiate)
   )
+
+  if (! is.null(omnibus_groups_filter)) {
+    object_details$data <-
+      filterByOmnibusGroups(
+        object = object_details$data,
+        experiment = experiment,
+        groups = omnibus_groups_filter
+      )
+
+  }
 
   if (! is.null(lower_frequency_cutoff) || ! is.null(upper_frequency_cutoff)) {
     object_details$data <-
@@ -508,11 +527,12 @@ runMiDAS <- function(object,
         lower_frequency_cutoff = lower_frequency_cutoff,
         upper_frequency_cutoff = upper_frequency_cutoff
       )
-    assert_that(
-      length(object_details$data[, , experiment]) != 0,
-      msg = "No variables available for analysis, please revisit your filtration criteria."
-    )
   }
+
+  assert_that(
+    length(object_details$data[, , experiment]) != 0,
+    msg = "No variables available for analysis, please revisit your filtration criteria."
+  )
 
   args <- list(
     call = object_details$call,
@@ -531,6 +551,8 @@ runMiDAS <- function(object,
     do.call(runMiDAS_conditional, args)
   } else if (! conditional && omnibus) {
     do.call(runMiDAS_linear_omnibus, args)
+  } else if (conditional && omnibus) {
+    do.call(runMiDAS_conditional_omnibus, args)
   }
 
   return(results)
@@ -561,7 +583,7 @@ runMiDAS_linear <- function(call,
   placeholder <- getPlaceholder(midas)
 
   # insert data for analysis
-  data <- midasToWide(midas, experiment)
+  data <- as.data.frame(midas)
   call <- call_modify(substitute(call), data = data)
   object <- eval(call)
 
@@ -646,7 +668,7 @@ runMiDAS_conditional <- function(call,
   placeholder <- getPlaceholder(midas)
 
   # insert data for analysis
-  data <- midasToWide(midas, experiment)
+  data <- as.data.frame(midas)
   call <- call_modify(substitute(call), data = data)
   object <- eval(call)
 
@@ -751,7 +773,7 @@ runMiDAS_linear_omnibus <- function(call,
   placeholder <- getPlaceholder(midas)
 
   # insert data for analysis
-  data <- midasToWide(midas, experiment)
+  data <- as.data.frame(midas)
   call <- call_modify(substitute(call), data = data)
   object <- eval(call)
 
@@ -792,6 +814,157 @@ runMiDAS_linear_omnibus <- function(call,
       .data$p.value,
       .data$p.adjusted
     )
+
+  return(results)
+}
+
+#' @rdname runMiDAS
+#'
+#' @title runMiDAS conditonal omnibus
+#'
+#' @details statistical analysis is performed iteratively on groups of variables
+#'   like residues at particular amino acid position, using likelyhood ratio
+#'   test. This is done by substituting \code{placeholder} in the
+#'   \code{object}'s formula with linear combination of variable in particular
+#'   group. In each iteration best variable from previous one is added to
+#'   formula.
+#'
+#' @param object_details TODO
+#'
+#' @importFrom assertthat assert_that is.number
+#' @importFrom dplyr as_tibble mutate select
+#' @importFrom magrittr %>%
+#' @importFrom stats formula
+#' @importFrom rlang call_modify !! :=
+#'
+runMiDAS_conditional_omnibus <- function(call,
+                                    midas,
+                                    experiment,
+                                    test_covar,
+                                    correction = "bonferroni",
+                                    n_correction = NULL,
+                                    keep = FALSE,
+                                    th,
+                                    rss_th = 1e-07,
+                                    exponentiate = FALSE,
+                                    ...) {
+  omnibus_groups <- getOmnibusGroups(midas, experiment)
+  assert_that(
+    is.flag(keep),
+    is.number(th),
+    is.number(rss_th),
+    ! is.null(omnibus_groups),
+    msg = sprintf("Omnibus test does not support experiment %s", experiment)
+  )
+  placeholder <- getPlaceholder(midas)
+
+  # insert data for analysis
+  data <- as.data.frame(midas)
+  call <- call_modify(substitute(call), data = data)
+  object <- eval(call)
+
+  # run analysis
+  prev_formula <- formula(object)
+  first_variables <- all.vars(prev_formula)
+  prev_omnibus_groups <- c()
+  new_omnibus_groups <-
+    omnibus_groups[! names(omnibus_groups) %in% first_variables]
+
+  best <- list()
+  i <- 1
+  while (length(new_omnibus_groups) > 0) {
+    results <- omnibusTest(
+      object = object,
+      omnibus_groups = new_omnibus_groups,
+      placeholder = placeholder,
+      correction = correction,
+      n_correction = n_correction
+    )
+
+    results <- results[! is.infinite(results[["p.value"]]), ]
+
+    mask <- ! prev_omnibus_groups %in% first_variables
+    results$covariates <-
+      paste(prev_omnibus_groups[mask], collapse = " + ")
+
+    i_min <- which.min(results[["p.value"]])
+    if (length(i_min) == 0) break
+    if (results$p.value[i_min] > th) break
+
+    gr_name <- results$group[i_min]
+    prev_omnibus_groups <- c(prev_omnibus_groups, gr_name)
+    object <- updateModel(object,
+                          omnibus_groups[[gr_name]],
+                          backquote = TRUE,
+                          collapse = " + "
+    )
+
+    if (sum(resid(object) ^ 2) <= rss_th) {
+      warn("Perfect fit was reached attempting further model selection is nonsense.")
+      break
+    }
+    prev_formula <- formula(object)
+    prev_variables <- all.vars(prev_formula)
+    new_omnibus_groups <-
+      new_omnibus_groups[! names(new_omnibus_groups) %in% prev_omnibus_groups]
+
+    results$term <- gsub("`", "", results$term)
+    best[[i]] <- results
+    i <- i + 1
+  }
+
+    if (length(best) == 0) {
+      warn("No significant variables found. Returning empty table.") # Tibble to be more precise?
+    }
+
+    if (keep) {
+      results <- best
+    } else {
+      if (length(best) == 0) {
+        results <- results[0, ]
+      } else {
+        results <- lapply(best, function(res) {
+          i_min <- which.min(res[["p.value"]])
+          res[i_min, ]
+        })
+        results <- bind_rows(results)
+      }
+    }
+
+    return(results)
+
+  # format linear omnibus results
+  group_name <- switch (experiment,
+                        "aa_level" = "aa_pos",
+                        "group"
+  )
+  term_prefix <- switch (experiment,
+                         "aa_level" = "[A-Z0-9]+_-*[0-9]+_",
+                         ""
+  )
+  term_name <- switch (experiment,
+                       "aa_level" = "residue",
+                       "term"
+  )
+
+  .formatResults <- function(df) {
+    df %>$%
+      as_tibble() %>%
+      mutate(term = gsub(term_prefix, "", .data$term)) %>%
+      select(
+        !! group_name := .data$group,
+        !! term_name := .data$term,
+        .data$dof,
+        .data$statistic,
+        .data$p.value,
+        .data$p.adjusted
+      )
+  }
+  if (is.list(results)) {
+    results <- lapply(results, .formatResults)
+  } else {
+    results <- .formatResults(results)
+  }
 
   return(results)
 }
