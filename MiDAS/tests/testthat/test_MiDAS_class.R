@@ -714,12 +714,14 @@ test_that("filterByOmnibusGroups", {
       groups = mask
     )
   test_filtered_midas <- midas
-  mask <- c("A_83_G", "A_83_R", "A_90_A", "A_90_D")
-  test_filtered_midas <- test_filtered_midas[mask, ]
+  vars <- c("A_83_G", "A_83_R", "A_90_A", "A_90_D")
+  test_filtered_midas[[experiment]] <- test_filtered_midas[[experiment]][vars, ]
+  metadata(test_filtered_midas[[experiment]])$omnibus_groups <-
+    metadata(test_filtered_midas[[experiment]])$omnibus_groups[mask]
   expect_equal(filtered_midas, test_filtered_midas)
 
   # unsported experiments raise error
-  experiment <- "hla_divergence"
+  experiment <- "hla_allele"
   expect_error(
     filterByOmnibusGroups(
       object = midas,

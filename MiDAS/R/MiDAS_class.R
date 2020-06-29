@@ -402,18 +402,19 @@ setMethod(
       is.character(groups)
     )
     omnibus_groups <- getOmnibusGroups(object, experiment)
+    se <- object[[experiment]]
     assert_that(
       see_if(
         !is.null(omnibus_groups),
         msg = sprintf(
-          "Omnibus groups filtration does not support experiment %s",
+          "Omnibus groups filtration does not support experiment '%s'",
           experiment
         )
       ),
       see_if(
-        isClass(object[[experiment]], "SummarizedExperiment"),
+        isClass(se, "SummarizedExperiment"),
         msg = sprintf(
-          "Omnibus groups filtration does not support experiment %s",
+          "Omnibus groups filtration does not support experiment '%s'",
           experiment
         )
       ),
@@ -421,7 +422,8 @@ setMethod(
     )
 
     mask <- unlist(omnibus_groups[groups])
-    object <- object[mask, ]
+    object[[experiment]] <- se[mask, ]
+    metadata(object[[experiment]])$omnibus_groups <- omnibus_groups[groups]
 
     return(object)
   })
