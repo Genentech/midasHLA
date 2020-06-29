@@ -847,12 +847,12 @@ assertthat::on_failure(colnamesMatches) <- function(call, env) {
 #' \code{checkKirCallsFormat} asserts if KIR counts data frame have proper
 #' format.
 #'
-#' @param kir_counts Data frame containing KIR gene counts, as returned by
+#' @param kir_calls Data frame containing KIR gene counts, as returned by
 #'   \code{\link{readKPICalls}} function.
-#' @param accept.null Logical indicating if NULL \code{kir_counts} should be
+#' @param accept.null Logical indicating if NULL \code{kir_calls} should be
 #'   accepted.
 #'
-#' @return Logical indicating if \code{kir_counts} follow KIR counts data frame
+#' @return Logical indicating if \code{kir_calls} follow KIR counts data frame
 #'   format. Otherwise raise error.
 #'
 #' @family assert functions
@@ -863,29 +863,29 @@ assertthat::on_failure(colnamesMatches) <- function(call, env) {
 #' @importFrom assertthat assert_that see_if
 #' @examples
 #' file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
-#' kir_counts <- readKPICalls(file)
-#' checkKirCallsFormat(kir_counts)
+#' kir_calls <- readKPICalls(file)
+#' checkKirCallsFormat(kir_calls)
 #'
 #' @export
-checkKirCallsFormat <- function(kir_counts,
+checkKirCallsFormat <- function(kir_calls,
                                  accept.null = FALSE) {
-  if (! (is.null(kir_counts) & accept.null)) {
-    kir_counts_name <- deparse(substitute(kir_counts))
+  if (! (is.null(kir_calls) & accept.null)) {
+    kir_counts_name <- deparse(substitute(kir_calls))
     assert_that(
-      is.data.frame(kir_counts),
-      see_if(nrow(kir_counts) >= 1 & ncol(kir_counts) >= 2,
+      is.data.frame(kir_calls),
+      see_if(nrow(kir_calls) >= 1 & ncol(kir_calls) >= 2,
               msg = paste0(kir_counts_name,
                            " have to have at least 1 rows and 2 columns"
               )
       ),
-      see_if(! any(vapply(kir_counts, is.factor, logical(length = 1))),
+      see_if(! any(vapply(kir_calls, is.factor, logical(length = 1))),
            msg = paste0(kir_counts_name, " can't contain factors")
       )
     )
 
-    kir_counts <- kir_counts[, 1, drop = FALSE]
+    kir_calls <- kir_calls[, 1, drop = FALSE]
       assert_that(
-        colnamesMatches(kir_counts, "ID")
+        colnamesMatches(kir_calls, "ID")
       )
   }
 
@@ -1573,4 +1573,27 @@ isExperimentCountsOrZeros <- function(x, na.rm = TRUE) {
   }
 
   return(test)
+}
+
+#' Check KIR genes format
+#'
+#' \code{checkKirGenesFormat} test if the input character contains correct KIR
+#' gene names
+#'
+#' @param genes Character vector containing KIR gene names.
+#'
+#' @return Logical vector specifying if values of \code{genes} follows KIR genes
+#'   naming conventions.
+#'
+#' @examples
+#' genes <- c("KIR3DL3", "KIR2DS2", "KIR2DL2")
+#' checkKirGenesFormat(genes)
+#'
+#' @importFrom assertthat assert_that
+#' @importFrom stringi stri_detect_regex
+#' @export
+checkKirGenesFormat <- function(genes) {
+  pattern <- "^KIR[0-9]{1}D[A-Z]{1}[0-9]{1}$"
+  is_correct <- stri_detect_regex(genes, pattern)
+  return(is_correct)
 }
