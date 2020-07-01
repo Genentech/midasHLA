@@ -675,3 +675,9 @@ test_that("isExperimentCountsOrZeros", {
 
   expect_equal(isExperimentCountsOrZeros(LETTERS), FALSE)
 })
+
+test_that("checkKirGenesFormat", {
+  genes <- c("KIR3DL3", "KIR2DS4")
+  expect_equal(checkKirGenesFormat(genes), c(TRUE, TRUE))
+  expect_equal(checkKirGenesFormat(LETTERS), rep(FALSE, length(LETTERS)))
+})
