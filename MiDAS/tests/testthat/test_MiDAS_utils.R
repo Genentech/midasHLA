@@ -309,30 +309,29 @@ test_that("is class or null", {
 })
 
 test_that("KIR haplotypes are converted to gene counts", {
-  x <- c("1+3|16+3", "1+1")
+  x <- c("cA01~tA01+cB02~tA01", "cA01~tA01+cA01~tB01_2DS5")
   kir_hap <- kirHaplotypeToCounts(x)
-
-  hap_dict <- system.file("extdata", "Match_kir_haplotype_gene.txt", package = "MiDAS")
-  hap_dict <- read.table(hap_dict)
-  hap1 <- colSums(hap_dict[c("1", "3"), ])
-  hap1 <- ifelse(hap1 > 1, 1, hap1)
-  hap2 <- colSums(hap_dict[c("1", "1"), ])
-  hap2 <- ifelse(hap2 > 1, 1, hap2)
-  test_kir_hap <- rbind(hap1, hap2)
-  test_kir_hap <-
-    as.data.frame(test_kir_hap,
-                  optional = TRUE,
-                  stringsAsFactors = FALSE)
-  test_kir_hap <- cbind(haplotypes = x, test_kir_hap, stringsAsFactors = FALSE)
-  rownames(test_kir_hap) <- NULL
-
+  test_kir_hap <- data.frame(
+    haplotypes = c("cA01~tA01+cB02~tA01", "cA01~tA01+cA01~tB01_2DS5"),
+    KIR3DL3 = c(1, 1),
+    KIR2DS2 = c(1, 0),
+    KIR2DL2 = c(1, 0),
+    KIR2DL3 = c(1, 1),
+    KIR2DP1 = c(1, 1),
+    KIR2DL1 = c(1, 1),
+    KIR3DP1 = c(1, 1),
+    KIR2DL4 = c(1, 1),
+    KIR3DL1 = c(1, 1),
+    KIR3DS1 = c(0, 1),
+    KIR2DL5 = c(0, 1),
+    KIR2DS3 = c(0, 0),
+    KIR2DS5 = c(0, 1),
+    KIR2DS4 = c(1, 1),
+    KIR2DS1 = c(0, 1),
+    KIR3DL2 = c(1, 1),
+    stringsAsFactors = FALSE
+  )
   expect_equal(kir_hap, test_kir_hap)
-
-  expect_error(kirHaplotypeToCounts(1), "x is not a character vector")
-  expect_error(kirHaplotypeToCounts(x, hap_dict = "foo"),
-               "Path 'foo' does not exist")
-  expect_error(kirHaplotypeToCounts(x, binary = "yes"),
-               "binary is not a flag \\(a length one logical vector\\).")
 })
 
 test_that("column names matches", {

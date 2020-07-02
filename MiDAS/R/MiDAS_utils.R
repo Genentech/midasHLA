@@ -726,6 +726,9 @@ assertthat::on_failure(isClassOrNULL) <- function(call, env) {
 #' column holding KIR haplotypes and gene counts in others. File should have
 #' header with first column unnamed and gene names in the others.
 #'
+#' Haplotypes are converted to gene presence / absence indicators as it is the
+#' only way that allows unambiguous conversion.
+#'
 #' @return Data frame with haplotypes and corresponding gene counts. \code{NA}'s
 #'   in \code{x} are removed during conversion.
 #'
@@ -733,7 +736,7 @@ assertthat::on_failure(isClassOrNULL) <- function(call, env) {
 #'   \code{\link{checkKirCallsFormat}}, \code{\link{prepareMiDAS}}.
 #'
 #' @examples
-#' x <- c(NA, "1+3|16+3", "1+1", NA)
+#' x <- c(NA, "cA01~tA01+cB02~tA01", "cA01~tA01+cA01~tB01_2DS5")
 #' kirHaplotypeToCounts(x)
 #'
 #' @importFrom assertthat assert_that is.readable see_if
@@ -741,15 +744,15 @@ assertthat::on_failure(isClassOrNULL) <- function(call, env) {
 #' @importFrom stringi stri_split_fixed
 #'
 #' @export
-kirHaplotypeToCounts <- function(x,
-                                 hap_dict = system.file("extdata", "Match_kir_haplotype_gene.txt", package = "MiDAS"),
-                                 binary = TRUE) {
+kirHaplotypeToCounts <-
+  function(x,
+           hap_dict = system.file("extdata", "Match_kir_nomenclature_gene.txt", package = "MiDAS"),
+           binary = TRUE) {
   assert_that(
     is.character(x),
     is.readable(hap_dict),
     isTRUEorFALSE(binary)
   )
-  binary <- TRUE # its not possible yet to not oparate on binary states - once available delete this line
   hap_dict <- read.table(hap_dict, stringsAsFactors = FALSE)
 
   # x <- na.omit(x)
