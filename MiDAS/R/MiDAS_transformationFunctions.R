@@ -959,7 +959,7 @@ kableResults <- function(results,
 #'   presence of variable and \code{0} absence.
 #'
 #' @examples
-#' file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+#' file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
 #' kir_counts <- readKPICalls(file)
 #' countsToVariables(kir_counts, "kir_haplotypes")
 #'
@@ -1064,7 +1064,7 @@ countsToVariables <- function(counts,
 #' @examples
 #' hla_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(hla_file)
-#' kir_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+#' kir_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
 #' kir_counts <- readKPICalls(kir_file)
 #' getHlaKirInteractions(hla_calls, kir_counts)
 #'

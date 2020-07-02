@@ -13,7 +13,7 @@ test_that("MiDAS object is valid", {
   hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(hla_calls_file)
 
-  kir_calls_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
   kir_calls <- readKPICalls(kir_calls_file)
 
   pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
@@ -111,7 +111,7 @@ test_that("MiDAS object's hla_calls is extracted correctly", {
 })
 
 test_that("MiDAS object's kir_calls is extracted correctly", {
-  kir_calls_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
   kir_calls <- readKPICalls(kir_calls_file)
   kir_calls <- kir_calls
   pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
@@ -128,7 +128,7 @@ test_that("MiDAS object's kir_calls is extracted correctly", {
 })
 
 test_that("MiDAS object's placeholder is extracted correctly", {
-  kir_calls_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
   kir_calls <- readKPICalls(kir_calls_file)
   kir_calls <- kir_calls[1:20, ]
 
@@ -239,7 +239,7 @@ test_that("MiDAS object's frequencies are extracted correctly", {
 })
 
 test_that("MiDAS's as.data.frame method works properly", {
-  kir_calls_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
   kir_calls <- readKPICalls(kir_calls_file)
   kir_calls <- kir_calls[1:20, ]
 
@@ -274,7 +274,7 @@ test_that("MiDAS object is prepared properly", {
   hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(hla_calls_file)
 
-  kir_calls_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
   kir_calls <- readKPICalls(kir_calls_file)
 
   pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
@@ -562,7 +562,7 @@ test_that("MiDAS data for allele_group analysis is prepared properly", {
 })
 
 test_that("MiDAS data for kir_genes analysis is prepared properly", {
-  kir_calls_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
   kir_calls <- readKPICalls(kir_calls_file)
 
   args_c <- expand.grid(
@@ -584,7 +584,7 @@ test_that("MiDAS data for kir_genes analysis is prepared properly", {
 test_that("MiDAS data for hla_kir_interactions analysis is prepared properly", {
   hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(hla_calls_file)
-  kir_calls_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
   kir_calls <- readKPICalls(kir_calls_file)
 
   args_c <- expand.grid(
@@ -641,7 +641,7 @@ test_that("MiDAS data for hla_divergence analysis is prepared properly", {
 test_that("MiDAS is filtered correctly", {
   hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(hla_calls_file)
-  kir_calls_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
   kir_calls <- readKPICalls(kir_calls_file)
   pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
   pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)

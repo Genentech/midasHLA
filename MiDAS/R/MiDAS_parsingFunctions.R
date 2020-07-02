@@ -273,7 +273,7 @@ readHlaAlignments <- function(file,
 #' @return Data frame containing KIR gene counts.
 #'
 #' @examples
-#' file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+#' file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
 #' readKPICalls(file)
 #'
 #' @importFrom assertthat assert_that is.readable see_if

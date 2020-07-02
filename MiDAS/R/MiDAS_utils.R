@@ -866,7 +866,7 @@ assertthat::on_failure(colnamesMatches) <- function(call, env) {
 #'
 #' @importFrom assertthat assert_that see_if
 #' @examples
-#' file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+#' file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
 #' kir_calls <- readKPICalls(file)
 #' checkKirCallsFormat(kir_calls)
 #'

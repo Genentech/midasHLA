@@ -193,7 +193,7 @@ test_that("HLA statistical models are updated properly", {
 
 
 test_that("statistical models are statistical model", {
-  kir_calls_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
   kir_calls <- readKPICalls(kir_calls_file)
   kir_calls <- kir_calls[1:20, ]
   pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
@@ -351,7 +351,7 @@ test_that("colnamesMatches", {
 })
 
 test_that("KIR counts have proper format", {
-  file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
   kir_counts <- readKPICalls(file)
   expect_equal(checkKirCallsFormat(kir_counts), TRUE)
 

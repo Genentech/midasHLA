@@ -393,17 +393,17 @@ test_that("results are formatted properly", {
 # })
 
 test_that("counts to variables conversion", {
-  file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
   kir_counts <- readKPICalls(file)[1:2, ]
   kir_haplotypes <- countsToVariables(kir_counts, "kir_haplotypes")
   kir_haplotypes_test <- data.frame(
     ID = c("PAT1", "PAT2"),
-    cenAA = c(0, 1),
+    cenAA = c(1, 0),
     cenBB = c(0, 0),
-    cenAB = c(1, 0),
-    telAA = c(1, 1),
+    cenAB = c(0, 1),
+    telAA = c(0, 1),
     telBB = c(0, 0),
-    telAB = c(0, 0),
+    telAB = c(1, 0),
     stringsAsFactors = FALSE
   )
   expect_equal(kir_haplotypes, kir_haplotypes_test)
@@ -452,7 +452,7 @@ test_that("counts to variables conversion", {
 test_that("HLA - KIR interactions are infered correctly", {
   hla_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(hla_file)
-  kir_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  kir_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
   kir_counts <- readKPICalls(kir_file)
   hla_kir <- getHlaKirInteractions(hla_calls, kir_counts)
   load(system.file("extdata", "test_hla_kir_interactions.Rdata", package = "MiDAS"))
@@ -484,7 +484,7 @@ test_that("HLA - KIR interactions are infered correctly", {
 test_that("Experiments are filtered correctly", {
   hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(hla_calls_file)
-  kir_calls_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+  kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
   kir_calls <- readKPICalls(kir_calls_file)
   pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
   pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
