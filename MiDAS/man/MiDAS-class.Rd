@@ -52,8 +52,8 @@ getFrequencies(object, experiment)
 
 \S4method{getFrequencies}{MiDAS}(object, experiment)
 
-filterByFrequency(object, experiment, lower_frequency_cutoff,
-  upper_frequency_cutoff)
+filterByFrequency(object, experiment, lower_frequency_cutoff = NULL,
+  upper_frequency_cutoff = NULL)
 
 \S4method{filterByFrequency}{MiDAS}(object, experiment,
   lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL)

@@ -4,27 +4,29 @@
 \alias{readKPICalls}
 \title{Reads data table with KIR haplotypes calls}
 \usage{
-readKPICalls(file, hap_dict = system.file("extdata",
-  "Match_kir_haplotype_gene.txt", package = "MiDAS"), counts = TRUE,
-  binary = TRUE, na.strings = c("", "NA"))
+readKPICalls(file, na.strings = c("", "NA", "uninterpretable"))
 }
 \arguments{
-\item{file}{Path to input file.}
+\item{file}{the name of the file which the data are to be read from.
+    Each row of the table appears as one line of the file.  If it does
+    not contain an \emph{absolute} path, the file name is
+    \emph{relative} to the current working directory,
+    \code{\link{getwd}()}. Tilde-expansion is performed where supported.
+    This can be a compressed file (see \code{\link{file}}).
 
-\item{hap_dict}{String specifying path to KIR haplotypes dictionary. By
-default file shipped together with package is being used. See details for
-more information.}
+    Alternatively, \code{file} can be a readable text-mode
+    \link{connection} (which will be opened for reading if
+    necessary, and if so \code{\link{close}}d (and hence destroyed) at
+    the end of the function call).  (If \code{\link{stdin}()} is used,
+    the prompts for lines may be somewhat confusing.  Terminate input
+    with a blank line or an EOF signal, \code{Ctrl-D} on Unix and
+    \code{Ctrl-Z} on Windows.  Any pushback on \code{stdin()} will be
+    cleared before return.)
 
-\item{counts}{Logical flag indicating if KIR haplotypes should be converted
-to gene counts.}
-
-\item{binary}{Logical flag indicating if haplotypes should be converted only
-  to gene presence / absence indicators (it is the only way that allows
-  unambiguous conversion). This argument is currently ignored.
-
-\code{hap_dict} have to be a tab separated values formatted file with first
-column holding KIR haplotypes and gene counts in others. File should have
-header with first column unnamed and gene names in the others.}
+    \code{file} can also be a complete URL.  (For the supported URL
+    schemes, see the \sQuote{URLs} section of the help for
+    \code{\link{url}}.)
+  }
 
 \item{na.strings}{a character vector of strings which are to be
     interpreted as \code{\link{NA}} values.  Blank fields are also
@@ -34,8 +36,7 @@ header with first column unnamed and gene names in the others.}
     values may need their own white space stripped in advance.}
 }
 \value{
-Data frame containing KIR haplotypes calls or corresponding gene
-  counts.
+Data frame containing KIR gene counts.
 }
 \description{
 \code{readKPICalls} reads table with KIR haplotypes calls from file.
@@ -46,7 +47,7 @@ First column should contain samples IDs, second column should hold
 corresponding KIR haplotypes.
 }
 \examples{
-file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
 readKPICalls(file)
 
 }
