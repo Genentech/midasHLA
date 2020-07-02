@@ -1065,7 +1065,7 @@ countsToVariables <- function(counts,
 #' hla_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(hla_file)
 #' kir_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
-#' kir_counts <- readKPICalls(kir_file, counts = TRUE)
+#' kir_counts <- readKPICalls(kir_file)
 #' getHlaKirInteractions(hla_calls, kir_counts)
 #'
 #' @importFrom assertthat assert_that is.string
