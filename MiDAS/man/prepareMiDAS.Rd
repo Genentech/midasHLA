@@ -2,17 +2,17 @@
 % Please edit documentation in R/MiDAS_class.R
 \name{prepareMiDAS}
 \alias{prepareMiDAS}
-\alias{prepareMiDAS_hla_allele}
+\alias{prepareMiDAS_hla_alleles}
 \title{Prepare MiDAS object for statistical analysis}
 \usage{
 prepareMiDAS(hla_calls = NULL, kir_calls = NULL, colData,
   inheritance_model = c("additive", "dominant", "recessive"),
-  experiment = c("hla_allele", "aa_level", "allele_g_group",
-  "allele_supertype", "allele_group", "kir_genes", "hla_kir_interactions",
+  experiment = c("hla_alleles", "hla_aa", "hla_g_groups",
+  "hla_supertypes", "hla_NK_ligands", "kir_genes", "hla_kir_interactions",
   "hla_divergence"), placeholder = "term",
   lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL, ...)
 
-prepareMiDAS_hla_allele(hla_calls, inheritance_model, ...)
+prepareMiDAS_hla_alleles(hla_calls, inheritance_model, ...)
 }
 \arguments{
 \item{hla_calls}{Data frame containing HLA allele calls, as return by
@@ -35,9 +35,9 @@ are coded as \code{1}. In \code{"recessive"} model homozygotes are coded as
 are coded as \code{2} and heterozygotes as \code{1}.}
 
 \item{experiment}{Character vector indicating analysis type for which data
-should be prepared. Valid choices are \code{"hla_allele"},
-\code{"aa_level"}, \code{"allele_g_group"}, \code{"allele_supertype"},
-\code{"allele_group"}, \code{"kir_genes"}, \code{"hla_kir_interactions"},
+should be prepared. Valid choices are \code{"hla_alleles"},
+\code{"hla_aa"}, \code{"hla_g_groups"}, \code{"hla_supertypes"},
+\code{"hla_NK_ligands"}, \code{"kir_genes"}, \code{"hla_kir_interactions"},
 \code{"hla_divergence"}.
 See details for further explanations.}
 
@@ -59,7 +59,7 @@ Matrix
 to selected analysis creating \code{\link{MiDAS}} object.
 }
 \details{
-\code{'hla_allele'} - \code{hla_calls} are transformed into counts
+\code{'hla_alleles'} - \code{hla_calls} are transformed into counts
 under \code{inheritance_model} of choice (see \code{\link{hlaCallsToCounts}}
 for  more details).
 }
@@ -85,7 +85,7 @@ midas <- prepareMiDAS(hla_calls = hla_calls,
                       kir_calls = kir_calls,
                       colData = phenotype,
                       inheritance_model = "additive",
-                      experiment = "hla_allele"
+                      experiment = "hla_alleles"
 )
 }
 

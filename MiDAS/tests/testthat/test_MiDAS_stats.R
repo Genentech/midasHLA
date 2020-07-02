@@ -12,10 +12,10 @@ test_that("HLA allele associations are analyzed properly", {
   midas <-
     prepareMiDAS(hla_calls,
                  colData = coldata,
-                 experiment = "hla_allele",
+                 experiment = "hla_alleles",
                  inheritance_model = "additive")
 
-  midas_data <- midasToWide(midas, experiment = "hla_allele")
+  midas_data <- midasToWide(midas, experiment = "hla_alleles")
   object <- lm(OS_DIED ~ AGE + SEX + term, data = midas_data)
 
   res <- analyzeAssociations(object,
@@ -94,10 +94,10 @@ test_that("Stepwise conditional alleles subset selection", {
     prepareMiDAS(
       hla_calls,
       colData = coldata,
-      experiment = "hla_allele",
+      experiment = "hla_alleles",
       inheritance_model = "additive"
     )
-  midas_data <- midasToWide(midas, experiment = "hla_allele")
+  midas_data <- midasToWide(midas, experiment = "hla_alleles")
 
   object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX + term, data = midas_data)
 
@@ -237,11 +237,11 @@ test_that("runMiDAS", {
       kir_call = kir_calls,
       colData = coldata,
       experiment = c(
-        "hla_allele",
-        "aa_level",
-        "allele_g_group",
-        "allele_supertype",
-        "allele_group",
+        "hla_alleles",
+        "hla_aa",
+        "hla_g_groups",
+        "hla_supertypes",
+        "hla_NK_ligands",
         "kir_genes",
         "hla_kir_interactions",
         "hla_divergence"
@@ -254,11 +254,11 @@ test_that("runMiDAS", {
   omnibus = FALSE
   experiment_choice <-
     c(
-      "hla_allele",
-      # "aa_level", #TODO
-      "allele_g_group",
-      "allele_supertype",
-      "allele_group",
+      "hla_alleles",
+      # "hla_aa", #TODO
+      "hla_g_groups",
+      "hla_supertypes",
+      "hla_NK_ligands",
       "kir_genes",
       "hla_kir_interactions",
       "hla_divergence"
@@ -289,12 +289,12 @@ test_that("runMiDAS", {
     }
 
     term_name <- switch (experiment,
-                         "hla_allele" = "allele",
-                         "aa_level" = "aa",
+                         "hla_alleles" = "allele",
+                         "hla_aa" = "aa",
                          "expression_level" = "allele",
-                         "allele_g_group" = "g.group",
-                         "allele_supertype" = "supertype",
-                         "allele_group" = "allele.group",
+                         "hla_g_groups" = "g.group",
+                         "hla_supertypes" = "supertype",
+                         "hla_NK_ligands" = "allele.group",
                          "kir_genes" = "kir.gene",
                          "hla_kir_interactions" = "hla.kir.interaction",
                          "term"
@@ -312,11 +312,11 @@ test_that("runMiDAS", {
   keep <- FALSE
   experiment_choice <-
     c(
-      "hla_allele",
-      # "aa_level", # TODO
-      "allele_g_group",
-      "allele_supertype",
-      "allele_group",
+      "hla_alleles",
+      # "hla_aa", # TODO
+      "hla_g_groups",
+      "hla_supertypes",
+      "hla_NK_ligands",
       "kir_genes",
       "hla_kir_interactions",
       "hla_divergence"
@@ -355,12 +355,12 @@ test_that("runMiDAS", {
     }
 
     term_name <- switch (experiment,
-                         "hla_allele" = "allele",
-                         "aa_level" = "aa",
+                         "hla_alleles" = "allele",
+                         "hla_aa" = "aa",
                          "expression_level" = "allele",
-                         "allele_g_group" = "g.group",
-                         "allele_supertype" = "supertype",
-                         "allele_group" = "allele.group",
+                         "hla_g_groups" = "g.group",
+                         "hla_supertypes" = "supertype",
+                         "hla_NK_ligands" = "allele.group",
                          "kir_genes" = "kir.gene",
                          "hla_kir_interactions" = "hla.kir.interaction",
                          "term"
@@ -376,8 +376,8 @@ test_that("runMiDAS", {
   omnibus <- FALSE
   experiment_choice <-
     c(
-      "hla_allele",
-      "allele_supertype"
+      "hla_alleles",
+      "hla_supertypes"
     )
   lower_frequency_cutoff <- 0.02
   upper_frequency_cutoff <- 0.06
@@ -420,12 +420,12 @@ test_that("runMiDAS", {
     }
 
     term_name <- switch (experiment,
-                         "hla_allele" = "allele",
-                         "aa_level" = "aa",
+                         "hla_alleles" = "allele",
+                         "hla_aa" = "aa",
                          "expression_level" = "allele",
-                         "allele_g_group" = "g.group",
-                         "allele_supertype" = "supertype",
-                         "allele_group" = "allele.group",
+                         "hla_g_groups" = "g.group",
+                         "hla_supertypes" = "supertype",
+                         "hla_NK_ligands" = "allele.group",
                          "kir_genes" = "kir.gene",
                          "hla_kir_interactions" = "hla.kir.interaction",
                          "term"
@@ -470,17 +470,17 @@ test_that("runMiDAS", {
   )
 
   expect_error(runMiDAS(object, experiment = "foo"),
-               "experiment should be one of \"hla_allele\", \"aa_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"hla_kir_interactions\", \"hla_divergence\"."
+               "experiment should be one of \"hla_alleles\", \"hla_aa\", \"hla_g_groups\", \"hla_supertypes\", \"hla_NK_ligands\", \"kir_genes\", \"hla_kir_interactions\", \"hla_divergence\"."
   )
 
-  expect_error(runMiDAS(object, experiment = "hla_allele", conditional = 1),
+  expect_error(runMiDAS(object, experiment = "hla_alleles", conditional = 1),
                "conditional is not a flag \\(a length one logical vector\\)."
   )
 
   expect_error(
     runMiDAS(
       object,
-      experiment = "hla_allele",
+      experiment = "hla_alleles",
       conditional = TRUE,
       omnibus = 1
     ),
@@ -490,20 +490,20 @@ test_that("runMiDAS", {
   expect_error(
     runMiDAS(
       object,
-      experiment = "hla_allele",
+      experiment = "hla_alleles",
       omnibus_groups_filter = 1
     ),
     "omnibus_groups_filter is not a character."
   )
 
-  expect_error(runMiDAS(object, experiment = "hla_allele", correction = 1),
+  expect_error(runMiDAS(object, experiment = "hla_alleles", correction = 1),
                "correction is not a string \\(a length one character vector\\)."
   )
 
   expect_error(
     runMiDAS(
       object,
-      experiment = "hla_allele",
+      experiment = "hla_alleles",
       conditional = TRUE,
       omnibus = FALSE,
       n_correction = "foo"
@@ -514,7 +514,7 @@ test_that("runMiDAS", {
   expect_error(
     runMiDAS(
       object,
-      experiment = "hla_allele",
+      experiment = "hla_alleles",
       conditional = TRUE,
       omnibus = FALSE,
       exponentiate = "foo"
@@ -536,7 +536,7 @@ test_that("runMiDAS", {
   expect_error(
     runMiDAS(
       object,
-      experiment = "hla_allele",
+      experiment = "hla_alleles",
       lower_frequency_cutoff = 0.53,
       upper_frequency_cutoff = 0.56
     ),
@@ -558,9 +558,9 @@ test_that("omnibusTest", {
       hla_calls,
       colData = coldata,
       inheritance_model = "dominant",
-      experiment = "aa_level"
+      experiment = "hla_aa"
     )
-  midas_data <- midasToWide(midas, experiment = "aa_level")
+  midas_data <- midasToWide(midas, experiment = "hla_aa")
   object <- lm(OS ~ AGE + SEX + term, data = midas_data)
   omnibus_groups <- list(
     A_77 = c("A_77_D", "A_77_N", "A_77_S"),

@@ -753,7 +753,7 @@ countsToHlaCalls <- function(counts) {
 #' pheno <- read.table(
 #'   system.file("extdata", "pheno_example.txt", package = "MiDAS"),
 #'   header = TRUE)
-#' midas_data <- prepareMiDAS(hla_calls, pheno, analysis_type = "hla_allele")
+#' midas_data <- prepareMiDAS(hla_calls, pheno, analysis_type = "hla_alleles")
 #' object <- lm(OS ~ 1 + term, data = midas_data)
 #' res <- analyzeAssociations(object, variables = colnames(midas_data)[-1])
 #' formatResults(res,

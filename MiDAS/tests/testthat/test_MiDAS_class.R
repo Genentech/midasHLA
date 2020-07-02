@@ -70,7 +70,7 @@ test_that("MiDAS object's inheritance model is extracted correctly", {
     hla_calls = hla_calls,
     colData = pheno,
     inheritance_model = "additive",
-    experiment = "hla_allele"
+    experiment = "hla_alleles"
   )
 
   expect_equal(getInheritanceModel(midas), "additive")
@@ -87,10 +87,10 @@ test_that("MiDAS object's experiment is extracted correctly", {
     hla_calls = hla_calls,
     colData = pheno,
     inheritance_model = "additive",
-    experiment = "hla_allele"
+    experiment = "hla_alleles"
   )
 
-  expect_equal(getExperiments(midas), "hla_allele")
+  expect_equal(getExperiments(midas), "hla_alleles")
 })
 
 test_that("MiDAS object's hla_calls is extracted correctly", {
@@ -104,7 +104,7 @@ test_that("MiDAS object's hla_calls is extracted correctly", {
     hla_calls = hla_calls,
     colData = pheno,
     inheritance_model = "additive",
-    experiment = "hla_allele"
+    experiment = "hla_alleles"
   )
 
   expect_equal(getHlaCalls(midas), hla_calls)
@@ -156,10 +156,10 @@ test_that("MiDAS object's omnibus groups are extracted correctly", {
     hla_calls = hla_calls,
     colData = pheno,
     inheritance_model = "additive",
-    experiment = "aa_level"
+    experiment = "hla_aa"
   )
 
-  expect_equal(getOmnibusGroups(midas, "aa_level")[1:3],
+  expect_equal(getOmnibusGroups(midas, "hla_aa")[1:3],
                list(
                  `A_-15` = c("A_-15_V", "A_-15_L"),
                  `A_-11` = c("A_-11_S", "A_-11_L"),
@@ -183,10 +183,10 @@ test_that("MiDAS object's frequencies are extracted correctly", {
     hla_calls = hla_calls,
     colData = pheno,
     inheritance_model = "additive",
-    experiment = c("hla_allele", "hla_divergence")
+    experiment = c("hla_alleles", "hla_divergence")
   )
 
-  freq <- getFrequencies(midas, "hla_allele")
+  freq <- getFrequencies(midas, "hla_alleles")
   test_freq <- data.frame(
     term = c(
       "A*01:01",
@@ -230,7 +230,7 @@ test_that("MiDAS object's frequencies are extracted correctly", {
   )
 
   expect_error(getFrequencies(midas, "foo"),
-               "experiment should be one of \"hla_allele\", \"hla_divergence\"."
+               "experiment should be one of \"hla_alleles\", \"hla_divergence\"."
   )
 
   expect_error(getFrequencies(midas, "hla_divergence"),
@@ -300,11 +300,11 @@ test_that("MiDAS object is prepared properly", {
       colData = phenotype,
       inheritance_model = args$inheritance_model,
       experiment = c(
-        "hla_allele",
-        # "aa_level",
-        "allele_g_group",
-        "allele_supertype",
-        "allele_group",
+        "hla_alleles",
+        # "hla_aa",
+        "hla_g_groups",
+        "hla_supertypes",
+        "hla_NK_ligands",
         "kir_genes",
         "hla_kir_interactions",
         "hla_divergence"
@@ -364,7 +364,7 @@ test_that("MiDAS object is prepared properly", {
       inheritance_model = "additive",
       experiment = "foo"
     ),
-    "experiment should match values \"hla_allele\", \"aa_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"hla_kir_interactions\"."
+    "experiment should match values \"hla_alleles\", \"hla_aa\", \"hla_g_groups\", \"hla_supertypes\", \"hla_NK_ligands\", \"kir_genes\", \"hla_kir_interactions\"."
   )
 
   expect_error(
@@ -372,7 +372,7 @@ test_that("MiDAS object is prepared properly", {
       hla_calls = hla_calls,
       colData = phenotype,
       inheritance_model = "additive",
-      experiment = "hla_allele",
+      experiment = "hla_alleles",
       placeholder = 1
     ),
     "placeholder is not a string \\(a length one character vector\\)."
@@ -383,14 +383,14 @@ test_that("MiDAS object is prepared properly", {
       hla_calls = hla_calls,
       colData = phenotype,
       inheritance_model = "additive",
-      experiment = "hla_allele",
+      experiment = "hla_alleles",
       placeholder = "AGE"
     ),
     "Placeholder 'AGE' can not be used, it is alredy used as column name in one of the inputs."
   )
 })
 
-test_that("MiDAS data for hla_allele analysis is prepared properly", {
+test_that("MiDAS data for hla_alleles analysis is prepared properly", {
   hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(hla_calls_file)
 
@@ -405,7 +405,7 @@ test_that("MiDAS data for hla_allele analysis is prepared properly", {
     FUN = function(args) {
       args <- as.list(args)
       args$hla_calls <- hla_calls
-      experiment <- do.call(prepareMiDAS_hla_allele, args)
+      experiment <- do.call(prepareMiDAS_hla_alleles, args)
 
       experiment_test <- do.call(hlaCallsToCounts, args)
       experiment_test <- dfToExperimentMat(experiment_test)
@@ -415,7 +415,7 @@ test_that("MiDAS data for hla_allele analysis is prepared properly", {
   ))
 })
 
-test_that("MiDAS data for aa_level analysis is prepared properly", { # TODO
+test_that("MiDAS data for hla_aa analysis is prepared properly", { # TODO
   hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(hla_calls_file)
 
@@ -429,7 +429,7 @@ test_that("MiDAS data for aa_level analysis is prepared properly", { # TODO
   for (i in 1:nrow(args_c)) {
     args <- as.list(args_c[i, , drop = FALSE])
     args$hla_calls <- hla_calls
-    experiment <- do.call(prepareMiDAS_aa_level, args)
+    experiment <- do.call(prepareMiDAS_hla_aa, args)
 
     counts <-
       hlaToAAVariation(
@@ -456,7 +456,7 @@ test_that("MiDAS data for aa_level analysis is prepared properly", { # TODO
   }
 })
 
-test_that("MiDAS data for allele_g_group analysis is prepared properly", {
+test_that("MiDAS data for hla_g_groups analysis is prepared properly", {
   hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(hla_calls_file)
 
@@ -468,7 +468,7 @@ test_that("MiDAS data for allele_g_group analysis is prepared properly", {
   for (i in 1:nrow(args_c)) {
     args <- as.list(args_c[i, , drop = FALSE])
     args$hla_calls <- hla_calls
-    experiment <- do.call(prepareMiDAS_allele_g_group, args)
+    experiment <- do.call(prepareMiDAS_hla_g_groups, args)
 
     experiment_test <-
       hlaToVariable(hla_calls = args$hla_calls,
@@ -487,7 +487,7 @@ test_that("MiDAS data for allele_g_group analysis is prepared properly", {
   }
 })
 
-test_that("MiDAS data for allele_supertype analysis is prepared properly", {
+test_that("MiDAS data for hla_supertypes analysis is prepared properly", {
   hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(hla_calls_file)
 
@@ -499,7 +499,7 @@ test_that("MiDAS data for allele_supertype analysis is prepared properly", {
   for (i in 1:nrow(args_c)) {
     args <- as.list(args_c[i, , drop = FALSE])
     args$hla_calls <- hla_calls
-    experiment <- do.call(prepareMiDAS_allele_supertype, args)
+    experiment <- do.call(prepareMiDAS_hla_supertypes, args)
 
     experiment_test <-
       hlaToVariable(hla_calls = args$hla_calls,
@@ -520,7 +520,7 @@ test_that("MiDAS data for allele_supertype analysis is prepared properly", {
   }
 })
 
-test_that("MiDAS data for allele_group analysis is prepared properly", {
+test_that("MiDAS data for hla_NK_ligands analysis is prepared properly", {
   hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(hla_calls_file)
 
@@ -532,7 +532,7 @@ test_that("MiDAS data for allele_group analysis is prepared properly", {
   for (i in 1:nrow(args_c)) {
     args <- as.list(args_c[i, , drop = FALSE])
     args$hla_calls <- hla_calls
-    experiment <- do.call(prepareMiDAS_allele_group, args)
+    experiment <- do.call(prepareMiDAS_hla_NK_ligands, args)
 
     experiment_test <-
       Reduce(
@@ -650,11 +650,11 @@ test_that("MiDAS is filtered correctly", {
     kir_calls = kir_calls,
     colData = pheno,
     inheritance_model = "additive",
-    experiment = c("hla_allele", "allele_supertype", "kir_genes", "hla_divergence")
+    experiment = c("hla_alleles", "hla_supertypes", "kir_genes", "hla_divergence")
   )
 
   # filtration works as expected
-  experiment <- "hla_allele"
+  experiment <- "hla_alleles"
   inheritance_model <- "additive"
   lower_frequency_cutoff <- 0.53
   upper_frequency_cutoff <- 0.56
@@ -700,11 +700,11 @@ test_that("filterByOmnibusGroups", {
     hla_calls = hla_calls,
     colData = pheno,
     inheritance_model = "additive",
-    experiment = c("hla_allele", "aa_level")
+    experiment = c("hla_alleles", "hla_aa")
   )
 
   # filtration works as expected
-  experiment <- "aa_level"
+  experiment <- "hla_aa"
   mask <- c("A_83", "A_90")
   filtered_midas <-
     filterByOmnibusGroups(
@@ -720,13 +720,13 @@ test_that("filterByOmnibusGroups", {
   expect_equal(filtered_midas, test_filtered_midas)
 
   # unsported experiments raise error
-  experiment <- "hla_allele"
+  experiment <- "hla_alleles"
   expect_error(
     filterByOmnibusGroups(
       object = midas,
       experiment = experiment,
       groups = mask
     ),
-    "Omnibus groups filtration does not support experiment 'hla_allele'"
+    "Omnibus groups filtration does not support experiment 'hla_alleles'"
   )
 })

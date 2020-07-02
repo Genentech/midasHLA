@@ -69,7 +69,7 @@ covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
 midas_data <- prepareMiDAS(hla_calls = hla_calls,
                              pheno = pheno,
                              covar = covar,
-                             experiment = "hla_allele",
+                             experiment = "hla_alleles",
                              inheritance_model = "additive"
 )
 

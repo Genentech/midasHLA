@@ -455,9 +455,9 @@ as.data.frame.MiDAS <- function(x, ...) {
 #'   \code{kir_calls}. Importantly rows of \code{hla_calls} and
 #'   \code{kir_calls} without corresponding phenotype are discarded.
 #' @param experiment Character vector indicating analysis type for which data
-#'   should be prepared. Valid choices are \code{"hla_allele"},
-#'   \code{"aa_level"}, \code{"allele_g_group"}, \code{"allele_supertype"},
-#'   \code{"allele_group"}, \code{"kir_genes"}, \code{"hla_kir_interactions"},
+#'   should be prepared. Valid choices are \code{"hla_alleles"},
+#'   \code{"hla_aa"}, \code{"hla_g_groups"}, \code{"hla_supertypes"},
+#'   \code{"hla_NK_ligands"}, \code{"kir_genes"}, \code{"hla_kir_interactions"},
 #'   \code{"hla_divergence"}.
 #'   See details for further explanations.
 #' @param placeholder String
@@ -489,7 +489,7 @@ as.data.frame.MiDAS <- function(x, ...) {
 #'                       kir_calls = kir_calls,
 #'                       colData = phenotype,
 #'                       inheritance_model = "additive",
-#'                       experiment = "hla_allele"
+#'                       experiment = "hla_alleles"
 #' )
 #' }
 #'
@@ -505,11 +505,11 @@ prepareMiDAS <- function(hla_calls = NULL,
                          colData,
                          inheritance_model = c("additive", "dominant", "recessive"),
                          experiment = c(
-                           "hla_allele",
-                           "aa_level",
-                           "allele_g_group",
-                           "allele_supertype",
-                           "allele_group",
+                           "hla_alleles",
+                           "hla_aa",
+                           "hla_g_groups",
+                           "hla_supertypes",
+                           "hla_NK_ligands",
                            "kir_genes",
                            "hla_kir_interactions",
                            "hla_divergence"
@@ -620,7 +620,7 @@ prepareMiDAS <- function(hla_calls = NULL,
 #'
 #' @title Prepare MiDAS data on HLA allele level
 #'
-#' @details \code{'hla_allele'} - \code{hla_calls} are transformed into counts
+#' @details \code{'hla_alleles'} - \code{hla_calls} are transformed into counts
 #' under \code{inheritance_model} of choice (see \code{\link{hlaCallsToCounts}}
 #' for  more details).
 #'
@@ -628,18 +628,18 @@ prepareMiDAS <- function(hla_calls = NULL,
 #'
 #' @return Matrix
 #'
-prepareMiDAS_hla_allele <- function(hla_calls, inheritance_model, ...) {
+prepareMiDAS_hla_alleles <- function(hla_calls, inheritance_model, ...) {
   assert_that(
     checkHlaCallsFormat(hla_calls)
   )
 
-  hla_allele <- hlaCallsToCounts(
+  hla_alleles <- hlaCallsToCounts(
     hla_calls = hla_calls,
     inheritance_model = inheritance_model
   ) %>%
     dfToExperimentMat()
 
-  return(hla_allele)
+  return(hla_alleles)
 }
 
 #' Prepare MiDAS data on HLA amino acid level
@@ -660,7 +660,7 @@ prepareMiDAS_hla_allele <- function(hla_calls, inheritance_model, ...) {
 #' @importFrom assertthat assert_that is.flag
 #' @importFrom SummarizedExperiment SummarizedExperiment
 #'
-prepareMiDAS_aa_level <- function(hla_calls,
+prepareMiDAS_hla_aa <- function(hla_calls,
                                   inheritance_model,
                                   indels = TRUE,
                                   unkchar = FALSE,
@@ -716,7 +716,7 @@ prepareMiDAS_aa_level <- function(hla_calls,
 #'
 #' @importFrom assertthat assert_that
 #'
-prepareMiDAS_allele_g_group <- function(hla_calls,
+prepareMiDAS_hla_g_groups <- function(hla_calls,
                                         inheritance_model,
                                         ...) {
   assert_that(
@@ -724,25 +724,25 @@ prepareMiDAS_allele_g_group <- function(hla_calls,
   )
 
   lib <- "allele_HLA_Ggroup"
-  allele_g_group <- hlaToVariable(hla_calls = hla_calls,
+  hla_g_groups <- hlaToVariable(hla_calls = hla_calls,
                                   dictionary = lib,
                                   na.value = 0
   )
 
   assert_that(
-    ncol(allele_g_group) > 1,
+    ncol(hla_g_groups) > 1,
     msg = "no allele could be assigned to G group for input hla_calls"
   )
 
-  allele_g_group <-
+  hla_g_groups <-
     hlaCallsToCounts(
-      hla_calls = allele_g_group,
+      hla_calls = hla_g_groups,
       inheritance_model = inheritance_model,
       check_hla_format = FALSE
     ) %>%
     dfToExperimentMat()
 
-  return(allele_g_group)
+  return(hla_g_groups)
 }
 
 #' Prepare MiDAS data on HLA allele's supertypes level
@@ -760,32 +760,32 @@ prepareMiDAS_allele_g_group <- function(hla_calls,
 #'
 #' @importFrom assertthat assert_that
 #'
-prepareMiDAS_allele_supertype <- function(hla_calls, inheritance_model, ...) {
+prepareMiDAS_hla_supertypes <- function(hla_calls, inheritance_model, ...) {
   assert_that(
     checkHlaCallsFormat(hla_calls)
   )
 
   lib <- "allele_HLA_supertype"
-  allele_supertype <- hlaToVariable(hla_calls = hla_calls,
+  hla_supertypes <- hlaToVariable(hla_calls = hla_calls,
                                     dictionary = lib,
                                     na.value = 0
   )
 
   assert_that(
-    ncol(allele_supertype) > 1,
+    ncol(hla_supertypes) > 1,
     msg = "no allele could be assigned to supertype for input hla_calls"
   )
 
-  allele_supertype <-
+  hla_supertypes <-
     hlaCallsToCounts(
-      hla_calls = allele_supertype,
+      hla_calls = hla_supertypes,
       inheritance_model = inheritance_model,
       check_hla_format = FALSE
     ) %>%
     subset(select = - Unclassified) %>%
     dfToExperimentMat()
 
-  return(allele_supertype)
+  return(hla_supertypes)
 }
 
 #' Prepare MiDAS data on HLA allele's groups level
@@ -804,7 +804,7 @@ prepareMiDAS_allele_supertype <- function(hla_calls, inheritance_model, ...) {
 #'
 #' @importFrom assertthat assert_that
 #'
-prepareMiDAS_allele_group <- function(hla_calls, inheritance_model, ...) {
+prepareMiDAS_hla_NK_ligands <- function(hla_calls, inheritance_model, ...) {
   assert_that(
     checkHlaCallsFormat(hla_calls)
   )
@@ -814,25 +814,25 @@ prepareMiDAS_allele_group <- function(hla_calls, inheritance_model, ...) {
     "allele_HLA_Bw4+A23+A24+A32",
     "allele_HLA-C_C1-2"
   )
-  allele_group <- Reduce(
+  hla_NK_ligands <- Reduce(
     f = function(...) left_join(..., by = "ID"),
     x = lapply(lib, hlaToVariable, hla_calls = hla_calls, na.value = 0)
   )
 
   assert_that(
-    ncol(allele_group) > 1,
+    ncol(hla_NK_ligands) > 1,
     msg = "no allele could be assigned to allele groups for input hla_calls"
   )
 
-  allele_group <-
+  hla_NK_ligands <-
     hlaCallsToCounts(
-      hla_calls = allele_group,
+      hla_calls = hla_NK_ligands,
       inheritance_model = inheritance_model,
       check_hla_format = FALSE
     ) %>%
     dfToExperimentMat()
 
-  return(allele_group)
+  return(hla_NK_ligands)
 }
 
 #' Prepare MiDAS data on KIR genes level

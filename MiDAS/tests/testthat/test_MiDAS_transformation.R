@@ -356,12 +356,12 @@ test_that("results are formatted properly", {
 #     colData = phenotype,
 #     inheritance_model = "dominant",
 #     analysis_type = c(
-#       "hla_allele"
+#       "hla_alleles"
 #     )
 #   )
 #
 #   object <- stats::glm(OS_DIED ~ 1 + term, data = midas, family = stats::binomial)
-#   res <- runMiDAS(object, mode = "linear", analysis_type = "hla_allele")
+#   res <- runMiDAS(object, mode = "linear", analysis_type = "hla_alleles")
 #   res_kable <- kableResults(res)
 #   res_kable_test <- formatResults(res,
 #                                   filter_by = "p.adjusted <= 1",
@@ -493,11 +493,11 @@ test_that("Experiments are filtered correctly", {
     kir_calls = kir_calls,
     colData = pheno,
     inheritance_model = "additive",
-    experiment = c("hla_allele", "allele_supertype", "kir_genes", "hla_divergence")
+    experiment = c("hla_alleles", "allele_supertype", "kir_genes", "hla_divergence")
   )
 
   # filtering works as expected for fractions
-  experiment <- midas[["hla_allele"]]
+  experiment <- midas[["hla_alleles"]]
   inheritance_model <- "additive"
   lower_frequency_cutoff <- 0.54
   upper_frequency_cutoff <- 0.56
@@ -511,7 +511,7 @@ test_that("Experiments are filtered correctly", {
   expect_equal(experiment_filtered, experiment[expected_vars, ])
 
   # filtering works as expected for counts
-  experiment <- midas[["hla_allele"]]
+  experiment <- midas[["hla_alleles"]]
   inheritance_model <- "additive"
   lower_frequency_cutoff <- 6
   upper_frequency_cutoff <- 8
@@ -527,7 +527,7 @@ test_that("Experiments are filtered correctly", {
   expect_equal(experiment_filtered, experiment[expected_vars, ])
 
   # filtering works as expected for boundry conditions NULL, NULL
-  experiment <- midas[["hla_allele"]]
+  experiment <- midas[["hla_alleles"]]
   inheritance_model <- "additive"
   lower_frequency_cutoff <- NULL
   upper_frequency_cutoff <- NULL
@@ -541,7 +541,7 @@ test_that("Experiments are filtered correctly", {
   expect_equal(experiment_filtered, experiment[expected_vars, ])
 
   # filtering works as expected for boundry conditions 0, 0
-  experiment <- midas[["hla_allele"]]
+  experiment <- midas[["hla_alleles"]]
   inheritance_model <- "additive"
   lower_frequency_cutoff <- 0
   upper_frequency_cutoff <- 0
@@ -555,7 +555,7 @@ test_that("Experiments are filtered correctly", {
   expect_equal(experiment_filtered, experiment[expected_vars, ])
 
   # filtering works as expected for boundry conditions 1, 1
-  experiment <- midas[["hla_allele"]]
+  experiment <- midas[["hla_alleles"]]
   inheritance_model <- "additive"
   lower_frequency_cutoff <- 1
   upper_frequency_cutoff <- 1
@@ -599,7 +599,7 @@ test_that("Experiments are filtered correctly", {
   )
 
   # inheritance_model must be a string
-  experiment <- midas[["hla_allele"]]
+  experiment <- midas[["hla_alleles"]]
   inheritance_model <- 1
   lower_frequency_cutoff <- "foo"
   upper_frequency_cutoff <- 0.5
@@ -614,7 +614,7 @@ test_that("Experiments are filtered correctly", {
   )
 
   # inheritance_model must match allowed values
-  experiment <- midas[["hla_allele"]]
+  experiment <- midas[["hla_alleles"]]
   inheritance_model <- "foo"
   lower_frequency_cutoff <- 0
   upper_frequency_cutoff <- 1
@@ -634,7 +634,7 @@ test_that("Experiments are filtered correctly", {
   )
 
   # lower_frequency_cutof must be a number
-  experiment <- midas[["hla_allele"]]
+  experiment <- midas[["hla_alleles"]]
   inheritance_model <- "additive"
   lower_frequency_cutoff <- "foo"
   upper_frequency_cutoff <- 0.5
@@ -649,7 +649,7 @@ test_that("Experiments are filtered correctly", {
   )
 
   # lower_frequency_cutof must be positive
-  experiment <- midas[["hla_allele"]]
+  experiment <- midas[["hla_alleles"]]
   inheritance_model <- "additive"
   lower_frequency_cutoff <- -1
   upper_frequency_cutoff <- 0.5
@@ -664,7 +664,7 @@ test_that("Experiments are filtered correctly", {
   )
 
   # upper_frequency_cutoff must be a number
-  experiment <- midas[["hla_allele"]]
+  experiment <- midas[["hla_alleles"]]
   inheritance_model <- "additive"
   lower_frequency_cutoff <- 0.5
   upper_frequency_cutoff <- "foo"
@@ -679,7 +679,7 @@ test_that("Experiments are filtered correctly", {
   )
 
   # upper_frequency_cutoff must be positive
-  experiment <- midas[["hla_allele"]]
+  experiment <- midas[["hla_alleles"]]
   inheritance_model <- "additive"
   lower_frequency_cutoff <- 0
   upper_frequency_cutoff <- -1
@@ -694,7 +694,7 @@ test_that("Experiments are filtered correctly", {
   )
 
   # lower_frequency_cutoff is lower than upper_frequency_cutoff
-  experiment <- midas[["hla_allele"]]
+  experiment <- midas[["hla_alleles"]]
   inheritance_model <- "additive"
   lower_frequency_cutoff <- 5
   upper_frequency_cutoff <- 1
@@ -709,7 +709,7 @@ test_that("Experiments are filtered correctly", {
   )
 
   # Both lower_frequency_cutoff and upper_frequency_cutoff have to be either frequencies or counts
-  experiment <- midas[["hla_allele"]]
+  experiment <- midas[["hla_alleles"]]
   inheritance_model <- "additive"
   lower_frequency_cutoff <- 0.5
   upper_frequency_cutoff <- 2

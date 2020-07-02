@@ -42,7 +42,7 @@
 #' midas_data <- prepareMiDAS(hla_calls = hla_calls,
 #'                                pheno = pheno,
 #'                                covar = covar,
-#'                                experiment = "hla_allele",
+#'                                experiment = "hla_alleles",
 #'                                inheritance_model = "additive"
 #' )
 #'
@@ -181,7 +181,7 @@ analyzeAssociations <- function(object,
 #' midas_data <- prepareMiDAS(hla_calls = hla_calls,
 #'                              pheno = pheno,
 #'                              covar = covar,
-#'                              experiment = "hla_allele",
+#'                              experiment = "hla_alleles",
 #'                              inheritance_model = "additive"
 #' )
 #'
@@ -427,8 +427,8 @@ omnibusTest <- function(object,
 #' @inheritParams filterByFrequency
 #' @param experiment String indicating the experiment associated with
 #'   \code{object}'s \code{MiDAS} data to use. Valid values includes:
-#'   \code{"hla_allele"}, \code{"aa_level"}, \code{"allele_g_group"},
-#'   \code{"allele_supertype"}, \code{"allele_group"}, \code{"kir_genes"},
+#'   \code{"hla_alleles"}, \code{"hla_aa"}, \code{"hla_g_groups"},
+#'   \code{"hla_supertypes"}, \code{"hla_NK_ligands"}, \code{"kir_genes"},
 #'   \code{"hla_kir_interactions"}. See \code{link{prepareMiDAS}} for more
 #'   informations.
 #' @param conditional Logical flag,
@@ -463,14 +463,14 @@ omnibusTest <- function(object,
 #'                       kir_calls = kir_calls,
 #'                       colData = phenotype,
 #'                       inheritance_model = "additive",
-#'                       experiment = "hla_allele"
+#'                       experiment = "hla_alleles"
 #' )
 #'
 #' # constructs statistical model
 #' object <- lm(OS ~ AGE + SEX + term, data = midas)
 #'
 #' # run analysis
-#' runMiDAS(object, mode = "linear", experiment = "hla_allele")
+#' runMiDAS(object, mode = "linear", experiment = "hla_alleles")
 #' }
 #'
 #' @importFrom assertthat assert_that is.number is.string
@@ -618,12 +618,12 @@ runMiDAS_linear <- function(call,
 
   ## rename term
   term_name <- switch (experiment,
-                       "hla_allele" = "allele",
-                       "aa_level" = "aa",
+                       "hla_alleles" = "allele",
+                       "hla_aa" = "aa",
                        "expression_level" = "allele",
-                       "allele_g_group" = "g.group",
-                       "allele_supertype" = "supertype",
-                       "allele_group" = "allele.group",
+                       "hla_g_groups" = "g.group",
+                       "hla_supertypes" = "supertype",
+                       "hla_NK_ligands" = "allele.group",
                        "kir_genes" = "kir.gene",
                        "hla_kir_interactions" = "hla.kir.interaction",
                        "term"
@@ -692,12 +692,12 @@ runMiDAS_conditional <- function(call,
 
   # format conditional results
   term_name <- switch (experiment,
-                       "hla_allele" = "allele",
-                       "aa_level" = "aa",
+                       "hla_alleles" = "allele",
+                       "hla_aa" = "aa",
                        "expression_level" = "allele",
-                       "allele_g_group" = "g.group",
-                       "allele_supertype" = "supertype",
-                       "allele_group" = "allele.group",
+                       "hla_g_groups" = "g.group",
+                       "hla_supertypes" = "supertype",
+                       "hla_NK_ligands" = "allele.group",
                        "kir_genes" = "kir.gene",
                        "hla_kir_interactions" = "hla.kir.interaction",
                        "term"
@@ -792,15 +792,15 @@ runMiDAS_linear_omnibus <- function(call,
 
   # format linear omnibus results
   group_name <- switch (experiment,
-                       "aa_level" = "aa_pos",
+                       "hla_aa" = "aa_pos",
                        "group"
   )
   term_prefix <- switch (experiment,
-                         "aa_level" = "[A-Z0-9]+_-*[0-9]+_",
+                         "hla_aa" = "[A-Z0-9]+_-*[0-9]+_",
                          ""
   )
   term_name <- switch (experiment,
-                       "aa_level" = "residue",
+                       "hla_aa" = "residue",
                        "term"
   )
   results <- results %>%
@@ -935,15 +935,15 @@ runMiDAS_conditional_omnibus <- function(call,
 
   # format linear omnibus results
   group_name <- switch (experiment,
-                        "aa_level" = "aa_pos",
+                        "hla_aa" = "aa_pos",
                         "group"
   )
   term_prefix <- switch (experiment,
-                         "aa_level" = "[A-Z0-9]+_-*[0-9]+_",
+                         "hla_aa" = "[A-Z0-9]+_-*[0-9]+_",
                          ""
   )
   term_name <- switch (experiment,
-                       "aa_level" = "residue",
+                       "hla_aa" = "residue",
                        "term"
   )
 

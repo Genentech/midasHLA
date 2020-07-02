@@ -153,10 +153,10 @@ test_that("HLA statistical models are updated properly", {
     prepareMiDAS(
       hla_calls,
       colData = coldata,
-      experiment = "hla_allele",
+      experiment = "hla_alleles",
       inheritance_model = "additive"
     )
-  midas_data <- midasToWide(midas, experiment = "hla_allele")
+  midas_data <- midasToWide(midas, experiment = "hla_alleles")
   coxmod <- coxph(Surv(OS, OS_DIED) ~ 1, data = midas_data)
   coxmod$call$data <- midas_data
   coxmod_test <- coxph(Surv(OS, OS_DIED) ~ `A*01:01`, data = midas_data)
@@ -619,10 +619,10 @@ test_that("midasToWide", {
     hla_calls = hla_calls,
     colData = pheno,
     inheritance_model = "additive",
-    experiment = "hla_allele"
+    experiment = "hla_alleles"
   )
 
-  wide <- midasToWide(midas, "hla_allele")
+  wide <- midasToWide(midas, "hla_alleles")
   test_wide <- data.frame(
     primary = c("PAT1", "PAT2", "PAT3", "PAT4", "PAT5"),
     ID = c("PAT1", "PAT2", "PAT3", "PAT4", "PAT5"),
@@ -649,7 +649,7 @@ test_that("midasToWide", {
 
   expect_error(
     midasToWide(midas, "foo"),
-    "experiment should match values \"hla_allele\"."
+    "experiment should match values \"hla_alleles\"."
   )
 })
 
@@ -664,12 +664,12 @@ test_that("isExperimentCountsOrZeros", {
     hla_calls = hla_calls,
     colData = pheno,
     inheritance_model = "additive",
-    experiment = c("hla_allele", "aa_level")
+    experiment = c("hla_alleles", "hla_aa")
   )
 
-  expect_equal(isExperimentCountsOrZeros(midas[["hla_allele"]]), TRUE)
+  expect_equal(isExperimentCountsOrZeros(midas[["hla_alleles"]]), TRUE)
 
-  expect_equal(isExperimentCountsOrZeros(midas[["aa_level"]]), TRUE)
+  expect_equal(isExperimentCountsOrZeros(midas[["hla_aa"]]), TRUE)
 
   expect_equal(isExperimentCountsOrZeros(matrix(runif(15), nrow = 3)), FALSE)
 

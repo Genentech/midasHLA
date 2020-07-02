@@ -36,8 +36,8 @@ others.}
 
 \item{experiment}{String indicating the experiment associated with
 \code{object}'s \code{MiDAS} data to use. Valid values includes:
-\code{"hla_allele"}, \code{"aa_level"}, \code{"allele_g_group"},
-\code{"allele_supertype"}, \code{"allele_group"}, \code{"kir_genes"},
+\code{"hla_alleles"}, \code{"hla_aa"}, \code{"hla_g_groups"},
+\code{"hla_supertypes"}, \code{"hla_NK_ligands"}, \code{"kir_genes"},
 \code{"hla_kir_interactions"}. See \code{link{prepareMiDAS}} for more
 informations.}
 
@@ -155,14 +155,14 @@ midas <- prepareMiDAS(hla_calls = hla_calls,
                       kir_calls = kir_calls,
                       colData = phenotype,
                       inheritance_model = "additive",
-                      experiment = "hla_allele"
+                      experiment = "hla_alleles"
 )
 
 # constructs statistical model
 object <- lm(OS ~ AGE + SEX + term, data = midas)
 
 # run analysis
-runMiDAS(object, mode = "linear", experiment = "hla_allele")
+runMiDAS(object, mode = "linear", experiment = "hla_alleles")
 }
 
 }
