@@ -425,7 +425,7 @@ test_that("counts to variables conversion", {
 
   expect_error(
     countsToVariables(iris),
-    "counts can't contain factors"
+    "first column in counts must be named 'ID'"
   )
 
   expect_error(
@@ -477,7 +477,7 @@ test_that("HLA - KIR interactions are infered correctly", {
  fake_kir_counts[1:5, 1] <- paste0("foo", 1:5)
  expect_warning(
   getHlaKirInteractions(hla_calls, fake_kir_counts),
-  "15 IDs in hla_calls matched IDs in kir_counts"
+  "14 IDs in hla_calls matched IDs in kir_counts"
  )
 })
 

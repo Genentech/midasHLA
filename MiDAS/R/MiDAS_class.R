@@ -875,7 +875,7 @@ prepareMiDAS_kir_genes <- function(kir_calls, ...) {
 prepareMiDAS_hla_kir_interactions <- function(hla_calls, kir_calls, ...) {
   assert_that(
     checkHlaCallsFormat(hla_calls),
-    checkKirCallsFormat(hla_calls)
+    checkKirCallsFormat(kir_calls)
   )
 
   hla_kir_interactions <-

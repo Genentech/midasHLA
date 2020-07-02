@@ -972,7 +972,7 @@ countsToVariables <- function(counts,
                               na.value = NA,
                               nacols.rm = TRUE) {
   assert_that(
-    checkKirCallsFormat(counts),
+    checkColDataFormat(counts),
     see_if(length(na.value) == 1, msg = "na.value length must equal 1."),
     isTRUEorFALSE(nacols.rm)
   )
