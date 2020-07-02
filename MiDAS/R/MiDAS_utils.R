@@ -837,11 +837,12 @@ colnamesMatches <- function(x, cols) {
 assertthat::on_failure(colnamesMatches) <- function(call, env) {
   curr_colnames <- colnames(eval(call$x, envir = env))
   future_colnames <- eval(call$cols, envir = env)
+  mask <- ! curr_colnames %in% future_colnames
 
-  sprintf("Columns %s in %s should be named %s",
-           paste(curr_colnames, collapse = ", "),
+  sprintf("Columns: '%s' in %s should be named '%s'",
+           paste(curr_colnames[mask], collapse = "', '"),
            deparse(call$x),
-           paste(future_colnames, collapse = ", ")
+           paste(future_colnames[mask], collapse = "', '")
   )
 }
 

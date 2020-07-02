@@ -334,7 +334,7 @@ test_that("KIR haplotypes are converted to gene counts", {
   expect_equal(kir_hap, test_kir_hap)
 })
 
-test_that("column names matches", {
+test_that("colnamesMatches", {
   df <- data.frame(a = 1:5, b = 1:5)
   expect_equal(colnamesMatches(df, c("a", "b")), TRUE)
 
@@ -346,7 +346,7 @@ test_that("column names matches", {
 
   expect_error(
     assertthat::assert_that(colnamesMatches(df, c("foo", "bar"))),
-    "Columns a, b in df should be named foo, bar"
+    "Columns: 'a', 'b' in df should be named 'foo', 'bar'"
   )
 })
 
