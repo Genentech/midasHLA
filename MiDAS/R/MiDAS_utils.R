@@ -870,23 +870,34 @@ assertthat::on_failure(colnamesMatches) <- function(call, env) {
 checkKirCallsFormat <- function(kir_calls,
                                  accept.null = FALSE) {
   if (! (is.null(kir_calls) & accept.null)) {
-    kir_counts_name <- deparse(substitute(kir_calls))
     assert_that(
       is.data.frame(kir_calls),
-      see_if(nrow(kir_calls) >= 1 & ncol(kir_calls) >= 2,
-              msg = paste0(kir_counts_name,
-                           " have to have at least 1 rows and 2 columns"
-              )
-      ),
       see_if(! any(vapply(kir_calls, is.factor, logical(length = 1))),
-           msg = paste0(kir_counts_name, " can't contain factors")
+             msg = paste0(deparse(substitute(kir_calls)), " can't contain factors")
+      ),
+      colnamesMatches(
+        kir_calls,
+        c(
+          "ID",
+          "KIR3DL3",
+          "KIR2DS2",
+          "KIR2DL2",
+          "KIR2DL3",
+          "KIR2DP1",
+          "KIR2DL1",
+          "KIR3DP1",
+          "KIR2DL4",
+          "KIR3DL1",
+          "KIR3DS1",
+          "KIR2DL5",
+          "KIR2DS3",
+          "KIR2DS5",
+          "KIR2DS4",
+          "KIR2DS1",
+          "KIR3DL2"
+        )
       )
     )
-
-    kir_calls <- kir_calls[, 1, drop = FALSE]
-      assert_that(
-        colnamesMatches(kir_calls, "ID")
-      )
   }
 
   return(TRUE)

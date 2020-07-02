@@ -358,11 +358,6 @@ test_that("KIR counts have proper format", {
 
   expect_equal(checkKirCallsFormat(NULL, accept.null = TRUE), TRUE)
 
-  expect_error(
-    checkKirCallsFormat(kir_counts[, 1, drop = FALSE]),
-    "kir_counts\\[, 1, drop = FALSE\\] have to have at least 1 rows and 2 columns"
-  )
-
   fake_kir_counts <- kir_counts
   fake_kir_counts[, 1] <- as.factor(fake_kir_counts[, 1, drop = TRUE])
   expect_error(
@@ -370,11 +365,17 @@ test_that("KIR counts have proper format", {
     "fake_kir_counts can't contain factors"
   )
 
+
+  expect_error(
+    checkKirCallsFormat(kir_counts[, 1, drop = FALSE]),
+    "Number of columns in kir_calls must equal 17."
+  )
+
   fake_kir_counts <- kir_counts
   colnames(fake_kir_counts) <- c("FOO", colnames(fake_kir_counts)[-1])
   expect_error(
     checkKirCallsFormat(fake_kir_counts),
-    "Columns FOO in kir_counts should be named ID"
+    "Columns: 'FOO' in kir_calls should be named 'ID'"
   )
 })
 
