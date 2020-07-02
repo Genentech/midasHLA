@@ -319,8 +319,8 @@ setGeneric(
   name = "filterByFrequency",
   def = function(object,
                  experiment,
-                 lower_frequency_cutoff,
-                 upper_frequency_cutoff) {
+                 lower_frequency_cutoff = NULL,
+                 upper_frequency_cutoff = NULL) {
     standardGeneric("filterByFrequency")
   }
 )
@@ -337,7 +337,6 @@ setMethod(
                         experiment,
                         lower_frequency_cutoff = NULL,
                         upper_frequency_cutoff = NULL) {
-
   assert_that(
     is.character(experiment),
     characterMatches(experiment, getExperiments(object)),
