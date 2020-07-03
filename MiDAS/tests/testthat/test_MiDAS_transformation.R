@@ -342,87 +342,68 @@ test_that("results are formatted properly", {
                "header is not a string \\(a length one character vector\\) or NULL.")
 })
 
-test_that("counts are conveerted into frequencies", {
-  file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(file)
-  hla_counts <- hlaCallsToCounts(hla_calls, inheritance_model = "additive")
-  hla_freq <- getCountsFrequencies(hla_counts)
-  hla_freq <- hla_freq[, c("term", "Freq")]
-  colnames(hla_freq) <- c("allele", "Freq")
-  rownames(hla_freq) <- NULL
-  test_hla_freq <- getHlaFrequencies(hla_calls)
-  if (all(class(test_hla_freq$Freq) == c("formattable", "numeric"))) {
-    stop("other freq functions are already updated delete this fix")
-  }
-  test_hla_freq$Freq <- formattable::percent(test_hla_freq$Freq)
-  expect_equal(hla_freq, test_hla_freq)
-
-  expect_error(getCountsFrequencies("foo"), "counts_table is not a data frame")
-
-  expect_error(getCountsFrequencies(hla_counts[-1]),
-               "first column of counts_table must be named ID")
-
-  expect_error(getCountsFrequencies(hla_calls),
-               "values in counts_table are not counts \\(a positive integers\\) or zeros.")
-})
-
-test_that("results are formatted properly with preselected args", {
-  midas_data <- data.frame(
-    ID = c(1, 2),
-    "A*01:01" = c(0, 2),
-    "A*01:02" = c(2, 0),
-    R = c(1, 0),
-    term = c(1, 1),
-    check.names = FALSE,
-    stringsAsFactors = FALSE
-  )
-
-  object <- stats::glm(R ~ 1 + term, data = midas_data, family = stats::binomial)
-  object$call$data <- midas_data
-  res <- runMiDAS(object, analysis_type = "hla_allele", variables = c("A*01:01", "A*01:02"))
-  res <- rename(res, term = allele)
-  res_kable <- kableResults(res)
-  res_kable_test <- formatResults(res,
-                                  filter_by = "p.adjusted <= 1",
-                                  arrange_by = "p.value",
-                                  select_cols = c(
-                                    "term",
-                                    "estimate",
-                                    "std.error",
-                                    "p.value",
-                                    "p.adjusted"
-  ),
-                                  format = "html",
-                                  header = "MiDAS analysis results"
-  )
-
-  expect_equal(res_kable, res_kable_test)
-
-  expect_error(kableResults(res, pvalue_cutoff = "a"),
-               "pvalue_cutoff is not a number \\(a length one numeric vector\\) or NULL."
-  )
-
-  expect_error(kableResults(res, format = 1),
-               "format is not a string \\(a length one character vector\\)."
-  )
-
-  expect_error(kableResults(res, format = "foo"),
-               "format should be one of \"html\", \"latex\"."
-  )
-})
+# TODO
+# test_that("results are formatted properly with preselected args", {
+#   hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#   hla_calls <- readHlaCalls(hla_calls_file)
+#   pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+#   pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
+#   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
+#   covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
+#   phenotype <- dplyr::left_join(pheno, covar, by = "ID")
+#   midas <- prepareMiDAS(
+#     hla_calls = hla_calls,
+#     colData = phenotype,
+#     inheritance_model = "dominant",
+#     analysis_type = c(
+#       "hla_alleles"
+#     )
+#   )
+#
+#   object <- stats::glm(OS_DIED ~ 1 + term, data = midas, family = stats::binomial)
+#   res <- runMiDAS(object, mode = "linear", analysis_type = "hla_alleles")
+#   res_kable <- kableResults(res)
+#   res_kable_test <- formatResults(res,
+#                                   filter_by = "p.adjusted <= 1",
+#                                   arrange_by = "p.value",
+#                                   select_cols = c(
+#                                     "allele",
+#                                     "estimate",
+#                                     "std.error",
+#                                     "p.value",
+#                                     "p.adjusted"
+#   ),
+#                                   format = "html",
+#                                   header = "MiDAS analysis results"
+#   )
+#
+#   expect_equal(res_kable, res_kable_test)
+#
+#   expect_error(kableResults(res, pvalue_cutoff = "a"),
+#                "pvalue_cutoff is not a number \\(a length one numeric vector\\) or NULL."
+#   )
+#
+#   expect_error(kableResults(res, format = 1),
+#                "format is not a string \\(a length one character vector\\)."
+#   )
+#
+#   expect_error(kableResults(res, format = "foo"),
+#                "format should be one of \"html\", \"latex\"."
+#   )
+# })
 
 test_that("counts to variables conversion", {
-  file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
-  kir_counts <- readKirCalls(file)[1:2, ]
+  file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
+  kir_counts <- readKPICalls(file)[1:2, ]
   kir_haplotypes <- countsToVariables(kir_counts, "kir_haplotypes")
   kir_haplotypes_test <- data.frame(
     ID = c("PAT1", "PAT2"),
-    cenAA = c(0, 1),
+    cenAA = c(1, 0),
     cenBB = c(0, 0),
-    cenAB = c(1, 0),
-    telAA = c(1, 1),
+    cenAB = c(0, 1),
+    telAA = c(0, 1),
     telBB = c(0, 0),
-    telAB = c(0, 0),
+    telAB = c(1, 0),
     stringsAsFactors = FALSE
   )
   expect_equal(kir_haplotypes, kir_haplotypes_test)
@@ -444,7 +425,7 @@ test_that("counts to variables conversion", {
 
   expect_error(
     countsToVariables(iris),
-    "counts can't contain factors"
+    "first column in counts must be named 'ID'"
   )
 
   expect_error(
@@ -471,14 +452,14 @@ test_that("counts to variables conversion", {
 test_that("HLA - KIR interactions are infered correctly", {
   hla_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(hla_file)
-  kir_file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
-  kir_counts <- readKirCalls(kir_file, counts = TRUE)
+  kir_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
+  kir_counts <- readKPICalls(kir_file)
   hla_kir <- getHlaKirInteractions(hla_calls, kir_counts)
   load(system.file("extdata", "test_hla_kir_interactions.Rdata", package = "MiDAS"))
   expect_equal(hla_kir, test_hla_kir)
 
   # checkHlaCallsFormat are omitted here
-  # checkKirCountsFormat are omitted here
+  # checkKirCallsFormat are omitted here
 
   expect_error(
     getHlaKirInteractions(hla_calls, kir_counts, interactions_dict = 1),
@@ -496,6 +477,306 @@ test_that("HLA - KIR interactions are infered correctly", {
  fake_kir_counts[1:5, 1] <- paste0("foo", 1:5)
  expect_warning(
   getHlaKirInteractions(hla_calls, fake_kir_counts),
-  "15 IDs in hla_calls matched IDs in kir_counts"
+  "14 IDs in hla_calls matched IDs in kir_counts"
  )
+})
+
+test_that("Experiments are filtered correctly", {
+  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(hla_calls_file)
+  kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
+  kir_calls <- readKPICalls(kir_calls_file)
+  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
+  midas <- prepareMiDAS(
+    hla_calls = hla_calls,
+    kir_calls = kir_calls,
+    colData = pheno,
+    inheritance_model = "additive",
+    experiment = c("hla_alleles", "hla_supertypes", "kir_genes", "hla_divergence")
+  )
+
+  # filtering works as expected for fractions
+  experiment <- midas[["hla_alleles"]]
+  inheritance_model <- "additive"
+  lower_frequency_cutoff <- 0.54
+  upper_frequency_cutoff <- 0.56
+  experiment_filtered <- filterExperimentByFrequency(
+    experiment = experiment,
+    inheritance_model = inheritance_model,
+    lower_frequency_cutoff = lower_frequency_cutoff,
+    upper_frequency_cutoff = upper_frequency_cutoff
+  )
+  expected_vars <- c("DPB1*04:01", "DRB4*01:03", "H*01:01", "K*01:02")
+  expect_equal(experiment_filtered, experiment[expected_vars, ])
+
+  # filtering works as expected for counts
+  experiment <- midas[["hla_alleles"]]
+  inheritance_model <- "additive"
+  lower_frequency_cutoff <- 6
+  upper_frequency_cutoff <- 8
+  experiment_filtered <- filterExperimentByFrequency(
+    experiment = experiment,
+    inheritance_model = inheritance_model,
+    lower_frequency_cutoff = lower_frequency_cutoff,
+    upper_frequency_cutoff = upper_frequency_cutoff
+  )
+  expected_vars <-
+    c("C*07:02",
+      "DQB1*02:01")
+  expect_equal(experiment_filtered, experiment[expected_vars, ])
+
+  # filtering works as expected for boundry conditions NULL, NULL
+  experiment <- midas[["hla_alleles"]]
+  inheritance_model <- "additive"
+  lower_frequency_cutoff <- NULL
+  upper_frequency_cutoff <- NULL
+  experiment_filtered <- filterExperimentByFrequency(
+    experiment = experiment,
+    inheritance_model = inheritance_model,
+    lower_frequency_cutoff = lower_frequency_cutoff,
+    upper_frequency_cutoff = upper_frequency_cutoff
+  )
+  expected_vars <- rownames(experiment)
+  expect_equal(experiment_filtered, experiment[expected_vars, ])
+
+  # filtering works as expected for boundry conditions 0, 0
+  experiment <- midas[["hla_alleles"]]
+  inheritance_model <- "additive"
+  lower_frequency_cutoff <- 0
+  upper_frequency_cutoff <- 0
+  experiment_filtered <- filterExperimentByFrequency(
+    experiment = experiment,
+    inheritance_model = inheritance_model,
+    lower_frequency_cutoff = lower_frequency_cutoff,
+    upper_frequency_cutoff = upper_frequency_cutoff
+  )
+  expected_vars <- character(0L)
+  expect_equal(experiment_filtered, experiment[expected_vars, ])
+
+  # filtering works as expected for boundry conditions 1, 1
+  experiment <- midas[["hla_alleles"]]
+  inheritance_model <- "additive"
+  lower_frequency_cutoff <- 1
+  upper_frequency_cutoff <- 1
+  experiment_filtered <- filterExperimentByFrequency(
+    experiment = experiment,
+    inheritance_model = inheritance_model,
+    lower_frequency_cutoff = lower_frequency_cutoff,
+    upper_frequency_cutoff = upper_frequency_cutoff
+  )
+  expected_vars <- character(0L)
+  expect_equal(experiment_filtered, experiment[expected_vars, ])
+
+  # experiment must be a matrix
+  experiment <- LETTERS
+  inheritance_model <- "additive"
+  lower_frequency_cutoff <- 0.1
+  upper_frequency_cutoff <- 0.5
+  expect_error(
+    filterExperimentByFrequency(
+      experiment = experiment,
+      inheritance_model = inheritance_model,
+      lower_frequency_cutoff = lower_frequency_cutoff,
+      upper_frequency_cutoff = upper_frequency_cutoff
+    ),
+    "experiment is not a matrix"
+  )
+
+  # experiment must be of type integer
+  experiment <- matrix(LETTERS)
+  inheritance_model <- "additive"
+  lower_frequency_cutoff <- 0.1
+  upper_frequency_cutoff <- 0.5
+  expect_error(
+    filterExperimentByFrequency(
+      experiment = experiment,
+      inheritance_model = inheritance_model,
+      lower_frequency_cutoff = lower_frequency_cutoff,
+      upper_frequency_cutoff = upper_frequency_cutoff
+    ),
+    "values in experiment are not counts \\(a positive integers\\) or zeros."
+  )
+
+  # inheritance_model must be a string
+  experiment <- midas[["hla_alleles"]]
+  inheritance_model <- 1
+  lower_frequency_cutoff <- "foo"
+  upper_frequency_cutoff <- 0.5
+  expect_error(
+    filterExperimentByFrequency(
+      experiment = experiment,
+      inheritance_model = inheritance_model,
+      lower_frequency_cutoff = lower_frequency_cutoff,
+      upper_frequency_cutoff = upper_frequency_cutoff
+    ),
+    "inheritance_model is not a string \\(a length one character vector\\)."
+  )
+
+  # inheritance_model must match allowed values
+  experiment <- midas[["hla_alleles"]]
+  inheritance_model <- "foo"
+  lower_frequency_cutoff <- 0
+  upper_frequency_cutoff <- 1
+  inheritance_model_vals <- formals(filterExperimentByFrequency)
+  inheritance_model_vals <- inheritance_model_vals[["inheritance_model"]]
+  inheritance_model_vals <- eval(inheritance_model_vals)
+  inheritance_model_vals <- paste(inheritance_model_vals, collapse = "\", \"")
+  inheritance_model_vals <- paste0("\"", inheritance_model_vals, "\"")
+  expect_error(
+    filterExperimentByFrequency(
+      experiment = experiment,
+      inheritance_model = inheritance_model,
+      lower_frequency_cutoff = lower_frequency_cutoff,
+      upper_frequency_cutoff = upper_frequency_cutoff
+    ),
+    sprintf("inheritance_model should be one of %s.", inheritance_model_vals)
+  )
+
+  # lower_frequency_cutof must be a number
+  experiment <- midas[["hla_alleles"]]
+  inheritance_model <- "additive"
+  lower_frequency_cutoff <- "foo"
+  upper_frequency_cutoff <- 0.5
+  expect_error(
+    filterExperimentByFrequency(
+      experiment = experiment,
+      inheritance_model = inheritance_model,
+      lower_frequency_cutoff = lower_frequency_cutoff,
+      upper_frequency_cutoff = upper_frequency_cutoff
+    ),
+    "lower_frequency_cutoff is not a number \\(a length one numeric vector\\)."
+  )
+
+  # lower_frequency_cutof must be positive
+  experiment <- midas[["hla_alleles"]]
+  inheritance_model <- "additive"
+  lower_frequency_cutoff <- -1
+  upper_frequency_cutoff <- 0.5
+  expect_error(
+    filterExperimentByFrequency(
+      experiment = experiment,
+      inheritance_model = inheritance_model,
+      lower_frequency_cutoff = lower_frequency_cutoff,
+      upper_frequency_cutoff = upper_frequency_cutoff
+    ),
+    "lower_frequency_cutoff must be a number greater than 0."
+  )
+
+  # upper_frequency_cutoff must be a number
+  experiment <- midas[["hla_alleles"]]
+  inheritance_model <- "additive"
+  lower_frequency_cutoff <- 0.5
+  upper_frequency_cutoff <- "foo"
+  expect_error(
+    filterExperimentByFrequency(
+      experiment = experiment,
+      inheritance_model = inheritance_model,
+      lower_frequency_cutoff = lower_frequency_cutoff,
+      upper_frequency_cutoff = upper_frequency_cutoff
+    ),
+    "upper_frequency_cutoff is not a number \\(a length one numeric vector\\)."
+  )
+
+  # upper_frequency_cutoff must be positive
+  experiment <- midas[["hla_alleles"]]
+  inheritance_model <- "additive"
+  lower_frequency_cutoff <- 0
+  upper_frequency_cutoff <- -1
+  expect_error(
+    filterExperimentByFrequency(
+      experiment = experiment,
+      inheritance_model = inheritance_model,
+      lower_frequency_cutoff = lower_frequency_cutoff,
+      upper_frequency_cutoff = upper_frequency_cutoff
+    ),
+    "upper_frequency_cutoff must be a number greater than 0."
+  )
+
+  # lower_frequency_cutoff is lower than upper_frequency_cutoff
+  experiment <- midas[["hla_alleles"]]
+  inheritance_model <- "additive"
+  lower_frequency_cutoff <- 5
+  upper_frequency_cutoff <- 1
+  expect_error(
+    filterExperimentByFrequency(
+      experiment = experiment,
+      inheritance_model = inheritance_model,
+      lower_frequency_cutoff = lower_frequency_cutoff,
+      upper_frequency_cutoff = upper_frequency_cutoff
+    ),
+    "lower_frequency_cutoff cannot be higher than upper_frequency_cutoff."
+  )
+
+  # Both lower_frequency_cutoff and upper_frequency_cutoff have to be either frequencies or counts
+  experiment <- midas[["hla_alleles"]]
+  inheritance_model <- "additive"
+  lower_frequency_cutoff <- 0.5
+  upper_frequency_cutoff <- 2
+  expect_error(
+    filterExperimentByFrequency(
+      experiment = experiment,
+      inheritance_model = inheritance_model,
+      lower_frequency_cutoff = lower_frequency_cutoff,
+      upper_frequency_cutoff = upper_frequency_cutoff
+    ),
+    "Both lower_frequency_cutoff and upper_frequency_cutoff have to be either frequencies or counts."
+  )
+})
+
+test_that("getExperimentFrequencies", {
+  # matirx
+  experiment_matrix <- matrix(
+    data = c(0, 2, 0, 0, 0,
+             0, 2, 0, 0, 0,
+             2, 0, 0, 0, 0,
+             0, 1, 1, 0, 0,
+             0, 0, 0, 0, 0
+    ),
+    nrow = 5,
+    ncol = 5,
+    dimnames = list(
+      c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
+      c("PAT1", "PAT2", "PAT3", "PAT4", "PAT5")
+    )
+  )
+
+  # additive
+  experiment_matrix_freq <-
+    getExperimentFrequencies(experiment_matrix, "additive")
+  experiment_matrix_freq_test <- data.frame(
+    term = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
+    Counts = c(2, 5, 1, 0, 0),
+    Freq = formattable::percent(c(0.2, 0.5, 0.1, 0, 0), 2L),
+    row.names = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
+    stringsAsFactors = FALSE
+  )
+  expect_equal(experiment_matrix_freq, experiment_matrix_freq_test)
+
+  # dominant
+  experiment_matrix[experiment_matrix == 2] <- 1
+  experiment_matrix_freq <-
+    getExperimentFrequencies(experiment_matrix, "dominant")
+  experiment_matrix_freq_test <- data.frame(
+    term = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
+    Counts = c(1, 3, 1, 0, 0),
+    Freq = formattable::percent(c(0.2, 0.6, 0.2, 0, 0), 2L),
+    row.names = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
+    stringsAsFactors = FALSE
+  )
+  expect_equal(experiment_matrix_freq, experiment_matrix_freq_test)
+
+  # SummarizedExperiment
+  experiment_se <- SummarizedExperiment::SummarizedExperiment(experiment_matrix)
+  experiment_se_freq <- getExperimentFrequencies(experiment_se, "dominant")
+  expect_equal(experiment_matrix_freq, experiment_matrix_freq_test)
+
+  expect_error(getExperimentFrequencies(as.matrix(LETTERS)),
+               "values in experiment are not counts \\(a positive integers\\) or zeros.")
+
+  expect_error(getExperimentFrequencies(experiment_matrix, 1),
+               "inheritance_model is not a string \\(a length one character vector\\).")
+
+  expect_error(getExperimentFrequencies(experiment_matrix, "foo"),
+               "inheritance_model should be one of \"dominant\", \"recessive\", \"additive\".")
 })

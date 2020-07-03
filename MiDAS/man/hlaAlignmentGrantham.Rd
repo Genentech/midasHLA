@@ -7,7 +7,9 @@
 hlaAlignmentGrantham(gene, resolution)
 }
 \arguments{
-\item{alignment}{Matrix containing HLA alleles amino acids level alignment.}
+\item{gene}{Character}
+
+\item{resolution}{Number}
 }
 \description{
 \code{hlaAlignmentGrantham} get HLA alignment processed so that grantham

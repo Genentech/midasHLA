@@ -148,12 +148,15 @@ test_that("HLA statistical models are updated properly", {
   pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-  midas_data <-
-    prepareMiDAS(hla_calls,
-                     pheno,
-                     covar,
-                     analysis_type = "hla_allele",
-                     inheritance_model = "additive")
+  coldata <- dplyr::left_join(pheno, covar, by = "ID")
+  midas <-
+    prepareMiDAS(
+      hla_calls,
+      colData = coldata,
+      experiment = "hla_alleles",
+      inheritance_model = "additive"
+    )
+  midas_data <- midasToWide(midas, experiment = "hla_alleles")
   coxmod <- coxph(Surv(OS, OS_DIED) ~ 1, data = midas_data)
   coxmod$call$data <- midas_data
   coxmod_test <- coxph(Surv(OS, OS_DIED) ~ `A*01:01`, data = midas_data)
@@ -168,15 +171,6 @@ test_that("HLA statistical models are updated properly", {
 
   expect_error(updateModel(coxmod, x = "A*01:01", placeholder = 1),
                "placeholder is not a string \\(a length one character vector\\)."
-  )
-
-  expect_error(
-    updateModel(
-      coxmod,
-      x = c("A*01:01", "A*01:02"),
-      placeholder = "foo"
-    ),
-    "placeholder argument can be used only with one new variable in x."
   )
 
   expect_error(updateModel(coxmod, x = "A*01:01", backquote = 1),
@@ -199,32 +193,39 @@ test_that("HLA statistical models are updated properly", {
 
 
 test_that("statistical models are statistical model", {
-  object <- lm(speed ~ dist, data = cars)
+  kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
+  kir_calls <- readKPICalls(kir_calls_file)
+  kir_calls <- kir_calls[1:20, ]
+  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
+
+  midas <- prepareMiDAS(
+    kir_calls = kir_calls,
+    colData = pheno,
+    inheritance_model = "additive",
+    experiment = "kir_genes"
+  )
+
+  object <- lm(OS ~ OS_DIED, data = midas)
   expect_equal(checkStatisticalModel(object), TRUE)
 
   expect_error(checkStatisticalModel(list(1)),
                "object is required to have the internal OBJECT bit set"
   )
 
-  expect_error(updateModel(speed ~ cars),
+  expect_error(checkStatisticalModel(speed ~ cars),
                "object have to have an attribute 'call'"
   )
 
   fake_model <- list(call = list(formula = "foo"))
   class(fake_model) <- "fake"
-  expect_error(updateModel(fake_model),
+  expect_error(checkStatisticalModel(fake_model),
                "object have to be a model with defined formula"
   )
 
   fake_model <- list(call = list(formula = 1 ~ 1))
   class(fake_model) <- "fake"
-  expect_error(updateModel(fake_model),
-               "object need to have data attribute defined"
-  )
-
-  fake_model <- list(call = list(formula = 1 ~ 1, data = "bigData"))
-  class(fake_model) <- "fake"
-  expect_error(updateModel(fake_model),
+  expect_error(checkStatisticalModel(fake_model),
                "object need to have data attribute defined"
   )
 })
@@ -308,33 +309,32 @@ test_that("is class or null", {
 })
 
 test_that("KIR haplotypes are converted to gene counts", {
-  x <- c("1+3|16+3", "1+1")
+  x <- c("cA01~tA01+cB02~tA01", "cA01~tA01+cA01~tB01_2DS5")
   kir_hap <- kirHaplotypeToCounts(x)
-
-  hap_dict <- system.file("extdata", "Match_kir_haplotype_gene.txt", package = "MiDAS")
-  hap_dict <- read.table(hap_dict)
-  hap1 <- colSums(hap_dict[c("1", "3"), ])
-  hap1 <- ifelse(hap1 > 1, 1, hap1)
-  hap2 <- colSums(hap_dict[c("1", "1"), ])
-  hap2 <- ifelse(hap2 > 1, 1, hap2)
-  test_kir_hap <- rbind(hap1, hap2)
-  test_kir_hap <-
-    as.data.frame(test_kir_hap,
-                  optional = TRUE,
-                  stringsAsFactors = FALSE)
-  test_kir_hap <- cbind(haplotypes = x, test_kir_hap, stringsAsFactors = FALSE)
-  rownames(test_kir_hap) <- NULL
-
+  test_kir_hap <- data.frame(
+    haplotypes = c("cA01~tA01+cB02~tA01", "cA01~tA01+cA01~tB01_2DS5"),
+    KIR3DL3 = c(1, 1),
+    KIR2DS2 = c(1, 0),
+    KIR2DL2 = c(1, 0),
+    KIR2DL3 = c(1, 1),
+    KIR2DP1 = c(1, 1),
+    KIR2DL1 = c(1, 1),
+    KIR3DP1 = c(1, 1),
+    KIR2DL4 = c(1, 1),
+    KIR3DL1 = c(1, 1),
+    KIR3DS1 = c(0, 1),
+    KIR2DL5 = c(0, 1),
+    KIR2DS3 = c(0, 0),
+    KIR2DS5 = c(0, 1),
+    KIR2DS4 = c(1, 1),
+    KIR2DS1 = c(0, 1),
+    KIR3DL2 = c(1, 1),
+    stringsAsFactors = FALSE
+  )
   expect_equal(kir_hap, test_kir_hap)
-
-  expect_error(kirHaplotypeToCounts(1), "x is not a character vector")
-  expect_error(kirHaplotypeToCounts(x, hap_dict = "foo"),
-               "Path 'foo' does not exist")
-  expect_error(kirHaplotypeToCounts(x, binary = "yes"),
-               "binary is not a flag \\(a length one logical vector\\).")
 })
 
-test_that("column names matches", {
+test_that("colnamesMatches", {
   df <- data.frame(a = 1:5, b = 1:5)
   expect_equal(colnamesMatches(df, c("a", "b")), TRUE)
 
@@ -346,34 +346,35 @@ test_that("column names matches", {
 
   expect_error(
     assertthat::assert_that(colnamesMatches(df, c("foo", "bar"))),
-    "Columns a, b in df should be named foo, bar"
+    "Columns: 'a', 'b' in df should be named 'foo', 'bar'"
   )
 })
 
 test_that("KIR counts have proper format", {
-  file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
-  kir_counts <- readKirCalls(file)
-  expect_equal(checkKirCountsFormat(kir_counts), TRUE)
+  file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
+  kir_counts <- readKPICalls(file)
+  expect_equal(checkKirCallsFormat(kir_counts), TRUE)
 
-  expect_equal(checkKirCountsFormat(NULL, accept.null = TRUE), TRUE)
-
-  expect_error(
-    checkKirCountsFormat(kir_counts[, 1, drop = FALSE]),
-    "kir_counts\\[, 1, drop = FALSE\\] have to have at least 1 rows and 2 columns"
-  )
+  expect_equal(checkKirCallsFormat(NULL, accept.null = TRUE), TRUE)
 
   fake_kir_counts <- kir_counts
   fake_kir_counts[, 1] <- as.factor(fake_kir_counts[, 1, drop = TRUE])
   expect_error(
-    checkKirCountsFormat(fake_kir_counts),
+    checkKirCallsFormat(fake_kir_counts),
     "fake_kir_counts can't contain factors"
+  )
+
+
+  expect_error(
+    checkKirCallsFormat(kir_counts[, 1, drop = FALSE]),
+    "Number of columns in kir_calls must equal 17."
   )
 
   fake_kir_counts <- kir_counts
   colnames(fake_kir_counts) <- c("FOO", colnames(fake_kir_counts)[-1])
   expect_error(
-    checkKirCountsFormat(fake_kir_counts),
-    "Columns FOO in kir_counts should be named ID"
+    checkKirCallsFormat(fake_kir_counts),
+    "Columns: 'FOO' in kir_calls should be named 'ID'"
   )
 })
 
@@ -439,6 +440,48 @@ test_that("object has placeholder", {
   )
 })
 
+test_that("phenotype data is properly formatted", {
+  pheno <- data.frame(
+    ID = 1:5,
+    letter = LETTERS[1:5]
+  )
+
+  expect_equal(checkColDataFormat(pheno), TRUE)
+
+  expect_error(
+    checkColDataFormat(LETTERS),
+    "LETTERS have to be a data frame"
+  )
+
+  expect_error(
+    checkColDataFormat(data.frame()),
+    "data.frame\\(\\) have to have at least 1 row and 2 columns"
+  )
+
+  expect_error(
+    checkColDataFormat(pheno[, 2, drop = FALSE]),
+    "pheno\\[, 2, drop = FALSE\\] have to have at least 1 row and 2 columns"
+  )
+})
+
+test_that("check if function exists", {
+  expect_equal(functionExists("lm"), TRUE)
+
+  expect_error(
+    assertthat::assert_that(functionExists("foo")),
+    "Function foo could not be found."
+  )
+})
+
+test_that("is class", {
+  expect_equal(isClass("foo", "character"), TRUE)
+
+  expect_error(
+    assertthat::assert_that(isClassOrNULL("foo", "bar")),
+    "\"foo\" must be an instance of \"bar\"."
+  )
+})
+
 test_that("Grantham distance is calculated properly", {
   aa1 <- c("A", "S", "W")
   aa2 <- c("A", "S", "V")
@@ -485,4 +528,156 @@ test_that("Between allele Grantham distance is calculated properly", {
     hlaCallsGranthamDistance(hla_calls_bad, genes = "A"),
     "Allele resolutions for gene A are not equal"
   )
+})
+
+test_that("Frequency cutoffs validation", {
+  # lower_frequency_cutof must be a number
+  lower_frequency_cutoff <- "foo"
+  upper_frequency_cutoff <- 0.5
+  expect_error(
+    validateFrequencyCutoffs(lower_frequency_cutoff, upper_frequency_cutoff),
+    "lower_frequency_cutoff is not a number \\(a length one numeric vector\\)."
+  )
+
+  # lower_frequency_cutof must be positive
+  lower_frequency_cutoff <- -1
+  upper_frequency_cutoff <- 0.5
+  expect_error(
+    validateFrequencyCutoffs(lower_frequency_cutoff, upper_frequency_cutoff),
+    "lower_frequency_cutoff must be a number greater than 0."
+  )
+
+  # upper_frequency_cutoff must be a number
+  lower_frequency_cutoff <- 0.5
+  upper_frequency_cutoff <- "foo"
+  expect_error(
+    validateFrequencyCutoffs(lower_frequency_cutoff, upper_frequency_cutoff),
+    "upper_frequency_cutoff is not a number \\(a length one numeric vector\\)."
+  )
+
+  # upper_frequency_cutoff must be positive
+  lower_frequency_cutoff <- 0
+  upper_frequency_cutoff <- -1
+  expect_error(
+    validateFrequencyCutoffs(lower_frequency_cutoff, upper_frequency_cutoff),
+    "upper_frequency_cutoff must be a number greater than 0."
+  )
+
+  # lower_frequency_cutoff is lower than upper_frequency_cutoff
+  lower_frequency_cutoff <- 5
+  upper_frequency_cutoff <- 1
+  expect_error(
+    validateFrequencyCutoffs(lower_frequency_cutoff, upper_frequency_cutoff),
+    "lower_frequency_cutoff cannot be higher than upper_frequency_cutoff."
+  )
+
+  # Both lower_frequency_cutoff and upper_frequency_cutoff have to be either frequencies or counts
+  lower_frequency_cutoff <- 0.5
+  upper_frequency_cutoff <- 2
+  expect_error(
+    validateFrequencyCutoffs(lower_frequency_cutoff, upper_frequency_cutoff),
+    "Both lower_frequency_cutoff and upper_frequency_cutoff have to be either frequencies or counts."
+  )
+})
+
+test_that("getHlaCallsGenes", {
+  file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(file)[, 1:5]
+  genes <- getHlaCallsGenes(hla_calls)
+  expect_equal(genes, c("A", "B"))
+})
+
+test_that("dfToExperimentMat", {
+  file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(file)
+  mat <- dfToExperimentMat(hla_calls)
+  ids <- hla_calls[["ID"]]
+  test_mat <- hla_calls[, -1]
+  test_mat <- t(test_mat)
+  colnames(test_mat) <- ids
+  expect_equal(mat, test_mat)
+})
+
+test_that("experimentMatToDf", {
+  file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(file)
+  ids <- hla_calls[["ID"]]
+  mat <- hla_calls[, -1]
+  mat <- t(mat)
+  colnames(mat) <- ids
+  expect_equal(experimentMatToDf(mat), hla_calls)
+})
+
+test_that("midasToWide", {
+  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(hla_calls_file)[1:5, 1:5]
+
+  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)[1:5, ]
+
+  midas <- prepareMiDAS(
+    hla_calls = hla_calls,
+    colData = pheno,
+    inheritance_model = "additive",
+    experiment = "hla_alleles"
+  )
+
+  wide <- midasToWide(midas, "hla_alleles")
+  test_wide <- data.frame(
+    primary = c("PAT1", "PAT2", "PAT3", "PAT4", "PAT5"),
+    ID = c("PAT1", "PAT2", "PAT3", "PAT4", "PAT5"),
+    OS = c(280L, 458L, 415L, 211L, 631L),
+    OS_DIED = c(1L, 0L, 0L, 1L, 0L),
+    term = wide$term, # there is a rounding error
+    `A*01:01` = c(0L, 0L, 2L, 0L, 0L),
+    `A*02:01` = c(2L, 2L, 0L, 1L, 0L),
+    `A*02:06` = c(0L, 0L, 0L, 1L, 0L),
+    `A*26:01` = c(0L, 0L, 0L, 0L, 2L),
+    `B*07:02` = c(0L, 0L, 0L, 0L, 2L),
+    `B*08:01` = c(0L, 0L, 2L, 0L, 0L),
+    `B*13:02` = c(1L, 0L, 0L, 0L, 0L),
+    `B*15:01` = c(1L, 0L, 0L, 0L, 0L),
+    `B*27:05` = c(0L, 0L, 0L, 1L, 0L),
+    `B*40:01` = c(0L, 1L, 0L, 1L, 0L),
+    `B*57:01` = c(0L, 1L, 0L, 0L, 0L),
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
+  expect_equal(wide, test_wide)
+
+  expect_error(midasToWide(midas, 1), "experiment is not a character vector")
+
+  expect_error(
+    midasToWide(midas, "foo"),
+    "experiment should match values \"hla_alleles\"."
+  )
+})
+
+test_that("isExperimentCountsOrZeros", {
+  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  hla_calls <- readHlaCalls(hla_calls_file)[1:5, 1:5]
+
+  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
+  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)[1:5, ]
+
+  midas <- prepareMiDAS(
+    hla_calls = hla_calls,
+    colData = pheno,
+    inheritance_model = "additive",
+    experiment = c("hla_alleles", "hla_aa")
+  )
+
+  expect_equal(isExperimentCountsOrZeros(midas[["hla_alleles"]]), TRUE)
+
+  expect_equal(isExperimentCountsOrZeros(midas[["hla_aa"]]), TRUE)
+
+  expect_equal(isExperimentCountsOrZeros(matrix(runif(15), nrow = 3)), FALSE)
+
+  expect_equal(isExperimentCountsOrZeros(LETTERS), FALSE)
+})
+
+test_that("checkKirGenesFormat", {
+  genes <- c("KIR3DL3", "KIR2DS4")
+  expect_equal(checkKirGenesFormat(genes), c(TRUE, TRUE))
+  expect_equal(checkKirGenesFormat(LETTERS), rep(FALSE, length(LETTERS)))
 })

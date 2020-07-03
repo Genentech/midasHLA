@@ -27,17 +27,22 @@ checkHlaCallsFormat(hla_calls)
 \seealso{
 Other assert functions: \code{\link{characterMatches}},
   \code{\link{checkAdditionalData}},
-  \code{\link{checkKirCountsFormat}},
+  \code{\link{checkColDataFormat}},
+  \code{\link{checkKirCallsFormat}},
   \code{\link{checkStatisticalModel}},
   \code{\link{colnamesMatches}},
+  \code{\link{functionExists}},
   \code{\link{hasTidyMethod}},
   \code{\link{isCharacterOrNULL}},
-  \code{\link{isClassOrNULL}}, \code{\link{isCountOrNULL}},
+  \code{\link{isClassOrNULL}}, \code{\link{isClass}},
+  \code{\link{isCountOrNULL}},
   \code{\link{isCountsOrZeros}},
+  \code{\link{isExperimentCountsOrZeros}},
   \code{\link{isFlagOrNULL}}, \code{\link{isNumberOrNULL}},
   \code{\link{isStringOrNULL}},
   \code{\link{isTRUEorFALSE}},
   \code{\link{objectHasPlaceholder}},
-  \code{\link{stringMatches}}
+  \code{\link{stringMatches}},
+  \code{\link{validateFrequencyCutoffs}}
 }
 \concept{assert functions}

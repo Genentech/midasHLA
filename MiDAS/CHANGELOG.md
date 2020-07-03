@@ -1,3 +1,13 @@
+## 0.0.9047 - 2/07/20
++ MiDAS object introduced
++ This an object derived from MultiAssayExperiment class, it is used for storing hla and kir calls and 
+  thier transformations. MiDAS object is now returned by prepareMiDAS function. Functions like getFrequencies
+  work with MiDAS object, it can also be consumed as data argument to functions such as lm.
++ Updates the KIR output to the latest version, as well as updates readKirCalls
++ Implements omnibus and conditional omnibus tests that can be used with "hla_aa" experiment
++ Now argument analysis_type is changed to experiment
++ experiments has been renamed eg. "aa_level" --> "hla_aa"
+
 ## 0.0.9046 - 10/05/20
 + fixes bug causing prepareMiDAS to fail on 1 row hla_calls input for 'aa_level' analysis_type
 

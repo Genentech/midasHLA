@@ -5,7 +5,7 @@
 \title{Convert KIR haplotypes to gene counts}
 \usage{
 kirHaplotypeToCounts(x, hap_dict = system.file("extdata",
-  "Match_kir_haplotype_gene.txt", package = "MiDAS"), binary = TRUE)
+  "Match_kir_nomenclature_gene.txt", package = "MiDAS"), binary = TRUE)
 }
 \arguments{
 \item{x}{Character vector specifying KIR haplotypes.}
@@ -20,7 +20,10 @@ more information.}
 
 \code{hap_dict} have to be a tab separated values formatted file with first
 column holding KIR haplotypes and gene counts in others. File should have
-header with first column unnamed and gene names in the others.}
+header with first column unnamed and gene names in the others.
+
+Haplotypes are converted to gene presence / absence indicators as it is the
+only way that allows unambiguous conversion.}
 }
 \value{
 Data frame with haplotypes and corresponding gene counts. \code{NA}'s
@@ -31,11 +34,11 @@ Data frame with haplotypes and corresponding gene counts. \code{NA}'s
 of KIR gene counts.
 }
 \examples{
-x <- c(NA, "1+3|16+3", "1+1", NA)
+x <- c(NA, "cA01~tA01+cB02~tA01", "cA01~tA01+cA01~tB01_2DS5")
 kirHaplotypeToCounts(x)
 
 }
 \seealso{
-\code{\link{readKirCalls}}, \code{\link{getHlaKirInteractions}},
-  \code{\link{checkKirCountsFormat}}, \code{\link{prepareMiDAS}}.
+\code{\link{readKPICalls}}, \code{\link{getHlaKirInteractions}},
+  \code{\link{checkKirCallsFormat}}, \code{\link{prepareMiDAS}}.
 }

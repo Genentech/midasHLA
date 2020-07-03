@@ -12,31 +12,33 @@ others.}
 }
 \value{
 Logical indicating if \code{object} is an existing fit from a
-model function such as lm, glm and many others. Otherwise raise error.
+model function such as lm, glm and many others. ontaining MiDAS object as
+its data atribute. Otherwise raise error.
 }
 \description{
 \code{checkStatisticalModel} asserts if object is an existing fit from a
-model function such as lm, glm and many others.
-}
-\examples{
-object <- lm(dist ~ speed, data = cars)
-checkStatisticalModel(object)
-
+model function such as lm, glm and many others. Containing MiDAS object as
+its data atribute.
 }
 \seealso{
 Other assert functions: \code{\link{characterMatches}},
   \code{\link{checkAdditionalData}},
+  \code{\link{checkColDataFormat}},
   \code{\link{checkHlaCallsFormat}},
-  \code{\link{checkKirCountsFormat}},
+  \code{\link{checkKirCallsFormat}},
   \code{\link{colnamesMatches}},
+  \code{\link{functionExists}},
   \code{\link{hasTidyMethod}},
   \code{\link{isCharacterOrNULL}},
-  \code{\link{isClassOrNULL}}, \code{\link{isCountOrNULL}},
+  \code{\link{isClassOrNULL}}, \code{\link{isClass}},
+  \code{\link{isCountOrNULL}},
   \code{\link{isCountsOrZeros}},
+  \code{\link{isExperimentCountsOrZeros}},
   \code{\link{isFlagOrNULL}}, \code{\link{isNumberOrNULL}},
   \code{\link{isStringOrNULL}},
   \code{\link{isTRUEorFALSE}},
   \code{\link{objectHasPlaceholder}},
-  \code{\link{stringMatches}}
+  \code{\link{stringMatches}},
+  \code{\link{validateFrequencyCutoffs}}
 }
 \concept{assert functions}

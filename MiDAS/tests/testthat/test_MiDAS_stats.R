@@ -8,15 +8,16 @@ test_that("HLA allele associations are analyzed properly", {
   pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-  midas_data <-
+  coldata <- dplyr::left_join(pheno, covar, by = "ID")
+  midas <-
     prepareMiDAS(hla_calls,
-                     pheno,
-                     covar,
-                     analysis_type = "hla_allele",
-                     inheritance_model = "additive")
+                 colData = coldata,
+                 experiment = "hla_alleles",
+                 inheritance_model = "additive")
 
+  midas_data <- midasToWide(midas, experiment = "hla_alleles")
   object <- lm(OS_DIED ~ AGE + SEX + term, data = midas_data)
-  #object$call$data <- midas_data
+
   res <- analyzeAssociations(object,
                              variables = c("A*01:01", "A*02:01"),
                              correction = "BH"
@@ -88,12 +89,15 @@ test_that("Stepwise conditional alleles subset selection", {
   pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-  midas_data <-
-    prepareMiDAS(hla_calls,
-                     pheno,
-                     covar,
-                     analysis_type = "hla_allele",
-                     inheritance_model = "additive")
+  coldata <- dplyr::left_join(pheno, covar, by = "ID")
+  midas <-
+    prepareMiDAS(
+      hla_calls,
+      colData = coldata,
+      experiment = "hla_alleles",
+      inheritance_model = "additive"
+    )
+  midas_data <- midasToWide(midas, experiment = "hla_alleles")
 
   object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX + term, data = midas_data)
 
@@ -214,838 +218,371 @@ test_that("Stepwise conditional alleles subset selection", {
   )
 })
 
-test_that("MiDAS associations are analyzed properly", {
+test_that("runMiDAS", {
   hla_calls_file <-
     system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(hla_calls_file)
+  hla_calls <- readHlaCalls(hla_calls_file)[, 1:11] # TODO this was taking tooo much time
+  kir_file <-
+    system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
+  kir_calls <- readKPICalls(kir_file)
   pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
   pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-  kir_file <-
-    system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
-  kir_counts <- readKirCalls(kir_file, counts = TRUE)
-  midas_data <-
+  coldata <- dplyr::left_join(pheno, covar, by = "ID")
+
+  midas <-
     prepareMiDAS(
-      hla_calls,
-      pheno,
-      covar,
-      kir_counts = kir_counts,
-      analysis_type = c(
-        "hla_allele",
-        "aa_level",
-        "expression_level",
-        "allele_g_group",
-        "allele_supertype",
-        "allele_group",
+      hla_calls = hla_calls,
+      kir_call = kir_calls,
+      colData = coldata,
+      experiment = c(
+        "hla_alleles",
+        "hla_aa",
+        "hla_g_groups",
+        "hla_supertypes",
+        "hla_NK_ligands",
         "kir_genes",
         "hla_kir_interactions",
-        "hla_divergence",
-        "custom"
+        "hla_divergence"
       ),
       inheritance_model = "additive"
     )
 
-  object <- lm(OS_DIED ~ AGE + SEX + term, data = midas_data)
-
-  # conditional FALSE, analysis_type = "hla_allele", extra variables
-  res <- runMiDAS(object,
-                  analysis_type = "hla_allele",
-                  variables = c("expression_A", "expression_C"),
-                  exponentiate = FALSE
-  )
-
-  test_variables <- colnames(midas_data[, label(midas_data) == "hla_allele"])
-  test_res <- analyzeAssociations(object, variables = c("expression_A", "expression_C", test_variables), exponentiate = FALSE)
-  test_variables <- test_res$term[-1:-2] # constant variables are discarded
-  test_res <- dplyr::rename(test_res, allele = term)
-  variables_freq <- getCountsFrequencies(midas_data[, c("ID", test_variables)])
-  test_res$Ntotal <- c(NA, NA, variables_freq$Counts)
-  test_res$Ntotal.frequency <- formattable::percent(c(NA, NA, variables_freq$Freq))
-  pos <- midas_data$OS_DIED == 1
-  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", test_variables)])
-  test_res$Npositive <- c(NA, NA, pos_freq$Counts)
-  test_res$Npositive.frequency <- formattable::percent(c(NA, NA, pos_freq$Freq))
-  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", test_variables)])
-  test_res$Nnegative <- c(NA, NA, neg_freq$Counts)
-  test_res$Nnegative.frequency <- formattable::percent(c(NA, NA, neg_freq$Freq))
-
-  expect_equal(as.data.frame(res), as.data.frame(test_res)) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
-
-  # conditional FALSE, analysis_type = "hla_allele", pattern = "^A"
-  res <- runMiDAS(object,
-                  analysis_type = "hla_allele",
-                  pattern = "^A",
-                  exponentiate = FALSE
-  )
-
-  test_variables <- colnames(midas_data[, label(midas_data) == "hla_allele"])
-  test_variables <- grep("^A", test_variables, value = TRUE)
-  test_res <- analyzeAssociations(object, variables = test_variables, exponentiate = FALSE)
-  test_res <- dplyr::rename(test_res, allele = term)
-  variables_freq <- getCountsFrequencies(midas_data[, c("ID", test_variables)])
-  test_res$Ntotal <- variables_freq$Counts
-  test_res$Ntotal.frequency <- formattable::percent(variables_freq$Freq)
-  pos <- midas_data$OS_DIED == 1
-  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", test_variables)])
-  test_res$Npositive <- pos_freq$Counts
-  test_res$Npositive.frequency <- formattable::percent(pos_freq$Freq)
-  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", test_variables)])
-  test_res$Nnegative <- neg_freq$Counts
-  test_res$Nnegative.frequency <- formattable::percent(neg_freq$Freq)
-
-  expect_equal(as.data.frame(res), as.data.frame(test_res))
-
-  ## analysis_type = "hla_allele" variables = NULL
-  res <- runMiDAS(object,
-                  analysis_type = "hla_allele",
-                  variables = NULL,
-                  exponentiate = FALSE
-  )
-
-  test_variables <- colnames(midas_data[, label(midas_data) == "hla_allele"])
-  test_res <- analyzeAssociations(object, variables = test_variables, exponentiate = FALSE)
-  test_variables <- test_res$term # constant variables are discarded
-  test_res <- dplyr::rename(test_res, allele = term)
-  variables_freq <- getCountsFrequencies(midas_data[, c("ID", test_variables)])
-  test_res$Ntotal <- variables_freq$Counts
-  test_res$Ntotal.frequency <- variables_freq$Freq
-  pos <- midas_data$OS_DIED == 1
-  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", test_variables)])
-  test_res$Npositive <- pos_freq$Counts
-  test_res$Npositive.frequency <- pos_freq$Freq
-  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", test_variables)])
-  test_res$Nnegative <- neg_freq$Counts
-  test_res$Nnegative.frequency <- neg_freq$Freq
-
-  expect_equal(as.data.frame(res), as.data.frame(test_res))
-
-  ## analysis_type = "aa_level" variables = NULL
-  res <- runMiDAS(object,
-                  analysis_type = "aa_level",
-                  variables = NULL,
-                  exponentiate = FALSE
-  )
-
-  test_variables <- colnames(midas_data[, label(midas_data) == "aa_level"])
-  test_res <- analyzeAssociations(object, variables = test_variables, exponentiate = FALSE)
-  test_variables <- test_res$term # constant variables are discarded
-  test_res <- dplyr::rename(test_res, aa = term)
-  variables_freq <- getCountsFrequencies(midas_data[, c("ID", test_variables)])
-  test_res$Ntotal <- variables_freq$Counts
-  test_res$Ntotal.frequency <- variables_freq$Freq
-  pos <- midas_data$OS_DIED == 1
-  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", test_variables)])
-  test_res$Npositive <- pos_freq$Counts
-  test_res$Npositive.frequency <- pos_freq$Freq
-  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", test_variables)])
-  test_res$Nnegative <- neg_freq$Counts
-  test_res$Nnegative.frequency <- neg_freq$Freq
-
-  expect_equal(as.data.frame(res), as.data.frame(test_res))
-
-  ## analysis_type = "expression_level" variables = NULL
-  res <- runMiDAS(object,
-                  analysis_type = "expression_level",
-                  variables = NULL,
-                  exponentiate = FALSE
-  )
-
-  test_variables <-
-    colnames(midas_data[, label(midas_data) == "expression_level", drop = FALSE])
-  test_res <- analyzeAssociations(object, variables = test_variables, exponentiate = FALSE)
-  test_variables <- test_res$term # constant variables are discarded
-  test_res <- dplyr::rename(test_res, allele = term)
-
-  expect_equal(as.data.frame(res), as.data.frame(test_res))
-
-  ## analysis_type = "allele_g_group" variables = NULL
-  res <- runMiDAS(object,
-                  analysis_type = "allele_g_group",
-                  variables = NULL,
-                  exponentiate = FALSE
-  )
-
-  test_variables <- colnames(midas_data[, label(midas_data) == "allele_g_group"])
-  test_res <- analyzeAssociations(object, variables = test_variables)
-  test_variables <- test_res$term # constant variables are discarded
-  test_res <- dplyr::rename(test_res, g.group = term)
-  variables_freq <- getCountsFrequencies(midas_data[, c("ID", test_variables)])
-  test_res$Ntotal <- variables_freq$Counts
-  test_res$Ntotal.frequency <- variables_freq$Freq
-  pos <- midas_data$OS_DIED == 1
-  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", test_variables)])
-  test_res$Npositive <- pos_freq$Counts
-  test_res$Npositive.frequency <- pos_freq$Freq
-  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", test_variables)])
-  test_res$Nnegative <- neg_freq$Counts
-  test_res$Nnegative.frequency <- neg_freq$Freq
-
-  expect_equal(as.data.frame(res), as.data.frame(test_res))
-
-  ## analysis_type = "allele_supertype" variables = NULL
-  res <- runMiDAS(object,
-                  analysis_type = "allele_supertype",
-                  variables = NULL,
-                  exponentiate = FALSE
-  )
-
-  test_variables <- colnames(midas_data[, label(midas_data) == "allele_supertype"])
-  test_res <- analyzeAssociations(object, variables = test_variables)
-  test_variables <- test_res$term # constant variables are discarded
-  test_res <- dplyr::rename(test_res, supertype = term)
-  variables_freq <- getCountsFrequencies(midas_data[, c("ID", test_variables)])
-  test_res$Ntotal <- variables_freq$Counts
-  test_res$Ntotal.frequency <- variables_freq$Freq
-  pos <- midas_data$OS_DIED == 1
-  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", test_variables)])
-  test_res$Npositive <- pos_freq$Counts
-  test_res$Npositive.frequency <- pos_freq$Freq
-  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", test_variables)])
-  test_res$Nnegative <- neg_freq$Counts
-  test_res$Nnegative.frequency <- neg_freq$Freq
-
-  expect_equal(as.data.frame(res), as.data.frame(test_res))
-
-  ## analysis_type = "allele_group" variables = NULL
-  res <- runMiDAS(object,
-                  analysis_type = "allele_group",
-                  variables = NULL,
-                  exponentiate = FALSE
-  )
-
-  test_variables <- colnames(midas_data[, label(midas_data) == "allele_group"])
-  test_res <- analyzeAssociations(object, variables = test_variables)
-  test_variables <- test_res$term # constant variables are discarded
-  test_res <- dplyr::rename(test_res, allele.group = term)
-  variables_freq <- getCountsFrequencies(midas_data[, c("ID", test_variables)])
-  test_res$Ntotal <- variables_freq$Counts
-  test_res$Ntotal.frequency <- variables_freq$Freq
-  pos <- midas_data$OS_DIED == 1
-  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", test_variables)])
-  test_res$Npositive <- pos_freq$Counts
-  test_res$Npositive.frequency <- pos_freq$Freq
-  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", test_variables)])
-  test_res$Nnegative <- neg_freq$Counts
-  test_res$Nnegative.frequency <- neg_freq$Freq
-
-  expect_equal(as.data.frame(res), as.data.frame(test_res))
-
-  ## analysis_type = "kir_genes" variables = NULL
-  res <- runMiDAS(object,
-                  analysis_type = "kir_genes",
-                  variables = NULL,
-                  exponentiate = FALSE
-  )
-  test_variables <- colnames(midas_data[, label(midas_data) == "kir_genes"])
-  test_res <- analyzeAssociations(object, variables = test_variables)
-  test_variables <- test_res$term # constant variables are discarded
-  test_res <- dplyr::rename(test_res, kir.gene = term)
-  variables_freq <- getCountsFrequencies(midas_data[, c("ID", test_variables)])
-  test_res$Ntotal <- variables_freq$Counts
-  test_res$Ntotal.frequency <- variables_freq$Freq
-  pos <- midas_data$OS_DIED == 1
-  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", test_variables)])
-  test_res$Npositive <- pos_freq$Counts
-  test_res$Npositive.frequency <- pos_freq$Freq
-  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", test_variables)])
-  test_res$Nnegative <- neg_freq$Counts
-  test_res$Nnegative.frequency <- neg_freq$Freq
-
-  expect_equal(as.data.frame(res), as.data.frame(test_res))
-
-  ## analysis_type = "hla_kir_interactions" variables = NULL
-  res <- runMiDAS(object,
-                  analysis_type = "hla_kir_interactions",
-                  variables = NULL,
-                  exponentiate = FALSE
-  )
-  test_variables <-
-    colnames(midas_data[, label(midas_data) == "hla_kir_interactions"])
-  test_res <- analyzeAssociations(object, variables = test_variables)
-  test_variables <- test_res$term # constant variables are discarded
-  test_res <- dplyr::rename(test_res, hla.kir.interaction = term)
-  variables_freq <- getCountsFrequencies(midas_data[, c("ID", test_variables)])
-  test_res$Ntotal <- variables_freq$Counts
-  test_res$Ntotal.frequency <- variables_freq$Freq
-  pos <- midas_data$OS_DIED == 1
-  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", test_variables)])
-  test_res$Npositive <- pos_freq$Counts
-  test_res$Npositive.frequency <- pos_freq$Freq
-  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", test_variables)])
-  test_res$Nnegative <- neg_freq$Counts
-  test_res$Nnegative.frequency <- neg_freq$Freq
-
-  expect_equal(as.data.frame(res), as.data.frame(test_res))
-
-  ## analysis_type = "hla_divergence" variables = NULL
-  res <- runMiDAS(object,
-                  analysis_type = "hla_divergence",
-                  variables = NULL,
-                  exponentiate = FALSE
-  )
-  test_variables <-
-    colnames(midas_data[, label(midas_data) == "hla_divergence"])
-  test_res <- analyzeAssociations(object, variables = test_variables)
-  test_variables <- test_res$term # constant variables are discarded
-  test_res <- dplyr::rename(test_res, hla.divergence = term)
-
-  expect_equal(as.data.frame(res), as.data.frame(test_res))
-
-  ## analysis_type = "none" variables = c("A*01:01", "A*02:01", "A*02:06")
-  test_variables <- c("A*01:01", "A*02:01", "A*02:06")
-  res <- runMiDAS(object,
-                  analysis_type = "none",
-                  variables = test_variables,
-                  exponentiate = FALSE
-  )
-  test_res <- analyzeAssociations(object, variables = test_variables)
-
-  expect_equal(as.data.frame(res), as.data.frame(test_res))
-
-  # conditional TRUE keep TRUE
-  res <- runMiDAS(object,
-                  analysis_type = "hla_allele",
-                  conditional = TRUE,
-                  keep = TRUE,
-                  exponentiate = FALSE
-  )
-
-  test_variables <- colnames(midas_data[, label(midas_data) == "hla_allele"])
-  test_res <- analyzeConditionalAssociations(object,
-                                             variables = test_variables,
-                                             th = 0.05,
-                                             keep = TRUE
-  )
-  test_res <- lapply(test_res, dplyr::rename, allele = term)
-  alleles <- lapply(test_res, `[`, "allele")
-  alleles <- unique(unlist(alleles))
-  variables_freq <- getCountsFrequencies(midas_data[, c("ID", alleles)])
-  colnames(variables_freq) <- c("allele", "Ntotal", "Ntotal.frequency")
-  test_res <-
-    lapply(test_res, dplyr::left_join, y = variables_freq, by = "allele")
-  pos <- midas_data$OS_DIED == 1
-  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", alleles)])
-  colnames(pos_freq) <- c("allele", "Npositive", "Npositive.frequency")
-  test_res <-
-    lapply(test_res, dplyr::left_join, y = pos_freq, by = "allele")
-  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", alleles)])
-  colnames(neg_freq) <- c("allele", "Nnegative", "Nnegative.frequency")
-  test_res <-
-    lapply(test_res, dplyr::left_join, y = neg_freq, by = "allele")
-
-  res <- lapply(res, as.data.frame)
-  test_res <- lapply(test_res, as.data.frame)
-  expect_equal(res, test_res) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
-
-  # conditional TRUE keep FALSE
-  res <- runMiDAS(object,
-                  analysis_type = "hla_allele",
-                  conditional = TRUE,
-                  keep = FALSE,
-                  exponentiate = FALSE
-  )
-
-  test_variables <- colnames(midas_data[, label(midas_data) == "hla_allele"])
-  test_res <- analyzeConditionalAssociations(object,
-                                             variables = test_variables,
-                                             th = 0.05,
-                                             keep = FALSE,
-                                             exponentiate = FALSE
-  )
-  test_variables <- test_res$term # constant variables are discarded
-  test_res <- dplyr::rename(test_res, allele = term)
-  variables_freq <- getCountsFrequencies(midas_data[, c("ID", test_variables)])
-  test_res$Ntotal <- variables_freq$Counts
-  test_res$Ntotal.frequency <- variables_freq$Freq
-  pos <- midas_data$OS_DIED == 1
-  pos_freq <- getCountsFrequencies(midas_data[pos, c("ID", test_variables)])
-  test_res$Npositive <- pos_freq$Counts
-  test_res$Npositive.frequency <- pos_freq$Freq
-  neg_freq <- getCountsFrequencies(midas_data[! pos, c("ID", test_variables)])
-  test_res$Nnegative <- neg_freq$Counts
-  test_res$Nnegative.frequency <- neg_freq$Freq
-
-  expect_equal(as.data.frame(res), as.data.frame(test_res))
-
-  # Test lower and upper frequency thresholds
-  # %
-  res <- runMiDAS(object, analysis_type = "hla_allele", lower_frequency_cutoff = 0.85)
-  freqs <- getHlaFrequencies(hla_calls)
-  expect_equal(res$allele, freqs$allele[freqs$Freq > 0.85 & freqs$Freq != 1])
-
-  res <- runMiDAS(object, analysis_type = "hla_allele", upper_frequency_cutoff = 0.03)
-  expect_equal(res$allele, freqs$allele[freqs$Freq < 0.03 & freqs$Freq != 1])
-
-  # test that additional variables are not considered for freq. cut-offs
-  additional_var <- "G*01:01" # freq == 0.875
-  res <-
-    runMiDAS(
-      object,
-      analysis_type = "hla_allele",
-      variables = additional_var,
-      upper_frequency_cutoff = 0.03
+  # linear
+  conditional = FALSE
+  omnibus = FALSE
+  experiment_choice <-
+    c(
+      "hla_alleles",
+      # "hla_aa", #TODO
+      "hla_g_groups",
+      "hla_supertypes",
+      "hla_NK_ligands",
+      "kir_genes",
+      "hla_kir_interactions",
+      "hla_divergence"
     )
-  filtered_alleles <- freqs$allele[freqs$Freq < 0.03 & freqs$Freq != 1]
-  expect_equal(sort(res$allele), sort(c(filtered_alleles, additional_var)))
+  for (experiment in experiment_choice) {
+    object <- lm(OS_DIED ~ AGE + SEX + term, data = midas)
+    res <- runMiDAS(object,
+                    conditional = conditional,
+                    omnibus = omnibus,
+                    experiment = experiment,
+                    exponentiate = FALSE
+    )
 
-  # counts
-  counts <- prepareMiDAS(hla_calls, analysis_type = "hla_allele")
-  counts <- colSums(counts[-1], na.rm = TRUE)
-  res <- runMiDAS(object, analysis_type = "hla_allele", lower_frequency_cutoff = 34)
-  expect_equal(res$allele, names(counts)[counts > 34 & freqs$Freq != 1])
+    midas_data <- midasToWide(midas, experiment = experiment)
+    object$call$data <- midas_data
+    test_variables <- rownames(midas[[experiment]])
+    test_res <-
+      analyzeAssociations(object, variables = test_variables, exponentiate = FALSE)
 
-  res <- runMiDAS(object, analysis_type = "hla_allele", upper_frequency_cutoff = 2)
-  expect_equal(res$allele, names(counts)[counts < 2 & freqs$Freq != 1])
+    if (typeof(midas[[experiment]]) == "integer") {
+      variables_freq <-
+        MiDAS:::runMiDASGetVarsFreq(
+          midas = midas,
+          experiment = experiment,
+          test_covar = all.vars(formula(object))[1]
+        )
+      test_res <- dplyr::left_join(test_res, variables_freq, by = "term")
+    }
 
-  # Tests for checkStatisticalModel errors are ommitted here
+    term_name <- switch (experiment,
+                         "hla_alleles" = "allele",
+                         "hla_aa" = "aa",
+                         "expression_level" = "allele",
+                         "hla_g_groups" = "g.group",
+                         "hla_supertypes" = "supertype",
+                         "hla_NK_ligands" = "allele.group",
+                         "kir_genes" = "kir.gene",
+                         "hla_kir_interactions" = "hla.kir.interaction",
+                         "term"
+    )
+    test_res <- dplyr::rename(test_res, !!term_name := term)
 
-  expect_error(runMiDAS(object, analysis_type = 1),
-               "analysis_type is not a string \\(a length one character vector\\)."
+
+    expect_equal(as.data.frame(res), as.data.frame(test_res)) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
+  }
+
+  # conditional
+  conditional <- TRUE
+  omnibus <- FALSE
+  th <- 0.1
+  keep <- FALSE
+  experiment_choice <-
+    c(
+      "hla_alleles",
+      # "hla_aa", # TODO
+      "hla_g_groups",
+      "hla_supertypes",
+      "hla_NK_ligands",
+      "kir_genes",
+      "hla_kir_interactions",
+      "hla_divergence"
+    )
+  for (experiment in experiment_choice) {
+    object <- lm(OS_DIED ~ AGE + SEX + term, data = midas)
+    res <- runMiDAS(object,
+                    conditional = conditional,
+                    omnibus = omnibus,
+                    experiment = experiment,
+                    exponentiate = FALSE,
+                    th = th,
+                    keep = keep
+    )
+
+    midas_data <- midasToWide(midas, experiment = experiment)
+    object$call$data <- midas_data
+    test_variables <- rownames(midas[[experiment]])
+    test_res <-
+      analyzeConditionalAssociations(
+        object,
+        variables = test_variables,
+        exponentiate = FALSE,
+        th = th,
+        keep = keep
+      )
+
+    if (typeof(midas[[experiment]]) == "integer") {
+      variables_freq <-
+        MiDAS:::runMiDASGetVarsFreq(
+          midas = midas,
+          experiment = experiment,
+          test_covar = all.vars(formula(object))[1]
+        )
+      test_res <- dplyr::left_join(test_res, variables_freq, by = "term")
+    }
+
+    term_name <- switch (experiment,
+                         "hla_alleles" = "allele",
+                         "hla_aa" = "aa",
+                         "expression_level" = "allele",
+                         "hla_g_groups" = "g.group",
+                         "hla_supertypes" = "supertype",
+                         "hla_NK_ligands" = "allele.group",
+                         "kir_genes" = "kir.gene",
+                         "hla_kir_interactions" = "hla.kir.interaction",
+                         "term"
+    )
+    test_res <- dplyr::rename(test_res, !!term_name := term)
+
+
+    expect_equal(as.data.frame(res), as.data.frame(test_res))
+  }
+
+  # frequency filtration
+  conditional <- FALSE
+  omnibus <- FALSE
+  experiment_choice <-
+    c(
+      "hla_alleles",
+      "hla_supertypes"
+    )
+  lower_frequency_cutoff <- 0.02
+  upper_frequency_cutoff <- 0.06
+  for (experiment in experiment_choice) {
+    object <- lm(OS_DIED ~ AGE + SEX + term, data = midas)
+    res <- runMiDAS(object,
+                    conditional = conditional,
+                    omnibus = omnibus,
+                    experiment = experiment,
+                    lower_frequency_cutoff = lower_frequency_cutoff,
+                    upper_frequency_cutoff = upper_frequency_cutoff,
+                    exponentiate = FALSE
+    )
+
+    midas_filtered <-
+      filterByFrequency(
+        object = midas,
+        experiment = experiment,
+        lower_frequency_cutoff = lower_frequency_cutoff,
+        upper_frequency_cutoff = upper_frequency_cutoff
+      )
+    test_variables <- rownames(midas_filtered[[experiment]])
+    midas_data <- midasToWide(midas_filtered, experiment = experiment)
+    object$call$data <- midas_data
+    test_res <- analyzeAssociations(
+      object = object,
+      variables = test_variables,
+      exponentiate = FALSE
+    )
+
+    if (typeof(midas_filtered[[experiment]]) == "integer") {
+      variables_freq <-
+        runMiDASGetVarsFreq(
+          midas = midas_filtered,
+          experiment = experiment,
+          test_covar = all.vars(formula(object))[1]
+        )
+      test_res <-
+        dplyr::left_join(test_res, variables_freq, by = "term")
+    }
+
+    term_name <- switch (experiment,
+                         "hla_alleles" = "allele",
+                         "hla_aa" = "aa",
+                         "expression_level" = "allele",
+                         "hla_g_groups" = "g.group",
+                         "hla_supertypes" = "supertype",
+                         "hla_NK_ligands" = "allele.group",
+                         "kir_genes" = "kir.gene",
+                         "hla_kir_interactions" = "hla.kir.interaction",
+                         "term"
+    )
+    test_res <- dplyr::rename(test_res, !!term_name := term)
+
+    expect_equal(lapply(res, as.data.frame), lapply(test_res, as.data.frame))
+  }
+
+  #
+  object <- lm(OS_DIED ~ AGE + SEX + term, data = midas)
+
+  expect_error(runMiDAS(list()),
+               "object is required to have the internal OBJECT bit set"
   )
 
-  expect_error(runMiDAS(object, analysis_type = "a"),
-               "analysis_type should be one of \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"hla_kir_interactions\"."
+  fake_object <- list(call = list(formula = 1 ~ 1, data = 1:5))
+  class(fake_object) <- "foo"
+  expect_error(runMiDAS(fake_object),
+               "tidy function for object of class class\\(object\\)\\[1L\\] could not be found." #TODO
   )
 
-  expect_error(runMiDAS(object, analysis_type = "hla_allele", pattern = 1),
-               "pattern is not a string \\(a length one character vector\\) or NULL."
+  fake_object <- object
+  fake_midas <- midas
+  class(fake_midas) <- structure("MultiAssayExperiment", package = "MultiAssayExperiment")
+  fake_object$call$data <- fake_midas
+  expect_error(runMiDAS(fake_object),
+               "object_details\\$data must be an instance of \"MiDAS\"." #TODO
   )
 
-  expect_error(runMiDAS(object, analysis_type = "hla_allele", variables = 1),
-               "variables is not a character vector or NULL."
-  )
+  # validObject test is ommited here
 
-  expect_error(runMiDAS(object, analysis_type = "hla_allele", placeholder = 1),
-               "placeholder is not a string \\(a length one character vector\\)."
-  )
-
+  fake_object <- object
+  fake_object$call$formula <- OS ~ AGE + SEX
   expect_error(
-    runMiDAS(object, analysis_type = "hla_allele", placeholder = "foo"),
-    "placeholder 'foo' could not be found in object's formula"
+    runMiDAS(fake_object),
+    "placeholder 'term' could not be found in object's formula"
   )
 
-  expect_error(runMiDAS(object, analysis_type = "hla_allele", conditional = 1),
+  expect_error(runMiDAS(object, experiment = 1),
+               "experiment is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(runMiDAS(object, experiment = "foo"),
+               "experiment should be one of \"hla_alleles\", \"hla_aa\", \"hla_g_groups\", \"hla_supertypes\", \"hla_NK_ligands\", \"kir_genes\", \"hla_kir_interactions\", \"hla_divergence\"."
+  )
+
+  expect_error(runMiDAS(object, experiment = "hla_alleles", conditional = 1),
                "conditional is not a flag \\(a length one logical vector\\)."
   )
 
-  expect_error(runMiDAS(object, analysis_type = "hla_allele", keep = 1),
-               "keep is not a flag \\(a length one logical vector\\)."
-  )
-
-  expect_error(runMiDAS(object, analysis_type = "hla_allele", variables = "thief"),
-               "thief can not be found in object data"
-  )
-
-  expect_error(runMiDAS(object, analysis_type = "hla_allele", lower_frequency_cutoff = "foo"),
-               "lower_frequency_cutoff is not a number \\(a length one numeric vector\\) or NULL."
-  )
-
-  expect_error(runMiDAS(object, analysis_type = "hla_allele", upper_frequency_cutoff = "foo"),
-               "upper_frequency_cutoff is not a number \\(a length one numeric vector\\) or NULL."
-  )
-
-  expect_error(runMiDAS(object, analysis_type = "hla_allele", correction = NA),
-               "correction is not a string \\(a length one character vector\\)."
-  )
-
-  expect_error(runMiDAS(object, analysis_type = "hla_allele", n_correction = "foo"),
-               "n_correction is not a count \\(a single positive integer\\) or NULL."
-  )
-
-  expect_error(runMiDAS(object, analysis_type = "hla_allele", exponentiate = "NA"),
-               "exponentiate is not a flag \\(a length one logical vector\\)."
-  )
-
-  expect_error(runMiDAS(object, analysis_type = "hla_allele", th = "NA"),
-               "th is not a number \\(a length one numeric vector\\)."
-  )
-
-  expect_error(runMiDAS(object, analysis_type = "hla_allele", rss_th = "NA"),
-               "rss_th is not a number \\(a length one numeric vector\\)."
-  )
-
-  expect_error(runMiDAS(object, analysis_type = "none"),
-               "For analysis type \"none\" variables argument can not be NULL."
-  )
-
-  new_data <- eval(object$call$data)
-  new_data <- rapply(
-    object = new_data,
-    f = function(col) {
-      attr(col, which = "label") <- NULL
-      col
-    },
-    how = "replace"
-  )
-  object2 <- object
-  object2$call$data <- new_data
-  expect_error(runMiDAS(object2, analysis_type = "hla_allele"),
-               "Argument variables = NULL can be used only with labeled variables, make sure to use prepareMiDAS function for data preparation."
+  expect_error(
+    runMiDAS(
+      object,
+      experiment = "hla_alleles",
+      conditional = TRUE,
+      omnibus = 1
+    ),
+    "omnibus is not a flag \\(a length one logical vector\\)."
   )
 
   expect_error(
     runMiDAS(
       object,
-      analysis_type = "hla_allele",
-      lower_frequency_cutoff = Inf,
-      upper_frequency_cutoff = Inf
+      experiment = "hla_alleles",
+      omnibus_groups_filter = 1
     ),
-    "No observations passes filtering criteria. Revisit your choice of 'lower_frequency_cutoff' and 'upper_frequency_cutoff'."
+    "omnibus_groups_filter is not a character."
   )
+
+  expect_error(runMiDAS(object, experiment = "hla_alleles", correction = 1),
+               "correction is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(
+    runMiDAS(
+      object,
+      experiment = "hla_alleles",
+      conditional = TRUE,
+      omnibus = FALSE,
+      n_correction = "foo"
+    ),
+    "n_correction is not a count \\(a single positive integer\\) or NULL."
+  )
+
+  expect_error(
+    runMiDAS(
+      object,
+      experiment = "hla_alleles",
+      conditional = TRUE,
+      omnibus = FALSE,
+      exponentiate = "foo"
+    ),
+    "exponentiate is not a flag \\(a length one logical vector\\)."
+  )
+
+  expect_error(
+    runMiDAS(
+      object,
+      experiment = "hla_divergence",
+      conditional = FALSE,
+      lower_frequency_cutoff = 0.1,
+      upper_frequency_cutoff = 0.8
+    ),
+    "Frequency filtration does not support experiment 'hla_divergence'"
+  )
+
+  expect_error(
+    runMiDAS(
+      object,
+      experiment = "hla_alleles",
+      lower_frequency_cutoff = 0.53,
+      upper_frequency_cutoff = 0.56
+    ),
+    "No variables available for analysis, please revisit your filtration criteria."
+  )
+
 })
 
-test_that("MiDAS data is prepared properly", {
-  rleft_join <- function(init, ..., by = "ID") {
-    Reduce(function(...)
-      dplyr::left_join(..., by = by),
-      x = list(...),
-      init = init)
-  }
-
-  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(hla_calls_file)
-  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
-  covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-  covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-
-  # hla_allele
-  midas_hla_allele <-
-    prepareMiDAS(hla_calls,
-                     pheno,
-                     covar,
-                     analysis_type = "hla_allele",
-                     inheritance_model = "additive")
-  midas_hla_allele_test <-
-    hlaCallsToCounts(hla_calls, inheritance_model = "additive")
-  Hmisc::label(midas_hla_allele_test[-1], self = FALSE) <-
-    rep("hla_allele", ncol(midas_hla_allele_test) - 1)
-  midas_hla_allele_test <- rleft_join(midas_hla_allele_test, pheno, covar)
-  # midas_hla_allele_test$term <- 1
-  expect_equal(subset(midas_hla_allele, select = -term), midas_hla_allele_test)
-
-  # aa_level
-  midas_aa_level <- prepareMiDAS(hla_calls,
-                                     pheno,
-                                     covar,
-                                     analysis_type = "aa_level",
-                                     inheritance_model = "additive")
-  midas_aa_level_test <- hlaToAAVariation(hla_calls)
-  midas_aa_level_test <-
-    aaVariationToCounts(midas_aa_level_test, inheritance_model = "additive")
-  Hmisc::label(midas_aa_level_test[-1], self = FALSE) <-
-    rep("aa_level", ncol(midas_aa_level_test) - 1)
-  midas_aa_level_test <- rleft_join(midas_aa_level_test, pheno, covar)
-  # midas_aa_level_test$term <- 1
-  expect_equal(subset(midas_aa_level, select = -term), midas_aa_level_test)
-
-  # expression_levels
-  midas_expression_levels <- prepareMiDAS(hla_calls,
-                                              pheno,
-                                              covar,
-                                              analysis_type = "expression_level",
-                                              inheritance_model = "additive")
-  expression_dicts <- grep("expression", listMiDASDictionaries(), value = TRUE)
-  midas_expression_levels_test <- Reduce(
-    f = function(...) dplyr::left_join(..., by = "ID"),
-    x = lapply(expression_dicts, function(x) {
-      expr <- hlaToVariable(hla_calls = hla_calls, dictionary = x, na.value = NA)
-      expr$sum <- rowSums(expr[, -1, drop = FALSE])
-      gene <- gsub("_1", "", colnames(expr)[2])
-      expr <- expr[, c("ID", "sum")]
-      colnames(expr) <- c("ID", gene)
-      expr
-    })
-  )
-  Hmisc::label(midas_expression_levels_test[-1], self = FALSE) <-
-    rep("expression_level", ncol(midas_expression_levels_test) - 1)
-  midas_expression_levels_test <-
-    rleft_join(midas_expression_levels_test, pheno, covar)
-  # midas_expression_levels_test$term <- 1
-  expect_equal(subset(midas_expression_levels, select = -term), midas_expression_levels_test)
-
-  # allele_g_group
-  midas_allele_g_group <- prepareMiDAS(hla_calls,
-                                          pheno,
-                                          covar,
-                                          analysis_type = "allele_g_group",
-                                          inheritance_model = "additive")
-  midas_allele_g_group_test <-
-    hlaToVariable(hla_calls, dictionary = "allele_HLA_Ggroup")
-  midas_allele_g_group_test <-
-    hlaCallsToCounts(
-      midas_allele_g_group_test,
-      inheritance_model = "additive",
-      check_hla_format = FALSE
-    )
-  Hmisc::label(midas_allele_g_group_test[-1], self = FALSE) <-
-    rep("allele_g_group", ncol(midas_allele_g_group_test) - 1)
-  midas_allele_g_group_test <- rleft_join(midas_allele_g_group_test, pheno, covar)
-  # midas_allele_g_group_test$term <- 1
-  expect_equal(subset(midas_allele_g_group, select = -term), midas_allele_g_group_test)
-
-  # allele_supertype
-  midas_allele_supertype <- prepareMiDAS(hla_calls,
-                                          pheno,
-                                          covar,
-                                          analysis_type = "allele_supertype",
-                                          inheritance_model = "additive")
-  test_midas_allele_supertype <-
-    hlaToVariable(hla_calls, dictionary = "allele_HLA_supertype")
-  test_midas_allele_supertype <-
-    hlaCallsToCounts(
-      test_midas_allele_supertype,
-      inheritance_model = "additive",
-      check_hla_format = FALSE
-    )
-  Hmisc::label(test_midas_allele_supertype[-1], self = FALSE) <-
-    rep("allele_supertype", ncol(test_midas_allele_supertype) - 1)
-  test_midas_allele_supertype <-
-    rleft_join(test_midas_allele_supertype, pheno, covar)
-  test_midas_allele_supertype <-
-    subset(test_midas_allele_supertype, select = - Unclassified)
-  # test_midas_allele_supertype$term <- 1
-  expect_equal(subset(midas_allele_supertype, select = -term), test_midas_allele_supertype)
-
-  # allele_groups
-  midas_allele_groups <- prepareMiDAS(hla_calls,
-                                              pheno,
-                                              covar,
-                                              analysis_type = "allele_group",
-                                              inheritance_model = "additive")
-  allele_groups_lib <- c("allele_HLA-B_Bw", "allele_HLA_Bw4+A23+A24+A32", "allele_HLA-C_C1-2")
-  test_midas_allele_group <- Reduce(
-    f = function(...) left_join(..., by = "ID"),
-    x = lapply(allele_groups_lib, hlaToVariable, hla_calls = hla_calls)
-  )
-  test_midas_allele_group <-
-    hlaCallsToCounts(
-      test_midas_allele_group,
-      inheritance_model = "additive",
-      check_hla_format = FALSE
-    )
-  Hmisc::label(test_midas_allele_group[-1], self = FALSE) <-
-    rep("allele_group", ncol(test_midas_allele_group) - 1)
-  test_midas_allele_group <-
-    rleft_join(test_midas_allele_group, pheno, covar)
-  # test_midas_allele_group$term <- 1
-  expect_equal(subset(midas_allele_groups, select = -term), test_midas_allele_group)
-
-  # kir_genes
-  kir_path <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
-  kir_counts <- readKirCalls(kir_path, counts = TRUE)
-  midas_kir_genes <- prepareMiDAS(hla_calls,
-                                      pheno,
-                                      covar,
-                                      kir_counts = kir_counts,
-                                      analysis_type = "kir_genes",
-                                      inheritance_model = "additive")
-  test_midas_kir_genes <- kir_counts
-  Hmisc::label(test_midas_kir_genes[-1], self = FALSE) <-
-    rep("kir_genes", ncol(kir_counts) - 1)
-  test_midas_kir_genes <-
-    rleft_join(hla_calls[, 1, drop = FALSE], test_midas_kir_genes, pheno, covar)
-  # test_midas_kir_genes$term <- 1
-  expect_equal(subset(midas_kir_genes, select = -term), test_midas_kir_genes)
-
-  # hla_kir_interactions
-  midas_hla_kir_interactions <- prepareMiDAS(
-    hla_calls,
-    pheno,
-    covar,
-    kir_counts = kir_counts,
-    analysis_type = "hla_kir_interactions",
-    inheritance_model = "additive"
-  )
-  test_midas_hla_kir_interactions <-
-    getHlaKirInteractions(hla_calls = hla_calls, kir_counts = kir_counts)
-  Hmisc::label(test_midas_hla_kir_interactions[-1], self = FALSE) <-
-    rep("hla_kir_interactions", ncol(test_midas_hla_kir_interactions) - 1)
-  test_midas_hla_kir_interactions <-
-    rleft_join(hla_calls[, 1, drop = FALSE],
-               test_midas_hla_kir_interactions,
-               pheno,
-               covar
-    )
-  # test_midas_hla_kir_interactions$term <- 1
-  expect_equal(subset(midas_hla_kir_interactions, select = -term), test_midas_hla_kir_interactions)
-
-  # hla_divergence
-  midas_hla_divergence <- prepareMiDAS(
-    hla_calls,
-    pheno,
-    covar,
-    analysis_type = "hla_divergence",
-    inheritance_model = "additive"
-  )
-  test_midas_hla_divergence <-hlaCallsGranthamDistance(
-    hla_calls = hla_calls,
-    genes = c("A", "B", "C")
-  )
-  test_midas_hla_divergence$ABC_avg <-
-    rowMeans(test_midas_hla_divergence[-1])
-  colnames(test_midas_hla_divergence)[-1] <-
-    paste0(colnames(test_midas_hla_divergence[-1]), "_divergence")
-  label(test_midas_hla_divergence[-1], self = FALSE) <- rep(
-    x = "hla_divergence",
-    ncol(test_midas_hla_divergence) - 1
-  )
-  test_midas_hla_divergence <-
-    rleft_join(hla_calls[, 1, drop = FALSE],
-               test_midas_hla_divergence,
-               pheno,
-               covar
-    )
-  # test_midas_hla_divergence$term <- 1
-  expect_equal(subset(midas_hla_divergence, select = -term), test_midas_hla_divergence)
-
-  # custom
-  midas_custom <- prepareMiDAS(hla_calls,
-                                   pheno,
-                                   covar,
-                                   analysis_type = "custom",
-                                   inheritance_model = "additive")
-  midas_custom_test <- rleft_join(hla_calls, pheno, covar)
-  gene_idx <-
-    ! colnames(midas_custom_test) %in% c("ID", "OS", "OS_DIED", "AGE", "SEX")
-  Hmisc::label(midas_custom_test[, gene_idx], self = FALSE) <-
-    rep("custom", sum(gene_idx))
-  # midas_custom_test$term <- 1
-  expect_equal(subset(midas_custom, select = -term), midas_custom_test)
-
-  # check more analysis types at once
-  midas_multiple <- prepareMiDAS(hla_calls,
-                                     pheno,
-                                     covar,
-                                     kir_counts = kir_counts,
-                                     analysis_type = c("hla_allele", "aa_level", "expression_level", "allele_g_group", "allele_supertype", "allele_group", "kir_genes", "hla_divergence", "custom"),
-                                     inheritance_model = "additive")
-  midas_multiple_test <-
-    rleft_join(
-      midas_hla_allele,
-      midas_aa_level,
-      midas_expression_levels,
-      midas_allele_g_group,
-      midas_allele_supertype,
-      midas_allele_groups,
-      midas_kir_genes,
-      midas_hla_divergence,
-      midas_custom,
-      by = c("ID", "OS", "OS_DIED", "AGE", "SEX")
-    )
-  # order of columns is different a bit expensive but just sort them
-  midas_multiple <- midas_multiple[, order(colnames(midas_multiple))]
-  midas_multiple_test <-
-    midas_multiple_test[, order(colnames(midas_multiple_test))]
-  midas_multiple_test[, grepl("term", colnames(midas_multiple_test))] <- NULL
-  # midas_multiple_test$term <- 1
-  expect_equal(subset(midas_multiple, select = -term), midas_multiple_test)
-
-  # test for checkHlaCallsFormat are ommitted here
-
-  expect_error(
-    prepareMiDAS(hla_calls, analysis_type = 1),
-    "analysis_type is not a character vector"
-  )
-
-  expect_error(
-    prepareMiDAS(hla_calls, analysis_type = "foo"),
-    "analysis_type should match values \"hla_allele\", \"aa_level\", \"expression_level\", \"allele_g_group\", \"allele_supertype\", \"allele_group\", \"kir_genes\", \"hla_kir_interactions\", \"hla_divergence\", \"custom\"."
-  )
-
-  expect_error(
-    prepareMiDAS(hla_calls, analysis_type = "hla_allele", inheritance_model = 1),
-    "inheritance_model is not a string \\(a length one character vector\\)."
-  )
-
-  expect_error(
-    prepareMiDAS(hla_calls, analysis_type = "hla_allele", inheritance_model = "bar"),
-    "inheritance_model should be one of \"dominant\", \"recessive\", \"additive\"."
-  )
-
-  expect_error(
-    prepareMiDAS(hla_calls, analysis_type = "hla_allele", indels = "no"),
-    "indels is not a flag \\(a length one logical vector\\)."
-  )
-
-  expect_error(
-    prepareMiDAS(hla_calls, analysis_type = "hla_allele", unkchar = "nope"),
-    "unkchar is not a flag \\(a length one logical vector\\)."
-  )
-
-  # checkAdditionalData on ... argument are ommitted here
-
-  expect_error(
-    prepareMiDAS(hla_calls[, c("ID", "DMA_1", "DMA_2")], analysis_type = "expression_level"),
-    "no expression levels were found for input hla_calls"
-  )
-
-  expect_error(
-    prepareMiDAS(hla_calls[, c("ID", "DOB_1", "DOB_2")], analysis_type = "allele_group"),
-    "no allele could be assigned to allele groups for input hla_calls"
-  )
-
-  expect_error(
-    prepareMiDAS(hla_calls, analysis_type = "kir_genes"),
-    "\"kir_genes\" analysis type requires kir_counts argument to be specified"
-  )
-
-  expect_error(
-    prepareMiDAS(hla_calls, analysis_type = "hla_kir_interactions"),
-    "\"hla_kir_interactions\" analysis type requires kir_counts argument to be specified"
-  )
-})
-
-test_that("amino acid omnibus test works fine", {
+test_that("omnibusTest", {
   hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(hla_calls_file)
   pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
   pheno <- read.table(pheno_file, header = TRUE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
   covar <- read.table(covar_file, header = TRUE)
-  midas_data <- prepareMiDAS(hla_calls, pheno, covar, analysis_type = "aa_level")
+  coldata <- dplyr::left_join(pheno, covar, by = "ID")
+  midas <-
+    prepareMiDAS(
+      hla_calls,
+      colData = coldata,
+      inheritance_model = "dominant",
+      experiment = "hla_aa"
+    )
+  midas_data <- midasToWide(midas, experiment = "hla_aa")
   object <- lm(OS ~ AGE + SEX + term, data = midas_data)
-  omnibus_res <- aaPosOmnibusTest(object, aa_pos = c("A_17", "A_90", "A_166"))
+  omnibus_groups <- list(
+    A_77 = c("A_77_D", "A_77_N", "A_77_S"),
+    A_79 = c("A_79_G", "A_79_R")
+  )
+  omnibus_res <- omnibusTest(object, omnibus_groups)
 
-  obj_A17 <- lm(OS ~ AGE + SEX + A_17_R + A_17_S + term, data = midas_data)
-  obj_A90 <- lm(OS ~ AGE + SEX + A_90_A + A_90_D + term, data = midas_data)
-  obj_A166 <- lm(OS ~ AGE + SEX + A_166_E + A_166_D + term, data = midas_data)
-  LRT <- lapply(list(obj_A17, obj_A90, obj_A166), LRTest, mod0 = object)
+  obj_A77 <- lm(OS ~ AGE + SEX + A_77_D + A_77_N + A_77_S, data = midas_data)
+  obj_A79 <- lm(OS ~ AGE + SEX + A_79_G + A_79_R , data = midas_data)
+  LRT <-
+    lapply(list(obj_A77, obj_A79),
+           LRTest,
+           mod0 = lm(OS ~ AGE + SEX + 0, data = midas_data))
   omnibus_res_test <- data.frame(
-    aa_pos = c("A_17", "A_90", "A_166"),
-    residues = c("R, S", "A, D", "E, D"),
-    d.f. = c(1, 1, 1),
+    group = c("A_77", "A_79"),
+    term = c("A_77_D, A_77_N, A_77_S", "A_79_G, A_79_R"),
+    dof = sapply(LRT, `[[`, "dof"),
+    logLik = sapply(LRT, `[[`, "logLik"),
     statistic = sapply(LRT, `[[`, "statistic"),
     p.value = sapply(LRT, `[[`, "p.value"),
     p.adjusted = p.adjust(sapply(LRT, `[[`, "p.value"), method = "bonferroni"),
     stringsAsFactors = FALSE
   )
   expect_equal(omnibus_res, omnibus_res_test)
-
-  # Tests for checkStatisticalModel errors are ommitted here
-
-  expect_error(aaPosOmnibusTest(object, aa_pos = 1:5),
-               "aa_pos is not a character vector"
-  )
-
-  expect_error(
-    aaPosOmnibusTest(object, c("A_17", "A_90", "A_166"), correction = 1),
-    "correction is not a string \\(a length one character vector\\)."
-  )
-
-  expect_error(
-    aaPosOmnibusTest(object, c("A_17", "A_90", "A_166"), n_correction = 1.5),
-    "n_correction is not a count \\(a single positive integer\\) or NULL."
-  )
-
-  expect_error(
-    aaPosOmnibusTest(object, "FOO_2"),
-    "amino acid position FOO_2 could not be found."
-  )
-
-  expect_error(
-    aaPosOmnibusTest(object, c("A_17", "A_90", "A_166"), n_correction = 1),
-    "n_correction must be at least 3."
-  )
 })

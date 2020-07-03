@@ -16,8 +16,8 @@ others.}
 tests.}
 
 \item{placeholder}{String specifying term to substitute with value from
-\code{x}. Can be used only if \code{x} is a string. Ignored if set to
-\code{NULL}.}
+\code{x}. If more than one variable is passed in \code{x} all of them will
+be bracketed. Ignored if set to \code{NULL}.}
 
 \item{correction}{String specifying multiple testing correction method. See
 details for further information.}
@@ -58,6 +58,7 @@ more significant variables based on a self-defined threshold.
 Selection criteria is the p-value from the test on coefficients values.
 }
 \examples{
+\dontrun{
 library("survival")
 hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 hla_calls <- readHlaCalls(hla_calls_file)
@@ -68,7 +69,7 @@ covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
 midas_data <- prepareMiDAS(hla_calls = hla_calls,
                              pheno = pheno,
                              covar = covar,
-                             analysis_type = "hla_allele",
+                             experiment = "hla_alleles",
                              inheritance_model = "additive"
 )
 
@@ -79,12 +80,13 @@ analyzeConditionalAssociations(object,
                             th = 0.05,
                             rss_th = 1e-07
 )
+}
 
 }
 \seealso{
 \code{\link[stats]{p.adjust}}, \code{\link[broom]{tidy}}
 
 Other MiDAS statistical functions: \code{\link{analyzeAssociations}},
-  \code{\link{prepareMiDAS}}, \code{\link{runMiDAS}}
+  \code{\link{runMiDAS}}
 }
 \concept{MiDAS statistical functions}

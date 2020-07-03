@@ -21,18 +21,23 @@ values in choices.
 }
 \seealso{
 Other assert functions: \code{\link{checkAdditionalData}},
+  \code{\link{checkColDataFormat}},
   \code{\link{checkHlaCallsFormat}},
-  \code{\link{checkKirCountsFormat}},
+  \code{\link{checkKirCallsFormat}},
   \code{\link{checkStatisticalModel}},
   \code{\link{colnamesMatches}},
+  \code{\link{functionExists}},
   \code{\link{hasTidyMethod}},
   \code{\link{isCharacterOrNULL}},
-  \code{\link{isClassOrNULL}}, \code{\link{isCountOrNULL}},
+  \code{\link{isClassOrNULL}}, \code{\link{isClass}},
+  \code{\link{isCountOrNULL}},
   \code{\link{isCountsOrZeros}},
+  \code{\link{isExperimentCountsOrZeros}},
   \code{\link{isFlagOrNULL}}, \code{\link{isNumberOrNULL}},
   \code{\link{isStringOrNULL}},
   \code{\link{isTRUEorFALSE}},
   \code{\link{objectHasPlaceholder}},
-  \code{\link{stringMatches}}
+  \code{\link{stringMatches}},
+  \code{\link{validateFrequencyCutoffs}}
 }
 \concept{assert functions}
