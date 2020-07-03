@@ -493,7 +493,7 @@ test_that("Experiments are filtered correctly", {
     kir_calls = kir_calls,
     colData = pheno,
     inheritance_model = "additive",
-    experiment = c("hla_alleles", "allele_supertype", "kir_genes", "hla_divergence")
+    experiment = c("hla_alleles", "hla_supertypes", "kir_genes", "hla_divergence")
   )
 
   # filtering works as expected for fractions
