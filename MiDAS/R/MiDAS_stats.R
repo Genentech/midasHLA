@@ -105,11 +105,6 @@ analyzeAssociations <- function(object,
     n = nc
   )
 
-  #  This covariates were added for consistiency with conditional analyze, now however that we are filtering covariates there it doesn't make much sense to keep those?
-  #  covariates <- formula(object)[[3]]
-  #  covariates <- deparse(covariates)
-  #  results$covariates <- covariates
-
   if (nrow(results) == 0) {
     warn("None of the variables could be tested. Returning empty table.")
   }
