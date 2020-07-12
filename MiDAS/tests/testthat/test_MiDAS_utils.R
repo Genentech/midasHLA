@@ -681,3 +681,67 @@ test_that("checkKirGenesFormat", {
   expect_equal(checkKirGenesFormat(genes), c(TRUE, TRUE))
   expect_equal(checkKirGenesFormat(LETTERS), rep(FALSE, length(LETTERS)))
 })
+
+test_that("iterativeLRT", {
+  MiDASdat <-
+    prepareMiDAS(
+      hla_calls = MiDAS_tut_HLA[, 1:3],
+      colData = MiDAS_tut_pheno,
+      inheritance_model = "dominant",
+      experiment = "hla_aa"
+    )
+  MiDASdat <- filterByOmnibusGroups(MiDASdat, "hla_aa", c("A_29", "A_44", "A_65"))
+  omnibus_groups <- getOmnibusGroups(MiDASdat, "hla_aa")
+  placeholder <- getPlaceholder(MiDASdat)
+  MiDASdat <- as.data.frame(MiDASdat)
+  object <- lm(disease ~ outcome + term, data = MiDASdat)
+
+  res <- iterativeLRT(object, placeholder, omnibus_groups)
+  test_res <- data.frame(
+    group = c("A_29", "A_44", "A_65"),
+    term = c("A_29_D, A_29_A", "A_44_R, A_44_K", "A_65_R, A_65_G"),
+    dof = c(1, 3, 3),
+    logLik = c(16365.357381683, 16365.5053334948, 16366.7408713989),
+    statistic = c(32730.714763366, 32731.0106669896, 32733.4817427978),
+    p.value = c(0, 0, 0),
+    stringsAsFactors = FALSE
+  )
+  expect_equal(res, test_res)
+
+  MiDASdat$A_29_A <- NA
+  res <- iterativeLRT(object, placeholder, omnibus_groups)
+  test_res <- data.frame(
+    group = c("A_29", "A_44", "A_65"),
+    term = c("A_29_D, A_29_A", "A_44_R, A_44_K", "A_65_R, A_65_G"),
+    dof = c(NA, 3, 3),
+    logLik = c(NA, 16365.5053334948, 16366.7408713989),
+    statistic = c(NA, 32731.0106669896, 32733.4817427978),
+    p.value = c(NA, 0, 0),
+    stringsAsFactors = FALSE
+  )
+  expect_equal(res, test_res)
+})
+
+test_that("iterativeModel", {
+  MiDASdat <-
+    prepareMiDAS(
+      hla_calls = MiDAS_tut_HLA[, 1:3],
+      colData = MiDAS_tut_pheno,
+      inheritance_model = "dominant",
+      experiment = "hla_alleles"
+    )
+  placeholder <- getPlaceholder(MiDASdat)
+  variables <- rownames(MiDASdat)[["hla_alleles"]][1:3]
+  MiDASdat <- as.data.frame(MiDASdat)
+  object <- lm(disease ~ outcome + term, data = MiDASdat)
+
+  res <- iterativeModel(object, placeholder, variables)
+  res_test <- dplyr::tibble(
+    term = c("A*01:01:01", "A*01:01:41", "A*01:01:47"),
+    estimate = c(-2.50126952397595e-16, -4.22559004808231e-16, NA),
+    std.error = c(4.79744241693974e-16, 4.45423469957002e-15, NA),
+    statistic = c(-0.521375621965567, -0.0948668027863513, NA),
+    p.value = c(0.60233737113293, 0.924458860404277, NA)
+  )
+  expect_equal(as.data.frame(res), as.data.frame(res_test))
+})

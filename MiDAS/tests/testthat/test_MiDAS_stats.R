@@ -300,6 +300,7 @@ test_that("runMiDAS", {
                          "term"
     )
     test_res <- dplyr::rename(test_res, !!term_name := term)
+    test_res <- dplyr::arrange(test_res, p.value)
 
 
     expect_equal(as.data.frame(res), as.data.frame(test_res)) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
@@ -366,6 +367,7 @@ test_that("runMiDAS", {
                          "term"
     )
     test_res <- dplyr::rename(test_res, !!term_name := term)
+    test_res <- dplyr::arrange(test_res, p.value)
 
 
     expect_equal(as.data.frame(res), as.data.frame(test_res))
@@ -431,6 +433,7 @@ test_that("runMiDAS", {
                          "term"
     )
     test_res <- dplyr::rename(test_res, !!term_name := term)
+    test_res <- dplyr::arrange(test_res, p.value)
 
     expect_equal(lapply(res, as.data.frame), lapply(test_res, as.data.frame))
   }

@@ -1612,3 +1612,119 @@ checkKirGenesFormat <- function(genes) {
   is_correct <- stri_detect_regex(genes, pattern)
   return(is_correct)
 }
+
+#' Iterative likelihood ratio test
+#'
+#' \code{iterativeLRT} performs likelihood ratio test in an iterative manner
+#' over groups of variables given in \code{omnibus_groups}.
+#'
+#' @inheritParams updateModel
+#' @inheritParams omnibusTest
+#'
+#' @return Data.frame containing summarised likelihood ratio test results.
+#'
+#' @importFrom dplyr bind_rows
+#'
+iterativeLRT <- function(object, placeholder, omnibus_groups) {
+  mod0 <- updateModel(
+    object = object,
+    x = "0",
+    placeholder = placeholder,
+    backquote = FALSE
+  )
+  results <- lapply(
+    X = omnibus_groups,
+    FUN = function(x) tryCatch(
+      expr = LRTest(
+        mod0,
+        updateModel(
+          object = object,
+          x = x,
+          placeholder = placeholder,
+          collapse = " + ",
+          backquote = TRUE
+        )
+      ),
+      error = function(e) {
+        msg <- sprintf(
+          "Error occurred while processing variables %s:\n\t%s",
+          toString(x), # output aa_pos in err message
+          conditionMessage(e)
+        )
+        warn(msg)
+        failed_result <- data.frame(
+          term = toString(x),
+          dof = NA,
+          logLik = NA,
+          statistic = NA,
+          p.value = NA,
+          stringsAsFactors = FALSE
+        )
+
+        return(failed_result)
+      }
+    )
+  )
+  results <- bind_rows(results, .id = "group")
+
+  return(results)
+}
+
+#' Iteratively evaluate model for different variables
+#'
+#' @inheritParams updateModel
+#' @inheritParams analyzeAssociations
+#'
+#' @return Tibble containing per variable summarised statistics.
+#'
+#' @importFrom dplyr bind_rows tibble
+#' @importFrom broom tidy
+#'
+iterativeModel <- function(object,
+                           placeholder,
+                           variables,
+                           exponentiate = FALSE) {
+  results <- lapply(
+    X = variables,
+    FUN = function(x) tryCatch(
+      expr = updateModel(
+        object = object,
+        x = x,
+        placeholder = placeholder,
+        backquote = TRUE,
+        collapse = " + "
+      ),
+      error = function(e) {
+        msg <- sprintf(
+          "Error occurred while processing variable %s:\n\t%s",
+          x,
+          conditionMessage(e)
+        )
+        warn(msg)
+
+        return(object)
+      }
+    )
+  )
+  results <- lapply(results, tidy, exponentiate = exponentiate)
+  results <- bind_rows(results)
+
+  # drop covariates
+  results$term <- gsub("`", "", results$term)
+  results <- results[results$term %in% variables, ]
+
+  # add entries for variables dropped by tidy due to NA estimate
+  mask <- ! variables %in% results$term
+  if (any(mask)) {
+    failed_results <- tibble(
+      term = variables[mask],
+      estimate = rep(NA, sum(mask)),
+      std.error = rep(NA, sum(mask)),
+      statistic = rep(NA, sum(mask)),
+      p.value = rep(NA, sum(mask))
+    )
+    results <- bind_rows(results, failed_results)
+  }
+
+  return(results)
+}

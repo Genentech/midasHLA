@@ -92,33 +92,7 @@ analyzeAssociations <- function(object,
     isTRUEorFALSE(exponentiate)
   )
 
-  results <- lapply(
-    X = variables,
-    FUN = function(x) tryCatch(
-      expr = updateModel(
-        object = object,
-        x = x,
-        placeholder = placeholder,
-        backquote = TRUE,
-        collapse = " + "
-      ),
-      error = function(e) {
-        msg <- sprintf(
-          "Error occurred while processing variable %s:\n\t%s",
-          x,
-          conditionMessage(e)
-        )
-        warn(msg)
-
-        return(object)
-      }
-    )
-  )
-
-  results <- lapply(results, tidy, exponentiate = exponentiate)
-  results <- bind_rows(results)
-  results$term <- gsub("`", "", results$term)
-  results <- results[results$term %in% variables, ]
+  results <- iterativeModel(object, placeholder, variables, exponentiate)
 
   nc <- ifelse(is.null(n_correction), length(results$p.value), n_correction)
   assert_that(
@@ -130,11 +104,6 @@ analyzeAssociations <- function(object,
     method = correction,
     n = nc
   )
-
-  #  This covariates were added for consistiency with conditional analyze, now however that we are filtering covariates there it doesn't make much sense to keep those?
-  #  covariates <- formula(object)[[3]]
-  #  covariates <- deparse(covariates)
-  #  results$covariates <- covariates
 
   if (nrow(results) == 0) {
     warn("None of the variables could be tested. Returning empty table.")
@@ -247,33 +216,7 @@ analyzeConditionalAssociations <- function(object,
   i <- 1
 
   while (length(new_variables) > 0) {
-    results <- lapply(
-      X = new_variables,
-      FUN = function(x) tryCatch(
-        expr = updateModel(
-          object = object,
-          x = x,
-          placeholder = placeholder,
-          backquote = TRUE,
-          collapse = " + "
-        ),
-        error = function(e) {
-          msg <- sprintf(
-            "Error occurred while processing variable %s:\n\t%s",
-            x,
-            conditionMessage(e)
-          )
-          warn(msg)
-
-          return(object)
-        }
-      )
-    )
-    results <- lapply(results, tidy, exponentiate = exponentiate)
-    results <- bind_rows(results)
-
-    mask_new_vars <- backquote(results[["term"]]) %in% backquote(new_variables)
-    results <- results[mask_new_vars, ]
+    results <- iterativeModel(object, placeholder, new_variables, exponentiate)
 
     nc <- ifelse(is.null(n_correction), length(results$p.value), n_correction)
     assert_that(
@@ -297,7 +240,7 @@ analyzeConditionalAssociations <- function(object,
 
     object <- updateModel(object,
                           results$term[i_min],
-                          backquote = FALSE,
+                          backquote = TRUE,
                           collapse = " + "
     )
 
@@ -357,38 +300,7 @@ omnibusTest <- function(object,
                         placeholder = "term",
                         correction = "bonferroni",
                         n_correction = NULL) {
-  mod0 <- updateModel(
-    object = object,
-    x = "0",
-    placeholder = placeholder,
-    backquote = FALSE
-  )
-  results <- lapply(
-    X = omnibus_groups,
-    FUN = function(x) tryCatch(
-      expr = LRTest(
-        mod0,
-        updateModel(
-          object = object,
-          x = x,
-          placeholder = placeholder,
-          collapse = " + ",
-          backquote = TRUE
-        )
-      ),
-      error = function(e) {
-        msg <- sprintf(
-          "Error occurred while processing variables %s:\n\t%s",
-          toString(x), # output aa_pos in err message
-          conditionMessage(e)
-        )
-        warn(msg)
-
-        return(object)
-      }
-    )
-  )
-  results <- bind_rows(results, .id = "group")
+  results <- iterativeLRT(object, placeholder, omnibus_groups)
 
   nc <- ifelse(is.null(n_correction), length(results$p.value), n_correction)
   assert_that(
@@ -568,7 +480,7 @@ runMiDAS <- function(object,
 #'   experiment.
 #'
 #' @importFrom assertthat assert_that
-#' @importFrom dplyr rename
+#' @importFrom dplyr arrange rename
 #' @importFrom rlang call_modify !! :=
 #'
 runMiDAS_linear <- function(call,
@@ -628,7 +540,8 @@ runMiDAS_linear <- function(call,
                        "hla_kir_interactions" = "hla.kir.interaction",
                        "term"
   )
-  results <- rename(results, !! term_name := .data$term)
+  results <- rename(results, !! term_name := .data$term) %>%
+    arrange(.data$p.value)
 
   return(results)
 }
@@ -649,7 +562,7 @@ runMiDAS_linear <- function(call,
 #' @inheritParams analyzeConditionalAssociations
 #'
 #' @importFrom assertthat assert_that
-#' @importFrom dplyr rename bind_rows
+#' @importFrom dplyr arrange rename bind_rows
 #' @importFrom rlang call_modify !! :=
 #'
 runMiDAS_conditional <- function(call,
@@ -718,7 +631,8 @@ runMiDAS_conditional <- function(call,
               ),
               by = "term"
             )
-          rename(.data = x, !! term_name := .data$term)
+          rename(.data = x, !! term_name := .data$term) %>%
+            arrange(p.value)
         }
       )
     } else {
@@ -732,7 +646,8 @@ runMiDAS_conditional <- function(call,
           ),
           by = "term"
         )
-      results <- rename(results, !! term_name := .data$term)
+      results <- rename(results, !! term_name := .data$term) %>%
+        arrange(.data$p.value)
     }
   }
 
@@ -813,7 +728,8 @@ runMiDAS_linear_omnibus <- function(call,
       .data$statistic,
       .data$p.value,
       .data$p.adjusted
-    )
+    ) %>%
+    arrange(.data$p.value)
 
   return(results)
 }
@@ -832,7 +748,7 @@ runMiDAS_linear_omnibus <- function(call,
 #' @param object_details TODO
 #'
 #' @importFrom assertthat assert_that is.number
-#' @importFrom dplyr as_tibble mutate select
+#' @importFrom dplyr arrange as_tibble mutate select
 #' @importFrom magrittr %>%
 #' @importFrom stats formula
 #' @importFrom rlang call_modify !! :=
@@ -948,7 +864,7 @@ runMiDAS_conditional_omnibus <- function(call,
   )
 
   .formatResults <- function(df) {
-    df %>$%
+    df %>%
       as_tibble() %>%
       mutate(term = gsub(term_prefix, "", .data$term)) %>%
       select(
@@ -958,7 +874,8 @@ runMiDAS_conditional_omnibus <- function(call,
         .data$statistic,
         .data$p.value,
         .data$p.adjusted
-      )
+      ) %>%
+      arrange(.data$p.value)
   }
   if (is.list(results)) {
     results <- lapply(results, .formatResults)
