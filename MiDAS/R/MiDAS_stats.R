@@ -480,7 +480,7 @@ runMiDAS <- function(object,
 #'   experiment.
 #'
 #' @importFrom assertthat assert_that
-#' @importFrom dplyr rename
+#' @importFrom dplyr arrange rename
 #' @importFrom rlang call_modify !! :=
 #'
 runMiDAS_linear <- function(call,
@@ -540,7 +540,8 @@ runMiDAS_linear <- function(call,
                        "hla_kir_interactions" = "hla.kir.interaction",
                        "term"
   )
-  results <- rename(results, !! term_name := .data$term)
+  results <- rename(results, !! term_name := .data$term) %>%
+    arrange(.data$p.value)
 
   return(results)
 }
@@ -561,7 +562,7 @@ runMiDAS_linear <- function(call,
 #' @inheritParams analyzeConditionalAssociations
 #'
 #' @importFrom assertthat assert_that
-#' @importFrom dplyr rename bind_rows
+#' @importFrom dplyr arrange rename bind_rows
 #' @importFrom rlang call_modify !! :=
 #'
 runMiDAS_conditional <- function(call,
@@ -630,7 +631,8 @@ runMiDAS_conditional <- function(call,
               ),
               by = "term"
             )
-          rename(.data = x, !! term_name := .data$term)
+          rename(.data = x, !! term_name := .data$term) %>%
+            arrange(p.value)
         }
       )
     } else {
@@ -644,7 +646,8 @@ runMiDAS_conditional <- function(call,
           ),
           by = "term"
         )
-      results <- rename(results, !! term_name := .data$term)
+      results <- rename(results, !! term_name := .data$term) %>%
+        arrange(.data$p.value)
     }
   }
 
@@ -725,7 +728,8 @@ runMiDAS_linear_omnibus <- function(call,
       .data$statistic,
       .data$p.value,
       .data$p.adjusted
-    )
+    ) %>%
+    arrange(.data$p.value)
 
   return(results)
 }
@@ -744,7 +748,7 @@ runMiDAS_linear_omnibus <- function(call,
 #' @param object_details TODO
 #'
 #' @importFrom assertthat assert_that is.number
-#' @importFrom dplyr as_tibble mutate select
+#' @importFrom dplyr arrange as_tibble mutate select
 #' @importFrom magrittr %>%
 #' @importFrom stats formula
 #' @importFrom rlang call_modify !! :=
@@ -860,7 +864,7 @@ runMiDAS_conditional_omnibus <- function(call,
   )
 
   .formatResults <- function(df) {
-    df %>$%
+    df %>%
       as_tibble() %>%
       mutate(term = gsub(term_prefix, "", .data$term)) %>%
       select(
@@ -870,7 +874,8 @@ runMiDAS_conditional_omnibus <- function(call,
         .data$statistic,
         .data$p.value,
         .data$p.adjusted
-      )
+      ) %>%
+      arrange(.data$p.value)
   }
   if (is.list(results)) {
     results <- lapply(results, .formatResults)
