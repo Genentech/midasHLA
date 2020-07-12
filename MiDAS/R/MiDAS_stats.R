@@ -92,33 +92,7 @@ analyzeAssociations <- function(object,
     isTRUEorFALSE(exponentiate)
   )
 
-  results <- lapply(
-    X = variables,
-    FUN = function(x) tryCatch(
-      expr = updateModel(
-        object = object,
-        x = x,
-        placeholder = placeholder,
-        backquote = TRUE,
-        collapse = " + "
-      ),
-      error = function(e) {
-        msg <- sprintf(
-          "Error occurred while processing variable %s:\n\t%s",
-          x,
-          conditionMessage(e)
-        )
-        warn(msg)
-
-        return(object)
-      }
-    )
-  )
-
-  results <- lapply(results, tidy, exponentiate = exponentiate)
-  results <- bind_rows(results)
-  results$term <- gsub("`", "", results$term)
-  results <- results[results$term %in% variables, ]
+  results <- iterativeModel(object, placeholder, variables, exponentiate)
 
   nc <- ifelse(is.null(n_correction), length(results$p.value), n_correction)
   assert_that(
@@ -247,33 +221,7 @@ analyzeConditionalAssociations <- function(object,
   i <- 1
 
   while (length(new_variables) > 0) {
-    results <- lapply(
-      X = new_variables,
-      FUN = function(x) tryCatch(
-        expr = updateModel(
-          object = object,
-          x = x,
-          placeholder = placeholder,
-          backquote = TRUE,
-          collapse = " + "
-        ),
-        error = function(e) {
-          msg <- sprintf(
-            "Error occurred while processing variable %s:\n\t%s",
-            x,
-            conditionMessage(e)
-          )
-          warn(msg)
-
-          return(object)
-        }
-      )
-    )
-    results <- lapply(results, tidy, exponentiate = exponentiate)
-    results <- bind_rows(results)
-
-    mask_new_vars <- backquote(results[["term"]]) %in% backquote(new_variables)
-    results <- results[mask_new_vars, ]
+    results <- iterativeModel(object, placeholder, new_variables, exponentiate)
 
     nc <- ifelse(is.null(n_correction), length(results$p.value), n_correction)
     assert_that(
@@ -297,7 +245,7 @@ analyzeConditionalAssociations <- function(object,
 
     object <- updateModel(object,
                           results$term[i_min],
-                          backquote = FALSE,
+                          backquote = TRUE,
                           collapse = " + "
     )
 
@@ -357,38 +305,7 @@ omnibusTest <- function(object,
                         placeholder = "term",
                         correction = "bonferroni",
                         n_correction = NULL) {
-  mod0 <- updateModel(
-    object = object,
-    x = "0",
-    placeholder = placeholder,
-    backquote = FALSE
-  )
-  results <- lapply(
-    X = omnibus_groups,
-    FUN = function(x) tryCatch(
-      expr = LRTest(
-        mod0,
-        updateModel(
-          object = object,
-          x = x,
-          placeholder = placeholder,
-          collapse = " + ",
-          backquote = TRUE
-        )
-      ),
-      error = function(e) {
-        msg <- sprintf(
-          "Error occurred while processing variables %s:\n\t%s",
-          toString(x), # output aa_pos in err message
-          conditionMessage(e)
-        )
-        warn(msg)
-
-        return(object)
-      }
-    )
-  )
-  results <- bind_rows(results, .id = "group")
+  results <- iterativeLRT(object, placeholder, omnibus_groups)
 
   nc <- ifelse(is.null(n_correction), length(results$p.value), n_correction)
   assert_that(
