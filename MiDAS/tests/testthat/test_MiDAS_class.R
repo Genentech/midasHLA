@@ -1,37 +1,20 @@
 context("MiDAS class")
 
 test_that("MiDAS object is valid", {
-  rleft_join <- function(init, ..., by = "ID") {
-    df <- Reduce(function(...)
-      dplyr::left_join(..., by = by),
-      x = list(...),
-      init = init)
-    rownames(df) <- df[[by]]
-    df
-  }
-
-  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(hla_calls_file)
-
-  kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-  kir_calls <- readKPICalls(kir_calls_file)
-
-  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
-  covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-  covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-  phenotype <- rleft_join(pheno, covar)
+  pheno <- MiDAS_tut_pheno
+  rownames(pheno) <- pheno$ID
+  pheno$term <- runif(nrow(pheno))
 
   midas <-
     MultiAssayExperiment(
       experiments = ExperimentList(
         list(
-          hla_calls = dfToExperimentMat(hla_calls),
-          kir_calls = dfToExperimentMat(kir_calls)
+          hla_calls = dfToExperimentMat(MiDAS_tut_HLA),
+          kir_calls = dfToExperimentMat(MiDAS_tut_KIR)
         )
       ),
-      colData = phenotype,
-      metadata = list(inheritance_model = "dominant")
+      colData = pheno,
+      metadata = list(placeholder = "term")
     )
   class(midas) <- structure("MiDAS", package = "MiDAS")
 
@@ -42,51 +25,32 @@ test_that("MiDAS object is valid", {
     "MiDAS object must contain hla_calls or kir_calls experiment"
   )
 
-  # unit tests of checkHlaCalls and checkKirCalls functions are ommited here
-
-  no_inheritance_midas <- midas
-  metadata(no_inheritance_midas)$inheritance_model <- NULL
+  bad_placeholder <- midas
+  S4Vectors::metadata(bad_placeholder)$placeholder <- 1
   expect_error(
-    validObject(no_inheritance_midas),
-    "inheritance_model is not a string \\(a length one character vector\\)."
+    validObject(bad_placeholder),
+    "placeholder is not a string \\(a length one character vector\\)."
   )
 
-  bad_inheritance_midas <- midas
-  metadata(bad_inheritance_midas)$inheritance_model <- "foo"
+  bad_placeholder <- midas
+  S4Vectors::metadata(bad_placeholder)$placeholder <- "A_1"
   expect_error(
-    validObject(bad_inheritance_midas),
-    "inheritance_model should be one of \"additive\", \"dominant\", \"recessive\"."
-  )
-})
-
-test_that("MiDAS object's inheritance model is extracted correctly", {
-  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(hla_calls_file)
-
-  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
-
-  midas <- prepareMiDAS(
-    hla_calls = hla_calls,
-    colData = pheno,
-    inheritance_model = "additive",
-    experiment = "hla_alleles"
+    validObject(bad_placeholder),
+    "Placeholder 'A_1' is used in one of the experiments"
   )
 
-  expect_equal(getInheritanceModel(midas), "additive")
+  bad_placeholder <- midas
+  S4Vectors::metadata(bad_placeholder)$placeholder <- "foo"
+  expect_error(
+    validObject(bad_placeholder),
+    "Placeholder 'foo' can not be found in object's colData"
+  )
 })
 
 test_that("MiDAS object's experiment is extracted correctly", {
-  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(hla_calls_file)
-
-  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
-
   midas <- prepareMiDAS(
-    hla_calls = hla_calls,
-    colData = pheno,
-    inheritance_model = "additive",
+    hla_calls = MiDAS_tut_HLA,
+    colData = MiDAS_tut_pheno,
     experiment = "hla_alleles"
   )
 
@@ -94,51 +58,29 @@ test_that("MiDAS object's experiment is extracted correctly", {
 })
 
 test_that("MiDAS object's hla_calls is extracted correctly", {
-  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(hla_calls_file)
-
-  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
-
   midas <- prepareMiDAS(
-    hla_calls = hla_calls,
-    colData = pheno,
-    inheritance_model = "additive",
+    hla_calls = MiDAS_tut_HLA,
+    colData = MiDAS_tut_pheno,
     experiment = "hla_alleles"
   )
 
-  expect_equal(getHlaCalls(midas), hla_calls)
+  expect_equal(getHlaCalls(midas), MiDAS_tut_HLA)
 })
 
 test_that("MiDAS object's kir_calls is extracted correctly", {
-  kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-  kir_calls <- readKPICalls(kir_calls_file)
-  kir_calls <- kir_calls
-  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
-
   midas <- prepareMiDAS(
-    kir_calls = kir_calls,
-    colData = pheno,
-    inheritance_model = "additive",
+    kir_calls = MiDAS_tut_KIR,
+    colData = MiDAS_tut_pheno,
     experiment = "kir_genes"
   )
 
-  expect_equal(getKirCalls(midas), kir_calls)
+  expect_equal(getKirCalls(midas), MiDAS_tut_KIR)
 })
 
 test_that("MiDAS object's placeholder is extracted correctly", {
-  kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-  kir_calls <- readKPICalls(kir_calls_file)
-  kir_calls <- kir_calls[1:20, ]
-
-  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
-
   midas <- prepareMiDAS(
-    kir_calls = kir_calls,
-    colData = pheno,
-    inheritance_model = "additive",
+    kir_calls = MiDAS_tut_KIR,
+    colData = MiDAS_tut_pheno,
     experiment = "kir_genes"
   )
 
@@ -146,24 +88,17 @@ test_that("MiDAS object's placeholder is extracted correctly", {
 })
 
 test_that("MiDAS object's omnibus groups are extracted correctly", {
-  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(hla_calls_file)
-
-  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
-
   midas <- prepareMiDAS(
-    hla_calls = hla_calls,
-    colData = pheno,
-    inheritance_model = "additive",
+    hla_calls = MiDAS_tut_HLA[, 1:3],
+    colData = MiDAS_tut_pheno,
     experiment = "hla_aa"
   )
 
   expect_equal(getOmnibusGroups(midas, "hla_aa")[1:3],
                list(
-                 `A_-15` = c("A_-15_V", "A_-15_L"),
-                 `A_-11` = c("A_-11_S", "A_-11_L"),
-                 A_9 = c("A_9_F", "A_9_Y", "A_9_S")
+                 `A_-22` = c("A_-22_*", "A_-22_V", "A_-22_I"),
+                 `A_-21` = c("A_-21_*", "A_-21_M", "A_-21_V"),
+                 `A_-18` = c("A_-18_*", "A_-18_R", "A_-18_P")
                ))
 
   expect_error(
@@ -173,54 +108,26 @@ test_that("MiDAS object's omnibus groups are extracted correctly", {
 })
 
 test_that("MiDAS object's frequencies are extracted correctly", {
-  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(hla_calls_file)[1:5, 1:5]
-
-  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)[1:5, ]
-
+  hla_calls <- reduceHlaCalls(MiDAS_tut_HLA, resolution = 4) # allels have to be in same res. for 'hla_divergence'
   midas <- prepareMiDAS(
     hla_calls = hla_calls,
-    colData = pheno,
-    inheritance_model = "additive",
+    colData = MiDAS_tut_pheno,
     experiment = c("hla_alleles", "hla_divergence")
   )
 
+  alleles_subset <-
+    c("A*01:01", "A*02:01", "A*02:06", "A*26:01", "B*07:02", "B*08:01", "B*13:02", "B*15:01", "B*27:05", "B*40:01", "B*57:01")
+  midas <- midas[alleles_subset, ]
   freq <- getFrequencies(midas, "hla_alleles")
   test_freq <- data.frame(
-    term = c(
-      "A*01:01",
-      "A*02:01",
-      "A*02:06",
-      "A*26:01",
-      "B*07:02",
-      "B*08:01",
-      "B*13:02",
-      "B*15:01",
-      "B*27:05",
-      "B*40:01",
-      "B*57:01"
+    term = alleles_subset,
+    Counts = c(236, 486, 22, 90, 179, 151, 66, 86, 59, 58, 44),
+    Freq = formattable::percent(
+      c(0.118, 0.243, 0.011, 0.045, 0.0895, 0.0755, 0.033, 0.043, 0.0295, 0.029, 0.022)
     ),
-    Counts = c(2, 5, 1, 2, 2, 2, 1, 1, 1, 2, 1),
-    Freq = formattable::percent(c(
-      0.2, 0.5, 0.1, 0.2, 0.2, 0.2, 0.1, 0.1, 0.1, 0.2, 0.1
-    )),
     stringsAsFactors = FALSE
   )
-  rownames(test_freq) <-
-    c(
-      "A*01:01",
-      "A*02:01",
-      "A*02:06",
-      "A*26:01",
-      "B*07:02",
-      "B*08:01",
-      "B*13:02",
-      "B*15:01",
-      "B*27:05",
-      "B*40:01",
-      "B*57:01"
-    )
+  rownames(test_freq) <- alleles_subset
 
   expect_equal(freq, test_freq)
 
@@ -239,17 +146,9 @@ test_that("MiDAS object's frequencies are extracted correctly", {
 })
 
 test_that("MiDAS's as.data.frame method works properly", {
-  kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-  kir_calls <- readKPICalls(kir_calls_file)
-  kir_calls <- kir_calls[1:20, ]
-
-  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
-
   midas <- prepareMiDAS(
-    kir_calls = kir_calls,
-    colData = pheno,
-    inheritance_model = "additive",
+    kir_calls = MiDAS_tut_KIR,
+    colData = MiDAS_tut_pheno,
     experiment = "kir_genes"
   )
 
@@ -262,30 +161,12 @@ test_that("MiDAS's as.data.frame method works properly", {
 })
 
 test_that("MiDAS object is prepared properly", {
-  rleft_join <- function(init, ..., by = "ID") {
-    df <- Reduce(function(...)
-      dplyr::left_join(..., by = by),
-      x = list(...),
-      init = init)
-    rownames(df) <- df[[by]]
-    df
-  }
-
-  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(hla_calls_file)
-
-  kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-  kir_calls <- readKPICalls(kir_calls_file)
-
-  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
-  covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-  covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-  phenotype <- rleft_join(pheno, covar)
+  hla_calls <- reduceHlaCalls(MiDAS_tut_HLA, resolution = 4)
+  kir_calls <- MiDAS_tut_KIR
+  phenotype <- MiDAS_tut_pheno
 
   args_c <-
     expand.grid(
-      inheritance_model = c("additive", "dominant", "recessive"),
       lower_frequency_cutoff = c(0, 0.54),
       upper_frequency_cutoff = c(1, 0.63),
       stringsAsFactors = FALSE
@@ -298,7 +179,6 @@ test_that("MiDAS object is prepared properly", {
       hla_calls = hla_calls,
       kir_calls = kir_calls,
       colData = phenotype,
-      inheritance_model = args$inheritance_model,
       experiment = c(
         "hla_alleles",
         # "hla_aa",
@@ -338,20 +218,9 @@ test_that("MiDAS object is prepared properly", {
   )
 
   expect_error(
-    prepareMiDAS(hla_calls = hla_calls, colData = phenotype, inheritance_model = 1),
-    "inheritance_model is not a string \\(a length one character vector\\)."
-  )
-
-  expect_error(
-    prepareMiDAS(hla_calls = hla_calls, colData = phenotype, inheritance_model = "foo"),
-    "inheritance_model should be one of \"additive\", \"dominant\", \"recessive\"."
-  )
-
-  expect_error(
     prepareMiDAS(
       hla_calls = hla_calls,
       colData = phenotype,
-      inheritance_model = "additive",
       experiment = 1
     ),
     "experiment is not a character vector"
@@ -361,7 +230,6 @@ test_that("MiDAS object is prepared properly", {
     prepareMiDAS(
       hla_calls = hla_calls,
       colData = phenotype,
-      inheritance_model = "additive",
       experiment = "foo"
     ),
     "experiment should match values \"hla_alleles\", \"hla_aa\", \"hla_g_groups\", \"hla_supertypes\", \"hla_NK_ligands\", \"kir_genes\", \"hla_kir_interactions\"."
@@ -371,7 +239,6 @@ test_that("MiDAS object is prepared properly", {
     prepareMiDAS(
       hla_calls = hla_calls,
       colData = phenotype,
-      inheritance_model = "additive",
       experiment = "hla_alleles",
       placeholder = 1
     ),
@@ -382,45 +249,23 @@ test_that("MiDAS object is prepared properly", {
     prepareMiDAS(
       hla_calls = hla_calls,
       colData = phenotype,
-      inheritance_model = "additive",
       experiment = "hla_alleles",
-      placeholder = "AGE"
+      placeholder = "outcome"
     ),
-    "Placeholder 'AGE' can not be used, it is alredy used as column name in one of the inputs."
+    "Placeholder 'outcome' can not be used, it is alredy used as column name in one of the inputs."
   )
 })
 
 test_that("MiDAS data for hla_alleles analysis is prepared properly", {
-  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(hla_calls_file)
-
-  args_c <- expand.grid(
-    inheritance_model = c("dominant", "recessive", "additive"),
-    stringsAsFactors = FALSE
-  )
-
-  invisible(apply(
-    X = args_c,
-    MARGIN = 1,
-    FUN = function(args) {
-      args <- as.list(args)
-      args$hla_calls <- hla_calls
-      experiment <- do.call(prepareMiDAS_hla_alleles, args)
-
-      experiment_test <- do.call(hlaCallsToCounts, args)
-      experiment_test <- dfToExperimentMat(experiment_test)
-
-      expect_equal(experiment, experiment_test)
-    }
-  ))
+  args <- list(hla_calls = MiDAS_tut_HLA)
+  experiment <- do.call(prepareMiDAS_hla_alleles, args)
+  experiment_test <- do.call(hlaCallsToCounts, args)
+  experiment_test <- dfToExperimentMat(experiment_test)
+  expect_equal(experiment, experiment_test)
 })
 
 test_that("MiDAS data for hla_aa analysis is prepared properly", { # TODO
-  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(hla_calls_file)
-
   args_c <- expand.grid(
-    inheritance_model = c("dominant", "recessive", "additive"),
     indels = c(TRUE, FALSE),
     unkchar = c(TRUE, FALSE),
     stringsAsFactors = FALSE
@@ -428,7 +273,7 @@ test_that("MiDAS data for hla_aa analysis is prepared properly", { # TODO
 
   for (i in 1:nrow(args_c)) {
     args <- as.list(args_c[i, , drop = FALSE])
-    args$hla_calls <- hla_calls
+    args$hla_calls <- MiDAS_tut_HLA
     experiment <- do.call(prepareMiDAS_hla_aa, args)
 
     counts <-
@@ -438,7 +283,7 @@ test_that("MiDAS data for hla_aa analysis is prepared properly", { # TODO
         unkchar = args$unkchar
       )
     counts <-
-      aaVariationToCounts(counts, inheritance_model = args$inheritance_model)
+      aaVariationToCounts(counts)
     counts <- dfToExperimentMat(counts)
     pos <- gsub("_.{1}$", "", rownames(counts))
     pos <- unique(pos)
@@ -457,205 +302,128 @@ test_that("MiDAS data for hla_aa analysis is prepared properly", { # TODO
 })
 
 test_that("MiDAS data for hla_g_groups analysis is prepared properly", {
-  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(hla_calls_file)
+  args <- list(hla_calls = MiDAS_tut_HLA)
 
-  args_c <- expand.grid(
-    inheritance_model = c("dominant", "recessive", "additive"),
-    stringsAsFactors = FALSE
-  )
+  experiment <- do.call(prepareMiDAS_hla_g_groups, args)
 
-  for (i in 1:nrow(args_c)) {
-    args <- as.list(args_c[i, , drop = FALSE])
-    args$hla_calls <- hla_calls
-    experiment <- do.call(prepareMiDAS_hla_g_groups, args)
+  experiment_test <-
+    hlaToVariable(
+      hla_calls = args$hla_calls,
+      dictionary = "allele_HLA_Ggroup",
+      na.value = 0
+    )
+  experiment_test <-
+    hlaCallsToCounts(experiment_test,
+                     check_hla_format = FALSE)
+  experiment_test <- dfToExperimentMat(experiment_test)
 
-    experiment_test <-
-      hlaToVariable(hla_calls = args$hla_calls,
-                    dictionary = "allele_HLA_Ggroup",
-                    na.value = 0
-      )
-    experiment_test <-
-      hlaCallsToCounts(
-        experiment_test,
-        inheritance_model = args$inheritance_model,
-        check_hla_format = FALSE
-      )
-    experiment_test <- dfToExperimentMat(experiment_test)
+  expect_equal(experiment, experiment_test)
 
-    expect_equal(experiment, experiment_test)
-  }
 })
 
 test_that("MiDAS data for hla_supertypes analysis is prepared properly", {
-  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(hla_calls_file)
+  args <- list(hla_calls = MiDAS_tut_HLA)
 
-  args_c <- expand.grid(
-    inheritance_model = c("dominant", "recessive", "additive"),
-    stringsAsFactors = FALSE
-  )
+  experiment <- do.call(prepareMiDAS_hla_supertypes, args)
 
-  for (i in 1:nrow(args_c)) {
-    args <- as.list(args_c[i, , drop = FALSE])
-    args$hla_calls <- hla_calls
-    experiment <- do.call(prepareMiDAS_hla_supertypes, args)
+  experiment_test <-
+    hlaToVariable(
+      hla_calls = args$hla_calls,
+      dictionary = "allele_HLA_supertype",
+      na.value = 0
+    )
+  experiment_test <-
+    hlaCallsToCounts(experiment_test,
+                     check_hla_format = FALSE)
+  experiment_test <- dfToExperimentMat(experiment_test)
+  experiment_test <-
+    experiment_test[rownames(experiment_test) != "Unclassified",]
 
-    experiment_test <-
-      hlaToVariable(hla_calls = args$hla_calls,
-                    dictionary = "allele_HLA_supertype",
-                    na.value = 0
-      )
-    experiment_test <-
-      hlaCallsToCounts(
-        experiment_test,
-        inheritance_model = args$inheritance_model,
-        check_hla_format = FALSE
-      )
-    experiment_test <- dfToExperimentMat(experiment_test)
-    experiment_test <-
-      experiment_test[rownames(experiment_test) != "Unclassified", ]
+  expect_equal(experiment, experiment_test)
 
-    expect_equal(experiment, experiment_test)
-  }
 })
 
 test_that("MiDAS data for hla_NK_ligands analysis is prepared properly", {
-  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(hla_calls_file)
+  args <- list(hla_calls = MiDAS_tut_HLA)
 
-  args_c <- expand.grid(
-    inheritance_model = c("dominant", "recessive", "additive"),
-    stringsAsFactors = FALSE
-  )
+  experiment <- do.call(prepareMiDAS_hla_NK_ligands, args)
 
-  for (i in 1:nrow(args_c)) {
-    args <- as.list(args_c[i, , drop = FALSE])
-    args$hla_calls <- hla_calls
-    experiment <- do.call(prepareMiDAS_hla_NK_ligands, args)
-
-    experiment_test <-
-      Reduce(
-        f = function(...)
-          left_join(..., by = "ID"),
-        x = lapply(
-          c(
-            "allele_HLA-B_Bw",
-            "allele_HLA_Bw4+A23+A24+A32",
-            "allele_HLA-C_C1-2"
-          ),
-          hlaToVariable,
-          hla_calls = args$hla_calls,
-          na.value = 0
-        )
+  experiment_test <-
+    Reduce(
+      f = function(...)
+        left_join(..., by = "ID"),
+      x = lapply(
+        c(
+          "allele_HLA-B_Bw",
+          "allele_HLA_Bw4+A23+A24+A32",
+          "allele_HLA-C_C1-2"
+        ),
+        hlaToVariable,
+        hla_calls = args$hla_calls,
+        na.value = 0
       )
-    experiment_test <-
-      hlaCallsToCounts(
-        experiment_test,
-        inheritance_model = args$inheritance_model,
-        check_hla_format = FALSE
-      )
-    experiment_test <- dfToExperimentMat(experiment_test)
+    )
+  experiment_test <-
+    hlaCallsToCounts(experiment_test,
+                     check_hla_format = FALSE)
+  experiment_test <- dfToExperimentMat(experiment_test)
 
-    expect_equal(experiment, experiment_test)
-  }
+  expect_equal(experiment, experiment_test)
+
 })
 
 test_that("MiDAS data for kir_genes analysis is prepared properly", {
-  kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-  kir_calls <- readKPICalls(kir_calls_file)
+  args <- list(kir_calls = MiDAS_tut_KIR)
+  experiment <- do.call(prepareMiDAS_kir_genes, args)
 
-  args_c <- expand.grid(
-    "",
-    stringsAsFactors = FALSE
-  )
+  experiment_test <- dfToExperimentMat(args$kir_calls)
 
-  for (i in 1:nrow(args_c)) {
-    args <- as.list(args_c[i, , drop = FALSE])
-    args$kir_calls <- kir_calls
-    experiment <- do.call(prepareMiDAS_kir_genes, args)
-
-    experiment_test <- dfToExperimentMat(kir_calls)
-
-    expect_equal(experiment, experiment_test)
-  }
+  expect_equal(experiment, experiment_test)
 })
 
 test_that("MiDAS data for hla_kir_interactions analysis is prepared properly", {
-  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(hla_calls_file)
-  kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-  kir_calls <- readKPICalls(kir_calls_file)
+  args <- list(hla_calls = MiDAS_tut_HLA, kir_calls = MiDAS_tut_KIR)
+  experiment <- do.call(prepareMiDAS_kir_genes, args)
 
-  args_c <- expand.grid(
-    "",
-    stringsAsFactors = FALSE
+  experiment_test <- getHlaKirInteractions(
+    hla_calls = args$hla_calls,
+    kir_counts = args$kir_calls
   )
+  experiment_test <- dfToExperimentMat(args$kir_calls)
 
-  for (i in 1:nrow(args_c)) {
-    args <- as.list(args_c[i, , drop = FALSE])
-    args$hla_calls <- hla_calls
-    args$kir_calls <- kir_calls
-    experiment <- do.call(prepareMiDAS_kir_genes, args)
-
-    experiment_test <- getHlaKirInteractions(
-      hla_calls = args$hla_calls,
-      kir_counts = args$kir_calls
-    )
-    experiment_test <- dfToExperimentMat(kir_calls)
-
-    expect_equal(experiment, experiment_test)
-  }
+  expect_equal(experiment, experiment_test)
 })
 
 test_that("MiDAS data for hla_divergence analysis is prepared properly", {
-  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(hla_calls_file)
+  hla_calls <- reduceHlaCalls(MiDAS_tut_HLA, 4)
+  experiment <- do.call(prepareMiDAS_hla_divergence, list(hla_calls))
 
-  args_c <- expand.grid(
-    "",
-    stringsAsFactors = FALSE
-  )
+  experiment_test <- hlaCallsGranthamDistance(hla_calls = hla_calls,
+                                              genes = c("A", "B", "C"))
+  experiment_test$ABC_avg <- rowMeans(experiment_test[-1])
+  experiment_test <- dfToExperimentMat(experiment_test)
 
-  for (i in 1:nrow(args_c)) {
-    args <- as.list(args_c[i, , drop = FALSE])
-    args$hla_calls <- hla_calls
-    experiment <- do.call(prepareMiDAS_hla_divergence, args)
+  expect_equal(experiment, experiment_test)
 
-    experiment_test <- hlaCallsGranthamDistance(
-      hla_calls = hla_calls,
-      genes = c("A", "B", "C")
-    )
-    experiment_test$ABC_avg <- rowMeans(experiment_test[-1])
-    experiment_test <- dfToExperimentMat(experiment_test)
-
-    expect_equal(experiment, experiment_test)
-  }
 
   hla_calls <- hla_calls[, c(1, 8:9)]
-  expect_error(prepareMiDAS_hla_divergence(hla_calls),
-               "Grantham distance can be calculated only for class I HLA alleles \\(A, B, C\\)."
+  expect_error(
+    prepareMiDAS_hla_divergence(hla_calls),
+    "Grantham distance can be calculated only for class I HLA alleles \\(A, B, C\\)."
   )
 })
 
 test_that("MiDAS is filtered correctly", {
-  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(hla_calls_file)
-  kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-  kir_calls <- readKPICalls(kir_calls_file)
-  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
+  hla_calls <- reduceHlaCalls(MiDAS_tut_HLA, 4)
   midas <- prepareMiDAS(
     hla_calls = hla_calls,
-    kir_calls = kir_calls,
-    colData = pheno,
-    inheritance_model = "additive",
+    kir_calls = MiDAS_tut_KIR,
+    colData = MiDAS_tut_pheno,
     experiment = c("hla_alleles", "hla_supertypes", "kir_genes", "hla_divergence")
   )
 
   # filtration works as expected
   experiment <- "hla_alleles"
-  inheritance_model <- "additive"
   lower_frequency_cutoff <- 0.53
   upper_frequency_cutoff <- 0.56
   filtered_midas <-
@@ -669,7 +437,6 @@ test_that("MiDAS is filtered correctly", {
   test_filtered_midas[[experiment]] <-
     filterExperimentByFrequency(
       experiment = midas[[experiment]],
-      inheritance_model = inheritance_model,
       lower_frequency_cutoff = lower_frequency_cutoff,
       upper_frequency_cutoff = upper_frequency_cutoff
     )
@@ -677,7 +444,6 @@ test_that("MiDAS is filtered correctly", {
 
   # unsported experiments raise error
   experiment <- "hla_divergence"
-  inheritance_model <- "additive"
   lower_frequency_cutoff <- 0.53
   upper_frequency_cutoff <- 0.56
   expect_error(
@@ -692,14 +458,9 @@ test_that("MiDAS is filtered correctly", {
 })
 
 test_that("filterByOmnibusGroups", {
-  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(hla_calls_file)
-  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
   midas <- prepareMiDAS(
-    hla_calls = hla_calls,
-    colData = pheno,
-    inheritance_model = "additive",
+    hla_calls = MiDAS_tut_HLA,
+    colData = MiDAS_tut_pheno,
     experiment = c("hla_alleles", "hla_aa")
   )
 
@@ -713,7 +474,7 @@ test_that("filterByOmnibusGroups", {
       groups = mask
     )
   test_filtered_midas <- midas
-  vars <- c("A_83_G", "A_83_R", "A_90_A", "A_90_D")
+  vars <- c("A_83_G", "A_83_R",  "A_90_D", "A_90_A")
   test_filtered_midas[[experiment]] <- test_filtered_midas[[experiment]][vars, ]
   metadata(test_filtered_midas[[experiment]])$omnibus_groups <-
     metadata(test_filtered_midas[[experiment]])$omnibus_groups[mask]

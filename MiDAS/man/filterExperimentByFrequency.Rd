@@ -4,15 +4,11 @@
 \alias{filterExperimentByFrequency}
 \title{Filter experiment by frequency}
 \usage{
-filterExperimentByFrequency(experiment, inheritance_model = c("dominant",
-  "recessive", "additive"), lower_frequency_cutoff = NULL,
-  upper_frequency_cutoff = NULL)
+filterExperimentByFrequency(experiment, carrier_frequency = FALSE,
+  lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL)
 }
 \arguments{
-\item{experiment}{Matrix of type integer}
-
-\item{inheritance_model}{String matching one of values
-\code{"dominant", "recessive", "additive"}}
+\item{experiment}{Matrix}
 
 \item{lower_frequency_cutoff}{Number of positive value or \code{NULL}}
 

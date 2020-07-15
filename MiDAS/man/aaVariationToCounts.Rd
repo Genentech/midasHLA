@@ -4,19 +4,11 @@
 \alias{aaVariationToCounts}
 \title{Transform amino acid variations data frame to counts table}
 \usage{
-aaVariationToCounts(aa_variation, inheritance_model = c("dominant",
-  "recessive", "additive"))
+aaVariationToCounts(aa_variation)
 }
 \arguments{
 \item{aa_variation}{Data frame holding amino acid variation data as returned
 by \link{hlaToAAVariation}.}
-
-\item{inheritance_model}{String specifying inheritance model to use.
-Available choices are \code{"dominant"}, \code{"recessive"},
-\code{"additive"}. In \code{"dominant"} model homozygotes and heterozygotes
-are coded as \code{1}. In \code{"recessive"} model homozygotes are coded as
-\code{1} and all other as \code{0}. In \code{"additive"} model homozygotes
-are coded as \code{2} and heterozygotes as \code{1}.}
 }
 \value{
 Data frame containing counts of amino acid at specific positions
@@ -30,7 +22,7 @@ counts table.
 file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 hla_calls <- readHlaCalls(file)
 aa_variation <- hlaToAAVariation(hla_calls)
-aaVariationToCounts(aa_variation, inheritance_model = "additive")
+aaVariationToCounts(aa_variation)
 
 }
 \seealso{
