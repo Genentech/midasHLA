@@ -1096,7 +1096,8 @@ filterExperimentByFrequency <- function(experiment,
 #'
 getExperimentFrequencies <-
   function(experiment,
-           carrier_frequency = FALSE) {
+           carrier_frequency = FALSE,
+           ref = NULL) {
     UseMethod("getExperimentFrequencies", experiment)
   }
 
@@ -1105,12 +1106,14 @@ getExperimentFrequencies <-
 #'
 getExperimentFrequencies.matrix <-
   function(experiment,
-           carrier_frequency = FALSE) {
+           carrier_frequency = FALSE,
+           ref = NULL) {
     inheritance_model_choice <-  eval(formals()[["inheritance_model"]])
     assert_that(
       is.matrix(experiment),
       isCountsOrZeros(experiment),
       isTRUEorFALSE(carrier_frequency)
+      # TODO ref
     )
 
     if (carrier_frequency) {
@@ -1127,6 +1130,14 @@ getExperimentFrequencies.matrix <-
       Freq = percent(allele_freq),
       stringsAsFactors = FALSE
     )
+
+    if (! is.null(ref)) {
+      if (carrier_frequency) {
+         ref[, -1] <- lapply(ref[, -1, drop = FALSE], function (x) 2 * x * (1 - x) + x^2) # HWE 2qp + q^2
+      }
+      counts_df <-
+        left_join(counts_df, ref, by = c("term" = "var"))
+    }
 
     return(counts_df)
   }

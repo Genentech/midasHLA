@@ -234,7 +234,14 @@ setMethod(
 #' @export
 setGeneric(
   name = "getFrequencies",
-  def = function(object, experiment, carrier_frequency = FALSE) standardGeneric("getFrequencies")
+  def = function(object,
+                 experiment,
+                 carrier_frequency = FALSE,
+                 compare = NULL,
+                 ref = list(hla_alleles = allele_frequencies)
+  ) {
+    standardGeneric("getFrequencies")
+  }
 )
 
 #' @rdname MiDAS-class
@@ -245,10 +252,16 @@ setGeneric(
 setMethod(
   f = "getFrequencies",
   signature = "MiDAS",
-  definition = function (object, experiment, carrier_frequency = FALSE) {
+  definition = function (object,
+                         experiment,
+                         carrier_frequency = FALSE,
+                         compare = NULL,
+                         ref = list(hla_alleles = allele_frequencies)) {
     assert_that(
       is.string(experiment),
-      stringMatches(experiment, getExperiments(object))
+      stringMatches(experiment, getExperiments(object)),
+      isCharacterOrNULL(compare),
+      is.list(ref)
     )
     mat <- object[[experiment]]
     assert_that(
@@ -257,7 +270,24 @@ setMethod(
                     experiment
             )
     )
-    freq <- getExperimentFrequencies(mat, carrier_frequency)
+
+    ref <- ref[[experiment]]
+    if (! is.null(compare) && ! is.null(ref)) {
+      ref <- ref[ref$population == compare,]
+      ref <- reshape(
+        data = ref,
+        idvar = "var",
+        timevar = "population",
+        direction = "wide"
+      )
+      colnames(ref)[-1] <-
+        gsub("frequency\\.", "", colnames(ref)[-1])
+      freq <- getExperimentFrequencies(mat, carrier_frequency, ref)
+    } else {
+      if (! is.null(compare)) warn(sprintf("Could not find reference frequencies for experiment: '%s'", experiment))
+      freq <- getExperimentFrequencies(mat, carrier_frequency)
+    }
+
 
     return(freq)
   }

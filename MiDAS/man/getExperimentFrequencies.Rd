@@ -6,10 +6,11 @@
 \alias{getExperimentFrequencies.SummarizedExperiment}
 \title{Calculate variables frequencies TODO}
 \usage{
-getExperimentFrequencies(experiment, carrier_frequency = FALSE)
+getExperimentFrequencies(experiment, carrier_frequency = FALSE,
+  ref = NULL)
 
 \method{getExperimentFrequencies}{matrix}(experiment,
-  carrier_frequency = FALSE)
+  carrier_frequency = FALSE, ref = NULL)
 
 \method{getExperimentFrequencies}{SummarizedExperiment}(experiment,
   carrier_frequency = TRUE)

@@ -42,10 +42,12 @@ getOmnibusGroups(object, experiment)
 
 \S4method{getOmnibusGroups}{MiDAS}(object, experiment)
 
-getFrequencies(object, experiment, carrier_frequency = FALSE)
+getFrequencies(object, experiment, carrier_frequency = FALSE,
+  compare = NULL, ref = list(hla_alleles = allele_frequencies))
 
 \S4method{getFrequencies}{MiDAS}(object, experiment,
-  carrier_frequency = FALSE)
+  carrier_frequency = FALSE, compare = NULL, ref = list(hla_alleles =
+  allele_frequencies))
 
 filterByFrequency(object, experiment, lower_frequency_cutoff = NULL,
   upper_frequency_cutoff = NULL, carrier_frequency = FALSE)

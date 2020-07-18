@@ -39,7 +39,7 @@ if (! file.exists("inst/extdata/allelefrequency_df.Rdata")) {
   allelefrequency_df <-
     allelefrequency_df[, colnames(allelefrequency_df) != "Line"]
   colnames(allelefrequency_df) <-
-    c("allele", "population", "proc.ind.with.allele", "frequency", "sample.size")
+    c("var", "population", "proc.ind.with.allele", "frequency", "sample.size")
 
   # Allele Frequencies marked with (*) were calculated from all alleles in the corresponding G group.
   # These symbols can be found in "proc.ind.with.allele", "frequency" columns
@@ -88,13 +88,13 @@ if (! file.exists("inst/extdata/allelefrequency_df.Rdata")) {
 # order columns
 allele_frequencies <-
   allelefrequency_df[, c(
-    "allele",
+    "var",
     "population",
-    "frequency",
-    "frequency.ggroup",
-    "sample.size",
-    "proc.ind.with.allele",
-    "proc.ind.with.allele.ggroup"
+    "frequency"
+    # "frequency.ggroup",
+    # "sample.size",
+    # "proc.ind.with.allele",
+    # "proc.ind.with.allele.ggroup"
   )]
 
 usethis::use_data(allele_frequencies, allele_frequencies_reference_populations, overwrite = TRUE)
