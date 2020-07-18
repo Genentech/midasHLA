@@ -355,41 +355,27 @@ omnibusTest <- function(object,
 #'
 #' @examples
 #' \dontrun{
-#' # read hla calls file
-#' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-#' hla_calls <- readHlaCalls(hla_calls_file)
-#'
-#' # read kir calls file
-#' kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-#' kir_calls <- readKPICalls(kir_calls_file, counts = TRUE)
-#'
-#' # read phenotypic data and covariates
-#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-#' pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
-#' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-#' covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-#' phenotype <- left_join(pheno, covar, by ="ID")
-#'
 #' # create MiDAS object
-#' midas <- prepareMiDAS(hla_calls = hla_calls,
-#'                       kir_calls = kir_calls,
-#'                       colData = phenotype,
-#'                       inheritance_model = "additive",
+#' midas <- prepareMiDAS(hla_calls = MiDAS_tut_HLA,
+#'                       kir_calls = MiDAS_tut_KIR,
+#'                       colData = MiDAS_tut_pheno,
 #'                       experiment = "hla_alleles"
 #' )
 #'
 #' # constructs statistical model
-#' object <- lm(OS ~ AGE + SEX + term, data = midas)
+#' object <- lm(disease ~ outcome + term, data = midas)
 #'
 #' # run analysis
-#' runMiDAS(object, mode = "linear", experiment = "hla_alleles")
+#' runMiDAS(object, experiment = "hla_alleles", inheritance_model = "dominant")
 #' }
 #'
 #' @importFrom assertthat assert_that is.number is.string
+#' @importFrom rlang warn
 #'
 #' @export
 runMiDAS <- function(object,
                      experiment,
+                     inheritance_model = NULL,
                      conditional = FALSE,
                      omnibus = FALSE,
                      omnibus_groups_filter = NULL,
@@ -412,6 +398,7 @@ runMiDAS <- function(object,
     objectHasPlaceholder(object, getPlaceholder(object_details$data)),
     is.string(experiment),
     stringMatches(experiment, choice = getExperiments(object_details$data)),
+    isStringOrNULL(inheritance_model),
     isTRUEorFALSE(conditional),
     isTRUEorFALSE(omnibus),
     isCharacterOrNULL(omnibus_groups_filter),
@@ -421,6 +408,21 @@ runMiDAS <- function(object,
     isTRUEorFALSE(exponentiate)
   )
 
+  # convert experiment to specifed inheritance model
+  if (! is.null(inheritance_model)) {
+    if (isInheritanceModelApplicable(experiment)) {
+      assert_that(
+        characterMatches(inheritance_model, c("dominant", "recessive", "additive"))
+      )
+      object_details$data[[experiment]] <- applyInheritanceModel(
+        experiment = object_details$data[[experiment]],
+        inheritance_model = inheritance_model
+      )
+    } else {
+      warn(sprintf("Inheritance model can not be applied to experiment %s. Continuing without it.", experiment))
+    }
+  }
+
   if (! is.null(omnibus_groups_filter)) {
     object_details$data <-
       filterByOmnibusGroups(
@@ -428,7 +430,6 @@ runMiDAS <- function(object,
         experiment = experiment,
         groups = omnibus_groups_filter
       )
-
   }
 
   if (! is.null(lower_frequency_cutoff) || ! is.null(upper_frequency_cutoff)) {

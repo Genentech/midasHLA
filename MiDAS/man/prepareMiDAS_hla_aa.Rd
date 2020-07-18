@@ -4,13 +4,10 @@
 \alias{prepareMiDAS_hla_aa}
 \title{Prepare MiDAS data on HLA amino acid level}
 \usage{
-prepareMiDAS_hla_aa(hla_calls, inheritance_model, indels = TRUE,
-  unkchar = FALSE, ...)
+prepareMiDAS_hla_aa(hla_calls, indels = TRUE, unkchar = FALSE, ...)
 }
 \arguments{
 \item{hla_calls}{Data frame}
-
-\item{inheritance_model}{String}
 
 \item{indels}{Logical indicating whether indels should be considered when
 checking variability.}
@@ -26,7 +23,5 @@ Matrix
 \description{
 \code{hla_calls} are first converted to amino acid level, taking only
 variable positions under consideration. Than variable amino acid positions
-are transformed to counts under \code{inheritance_model} of choice (see
-\code{\link{hlaToAAVariation}} and \code{\link{aaVariationToCounts}} for more
-details).
+are transformed to counts.
 }

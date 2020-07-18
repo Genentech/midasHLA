@@ -8,10 +8,11 @@
 \alias{runMiDAS_conditional_omnibus}
 \title{Run MiDAS statistical analysis}
 \usage{
-runMiDAS(object, experiment, conditional = FALSE, omnibus = FALSE,
-  omnibus_groups_filter = NULL, lower_frequency_cutoff = NULL,
-  upper_frequency_cutoff = NULL, correction = "bonferroni",
-  n_correction = NULL, exponentiate = FALSE, ...)
+runMiDAS(object, experiment, inheritance_model = NULL,
+  conditional = FALSE, omnibus = FALSE, omnibus_groups_filter = NULL,
+  lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL,
+  correction = "bonferroni", n_correction = NULL,
+  exponentiate = FALSE, ...)
 
 runMiDAS_linear(call, midas, experiment, test_covar,
   correction = "bonferroni", n_correction = NULL,
@@ -135,34 +136,18 @@ statistical analysis is performed iteratively on groups of variables
 }
 \examples{
 \dontrun{
-# read hla calls file
-hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-hla_calls <- readHlaCalls(hla_calls_file)
-
-# read kir calls file
-kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-kir_calls <- readKPICalls(kir_calls_file, counts = TRUE)
-
-# read phenotypic data and covariates
-pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
-covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-phenotype <- left_join(pheno, covar, by ="ID")
-
 # create MiDAS object
-midas <- prepareMiDAS(hla_calls = hla_calls,
-                      kir_calls = kir_calls,
-                      colData = phenotype,
-                      inheritance_model = "additive",
+midas <- prepareMiDAS(hla_calls = MiDAS_tut_HLA,
+                      kir_calls = MiDAS_tut_KIR,
+                      colData = MiDAS_tut_pheno,
                       experiment = "hla_alleles"
 )
 
 # constructs statistical model
-object <- lm(OS ~ AGE + SEX + term, data = midas)
+object <- lm(disease ~ outcome + term, data = midas)
 
 # run analysis
-runMiDAS(object, mode = "linear", experiment = "hla_alleles")
+runMiDAS(object, experiment = "hla_alleles", inheritance_model = "dominant")
 }
 
 }

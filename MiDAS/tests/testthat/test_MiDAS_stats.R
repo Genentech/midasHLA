@@ -476,6 +476,14 @@ test_that("runMiDAS", {
                "experiment should be one of \"hla_alleles\", \"hla_aa\", \"hla_g_groups\", \"hla_supertypes\", \"hla_NK_ligands\", \"kir_genes\", \"hla_kir_interactions\", \"hla_divergence\"."
   )
 
+  expect_error(runMiDAS(object, experiment = "hla_alleles", inheritance_model = 1),
+               "inheritance_model is not a string \\(a length one character vector\\) or NULL."
+  )
+
+  expect_error(runMiDAS(object, experiment = "hla_alleles", inheritance_model = "foo"),
+               "inheritance_model should match values \"dominant\", \"recessive\", \"additive\"."
+  )
+
   expect_error(runMiDAS(object, experiment = "hla_alleles", conditional = 1),
                "conditional is not a flag \\(a length one logical vector\\)."
   )

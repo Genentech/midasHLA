@@ -308,13 +308,13 @@ hlaToVariable <- function(hla_calls,
   dict_prefix <- gsub(".txt$", "", gsub("^.*_", "", dictionary))
   colnames(variable) <- paste0(dict_prefix, "_", colnames(variable))
 
-  # set non-original NAs to 0
-  i <- is.na(variable) & ! is.na(hla_calls[, -1, drop = FALSE])
+  # # set non-original NAs to 0
+  # i <- is.na(variable) & ! is.na(hla_calls[, -1, drop = FALSE])
 
   # get all na columns
   j <- vapply(variable, function(x) ! all(is.na(x)), logical(length = 1))
 
-  variable[i] <- na.value
+  # variable[i] <- na.value get all na columns
   if (nacols.rm) {
     variable <- variable[, j, drop = FALSE]
   }
@@ -365,12 +365,6 @@ reduceHlaCalls <- function(hla_calls,
 #' \code{hlaCallsToCounts} convert HLA calls data frame into counts table.
 #'
 #' @inheritParams checkHlaCallsFormat
-#' @param inheritance_model String specifying inheritance model to use.
-#'   Available choices are \code{"dominant"}, \code{"recessive"},
-#'   \code{"additive"}. In \code{"dominant"} model homozygotes and heterozygotes
-#'   are coded as \code{1}. In \code{"recessive"} model homozygotes are coded as
-#'   \code{1} and all other as \code{0}. In \code{"additive"} model homozygotes
-#'   are coded as \code{2} and heterozygotes as \code{1}.
 #' @param check_hla_format Logical indicating if \code{hla_calls} format should
 #'   be checked. This is useful if one wants to use \code{hlaCallsToCounts} with
 #'   input not adhering to HLA nomenclature standards. See examples.
@@ -381,94 +375,30 @@ reduceHlaCalls <- function(hla_calls,
 #' @examples
 #' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(file)
-#' hlaCallsToCounts(hla_calls, inheritance_model = "additive")
+#' hlaCallsToCounts(hla_calls)
 #'
 #' # usage with non-HLA alleles numbers input
 #' hla_vars <- hlaToVariable(hla_calls, dictionary = "allele_HLA_supertype")
-#' hlaCallsToCounts(hla_calls, inheritance_model = "additive", check_hla_format = FALSE)
+#' hlaCallsToCounts(hla_calls, check_hla_format = FALSE)
 #'
 #' @importFrom assertthat assert_that is.string
 #' @importFrom qdapTools mtabulate
 #'
 #' @export
 hlaCallsToCounts <- function(hla_calls,
-                             inheritance_model = c("dominant", "recessive", "additive"),
                              check_hla_format = TRUE) {
   assert_that(
-    is.string(inheritance_model),
-    see_if(
-      pmatch(inheritance_model,
-             table = c("dominant", "recessive", "additive"),
-             nomatch = 0
-      ) != 0,
-      msg = "inheritance_model should be one of 'dominant', 'recessive', 'additive'"
-    ),
-    isTRUEorFALSE(check_hla_format)
+    isTRUEorFALSE(check_hla_format),
+    if (check_hla_format) {
+      checkHlaCallsFormat(hla_calls)
+    } else {
+      TRUE
+    }
   )
-
-  if (check_hla_format) {
-    assert_that(checkHlaCallsFormat(hla_calls))
-  }
-
-  inheritance_model <- match.arg(inheritance_model)
 
   hla_counts <- hla_calls[, -1, drop = FALSE]
-  i <- do.call(
-    what = "cbind",
-    args = lapply(
-      X = hla_counts,
-      FUN = function(x) {
-        vapply(
-          X = x,
-          FUN = function(x) {
-            x <- suppressWarnings(as.numeric(x))
-            test <- ! is.na(x)
-
-            return(test)
-          },
-          FUN.VALUE = logical(length = 1)
-        )
-      }
-    )
-  )
-  hla_counts[i] <- NA
   hla_counts <- mtabulate(as.data.frame(t(hla_counts)))
   rownames(hla_counts) <- NULL
-  hla_counts <- hla_counts[, order(colnames(hla_counts)), drop = FALSE]
-
-  hla_counts <- switch(inheritance_model,
-                       "dominant" = as.data.frame(
-                         lapply(hla_counts,
-                                function(x) ifelse(x >= 1, 1, 0)
-                         ),
-                         stringsAsFactors = FALSE,
-                         optional = TRUE
-                       ),
-                       "recessive" = as.data.frame(
-                         lapply(hla_counts,
-                                function(x) ifelse(x >= 2, 1, 0)
-                         ),
-                         stringsAsFactors = FALSE,
-                         optional = TRUE
-                       ),
-                       "additive" = hla_counts # Do nothing this is default res
-  )
-
-  # set 0 to NAs where appropiate
-  genes <- colnames(hla_calls[, -1, drop = FALSE])
-  origin_dict <- data.frame(
-    allele = unlist(hla_calls[, -1, drop = FALSE]),
-    gene = rep(genes, each = nrow(hla_calls)),
-    stringsAsFactors = FALSE
-  )
-  origin_dict <- origin_dict[! is.na(origin_dict$allele), ]
-  for (col in colnames(hla_counts)) {
-    origin <- origin_dict$gene[origin_dict$allele == col]
-    na_i <- hla_calls[, origin, drop = FALSE]
-    na_i <- is.na(na_i)
-    na_i <- rowSums(na_i) == ncol(na_i)
-    hla_counts[na_i, col] <- NA
-  }
 
   hla_counts <- cbind(ID = hla_calls[, 1, drop = FALSE],
                       hla_counts,
@@ -529,31 +459,20 @@ getHlaFrequencies <- function(hla_calls) {
 #' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(file)
 #' aa_variation <- hlaToAAVariation(hla_calls)
-#' aaVariationToCounts(aa_variation, inheritance_model = "additive")
+#' aaVariationToCounts(aa_variation)
 #'
 #' @importFrom assertthat assert_that is.string
 #' @importFrom qdapTools mtabulate
 #' @importFrom stats na.omit
 #'
 #' @export
-aaVariationToCounts <- function(aa_variation,
-                                inheritance_model = c("dominant", "recessive", "additive")) {
+aaVariationToCounts <- function(aa_variation) {
   assert_that(
     is.data.frame(aa_variation),
     see_if(colnames(aa_variation)[1] == "ID",
            msg = "first column of aa_variation must be named ID"
-    ),
-    is.string(inheritance_model),
-    see_if(
-      pmatch(inheritance_model,
-             table = c("dominant", "recessive", "additive"),
-             nomatch = 0
-      ) != 0,
-      msg = "inheritance_model should be one of 'dominant', 'recessive', 'additive'"
     )
   )
-
-  inheritance_model <- match.arg(inheritance_model)
 
   ids <- aa_variation[, 1]
   aa_counts <- aa_variation[, -1]
@@ -571,26 +490,6 @@ aaVariationToCounts <- function(aa_variation,
   aa_counts <- mtabulate(as.data.frame(aa_counts, stringsAsFactors = FALSE))
   rownames(aa_counts) <- NULL
   aa_counts <- aa_counts[, ord]
-
-  aa_counts <- switch(
-    inheritance_model,
-    "dominant" = as.data.frame(
-      lapply(aa_counts,
-             function(x)
-               ifelse(x == 2, 1, x)),
-      stringsAsFactors = FALSE,
-      optional = TRUE
-    ),
-    "recessive" = as.data.frame(
-      lapply(aa_counts,
-             function(x)
-               ifelse(x == 2, 1, 0)),
-      stringsAsFactors = FALSE,
-      optional = TRUE
-    ),
-    "additive" = aa_counts # Do nothing this is default res
-  )
-
   aa_counts <- cbind(ID = aa_variation[, 1, drop = FALSE],
                      aa_counts,
                      stringsAsFactors = FALSE
@@ -669,7 +568,7 @@ getAAFrequencies <- function(aa_variation) {
 #' @examples
 #' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(file)
-#' hla_counts <- hlaCallsToCounts(hla_calls, inheritance_model = "additive")
+#' hla_counts <- hlaCallsToCounts(hla_calls)
 #' countsToHlaCalls(hla_counts)
 #'
 #' @importFrom assertthat assert_that see_if
@@ -1115,10 +1014,8 @@ getHlaKirInteractions <- function(hla_calls,
     hla_max_resolution <- hla_max_resolution - 2
   }
 
-  hla_counts <- hlaCallsToCounts(hla_variables,
-                                 inheritance_model = "dominant",
-                                 check_hla_format = FALSE
-  )
+  hla_counts <- hlaCallsToCounts(hla_variables, check_hla_format = FALSE)
+  hla_counts[, -1] <- ceiling(hla_counts[, -1] / 2) # reduce to presence / absence indicators
 
   counts <- left_join(hla_counts, kir_counts, by = "ID")
   interactions <- countsToVariables(counts, dictionary = interactions_dict)
@@ -1130,9 +1027,7 @@ getHlaKirInteractions <- function(hla_calls,
 #'
 #' Helper function for experiments filtering
 #'
-#' @param experiment Matrix of type integer
-#' @param inheritance_model String matching one of values
-#'   \code{"dominant", "recessive", "additive"}
+#' @inheritParams getExperimentFrequencies
 #' @param lower_frequency_cutoff Number of positive value or \code{NULL}
 #' @param upper_frequency_cutoff Number of positive value or \code{NULL}
 #'
@@ -1143,15 +1038,14 @@ getHlaKirInteractions <- function(hla_calls,
 #' @importFrom magrittr %>%
 #'
 filterExperimentByFrequency <- function(experiment,
-                                        inheritance_model = c("dominant", "recessive", "additive"),
+                                        carrier_frequency = FALSE,
                                         lower_frequency_cutoff = NULL,
                                         upper_frequency_cutoff = NULL) {
   inheritance_model_choice <- eval(formals()[["inheritance_model"]])
   assert_that(
     is.matrix(experiment),
     isCountsOrZeros(experiment),
-    is.string(inheritance_model),
-    stringMatches(inheritance_model, inheritance_model_choice),
+    isTRUEorFALSE(carrier_frequency),
     validateFrequencyCutoffs(lower_frequency_cutoff, upper_frequency_cutoff)
   )
 
@@ -1159,7 +1053,7 @@ filterExperimentByFrequency <- function(experiment,
   upper_frequency_cutoff <- ifelse(is.null(upper_frequency_cutoff), Inf, upper_frequency_cutoff)
   freqs_are_float <- lower_frequency_cutoff <= 1 || upper_frequency_cutoff <= 1
   variables_freq <- experiment %>%
-    getExperimentFrequencies(inheritance_model = inheritance_model) %>%
+    getExperimentFrequencies(carrier_frequency = carrier_frequency) %>%
     filter(.data$Counts > lower_frequency_cutoff |
              freqs_are_float) %>%
     filter(.data$Freq > lower_frequency_cutoff |
@@ -1189,7 +1083,7 @@ filterExperimentByFrequency <- function(experiment,
 #'
 #' @inheritParams hlaCallsToCounts
 #' @param experiment Matrix
-#' @param inheritance_model String
+#' @param type String "allele_frequency" or "carrier_frequency"
 #'
 #' @return Data frame containing variables, its corresponding total counts
 #'   and frequencies.
@@ -1202,37 +1096,48 @@ filterExperimentByFrequency <- function(experiment,
 #'
 getExperimentFrequencies <-
   function(experiment,
-           inheritance_model = c("dominant", "recessive", "additive")) {
+           carrier_frequency = FALSE,
+           ref = NULL) {
     UseMethod("getExperimentFrequencies", experiment)
   }
 
 #' @rdname getExperimentFrequencies
 #' @method getExperimentFrequencies matrix
 #'
-#' @inheritParams getExperimentFrequencies
-#'
 getExperimentFrequencies.matrix <-
   function(experiment,
-           inheritance_model = c("dominant", "recessive", "additive")) {
+           carrier_frequency = FALSE,
+           ref = NULL) {
     inheritance_model_choice <-  eval(formals()[["inheritance_model"]])
     assert_that(
       is.matrix(experiment),
       isCountsOrZeros(experiment),
-      is.string(inheritance_model),
-      stringMatches(inheritance_model, choice = inheritance_model_choice)
+      isTRUEorFALSE(carrier_frequency)
+      # TODO ref
     )
+
+    if (carrier_frequency) {
+      experiment <- applyInheritanceModel(experiment, "dominant")
+    }
 
     # Under additive inheritance model population size equals 2 * nrow(counts_table), in other cases it's 1 * nrow(counts_table)
     counts_sums <- rowSums(experiment, na.rm = TRUE)
-    pop_mul <- ifelse(inheritance_model == "additive", 2, 1)
-    counts_freq <- counts_sums / (pop_mul * ncol(experiment))
+    allele_freq <- counts_sums / (2 * ncol(experiment)) # the population size is 2x because genes comes in two copies
 
     counts_df <- data.frame(
       term = rownames(experiment),
       Counts = counts_sums,
-      Freq = percent(counts_freq),
+      Freq = percent(allele_freq),
       stringsAsFactors = FALSE
     )
+
+    if (! is.null(ref)) {
+      if (carrier_frequency) {
+         ref[, -1] <- lapply(ref[, -1, drop = FALSE], function (x) 2 * x * (1 - x) + x^2) # HWE 2qp + q^2
+      }
+      counts_df <-
+        left_join(counts_df, ref, by = c("term" = "var"))
+    }
 
     return(counts_df)
   }
@@ -1240,14 +1145,61 @@ getExperimentFrequencies.matrix <-
 #' @rdname getExperimentFrequencies
 #' @method getExperimentFrequencies SummarizedExperiment
 #'
-#' @inheritParams getExperimentFrequencies
-#'
 getExperimentFrequencies.SummarizedExperiment <-
   function(experiment,
-           inheritance_model) {
+           carrier_frequency = TRUE) {
     counts <- assay(experiment)
     getExperimentFrequencies(experiment = counts,
-                             inheritance_model = inheritance_model
+                             carrier_frequency = carrier_frequency
     )
   }
 
+#' Format experiment to inheritance model
+#'
+#' Helper function transforming experiments counts to selected
+#' \code{inheritance_model}. Under \code{"additive"} inheritance model
+#' experiment is returned unchanged. For \code{"dominant"} occurence of the
+#' variable is reported as \code{1} and \code{0} otherwise. Under
+#' \code{"recessive"} inheritence model occurence of the variable occurence of
+#' two copies of the variable is reported as \code{1} and \code{0} otherwise.
+#'
+#' @param experiment Matrix
+#' @param inheritance_model String specifying inheritance model to use.
+#'   Available choices are \code{"dominant"}, \code{"recessive"},
+#'   \code{"additive"}. In \code{"dominant"} model homozygotes and heterozygotes
+#'   are coded as \code{1}. In \code{"recessive"} model homozygotes are coded as
+#'   \code{1} and all other as \code{0}. In \code{"additive"} model homozygotes
+#'   are coded as \code{2} and heterozygotes as \code{1}.
+#'
+#' @return Matrix
+#'
+applyInheritanceModel <-
+  function(experiment,
+           inheritance_model = c("dominant", "recessive", "additive")) {
+    UseMethod("applyInheritanceModel", experiment)
+  }
+
+#' @rdname applyInheritanceModel
+#' @method applyInheritanceModel matrix
+#'
+applyInheritanceModel.matrix <- function(experiment,
+                                         inheritance_model =  c("dominant", "recessive", "additive")) {
+  switch (
+    inheritance_model,
+    "additive" = experiment,
+    "dominant" = ceiling(experiment / 2),
+    "recessive" = floor(experiment / 2)
+  )
+}
+
+#' @rdname applyInheritanceModel
+#' @method applyInheritanceModel SummarizedExperiment
+#'
+#' @importFrom SummarizedExperiment assay
+#'
+applyInheritanceModel.SummarizedExperiment <- function(experiment,
+                                                       inheritance_model =  c("dominant", "recessive", "additive")) {
+  assay(experiment) <- applyInheritanceModel(assay(experiment), inheritance_model)
+
+  return(experiment)
+}

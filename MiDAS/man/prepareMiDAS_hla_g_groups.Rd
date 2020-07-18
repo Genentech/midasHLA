@@ -4,12 +4,10 @@
 \alias{prepareMiDAS_hla_g_groups}
 \title{Prepare MiDAS data on HLA allele's G groups level}
 \usage{
-prepareMiDAS_hla_g_groups(hla_calls, inheritance_model, ...)
+prepareMiDAS_hla_g_groups(hla_calls, ...)
 }
 \arguments{
 \item{hla_calls}{Data frame}
-
-\item{inheritance_model}{String}
 
 \item{...}{Not used}
 }

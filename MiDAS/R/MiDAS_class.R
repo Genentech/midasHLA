@@ -17,11 +17,6 @@ NULL
 #' for performing statistical analyses. See \code{\link{prepareMiDAS}} and
 #' \code{\link{runMiDAS}} for more informations.
 #'
-#' An inheritance model of \code{MiDAS} object is held in object's metadata. It
-#' specifies inheritance model under which all experiments matrices has been
-#' constructed. It can be accessed using \code{\link{getInheritanceModel}}
-#' function.
-#'
 #' Experiments slots available for \code{\link{runMiDAS}} function are defined
 #' in object's metadata under \code{experiment} variable. It can be accessed
 #' using \code{\link{getExperiments}} function.
@@ -39,9 +34,7 @@ MiDAS <- setClass(
 #
 # Valid \code{MiDAS} object must contain hla_calls or kir_calls experiment in
 # proper \link[=readHlaCalls]{HLA calls} or \link[=readKPICalls]{KIR calls}
-# format. It also have to have \code{inheritance_model} metadata's variable
-# defined, accepted values are \code{"additive"}, \code{"dominant"},
-# \code{"recessive"}.
+# format.
 #
 # \code{experiment} metadata's variable used to determine analyses available
 # via \code{\link{runMiDAS}} is optional and does not determine object
@@ -52,7 +45,7 @@ MiDAS <- setClass(
 setValidity(Class = "MiDAS", method = function(object) {
   hla_calls <- getHlaCalls(object)
   kir_calls <- getKirCalls(object)
-  inheritance_model <- getInheritanceModel(object)
+  placeholder <- getPlaceholder(object)
 
   assert_that(
     see_if(! is.null(hla_calls) | ! is.null(kir_calls),
@@ -60,12 +53,7 @@ setValidity(Class = "MiDAS", method = function(object) {
     ),
     if (! is.null(hla_calls)) { checkHlaCallsFormat(hla_calls) } else { TRUE },
     if (! is.null(kir_calls)) { checkKirCallsFormat(kir_calls) } else { TRUE },
-    is.string(inheritance_model),
-    stringMatches(
-      x = inheritance_model,
-      choice = c("additive", "dominant", "recessive")
-    ),
-    is.string(getPlaceholder(object)),
+    is.string(placeholder),
     see_if(
       ! getPlaceholder(object) %in% unlist(rownames(object)),
       msg = sprintf("Placeholder '%s' is used in one of the experiments", getPlaceholder(object))
@@ -78,30 +66,6 @@ setValidity(Class = "MiDAS", method = function(object) {
 
   return(TRUE)
 })
-
-#' @rdname MiDAS-class
-#'
-#' @title Extract inheritance model from MiDAS object.
-#'
-#' @param object \code{\link{MiDAS}} object
-#'
-#' @return String name of object's inheritance model.
-#'
-#' @export
-setGeneric(
-  name = "getInheritanceModel",
-  def = function(object) standardGeneric("getInheritanceModel")
-)
-
-#' @rdname MiDAS-class
-#'
-#' @importFrom S4Vectors metadata
-#'
-setMethod(
-  f = "getInheritanceModel",
-  signature = "MiDAS",
-  definition = function (object) metadata(object)$inheritance_model
-)
 
 #' @rdname MiDAS-class
 #'
@@ -270,7 +234,14 @@ setMethod(
 #' @export
 setGeneric(
   name = "getFrequencies",
-  def = function(object, experiment) standardGeneric("getFrequencies")
+  def = function(object,
+                 experiment,
+                 carrier_frequency = FALSE,
+                 compare = NULL,
+                 ref = list(hla_alleles = allele_frequencies)
+  ) {
+    standardGeneric("getFrequencies")
+  }
 )
 
 #' @rdname MiDAS-class
@@ -281,10 +252,16 @@ setGeneric(
 setMethod(
   f = "getFrequencies",
   signature = "MiDAS",
-  definition = function (object, experiment) {
+  definition = function (object,
+                         experiment,
+                         carrier_frequency = FALSE,
+                         compare = NULL,
+                         ref = list(hla_alleles = allele_frequencies)) {
     assert_that(
       is.string(experiment),
-      stringMatches(experiment, getExperiments(object))
+      stringMatches(experiment, getExperiments(object)),
+      isCharacterOrNULL(compare),
+      is.list(ref)
     )
     mat <- object[[experiment]]
     assert_that(
@@ -293,8 +270,24 @@ setMethod(
                     experiment
             )
     )
-    inheritance_model <- getInheritanceModel(object)
-    freq <- getExperimentFrequencies(mat, inheritance_model)
+
+    ref <- ref[[experiment]]
+    if (! is.null(compare) && ! is.null(ref)) {
+      ref <- ref[ref$population == compare,]
+      ref <- reshape(
+        data = ref,
+        idvar = "var",
+        timevar = "population",
+        direction = "wide"
+      )
+      colnames(ref)[-1] <-
+        gsub("frequency\\.", "", colnames(ref)[-1])
+      freq <- getExperimentFrequencies(mat, carrier_frequency, ref)
+    } else {
+      if (! is.null(compare)) warn(sprintf("Could not find reference frequencies for experiment: '%s'", experiment))
+      freq <- getExperimentFrequencies(mat, carrier_frequency)
+    }
+
 
     return(freq)
   }
@@ -320,7 +313,8 @@ setGeneric(
   def = function(object,
                  experiment,
                  lower_frequency_cutoff = NULL,
-                 upper_frequency_cutoff = NULL) {
+                 upper_frequency_cutoff = NULL,
+                 carrier_frequency = FALSE) {
     standardGeneric("filterByFrequency")
   }
 )
@@ -336,14 +330,14 @@ setMethod(
   definition = function(object,
                         experiment,
                         lower_frequency_cutoff = NULL,
-                        upper_frequency_cutoff = NULL) {
+                        upper_frequency_cutoff = NULL,
+                        carrier_frequency = FALSE) {
   assert_that(
     is.character(experiment),
     characterMatches(experiment, getExperiments(object)),
     validateFrequencyCutoffs(lower_frequency_cutoff, upper_frequency_cutoff)
   )
 
-  inheritance_model <- getInheritanceModel(object)
   for (ex in experiment) {
     mat <- object[[ex]]
     assert_that(
@@ -352,7 +346,7 @@ setMethod(
     )
     object[[ex]] <- filterExperimentByFrequency(
       experiment = mat,
-      inheritance_model = inheritance_model,
+      carrier_frequency = carrier_frequency,
       lower_frequency_cutoff = lower_frequency_cutoff,
       upper_frequency_cutoff = upper_frequency_cutoff
     )
@@ -488,7 +482,6 @@ as.data.frame.MiDAS <- function(x, ...) {
 #' midas <- prepareMiDAS(hla_calls = hla_calls,
 #'                       kir_calls = kir_calls,
 #'                       colData = phenotype,
-#'                       inheritance_model = "additive",
 #'                       experiment = "hla_alleles"
 #' )
 #' }
@@ -503,7 +496,6 @@ as.data.frame.MiDAS <- function(x, ...) {
 prepareMiDAS <- function(hla_calls = NULL,
                          kir_calls = NULL,
                          colData,
-                         inheritance_model = c("additive", "dominant", "recessive"),
                          experiment = c(
                            "hla_alleles",
                            "hla_aa",
@@ -519,7 +511,6 @@ prepareMiDAS <- function(hla_calls = NULL,
                          upper_frequency_cutoff = NULL,
                          ...
 ) {
-  inheritance_model_choice <- eval(formals()[["inheritance_model"]])
   experiment_choice <- eval(formals()[["experiment"]])
   assert_that(
     see_if(
@@ -533,8 +524,6 @@ prepareMiDAS <- function(hla_calls = NULL,
       checkKirCallsFormat(kir_calls)
     } else { TRUE },
     checkColDataFormat(colData),
-    is.string(inheritance_model),
-    stringMatches(inheritance_model, inheritance_model_choice),
     is.character(experiment),
     characterMatches(experiment, experiment_choice),
     is.string(placeholder),
@@ -568,8 +557,7 @@ prepareMiDAS <- function(hla_calls = NULL,
     fun <- paste0("prepareMiDAS_", e)
     args <- list(
       hla_calls = hla_calls,
-      kir_calls = kir_calls,
-      inheritance_model = inheritance_model
+      kir_calls = kir_calls
     )
     args <- c(args, dot.args)
     E <- do.call(
@@ -583,7 +571,6 @@ prepareMiDAS <- function(hla_calls = NULL,
         && is.integer(E)) {
       E <- filterExperimentByFrequency(
         experiment = E,
-        inheritance_model = inheritance_model,
         lower_frequency_cutoff = lower_frequency_cutoff,
         upper_frequency_cutoff = upper_frequency_cutoff
       )
@@ -599,7 +586,6 @@ prepareMiDAS <- function(hla_calls = NULL,
     DataFrame(colData, row.names = colData[["ID"]], check.names = TRUE)
 
   metadata <- list(
-    inheritance_model = inheritance_model,
     experiment = experiment,
     placeholder = placeholder
   )
@@ -620,23 +606,18 @@ prepareMiDAS <- function(hla_calls = NULL,
 #'
 #' @title Prepare MiDAS data on HLA allele level
 #'
-#' @details \code{'hla_alleles'} - \code{hla_calls} are transformed into counts
-#' under \code{inheritance_model} of choice (see \code{\link{hlaCallsToCounts}}
-#' for  more details).
+#' @details \code{'hla_alleles'} - \code{hla_calls} are transformed into counts.
 #'
 #' @inheritParams prepareMiDAS
 #'
 #' @return Matrix
 #'
-prepareMiDAS_hla_alleles <- function(hla_calls, inheritance_model, ...) {
+prepareMiDAS_hla_alleles <- function(hla_calls, ...) {
   assert_that(
     checkHlaCallsFormat(hla_calls)
   )
 
-  hla_alleles <- hlaCallsToCounts(
-    hla_calls = hla_calls,
-    inheritance_model = inheritance_model
-  ) %>%
+  hla_alleles <- hlaCallsToCounts(hla_calls = hla_calls) %>%
     dfToExperimentMat()
 
   return(hla_alleles)
@@ -646,13 +627,10 @@ prepareMiDAS_hla_alleles <- function(hla_calls, inheritance_model, ...) {
 #'
 #' \code{hla_calls} are first converted to amino acid level, taking only
 #' variable positions under consideration. Than variable amino acid positions
-#' are transformed to counts under \code{inheritance_model} of choice (see
-#' \code{\link{hlaToAAVariation}} and \code{\link{aaVariationToCounts}} for more
-#' details).
+#' are transformed to counts.
 #'
 #' @inheritParams hlaToAAVariation
 #' @param hla_calls Data frame
-#' @param inheritance_model String
 #' @param ... Not used
 #'
 #' @return Matrix
@@ -661,10 +639,9 @@ prepareMiDAS_hla_alleles <- function(hla_calls, inheritance_model, ...) {
 #' @importFrom SummarizedExperiment SummarizedExperiment
 #'
 prepareMiDAS_hla_aa <- function(hla_calls,
-                                  inheritance_model,
-                                  indels = TRUE,
-                                  unkchar = FALSE,
-                                  ...) {
+                                indels = TRUE,
+                                unkchar = FALSE,
+                                ...) {
   assert_that(
     checkHlaCallsFormat(hla_calls),
     is.flag(indels),
@@ -677,7 +654,7 @@ prepareMiDAS_hla_aa <- function(hla_calls,
       indels = indels,
       unkchar = unkchar
     ) %>%
-    aaVariationToCounts(inheritance_model = inheritance_model) %>%
+    aaVariationToCounts() %>%
     dfToExperimentMat()
   vars <- counts %>%
     rownames()
@@ -709,7 +686,6 @@ prepareMiDAS_hla_aa <- function(hla_calls,
 #' \code{\link{hlaCallsToCounts}} for more details).
 #'
 #' @param hla_calls Data frame
-#' @param inheritance_model String
 #' @param ... Not used
 #'
 #' @return Matrix
@@ -717,16 +693,15 @@ prepareMiDAS_hla_aa <- function(hla_calls,
 #' @importFrom assertthat assert_that
 #'
 prepareMiDAS_hla_g_groups <- function(hla_calls,
-                                        inheritance_model,
-                                        ...) {
+                                      ...) {
   assert_that(
     checkHlaCallsFormat(hla_calls)
   )
 
   lib <- "allele_HLA_Ggroup"
   hla_g_groups <- hlaToVariable(hla_calls = hla_calls,
-                                  dictionary = lib,
-                                  na.value = 0
+                                dictionary = lib,
+                                na.value = 0
   )
 
   assert_that(
@@ -737,7 +712,6 @@ prepareMiDAS_hla_g_groups <- function(hla_calls,
   hla_g_groups <-
     hlaCallsToCounts(
       hla_calls = hla_g_groups,
-      inheritance_model = inheritance_model,
       check_hla_format = FALSE
     ) %>%
     dfToExperimentMat()
@@ -748,19 +722,16 @@ prepareMiDAS_hla_g_groups <- function(hla_calls,
 #' Prepare MiDAS data on HLA allele's supertypes level
 #'
 #' \code{hla_calls} are transformed to HLA alleles groups using supertypes
-#' dictionary shipped with the package. Than they are transformed to counts
-#' under \code{inheritance_model} of choice (see \code{\link{hlaToVariable}} and
-#' \code{\link{hlaCallsToCounts}} for more details).
+#' dictionary shipped with the package. Than they are transformed to counts).
 #'
 #' @param hla_calls Data frame
-#' @param inheritance_model String
 #' @param ... Not used
 #'
 #' @return Matrix
 #'
 #' @importFrom assertthat assert_that
 #'
-prepareMiDAS_hla_supertypes <- function(hla_calls, inheritance_model, ...) {
+prepareMiDAS_hla_supertypes <- function(hla_calls, ...) {
   assert_that(
     checkHlaCallsFormat(hla_calls)
   )
@@ -779,7 +750,6 @@ prepareMiDAS_hla_supertypes <- function(hla_calls, inheritance_model, ...) {
   hla_supertypes <-
     hlaCallsToCounts(
       hla_calls = hla_supertypes,
-      inheritance_model = inheritance_model,
       check_hla_format = FALSE
     ) %>%
     subset(select = - Unclassified) %>%
@@ -792,19 +762,16 @@ prepareMiDAS_hla_supertypes <- function(hla_calls, inheritance_model, ...) {
 #'
 #' \code{hla_calls} are transformed to HLA alleles groups using Bw4/6, C1/2 and
 #' Bw4+A23+A24+A32 dictionaries shipped with the package. Than they are
-#' transformed to counts under \code{inheritance_model} of choice (see
-#' \code{\link{hlaToVariable}} and \code{\link{hlaCallsToCounts}} for more
-#' details).
+#' transformed to counts.
 #'
 #' @param hla_calls Data frame
-#' @param inheritance_model String
 #' @param ... Not used
 #'
 #' @return Matrix
 #'
 #' @importFrom assertthat assert_that
 #'
-prepareMiDAS_hla_NK_ligands <- function(hla_calls, inheritance_model, ...) {
+prepareMiDAS_hla_NK_ligands <- function(hla_calls, ...) {
   assert_that(
     checkHlaCallsFormat(hla_calls)
   )
@@ -827,7 +794,6 @@ prepareMiDAS_hla_NK_ligands <- function(hla_calls, inheritance_model, ...) {
   hla_NK_ligands <-
     hlaCallsToCounts(
       hla_calls = hla_NK_ligands,
-      inheritance_model = inheritance_model,
       check_hla_format = FALSE
     ) %>%
     dfToExperimentMat()

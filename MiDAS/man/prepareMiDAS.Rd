@@ -6,13 +6,12 @@
 \title{Prepare MiDAS object for statistical analysis}
 \usage{
 prepareMiDAS(hla_calls = NULL, kir_calls = NULL, colData,
-  inheritance_model = c("additive", "dominant", "recessive"),
   experiment = c("hla_alleles", "hla_aa", "hla_g_groups",
   "hla_supertypes", "hla_NK_ligands", "kir_genes", "hla_kir_interactions",
   "hla_divergence"), placeholder = "term",
   lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL, ...)
 
-prepareMiDAS_hla_alleles(hla_calls, inheritance_model, ...)
+prepareMiDAS_hla_alleles(hla_calls, ...)
 }
 \arguments{
 \item{hla_calls}{Data frame containing HLA allele calls, as return by
@@ -26,13 +25,6 @@ observations or covariates. It have to contain \code{'ID'} column holding
 samples identifiers corresponding to identifiers in \code{hla_calls} and
 \code{kir_calls}. Importantly rows of \code{hla_calls} and
 \code{kir_calls} without corresponding phenotype are discarded.}
-
-\item{inheritance_model}{String specifying inheritance model to use.
-Available choices are \code{"dominant"}, \code{"recessive"},
-\code{"additive"}. In \code{"dominant"} model homozygotes and heterozygotes
-are coded as \code{1}. In \code{"recessive"} model homozygotes are coded as
-\code{1} and all other as \code{0}. In \code{"additive"} model homozygotes
-are coded as \code{2} and heterozygotes as \code{1}.}
 
 \item{experiment}{Character vector indicating analysis type for which data
 should be prepared. Valid choices are \code{"hla_alleles"},
@@ -59,9 +51,7 @@ Matrix
 to selected analysis creating \code{\link{MiDAS}} object.
 }
 \details{
-\code{'hla_alleles'} - \code{hla_calls} are transformed into counts
-under \code{inheritance_model} of choice (see \code{\link{hlaCallsToCounts}}
-for  more details).
+\code{'hla_alleles'} - \code{hla_calls} are transformed into counts.
 }
 \examples{
 \dontrun{
@@ -84,7 +74,6 @@ phenotype <- left_join(pheno, covar, by ="ID")
 midas <- prepareMiDAS(hla_calls = hla_calls,
                       kir_calls = kir_calls,
                       colData = phenotype,
-                      inheritance_model = "additive",
                       experiment = "hla_alleles"
 )
 }

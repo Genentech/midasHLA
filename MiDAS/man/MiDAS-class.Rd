@@ -4,8 +4,6 @@
 \name{MiDAS-class}
 \alias{MiDAS-class}
 \alias{MiDAS}
-\alias{getInheritanceModel}
-\alias{getInheritanceModel,MiDAS-method}
 \alias{getExperiments}
 \alias{getExperiments,MiDAS-method}
 \alias{getHlaCalls}
@@ -24,10 +22,6 @@
 \alias{filterByOmnibusGroups,MiDAS-method}
 \title{MiDAS class}
 \usage{
-getInheritanceModel(object)
-
-\S4method{getInheritanceModel}{MiDAS}(object)
-
 getExperiments(object)
 
 \S4method{getExperiments}{MiDAS}(object)
@@ -48,15 +42,19 @@ getOmnibusGroups(object, experiment)
 
 \S4method{getOmnibusGroups}{MiDAS}(object, experiment)
 
-getFrequencies(object, experiment)
+getFrequencies(object, experiment, carrier_frequency = FALSE,
+  compare = NULL, ref = list(hla_alleles = allele_frequencies))
 
-\S4method{getFrequencies}{MiDAS}(object, experiment)
+\S4method{getFrequencies}{MiDAS}(object, experiment,
+  carrier_frequency = FALSE, compare = NULL, ref = list(hla_alleles =
+  allele_frequencies))
 
 filterByFrequency(object, experiment, lower_frequency_cutoff = NULL,
-  upper_frequency_cutoff = NULL)
+  upper_frequency_cutoff = NULL, carrier_frequency = FALSE)
 
 \S4method{filterByFrequency}{MiDAS}(object, experiment,
-  lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL)
+  lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL,
+  carrier_frequency = FALSE)
 
 filterByOmnibusGroups(object, experiment, groups)
 
@@ -72,8 +70,6 @@ filterByOmnibusGroups(object, experiment, groups)
 \item{upper_frequency_cutoff}{Number}
 
 \item{groups}{Character}
-
-\item{object}{\code{\link{MiDAS}} object}
 
 \item{object}{\code{\link{MiDAS}} object}
 
@@ -96,8 +92,6 @@ filterByOmnibusGroups(object, experiment, groups)
 \item{experiment}{Matrix}
 }
 \value{
-String name of object's inheritance model.
-
 Character giving names of available analysis types.
 
 Data frame with object's HLA calls.
@@ -138,11 +132,6 @@ Other experiments slots can be occupied by transformations of those matrices.
 Those transformations can be further used by \code{\link{runMiDAS}} function
 for performing statistical analyses. See \code{\link{prepareMiDAS}} and
 \code{\link{runMiDAS}} for more informations.
-
-An inheritance model of \code{MiDAS} object is held in object's metadata. It
-specifies inheritance model under which all experiments matrices has been
-constructed. It can be accessed using \code{\link{getInheritanceModel}}
-function.
 
 Experiments slots available for \code{\link{runMiDAS}} function are defined
 in object's metadata under \code{experiment} variable. It can be accessed

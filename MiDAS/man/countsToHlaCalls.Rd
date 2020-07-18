@@ -28,7 +28,7 @@ implemented so the function will always treat counts table as coming from
 \examples{
 file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 hla_calls <- readHlaCalls(file)
-hla_counts <- hlaCallsToCounts(hla_calls, inheritance_model = "additive")
+hla_counts <- hlaCallsToCounts(hla_calls)
 countsToHlaCalls(hla_counts)
 
 }

@@ -4,12 +4,10 @@
 \alias{prepareMiDAS_hla_supertypes}
 \title{Prepare MiDAS data on HLA allele's supertypes level}
 \usage{
-prepareMiDAS_hla_supertypes(hla_calls, inheritance_model, ...)
+prepareMiDAS_hla_supertypes(hla_calls, ...)
 }
 \arguments{
 \item{hla_calls}{Data frame}
-
-\item{inheritance_model}{String}
 
 \item{...}{Not used}
 }
@@ -18,7 +16,5 @@ Matrix
 }
 \description{
 \code{hla_calls} are transformed to HLA alleles groups using supertypes
-dictionary shipped with the package. Than they are transformed to counts
-under \code{inheritance_model} of choice (see \code{\link{hlaToVariable}} and
-\code{\link{hlaCallsToCounts}} for more details).
+dictionary shipped with the package. Than they are transformed to counts).
 }

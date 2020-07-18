@@ -1186,7 +1186,7 @@ assertthat::on_failure(functionExists) <- function(call, env) {
 #'
 runMiDASGetVarsFreq <- function(midas, experiment, test_covar) {
   variables_freq <- midas[[experiment]] %>%
-    getExperimentFrequencies(inheritance_model = getInheritanceModel(midas)) %>%
+    getExperimentFrequencies() %>%
     rename(Ntotal = .data$Counts, Ntotal.frequency = .data$Freq)
 
   test_covar_vals <- factor(colData(midas)[[test_covar]])
@@ -1196,7 +1196,7 @@ runMiDASGetVarsFreq <- function(midas, experiment, test_covar) {
     lvl1_ids <- ids[test_covar_vals == levels(test_covar_vals)[1]]
     lvl1_freq <- midas[, lvl1_ids] %>%
       `[[`(experiment) %>%
-      getExperimentFrequencies(inheritance_model = getInheritanceModel(midas)) %>%
+      getExperimentFrequencies() %>%
       rename(
         !!sprintf("N(%s=%s)", test_covar, levels(test_covar_vals)[1]) := .data$Counts,
         !!sprintf("N.frequency(%s=%s)", test_covar, levels(test_covar_vals)[1]) := .data$Freq
@@ -1206,7 +1206,7 @@ runMiDASGetVarsFreq <- function(midas, experiment, test_covar) {
     lvl2_ids <- ids[test_covar_vals == levels(test_covar_vals)[2]]
     lvl2_freq <- midas[, lvl2_ids] %>%
       `[[`(experiment) %>%
-      getExperimentFrequencies(inheritance_model = getInheritanceModel(midas)) %>%
+      getExperimentFrequencies() %>%
       rename(
         !!sprintf("N(%s=%s)", test_covar, levels(test_covar_vals)[2]) := .data$Counts,
         !!sprintf("N.frequency(%s=%s)", test_covar, levels(test_covar_vals)[2]) := .data$Freq
@@ -1628,7 +1628,7 @@ checkKirGenesFormat <- function(genes) {
 iterativeLRT <- function(object, placeholder, omnibus_groups) {
   mod0 <- updateModel(
     object = object,
-    x = "0",
+    x = "1",
     placeholder = placeholder,
     backquote = FALSE
   )
@@ -1727,4 +1727,37 @@ iterativeModel <- function(object,
   }
 
   return(results)
+}
+
+#' Check if experiment is inheritance model applicable
+#'
+#' Helper function checking if for given experiment type inheritance model can
+#' be applied (eg. "hla_alleles") or not (eg. "hla_kir_interactions")
+#'
+#' @param x String giving experiment type.
+#'
+#' @return Logical indicating if inheritance model can be applied.
+#'
+#' @family assert functions
+#'
+#' @importFrom assertthat assert_that
+#'
+isInheritanceModelApplicable <- function(x) {
+  im_applicable <- c("hla_alleles", "hla_aa", "hla_g_groups", "hla_supertypes", "hla_NK_ligands")
+  im_nonapplicable <- c("kir_genes", "hla_kir_interactions", "hla_divergence")
+  test <- if (x %in% im_applicable) {
+    TRUE
+  } else if (x %in% im_nonapplicable) {
+    FALSE
+  } else {
+    FALSE
+  }
+
+  return(test)
+}
+
+assertthat::on_failure(isInheritanceModelApplicable) <- function(call, env) {
+  paste0("Inheritance model can not be applied to experiment ",
+         deparse(call$x)
+  )
 }

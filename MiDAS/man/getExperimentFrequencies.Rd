@@ -6,19 +6,19 @@
 \alias{getExperimentFrequencies.SummarizedExperiment}
 \title{Calculate variables frequencies TODO}
 \usage{
-getExperimentFrequencies(experiment, inheritance_model = c("dominant",
-  "recessive", "additive"))
+getExperimentFrequencies(experiment, carrier_frequency = FALSE,
+  ref = NULL)
 
 \method{getExperimentFrequencies}{matrix}(experiment,
-  inheritance_model = c("dominant", "recessive", "additive"))
+  carrier_frequency = FALSE, ref = NULL)
 
 \method{getExperimentFrequencies}{SummarizedExperiment}(experiment,
-  inheritance_model)
+  carrier_frequency = TRUE)
 }
 \arguments{
 \item{experiment}{Matrix}
 
-\item{inheritance_model}{String}
+\item{type}{String "allele_frequency" or "carrier_frequency"}
 }
 \value{
 Data frame containing variables, its corresponding total counts
