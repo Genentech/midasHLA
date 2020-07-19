@@ -1,3 +1,6 @@
+## 0.0.9048 - 19/07/20
++ Frequency calcualtions can be now extended by the addition of reference population frequencies
+
 ## 0.0.9047 - 2/07/20
 + MiDAS object introduced
 + This an object derived from MultiAssayExperiment class, it is used for storing hla and kir calls and 
