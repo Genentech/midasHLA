@@ -1094,6 +1094,8 @@ filterExperimentByFrequency <- function(experiment,
 #' @importFrom formattable percent
 #' @importFrom SummarizedExperiment assay
 #'
+#' @export
+#'
 getExperimentFrequencies <-
   function(experiment,
            carrier_frequency = FALSE,
