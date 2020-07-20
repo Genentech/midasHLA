@@ -1034,7 +1034,6 @@ getHlaKirInteractions <- function(hla_calls,
 #' @return Matrix
 #'
 #' @importFrom assertthat assert_that see_if is.number is.string
-#' @importFrom dplyr filter
 #' @importFrom magrittr %>%
 #'
 filterExperimentByFrequency <- function(experiment,
@@ -1049,21 +1048,14 @@ filterExperimentByFrequency <- function(experiment,
     validateFrequencyCutoffs(lower_frequency_cutoff, upper_frequency_cutoff)
   )
 
-  lower_frequency_cutoff <- ifelse(is.null(lower_frequency_cutoff), -Inf, lower_frequency_cutoff)
-  upper_frequency_cutoff <- ifelse(is.null(upper_frequency_cutoff), Inf, upper_frequency_cutoff)
-  freqs_are_float <- lower_frequency_cutoff <= 1 || upper_frequency_cutoff <= 1
-  variables_freq <- experiment %>%
-    getExperimentFrequencies(carrier_frequency = carrier_frequency) %>%
-    filter(.data$Counts > lower_frequency_cutoff |
-             freqs_are_float) %>%
-    filter(.data$Freq > lower_frequency_cutoff |
-             ! freqs_are_float) %>%
-    filter(.data$Counts < upper_frequency_cutoff |
-             freqs_are_float) %>%
-    filter(.data$Freq < upper_frequency_cutoff |
-             ! freqs_are_float)
-  variables <- variables_freq$term
-  experiment <- experiment[variables, , drop = FALSE]
+  filtered_vars <- getExperimentFrequencies(
+    experiment = experiment,
+    carrier_frequency = carrier_frequency
+  ) %>%
+    getFrequencyMask(lower_frequency_cutoff = lower_frequency_cutoff,
+                     upper_frequency_cutoff = upper_frequency_cutoff)
+  mask <- rownames(experiment) %in% filtered_vars
+  experiment <- experiment[mask, , drop = FALSE]
 
   return(experiment)
 }
@@ -1112,7 +1104,6 @@ getExperimentFrequencies.matrix <-
   function(experiment,
            carrier_frequency = FALSE,
            ref = NULL) {
-    inheritance_model_choice <-  eval(formals()[["inheritance_model"]])
     assert_that(
       is.matrix(experiment),
       isCountsOrZeros(experiment),
@@ -1131,7 +1122,7 @@ getExperimentFrequencies.matrix <-
     counts_df <- data.frame(
       term = rownames(experiment),
       Counts = counts_sums,
-      Freq = percent(allele_freq),
+      Freq = allele_freq,
       stringsAsFactors = FALSE
     )
 
@@ -1142,6 +1133,14 @@ getExperimentFrequencies.matrix <-
       counts_df <-
         left_join(counts_df, ref, by = c("term" = "var"))
     }
+
+    # format frequencies as percent
+    counts_df[, -c(1, 2)] <-
+      rapply(
+        object = counts_df[, -c(1, 2), drop = FALSE],
+        f = function(col) percent(col),
+        how = "replace"
+      )
 
     return(counts_df)
   }
@@ -1208,4 +1207,35 @@ applyInheritanceModel.SummarizedExperiment <- function(experiment,
   assay(experiment) <- applyInheritanceModel(assay(experiment), inheritance_model)
 
   return(experiment)
+}
+
+#' Helper function for frequency data frame filtering
+#'
+#' @inheritParams filterExperimentByFrequency
+#' @param df Data frame as returned by \code{getExperimentFrequencies}.
+#'
+#' @return Character vector containing names of terms after filtration.
+#'
+#' @importFrom dplyr filter
+#' @importFrom magrittr %>%
+#'
+getFrequencyMask <- function(df, # TODO test
+                             lower_frequency_cutoff = NULL,
+                             upper_frequency_cutoff = NULL) {
+  lower_frequency_cutoff <- ifelse(is.null(lower_frequency_cutoff), -Inf, lower_frequency_cutoff)
+  upper_frequency_cutoff <- ifelse(is.null(upper_frequency_cutoff), Inf, upper_frequency_cutoff)
+  freqs_are_float <- lower_frequency_cutoff <= 1 || upper_frequency_cutoff <= 1
+  variables_freq <- df %>%
+    filter(.data$Counts > lower_frequency_cutoff |
+             freqs_are_float) %>%
+    filter(.data$Freq > lower_frequency_cutoff |
+             ! freqs_are_float) %>%
+    filter(.data$Counts < upper_frequency_cutoff |
+             freqs_are_float) %>%
+    filter(.data$Freq < upper_frequency_cutoff |
+             ! freqs_are_float)
+
+   filtered_vars <- variables_freq$term
+
+  return(filtered_vars)
 }
