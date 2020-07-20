@@ -1106,6 +1106,8 @@ getExperimentFrequencies <-
 #' @rdname getExperimentFrequencies
 #' @method getExperimentFrequencies matrix
 #'
+#' @export
+#'
 getExperimentFrequencies.matrix <-
   function(experiment,
            carrier_frequency = FALSE,
@@ -1146,6 +1148,8 @@ getExperimentFrequencies.matrix <-
 
 #' @rdname getExperimentFrequencies
 #' @method getExperimentFrequencies SummarizedExperiment
+#'
+#' @export
 #'
 getExperimentFrequencies.SummarizedExperiment <-
   function(experiment,
