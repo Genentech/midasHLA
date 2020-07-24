@@ -61,7 +61,7 @@ hla_calls <- readHlaCalls(hla_calls_file)
 
 # read kir calls file
 kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-kir_calls <- readKPICalls(kir_calls_file, counts = TRUE)
+kir_calls <- readKPICalls(kir_calls_file)
 
 # read phenotypic data and covariates
 pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")

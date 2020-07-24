@@ -30,6 +30,31 @@ MiDAS <- setClass(
   contains = "MultiAssayExperiment"
 )
 
+#' @rdname MiDAS-class
+#'
+#' MiDAS class initialize method
+#'
+#' @inheritParams methods::initialize
+#' @param experiments ExperimentList
+#' @param colData DataFrame
+#' @param metadata list
+#'
+#' @return MiDAS object
+#'
+#' @importClassesFrom MultiAssayExperiment MultiAssayExperiment
+#'
+#' @export
+setMethod("initialize", "MiDAS", function(.Object, experiments, colData, metadata) {
+  midas <- MultiAssayExperiment(
+    experiments = experiments,
+    colData = colData,
+    metadata = metadata
+  )
+  class(midas) <- structure("MiDAS", package = "MiDAS")
+
+  return(midas)
+})
+
 # Validity method for class MiDAS
 #
 # Valid \code{MiDAS} object must contain hla_calls or kir_calls experiment in
@@ -469,7 +494,7 @@ as.data.frame.MiDAS <- function(x, ...) {
 #'
 #' # read kir calls file
 #' kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-#' kir_calls <- readKPICalls(kir_calls_file, counts = TRUE)
+#' kir_calls <- readKPICalls(kir_calls_file)
 #'
 #' # read phenotypic data and covariates
 #' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
@@ -590,15 +615,7 @@ prepareMiDAS <- function(hla_calls = NULL,
     placeholder = placeholder
   )
 
-  mae <- MultiAssayExperiment(
-    experiments = experiments,
-    colData = colData,
-    metadata = metadata
-  )
-
-  class(mae) <- structure("MiDAS", package = "MiDAS")
-
-  return(mae)
+  new("MiDAS", experiments = experiments, colData = colData, metadata = metadata)
 }
 
 
