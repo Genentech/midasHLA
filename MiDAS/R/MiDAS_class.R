@@ -73,9 +73,6 @@ setValidity(Class = "MiDAS", method = function(object) {
   placeholder <- getPlaceholder(object)
 
   assert_that(
-    see_if(! is.null(hla_calls) | ! is.null(kir_calls),
-           msg = "MiDAS object must contain hla_calls or kir_calls experiment"
-    ),
     if (! is.null(hla_calls)) { checkHlaCallsFormat(hla_calls) } else { TRUE },
     if (! is.null(kir_calls)) { checkKirCallsFormat(kir_calls) } else { TRUE },
     is.string(placeholder),
@@ -883,6 +880,9 @@ prepareMiDAS_hla_kir_interactions <- function(hla_calls, kir_calls, ...) {
 #' @return Matrix
 #'
 prepareMiDAS_hla_divergence <- function(hla_calls, ...) {
+  assert_that(
+    checkHlaCallsFormat(hla_calls)
+  )
   genes <- getHlaCallsGenes(hla_calls)
   assert_that(
     any(c("A", "B", "C") %in% genes),

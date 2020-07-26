@@ -18,13 +18,6 @@ test_that("MiDAS object is valid", {
     )
   class(midas) <- structure("MiDAS", package = "MiDAS")
 
-  empty_midas <- midas
-  experiments(empty_midas) <- MultiAssayExperiment::ExperimentList()
-  expect_error(
-    validObject(empty_midas),
-    "MiDAS object must contain hla_calls or kir_calls experiment"
-  )
-
   bad_placeholder <- midas
   S4Vectors::metadata(bad_placeholder)$placeholder <- 1
   expect_error(
