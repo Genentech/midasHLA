@@ -1687,13 +1687,16 @@ iterativeModel <- function(object,
   results <- lapply(
     X = variables,
     FUN = function(x) tryCatch(
-      expr = updateModel(
-        object = object,
-        x = x,
-        placeholder = placeholder,
-        backquote = TRUE,
-        collapse = " + "
-      ),
+      expr = {
+        obj <- updateModel(
+          object = object,
+          x = x,
+          placeholder = placeholder,
+          backquote = TRUE,
+          collapse = " + "
+        )
+        tidy(obj, exponentiate)
+      },
       error = function(e) {
         msg <- sprintf(
           "Error occurred while processing variable %s:\n\t%s",
@@ -1706,7 +1709,6 @@ iterativeModel <- function(object,
       }
     )
   )
-  results <- lapply(results, tidy, exponentiate = exponentiate)
   results <- bind_rows(results)
 
   # drop covariates
