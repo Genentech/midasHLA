@@ -22,6 +22,9 @@
 allele_frequencies
 }
 \description{
+Accessed on 28.07.20
+}
+\details{
 A dataset containing allele frequencies across 5697 alleles
 For quick yet more details I recommend the search results page in the
 allelefrequencies.net database website. Data are gathered in wide format.

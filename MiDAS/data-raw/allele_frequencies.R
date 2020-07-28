@@ -97,4 +97,4 @@ allele_frequencies <-
     # "proc.ind.with.allele.ggroup"
   )]
 
-usethis::use_data(allele_frequencies, allele_frequencies_reference_populations, overwrite = TRUE)
+usethis::use_data(allele_frequencies, overwrite = TRUE)
