@@ -1094,6 +1094,7 @@ getObjectDetails <- function(object) {
   object_call <- getCall(object)
   object_env <- attr(object$terms, ".Environment")
   object_formula <- eval(object_call[["formula"]], envir = object_env)
+  object_call[["formula"]] <- object_formula
   object_data <- eval(object_call[["data"]], envir = object_env)
 
   object_details <- list(
