@@ -241,6 +241,8 @@ setMethod(
 #'
 #' @param object \code{\link{MiDAS}} object.
 #' @param experiment String specifying experiment.
+#' @param ref_pop Character giving the names of reference populations to use. The
+#'   vector can be named then names will be used as population names.
 #'
 #' @return Data frame containing variables, its corresponding total counts
 #'   and frequencies.
@@ -259,7 +261,8 @@ setGeneric(
   def = function(object,
                  experiment,
                  carrier_frequency = FALSE,
-                 compare = NULL,
+                 compare = FALSE,
+                 ref_pop = c("USA NMDP African American pop 2", "USA NMDP Chinese", "USA NMDP European Caucasian"),
                  ref = list(hla_alleles = allele_frequencies)
   ) {
     standardGeneric("getFrequencies")
@@ -269,6 +272,9 @@ setGeneric(
 #' @rdname MiDAS-class
 #'
 #' @importFrom assertthat assert_that is.string
+#' @importFrom dplyr select
+#' @importFrom rlang !!
+#' @importFrom stats reshape
 #' @importFrom S4Vectors metadata
 #'
 setMethod(
@@ -277,12 +283,14 @@ setMethod(
   definition = function (object,
                          experiment,
                          carrier_frequency = FALSE,
-                         compare = NULL,
+                         compare = FALSE,
+                         ref_pop = c("USA NMDP African American pop 2", "USA NMDP Chinese", "USA NMDP European Caucasian"),
                          ref = list(hla_alleles = allele_frequencies)) {
     assert_that(
       is.string(experiment),
       stringMatches(experiment, getExperiments(object)),
-      isCharacterOrNULL(compare),
+      isTRUEorFALSE(compare),
+      is.character(ref_pop),
       is.list(ref)
     )
     mat <- object[[experiment]]
@@ -294,8 +302,12 @@ setMethod(
     )
 
     ref <- ref[[experiment]]
-    if (! is.null(compare) && ! is.null(ref)) {
-      ref <- ref[ref$population == compare,]
+    if (compare && ! is.null(ref)) {
+      assert_that(
+        length(ref_pop) > 0,
+        msg = "Please specify reference populations using 'ref_pop' argument."
+      )
+      ref <- ref[ref$population %in% ref_pop,]
       ref <- reshape(
         data = ref,
         idvar = "var",
@@ -304,12 +316,13 @@ setMethod(
       )
       colnames(ref)[-1] <-
         gsub("frequency\\.", "", colnames(ref)[-1])
+      cols <- c("var", ref_pop)
+      ref <- select(ref, !!cols) # rename populations if needed
       freq <- getExperimentFrequencies(mat, carrier_frequency, ref)
     } else {
-      if (! is.null(compare)) warn(sprintf("Could not find reference frequencies for experiment: '%s'", experiment))
+      if (compare) warn(sprintf("Could not find reference frequencies for experiment: '%s'", experiment))
       freq <- getExperimentFrequencies(mat, carrier_frequency)
     }
-
 
     return(freq)
   }
