@@ -1544,7 +1544,7 @@ experimentMatToDf <- function(mat) {
 #' @importFrom assertthat assert_that
 #' @importFrom methods validObject
 #' @importFrom magrittr %>%
-#' @importFrom MultiAssayExperiment longFormat colData
+#' @importFrom MultiAssayExperiment wideFormat
 #' @importFrom tidyr spread
 #'
 midasToWide <- function(object, experiment) {
@@ -1557,11 +1557,11 @@ midasToWide <- function(object, experiment) {
   object <- object[, , experiment]
   wide_df <-
     object %>%
-    longFormat(colDataCols = TRUE) %>%
-    as.data.frame() %>%
-    subset(select = -assay) %>%
-    subset(select = -colname) %>%
-    spread(key = "rowname", value = "value")
+    wideFormat(colDataCols = TRUE, check.names = FALSE) %>%
+    as.data.frame(optional = TRUE, stringsAsFactors = FALSE)
+  # remove experiment prefix from variables names
+  re <- paste0("^(", paste(experiment, collapse = "|"), ")_")
+ colnames(wide_df) <- gsub(re, "", colnames(wide_df))
 
   return(wide_df)
 }

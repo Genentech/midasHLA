@@ -445,7 +445,6 @@ setMethod(
 
 #' Coerce MiDAS to Data Frame
 #'
-#' @rdname as.data.frame
 #' @method as.data.frame MiDAS
 #'
 #' @inheritParams as.data.frame
