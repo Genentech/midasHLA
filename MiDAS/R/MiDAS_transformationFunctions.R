@@ -1189,11 +1189,16 @@ applyInheritanceModel <-
 #'
 applyInheritanceModel.matrix <- function(experiment,
                                          inheritance_model =  c("dominant", "recessive", "additive")) {
+  .classify <- function(x, val) {
+    x <- x >= val
+    mode(x) <- "integer"
+    x
+  }
   switch (
     inheritance_model,
     "additive" = experiment,
-    "dominant" = ceiling(experiment / 2),
-    "recessive" = floor(experiment / 2)
+    "dominant" = .classify(experiment, 1), # ifelse(x >= 1, 1, 0)
+    "recessive" = .classify(experiment, 2) # ifelse(x >= 2, 1, 0)
   )
 }
 
