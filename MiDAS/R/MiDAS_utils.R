@@ -1551,10 +1551,11 @@ experimentMatToDf <- function(mat) {
 #' @return Data frame
 #'
 #' @importFrom assertthat assert_that
-#' @importFrom methods validObject
+#' @importFrom dplyr left_join
+#' @importFrom methods is validObject
 #' @importFrom magrittr %>%
-#' @importFrom MultiAssayExperiment wideFormat
-#' @importFrom tidyr spread
+#' @importFrom MultiAssayExperiment colData experiments
+#' @importFrom tibble rownames_to_column
 #'
 midasToWide <- function(object, experiment) {
   assert_that(
@@ -1572,7 +1573,7 @@ midasToWide <- function(object, experiment) {
       x %>%
         t() %>%
         as.data.frame(optional = TRUE) %>%
-        tibble::rownames_to_column(var = "ID") # In MiDAS ID corresponds to MAE primary
+        rownames_to_column(var = "ID") # In MiDAS ID corresponds to MAE primary
     }
   )
   col_data <- colData(object) %>%
