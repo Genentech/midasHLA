@@ -1535,6 +1535,15 @@ experimentMatToDf <- function(mat) {
 }
 
 #' Transform MiDAS to wide format data.frame
+### TODO maybe anyReps check could be added to MiDAS validateObject and no duplicated rows is a must, maybe this is what is being checked here>?
+### check that ID column in colData corresponds to primary
+# 1. experiments are converted to long list, goal is to next combine it with primary IDs *
+# 2. here the primary IDs from sampleMap are added to longFormat experiment *
+# 3. combine assay and primary, clearly nonunique rownames are allowed * -- to tell the truth, we already impose that all input data have the same sample ids naming, so we should be safe with just skipping this steps and just duble check that it is imposible to go into state where experiment colnames are different from primary IDS
+# 4. spread to wide format with ID column => transpose
+# 5. Combine list into single data.frame add colData
+# 6. ordering and stuff, not very important
+#
 #'
 #' @param object Object of class MiDAS
 #' @param experiment Character
@@ -1554,14 +1563,22 @@ midasToWide <- function(object, experiment) {
     characterMatches(experiment, getExperiments(object))
   )
 
-  object <- object[, , experiment]
-  wide_df <-
-    object %>%
-    wideFormat(colDataCols = TRUE, check.names = FALSE) %>%
-    as.data.frame(optional = TRUE, stringsAsFactors = FALSE)
-  # remove experiment prefix from variables names
-  re <- paste0("^(", paste(experiment, collapse = "|"), ")_")
- colnames(wide_df) <- gsub(re, "", colnames(wide_df))
+  ex_list <-
+    experiments(object)[experiment] # do not include hla_calls and kir_calls, they are stored as experiment just for convinience
+  ex_list <- lapply(
+    X = ex_list,
+    FUN = function(x) {
+      if (is(x, "SummarizedExperiment")) x <- assay(x)
+      x %>%
+        t() %>%
+        as.data.frame(optional = TRUE) %>%
+        tibble::rownames_to_column(var = "ID") # In MiDAS ID corresponds to MAE primary
+    }
+  )
+  col_data <- colData(object) %>%
+    as.data.frame(optional = TRUE)
+  ex_list[[length(ex_list) + 1]] <- col_data
+  wide_df <- Reduce(function(x, y) left_join(x, y, by = "ID"), ex_list)
 
   return(wide_df)
 }

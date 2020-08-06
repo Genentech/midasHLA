@@ -624,22 +624,21 @@ test_that("midasToWide", {
 
   wide <- midasToWide(midas, "hla_alleles")
   test_wide <- data.frame(
-    primary = c("PAT1", "PAT2", "PAT3", "PAT4", "PAT5"),
     ID = c("PAT1", "PAT2", "PAT3", "PAT4", "PAT5"),
+    `A*02:01` = c(2L, 2L, 0L, 1L, 0L),
+    `B*13:02` = c(1L, 0L, 0L, 0L, 0L),
+    `B*15:01` = c(1L, 0L, 0L, 0L, 0L),
+    `B*40:01` = c(0L, 1L, 0L, 1L, 0L),
+    `B*57:01` = c(0L, 1L, 0L, 0L, 0L),
+    `A*01:01` = c(0L, 0L, 2L, 0L, 0L),
+    `B*08:01` = c(0L, 0L, 2L, 0L, 0L),
+    `A*02:06` = c(0L, 0L, 0L, 1L, 0L),
+    `B*27:05` = c(0L, 0L, 0L, 1L, 0L),
+    `A*26:01` = c(0L, 0L, 0L, 0L, 2L),
+    `B*07:02` = c(0L, 0L, 0L, 0L, 2L),
     OS = c(280L, 458L, 415L, 211L, 631L),
     OS_DIED = c(1L, 0L, 0L, 1L, 0L),
     term = wide$term, # there is a rounding error
-    `A*01:01` = c(0L, 0L, 2L, 0L, 0L),
-    `A*02:01` = c(2L, 2L, 0L, 1L, 0L),
-    `A*02:06` = c(0L, 0L, 0L, 1L, 0L),
-    `A*26:01` = c(0L, 0L, 0L, 0L, 2L),
-    `B*07:02` = c(0L, 0L, 0L, 0L, 2L),
-    `B*08:01` = c(0L, 0L, 2L, 0L, 0L),
-    `B*13:02` = c(1L, 0L, 0L, 0L, 0L),
-    `B*15:01` = c(1L, 0L, 0L, 0L, 0L),
-    `B*27:05` = c(0L, 0L, 0L, 1L, 0L),
-    `B*40:01` = c(0L, 1L, 0L, 1L, 0L),
-    `B*57:01` = c(0L, 1L, 0L, 0L, 0L),
     stringsAsFactors = FALSE,
     check.names = FALSE
   )
