@@ -1,3 +1,10 @@
+## 0.0.9048 - 7/08/20
++ HWE test has been implemented
++ midasToWide function has been optimized lowering significantly run times
++ Inheritance model specification has been moved from prepareMiDAS to runMiDAS, improving logic of
+  operations.
++ added filtration by variables MiDAS method
+
 ## 0.0.9048 - 19/07/20
 + Frequency calcualtions can be now extended by the addition of reference population frequencies
 

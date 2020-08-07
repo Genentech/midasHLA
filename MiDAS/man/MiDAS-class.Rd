@@ -20,6 +20,8 @@
 \alias{filterByFrequency,MiDAS-method}
 \alias{filterByOmnibusGroups}
 \alias{filterByOmnibusGroups,MiDAS-method}
+\alias{filterByVariables}
+\alias{filterByVariables,MiDAS-method}
 \title{MiDAS class}
 \usage{
 getExperiments(object)
@@ -43,10 +45,14 @@ getOmnibusGroups(object, experiment)
 \S4method{getOmnibusGroups}{MiDAS}(object, experiment)
 
 getFrequencies(object, experiment, carrier_frequency = FALSE,
-  compare = NULL, ref = list(hla_alleles = allele_frequencies))
+  compare = FALSE, ref_pop = c("USA NMDP African American pop 2",
+  "USA NMDP Chinese", "USA NMDP European Caucasian"),
+  ref = list(hla_alleles = allele_frequencies))
 
 \S4method{getFrequencies}{MiDAS}(object, experiment,
-  carrier_frequency = FALSE, compare = NULL, ref = list(hla_alleles =
+  carrier_frequency = FALSE, compare = FALSE,
+  ref_pop = c("USA NMDP African American pop 2", "USA NMDP Chinese",
+  "USA NMDP European Caucasian"), ref = list(hla_alleles =
   allele_frequencies))
 
 filterByFrequency(object, experiment, lower_frequency_cutoff = NULL,
@@ -59,11 +65,18 @@ filterByFrequency(object, experiment, lower_frequency_cutoff = NULL,
 filterByOmnibusGroups(object, experiment, groups)
 
 \S4method{filterByOmnibusGroups}{MiDAS}(object, experiment, groups)
+
+filterByVariables(object, experiment, variables)
+
+\S4method{filterByVariables}{MiDAS}(object, experiment, variables)
 }
 \arguments{
 \item{object}{\code{\link{MiDAS}} object}
 
 \item{experiment}{String specifying experiment.}
+
+\item{ref_pop}{Character giving the names of reference populations to use. The
+vector can be named then names will be used as population names.}
 
 \item{lower_frequency_cutoff}{Number}
 
@@ -71,6 +84,8 @@ filterByOmnibusGroups(object, experiment, groups)
 
 \item{groups}{Character}
 
+\item{variables}{character}
+
 \item{object}{\code{\link{MiDAS}} object}
 
 \item{object}{\code{\link{MiDAS}} object.}
@@ -90,6 +105,10 @@ filterByOmnibusGroups(object, experiment, groups)
 \item{object}{\code{\link{MiDAS}} object}
 
 \item{experiment}{Matrix}
+
+\item{object}{\code{\link{MiDAS}} object}
+
+\item{experiment}{string}
 }
 \value{
 Character giving names of available analysis types.
@@ -116,6 +135,8 @@ is the sample size). For other models the sample size is taken as is
 Object of class MiDAS.
 
 Object of class MiDAS.
+
+MiDAS object
 }
 \description{
 The \code{MiDAS} class is a \code{\link{MultiAssayExperiment}} object

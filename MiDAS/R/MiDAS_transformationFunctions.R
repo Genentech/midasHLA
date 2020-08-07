@@ -1244,3 +1244,32 @@ getFrequencyMask <- function(df, # TODO test
 
   return(filtered_vars)
 }
+
+
+
+#' Filter experiment by frequency
+#'
+#' Helper function for experiments filtering
+#'
+#' @param experiment matrix
+#' @param variables character
+#'
+#' @return Matrix
+#'
+filterExperimentByVariables <-
+  function(experiment, variables) {
+    UseMethod("filterExperimentByVariables", experiment)
+  }
+
+#'
+filterExperimentByVariables.matrix <- function(experiment, variables) {
+  return(experiment[variables, ])
+}
+
+#'
+filterExperimentByVariables.SummarizedExperiment <- function(experiment, variables) {
+  experiment <- experiment[variables, ]
+  metadata(experiment)$omnibus_groups <- metadata(experiment)$omnibus_groups[variables]
+
+  return(experiment)
+}

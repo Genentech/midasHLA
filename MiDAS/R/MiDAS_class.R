@@ -456,6 +456,43 @@ setMethod(
     return(object)
   })
 
+#' @rdname MiDAS-class
+#'
+#' @title Filter MiDAS object by variables
+#'
+#' @param object \code{\link{MiDAS}} object
+#' @param experiment string
+#' @param variables character
+#'
+#' @return MiDAS object
+#'
+#' @export
+setGeneric(
+  name = "filterByVariables",
+  def = function(object, experiment, variables) standardGeneric("filterByVariables")
+)
+
+#' @rdname MiDAS-class
+#'
+#' @importFrom S4Vectors metadata
+#'
+setMethod(
+  f = "filterByVariables",
+  signature = "MiDAS",
+  definition = function (object, experiment, variables) {
+    assert_that(
+      validObject(object),
+      is.string(experiment),
+      stringMatches(experiment, getExperiments(object)),
+      is.character(variables),
+      characterMatches(variables, rownames(object))
+    )
+    object[[experiment]] <- filterExperimentByVariables(object[[experiment]], variables)
+
+    return(object)
+  }
+)
+
 #' Coerce MiDAS to Data Frame
 #'
 #' @method as.data.frame MiDAS

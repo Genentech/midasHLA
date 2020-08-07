@@ -886,3 +886,94 @@ runMiDAS_conditional_omnibus <- function(call,
 
   return(results)
 }
+
+#' Test for Hardy Weinberg Equilibrium
+#'
+#' Test HLA calls experiment (matrix) for Hardy Weinberg Equilibrium. This
+#' function \code{HWChisqStats} from \code{\link{HardyWeinberg}} package.
+#'
+#' @inheritParams stats::p.adjust
+#' @param X Matrix with genotype counts, with samples as columns and alleles as
+#'   rows.
+#'
+#' @return A vector of p-values
+#'
+#' @importFrom assertthat assert_that is.string
+#' @importFrom stats p.adjust
+#' @importFrom methods validObject
+#' @importFrom MultiAssayExperiment colData
+#' @importFrom HardyWeinberg HWChisqStats
+#'
+HWETest <-
+  function(object,
+           experiment = c("hla_alleles", "hla_aa", "hla_g_groups", "hla_supertypes", "hla_NK_ligands"),
+           HWE_group = NULL,
+           HWE_cutoff = NULL,
+           as.MiDAS = FALSE) {
+
+    experiment_choice <- eval(formals()[["experiment"]])
+    assert_that(
+      validObject(object),
+      is.string(experiment),
+      stringMatches(experiment, experiment_choice),
+      isNumberOrNULL(HWE_cutoff),
+      isTRUEorFALSE(as.MiDAS)
+    )
+    HWE_group <- substitute(HWE_group)
+    if (is.null(HWE_group)) {
+      X <- list(p.value = object[[experiment]])
+    } else {
+      colData <-
+        do.call(subset,
+                list(
+                  x = colData(object),
+                  subset = HWE_group
+                )
+        )
+      subset_ids <- colData$ID
+      x <- object[[experiment]]
+      X <- list(
+        x[, colnames(x) %in% subset_ids],
+        x[, ! colnames(x) %in% subset_ids]
+      )
+      names(X) <- c(deparse(HWE_group), paste0("not ", deparse(HWE_group)))
+    }
+
+    HWE.result <- data.frame(
+      var = rownames(object[[experiment]]),
+      stringsAsFactors = FALSE
+    )
+    for (i in 1:length(X)) {
+      HWE.pvalue <- apply(
+        X = X[[i]],
+        MARGIN = 1,
+        FUN = function(x) {
+          c(
+            AA = sum(x == 0, na.rm = TRUE),
+            AB = sum(x == 1, na.rm = TRUE),
+            BB = sum(x == 2, na.rm = TRUE)
+          )
+        }
+      ) %>%
+        t() %>%
+        HWChisqStats(x.linked = FALSE, pvalues = TRUE)
+      nm <- names(X)[[i]]
+      HWE.result[[nm]] <- HWE.pvalue[HWE.result$var] # NAs will be inserted on missing
+    }
+
+    if (! is.null(HWE_cutoff)) {
+      mask <- lapply(1:(ncol(HWE.result) - 1), function(i) {
+        m <- HWE.result[, i + 1] < HWE_cutoff[i]
+        m[is.na(m)] <- FALSE
+        m
+      })
+      mask <- Reduce(f = `&`, x = mask)
+      HWE.result <- HWE.result[mask, ]
+    }
+
+    if(as.MiDAS) {
+      HWE.result <- filterByVariables(object, experiment, HWE.result$var)
+    }
+
+    return(HWE.result)
+  }
