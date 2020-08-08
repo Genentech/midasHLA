@@ -575,7 +575,8 @@ prepareMiDAS <- function(hla_calls = NULL,
                            "hla_NK_ligands",
                            "kir_genes",
                            "hla_kir_interactions",
-                           "hla_divergence"
+                           "hla_divergence",
+                           "hla_het"
                          ),
                          placeholder = "term",
                          lower_frequency_cutoff = NULL,
@@ -947,4 +948,42 @@ prepareMiDAS_hla_divergence <- function(hla_calls, ...) {
   experiment_mat <- dfToExperimentMat(hla_divergence)
 
   return(experiment_mat)
+}
+
+#' Prepare MiDAS data on HLA heterozygosity level
+#'
+#' Heterozygosity status for each allele, "1" designates homozygote and "0"
+#' designates heterozygote.
+#'
+#' @param hla_calls Data frame
+#' @param ... Not used
+#'
+#' @return Matrix
+#'
+prepareMiDAS_hla_het <- function(hla_calls, hla_het_resolution = 8, ...) {
+  assert_that(
+    checkHlaCallsFormat(hla_calls),
+    is.number(hla_het_resolution) # TODO see how this check was done elsewhere
+  )
+
+  genes <- getHlaCallsGenes(hla_calls)
+  assert_that(
+    any(c("A", "B", "C", "DQA1", "DQB1", "DRA", "DRB1", "DPA1", "DPB1") %in% genes),
+    msg = "Heterozygosity status can be calculated only for classical genes (A, B, C, DQA1, DQB1, DRA, DRB1, DPA1, DPB1)."
+  )
+
+  # resolution
+  hla_calls <- reduceHlaCalls(hla_calls, hla_het_resolution)
+
+  hla_het <- hla_calls[, "ID", drop = FALSE]
+  for (g in genes) {
+    i <- paste0(g, "_1")
+    j <- paste0(g, "_2")
+    het <- hla_calls[, i, drop = TRUE] != hla_calls[, j, drop = TRUE]
+    nm <- paste0(g, "_het")
+    hla_het[[nm]] <- as.integer(het)
+  }
+  hla_het <- dfToExperimentMat(hla_het)
+
+  return(hla_het)
 }
