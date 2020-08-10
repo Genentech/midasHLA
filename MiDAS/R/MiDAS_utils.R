@@ -1723,8 +1723,11 @@ iterativeModel <- function(object,
           conditionMessage(e)
         )
         warn(msg)
+        failed_result <- tidy(object)[1, ]
+        failed_result[1, ] <- NA
+        failed_result$term <- x
 
-        return(object)
+        return(failed_result)
       }
     )
   )
