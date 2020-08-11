@@ -961,7 +961,7 @@ assertthat::on_failure(isTRUEorFALSE) <- function(call, env) {
 #'
 #' \code{hasTidyMethod} check if there is tidy method available for given class.
 #'
-#' @param class Object class.
+#' @param class String giving object class.
 #'
 #' @return Logical indicating if there is tidy method for given class.
 #'
@@ -977,9 +977,9 @@ hasTidyMethod <- function(class) {
 }
 
 assertthat::on_failure(hasTidyMethod) <- function(call, env) {
-  paste0("tidy function for object of class ",
-         deparse(call$class),
-         " could not be found."
+  paste0("Could not find 'tidy' function for statistical model '",
+         eval(expr = call$class, envir = env),
+         "'. Please ensure that 'tidy' for selected model is available. See 'broom' package for more information on 'tidy' function."
   )
 }
 

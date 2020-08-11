@@ -405,7 +405,7 @@ test_that("tidy method exists", {
 
   expect_error(
     assertthat::assert_that(hasTidyMethod("bar")),
-    "tidy function for object of class \"bar\" could not be found."
+    "Could not find 'tidy' function for statistical model 'bar'. Please ensure that 'tidy' for selected model is available. See 'broom' package for more information on 'tidy' function."
   )
 })
 
