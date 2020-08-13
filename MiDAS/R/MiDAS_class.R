@@ -967,10 +967,16 @@ prepareMiDAS_hla_het <- function(hla_calls, hla_het_resolution = 8, ...) {
   )
 
   genes <- getHlaCallsGenes(hla_calls)
+  classical_genes <- c("A", "B", "C", "DQA1", "DQB1", "DRA", "DRB1", "DPA1", "DPB1")
   assert_that(
-    any(c("A", "B", "C", "DQA1", "DQB1", "DRA", "DRB1", "DPA1", "DPB1") %in% genes),
+    any(classical_genes %in% genes),
     msg = "Heterozygosity status can be calculated only for classical genes (A, B, C, DQA1, DQB1, DRA, DRB1, DPA1, DPB1)."
   )
+
+  # filter non-classical genes
+  sel <- c("ID", paste0(rep(classical_genes, each = 2), "_", 1:2))
+  hla_calls <- hla_calls[, colnames(hla_calls) %in% sel, drop = FALSE]
+  genes <- getHlaCallsGenes(hla_calls)
 
   # resolution
   hla_calls <- reduceHlaCalls(hla_calls, hla_het_resolution)
