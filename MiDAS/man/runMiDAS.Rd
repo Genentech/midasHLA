@@ -20,8 +20,8 @@ runMiDAS_linear(call, midas, experiment, test_covar,
 
 runMiDAS_conditional(call, midas, experiment, test_covar,
   correction = "bonferroni", n_correction = NULL,
-  exponentiate = FALSE, th = 0.05, keep = FALSE, rss_th = 1e-07,
-  ...)
+  exponentiate = FALSE, th = 0.05, th_adj = TRUE, keep = FALSE,
+  rss_th = 1e-07, ...)
 
 runMiDAS_linear_omnibus(call, midas, experiment, test_covar,
   correction = "bonferroni", n_correction = NULL,
@@ -70,6 +70,8 @@ FALSE.}
 
 \item{th}{Number specifying p-value threshold for a variable to be considered
 significant.}
+
+\item{th_adj}{Logical}
 
 \item{keep}{Logical flag indicating if the output should be a list of results
 resulting from each selection step. Default is to return only the final
