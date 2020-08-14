@@ -347,8 +347,8 @@ test_that("MiDAS data for hla_NK_ligands analysis is prepared properly", {
         left_join(..., by = "ID"),
       x = lapply(
         c(
-          "allele_HLA-B_Bw",
-          "allele_HLA_Bw4+A23+A24+A32",
+          "allele_HLA_Bw4",
+          "allele_HLA-B_only_Bw",
           "allele_HLA-C_C1-2"
         ),
         hlaToVariable,

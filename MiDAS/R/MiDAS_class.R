@@ -841,8 +841,8 @@ prepareMiDAS_hla_NK_ligands <- function(hla_calls, ...) {
   )
 
   lib <- c(
-    "allele_HLA-B_Bw",
-    "allele_HLA_Bw4+A23+A24+A32",
+    "allele_HLA_Bw4",
+    "allele_HLA-B_only_Bw",
     "allele_HLA-C_C1-2"
   )
   hla_NK_ligands <- Reduce(
