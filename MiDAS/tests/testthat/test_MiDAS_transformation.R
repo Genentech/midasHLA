@@ -137,7 +137,8 @@ test_that("hla frequencies are calculated properly", {
   hla_freq <- getHlaFrequencies(minimal_hla_calls)
   test_hla_freq <- data.frame(
     allele = c("A*01:01", "A*02:01"),
-    Freq = c(0.5, 0.5),
+    Counts = c(2, 2),
+    Freq = formattable::percent(c(0.5, 0.5)),
     stringsAsFactors = FALSE
   )
   expect_equal(hla_freq, test_hla_freq)
@@ -664,11 +665,11 @@ test_that("getExperimentFrequencies", {
 
   # carrier frequency
   experiment_matrix_freq <-
-    getExperimentFrequencies(experiment_matrix, TRUE)
+    getExperimentFrequencies(experiment_matrix, carrier_frequency =  TRUE)
   experiment_matrix_freq_test <- data.frame(
     term = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
     Counts = c(1, 3, 1, 0, 0),
-    Freq = formattable::percent(c(0.1, 0.3, 0.1, 0, 0), 2L),
+    Freq = formattable::percent(c(0.2, 0.6, 0.2, 0, 0), 2L),
     row.names = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
     stringsAsFactors = FALSE
   )

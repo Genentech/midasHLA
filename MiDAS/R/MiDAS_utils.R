@@ -1785,3 +1785,44 @@ assertthat::on_failure(isInheritanceModelApplicable) <- function(call, env) {
          deparse(call$x)
   )
 }
+
+#' Get HLA allele frequencies in reference populations
+#'
+#' @param ref Data frame
+#' @param pop Character
+#' @param carrier_frequency Logical
+#'
+#' @return Data frame
+#'
+#' @importFrom assertthat assert_that
+#' @importFrom dplyr filter select
+#' @importFrom rlang .data !!
+#' @importFrom stats reshape
+#'
+getReferenceFrequencies <- function(ref, pop, carrier_frequency = FALSE) {
+  assert_that(
+    is.data.frame(ref),
+    colnamesMatches(ref, c("var", "population", "frequency")),
+    is.character(pop),
+    characterMatches(pop, unique(ref$population)),
+    isTRUEorFALSE(carrier_frequency)
+  )
+
+  ref <- dplyr::filter(ref, .data$population %in% pop)
+  ref <- reshape(
+    data = ref,
+    idvar = "var",
+    timevar = "population",
+    direction = "wide"
+  )
+  colnames(ref)[-1] <-
+    gsub("frequency\\.", "", colnames(ref)[-1])
+  cols <- c("var", pop)
+  ref <- select(ref, !!cols) # rename populations if needed
+
+  if (carrier_frequency) {
+    ref[, -1] <- lapply(ref[, -1, drop = FALSE], function (x) 2 * x * (1 - x) + x^2) # HWE 2qp + q^2
+  }
+
+  return(ref)
+}

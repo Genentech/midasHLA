@@ -4,7 +4,10 @@
 \alias{getHlaFrequencies}
 \title{Calculate alleles frequencies}
 \usage{
-getHlaFrequencies(hla_calls)
+getHlaFrequencies(hla_calls, carrier_frequency = FALSE,
+  compare = FALSE, ref_pop = c("USA NMDP African American pop 2",
+  "USA NMDP Chinese", "USA NMDP European Caucasian"),
+  ref = allele_frequencies)
 }
 \arguments{
 \item{hla_calls}{Data frame containing HLA allele calls, as return by

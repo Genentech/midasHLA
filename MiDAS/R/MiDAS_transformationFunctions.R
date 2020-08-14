@@ -427,18 +427,82 @@ hlaCallsToCounts <- function(hla_calls,
 #' getHlaFrequencies(hla_calls)
 #'
 #' @importFrom assertthat assert_that
+#' @importFrom dplyr left_join
+#' @importFrom formattable percent
 #'
 #' @export
-getHlaFrequencies <- function(hla_calls) {
+getHlaFrequencies <- function(hla_calls,
+                              carrier_frequency = FALSE,
+                              compare = FALSE,
+                              ref_pop = c("USA NMDP African American pop 2", "USA NMDP Chinese", "USA NMDP European Caucasian"),
+                              ref = allele_frequencies) {
   assert_that(
-    checkHlaCallsFormat(hla_calls)
+    checkHlaCallsFormat(hla_calls),
+    isTRUEorFALSE(compare),
+    is.data.frame(ref),
+    colnamesMatches(ref, c("var", "population", "frequency")),
+    is.character(ref_pop),
+    characterMatches(ref_pop, unique(ref$population))
   )
 
   allele <- unlist(hla_calls[, -1])
-  allele_freq <- table(allele, useNA = "no") / (2 * nrow(hla_calls))
-  allele_freq <- as.data.frame(allele_freq, stringsAsFactors = FALSE)
+  allele_counts <- table(allele, useNA = "no")
+  allele_freq <- allele_counts / (2 * nrow(hla_calls))
+
+  allele_freq <- data.frame(
+    allele = names(allele_counts),
+    Counts = as.vector(allele_counts),
+    Freq = as.vector(allele_freq),
+    stringsAsFactors = FALSE
+  )
+
+  if (compare) {
+    ref <- getReferenceFrequencies(ref, ref_pop, carrier_frequency)
+    allele_freq <- left_join(allele_freq, ref, by = c("allele" = "var"))
+  }
+
+  # format frequencies as percent
+  allele_freq[, -c(1, 2)] <-
+    rapply(
+      object = allele_freq[, -c(1, 2), drop = FALSE],
+      f = function(col) percent(col),
+      how = "replace"
+    )
 
   return(allele_freq)
+}
+
+#' Calculate KIR genes frequencies
+#'
+#' \code{getKIRFrequencies} calculates  KIR genes frequencies in KIR calls data
+#' frame.
+#'
+#' @return Data frame containing alleles and thier corresponding frequencies.
+#'
+#' @examples
+#' ""
+#'
+#' @importFrom assertthat assert_that
+#' @importFrom dplyr left_join
+#' @importFrom formattable percent
+#'
+#' @export
+getKIRFrequencies <- function(kir_calls) {
+  assert_that(
+    checkKirCallsFormat(kir_calls)
+  )
+
+  kir_sums <- colSums(kir_calls[, -1, drop = FALSE], na.rm = TRUE)
+  kir_freq <- kir_sums / nrow(kir_calls)
+
+  kir_freq <- data.frame(
+    gene = names(kir_sums),
+    Counts = kir_sums,
+    Freq = percent(kir_freq),
+    stringsAsFactors = FALSE
+  )
+
+  return(kir_freq)
 }
 
 #' Transform amino acid variations data frame to counts table
@@ -1115,9 +1179,10 @@ getExperimentFrequencies.matrix <-
       experiment <- applyInheritanceModel(experiment, "dominant")
     }
 
-    # Under additive inheritance model population size equals 2 * nrow(counts_table), in other cases it's 1 * nrow(counts_table)
+    # For carrier_frequency == FALSE population size equals 2 * nrow(counts_table), in other cases it's 1 * nrow(counts_table); the population size is 2x because genes comes in two copies
+    pop_mul <- ifelse(carrier_frequency, 1, 2)
     counts_sums <- rowSums(experiment, na.rm = TRUE)
-    allele_freq <- counts_sums / (2 * ncol(experiment)) # the population size is 2x because genes comes in two copies
+    allele_freq <- counts_sums / (pop_mul * ncol(experiment))
 
     counts_df <- data.frame(
       term = rownames(experiment),
@@ -1127,9 +1192,6 @@ getExperimentFrequencies.matrix <-
     )
 
     if (! is.null(ref)) {
-      if (carrier_frequency) {
-         ref[, -1] <- lapply(ref[, -1, drop = FALSE], function (x) 2 * x * (1 - x) + x^2) # HWE 2qp + q^2
-      }
       counts_df <-
         left_join(counts_df, ref, by = c("term" = "var"))
     }

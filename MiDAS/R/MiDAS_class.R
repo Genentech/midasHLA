@@ -307,17 +307,7 @@ setMethod(
         length(ref_pop) > 0,
         msg = "Please specify reference populations using 'ref_pop' argument."
       )
-      ref <- ref[ref$population %in% ref_pop,]
-      ref <- reshape(
-        data = ref,
-        idvar = "var",
-        timevar = "population",
-        direction = "wide"
-      )
-      colnames(ref)[-1] <-
-        gsub("frequency\\.", "", colnames(ref)[-1])
-      cols <- c("var", ref_pop)
-      ref <- select(ref, !!cols) # rename populations if needed
+      ref <- getReferenceFrequencies(ref, ref_pop, carrier_frequency)
       freq <- getExperimentFrequencies(mat, carrier_frequency, ref)
     } else {
       if (compare) warn(sprintf("Could not find reference frequencies for experiment: '%s'", experiment))
