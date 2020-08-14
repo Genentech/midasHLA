@@ -448,7 +448,7 @@ test_that("runMiDAS", {
   fake_object <- list(call = list(formula = 1 ~ 1, data = 1:5))
   class(fake_object) <- "foo"
   expect_error(runMiDAS(fake_object),
-               "tidy function for object of class class\\(object\\)\\[1L\\] could not be found." #TODO
+               "Could not find 'tidy' function for statistical model 'foo'. Please ensure that 'tidy' for selected model is available. See 'broom' package for more information on 'tidy' function."
   )
 
   fake_object <- object
