@@ -7,7 +7,7 @@
 hasTidyMethod(class)
 }
 \arguments{
-\item{class}{Object class.}
+\item{class}{String giving object class.}
 }
 \value{
 Logical indicating if there is tidy method for given class.

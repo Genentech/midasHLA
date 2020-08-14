@@ -8,7 +8,7 @@
 prepareMiDAS(hla_calls = NULL, kir_calls = NULL, colData,
   experiment = c("hla_alleles", "hla_aa", "hla_g_groups",
   "hla_supertypes", "hla_NK_ligands", "kir_genes", "hla_kir_interactions",
-  "hla_divergence"), placeholder = "term",
+  "hla_divergence", "hla_het"), placeholder = "term",
   lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL, ...)
 
 prepareMiDAS_hla_alleles(hla_calls, ...)
