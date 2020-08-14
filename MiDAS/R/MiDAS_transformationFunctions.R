@@ -754,13 +754,11 @@ formatResults <- function(results,
 
   filter_by <- parse_exprs(filter_by)
   arrange_by <- parse_exprs(arrange_by)
-  select_cols_quo <- parse_exprs(select_cols)
-  names(select_cols_quo) <- names(select_cols)
 
   results %<>%
     filter(!!! filter_by) %>%
     arrange(!!! arrange_by) %>%
-    select(!!! select_cols_quo)
+    select(select_cols)
 
   if (format == "html" & isTRUE(getOption("knitr.in.progress"))) {
     results <-
@@ -798,8 +796,7 @@ formatResults <- function(results,
 #' formatted table depending on the type of analysis and model type.
 #'
 #' @inheritParams formatResults
-#' @param cols Character vector specifying columns to kable. Names can be used
-#'   to rename columns.
+#' @param colnames Character vector giving new colnames in dply::rename style.
 #' @param header String specifying results table header.
 #' @param pvalue_cutoff Number specifying p-value cutoff for results to be
 #'   included in output. If \code{NULL} no filtering is done.
@@ -814,13 +811,13 @@ formatResults <- function(results,
 #' @importFrom rlang has_name list2 parse_expr warn !! :=
 #'
 kableResults <- function(results,
-                         cols = c("estimate", "std.error", "p.value", "p.adjusted", "Ntotal", "Ntotal (%)" = "Ntotal.frequency", Npositive = "N R=1", Npositive.frequency = "N R=1 (%%)", Nnegative = "N R=0", Nnegative.frequency = "N R=0 (%%)"),
+                         colnames = NULL,
                          header = "MiDAS analysis results",
                          pvalue_cutoff = NULL,
                          format = getOption("knitr.table.format")) {
   assert_that(
     is.data.frame(results),
-    is.character(cols),
+    isStringOrNULL(colnames),
     isNumberOrNULL(pvalue_cutoff),
     is.string(format),
     stringMatches(format, choice = c("html", "latex"))
@@ -828,50 +825,16 @@ kableResults <- function(results,
 
   filter_by <- ifelse(
     test = is.null(pvalue_cutoff),
-    yes = "p.adjusted <= 1",
+    yes = "p.value <= 1",
     no = sprintf("p.value <= %f", pvalue_cutoff)
   )
-  passed_filter <- eval(parse_expr(filter_by), envir = as.list(results))
-  if (! any(passed_filter, na.rm = TRUE)) {
-    warn(sprintf("None of the results meets filtering criteria: %s", filter_by))
-  }
 
-  term_name <- colnames(results)[1] # term name is always added..
-  if (term_name %in% cols) {
-    cols <- cols[cols != term_name]
-  }
-  select_cols <- c(
-    unlist(list2(
-      !! term_name := colnames(results)[1] # term name
-    )),
-    cols
-  )
+  select_cols <- colnames(results)
+  names(select_cols) <- select_cols
+  names(select_cols)[colnames] <- names(colnames)
 
-  present_cols <- has_name(results, select_cols)
-  if (test_present_cols <- ! all(present_cols)) {
-    warn(
-      sprintf(
-        "Columns %s could't be found in results, will be ommited.",
-        ifelse(test_present_cols,
-               paste0("\"",
-                      paste(
-                        select_cols[! present_cols],
-                        collapse = "\", \""
-                       ),
-                      "\""
-               ),
-               ""
-        )
-      )
-    )
-  }
-  assert_that(
-    sum(present_cols) != 0,
-    msg = sprintf("results does not contain any of the following columns: %s",
-                  paste(select_cols, collapse = ", ")
-    )
-  )
-  select_cols <- select_cols[present_cols]
+  # replace .frequency with %
+  names(select_cols) <- gsub(".frequency", " [%] ", names(select_cols))
 
   results %<>%
     formatResults(

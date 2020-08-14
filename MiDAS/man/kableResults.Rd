@@ -4,18 +4,14 @@
 \alias{kableResults}
 \title{Pretty format association analysis results}
 \usage{
-kableResults(results, cols = c("estimate", "std.error", "p.value",
-  "p.adjusted", "Ntotal", `Ntotal (\%)` = "Ntotal.frequency", Npositive =
-  "N R=1", Npositive.frequency = "N R=1 (\%\%)", Nnegative = "N R=0",
-  Nnegative.frequency = "N R=0 (\%\%)"),
+kableResults(results, colnames = NULL,
   header = "MiDAS analysis results", pvalue_cutoff = NULL,
   format = getOption("knitr.table.format"))
 }
 \arguments{
 \item{results}{Tibble as returned by \code{\link{analyzeAssociations}}.}
 
-\item{cols}{Character vector specifying columns to kable. Names can be used
-to rename columns.}
+\item{colnames}{Character vector giving new colnames in dply::rename style.}
 
 \item{header}{String specifying results table header.}
 
