@@ -137,7 +137,8 @@ test_that("hla frequencies are calculated properly", {
   hla_freq <- getHlaFrequencies(minimal_hla_calls)
   test_hla_freq <- data.frame(
     allele = c("A*01:01", "A*02:01"),
-    Freq = c(0.5, 0.5),
+    Counts = c(2, 2),
+    Freq = formattable::percent(c(0.5, 0.5)),
     stringsAsFactors = FALSE
   )
   expect_equal(hla_freq, test_hla_freq)
@@ -349,7 +350,7 @@ test_that("results are formatted properly", {
 
 test_that("counts to variables conversion", {
   file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-  kir_counts <- readKPICalls(file)[1:2, ]
+  kir_counts <- readKIRCalls(file)[1:2, ]
   kir_haplotypes <- countsToVariables(kir_counts, "kir_haplotypes")
   kir_haplotypes_test <- data.frame(
     ID = c("PAT1", "PAT2"),
@@ -408,7 +409,7 @@ test_that("HLA - KIR interactions are infered correctly", {
   hla_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(hla_file)
   kir_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-  kir_counts <- readKPICalls(kir_file)
+  kir_counts <- readKIRCalls(kir_file)
   hla_kir <- getHlaKirInteractions(hla_calls, kir_counts)
   load(system.file("extdata", "test_hla_kir_interactions.Rdata", package = "MiDAS"))
   expect_equal(hla_kir, test_hla_kir)
@@ -664,11 +665,11 @@ test_that("getExperimentFrequencies", {
 
   # carrier frequency
   experiment_matrix_freq <-
-    getExperimentFrequencies(experiment_matrix, TRUE)
+    getExperimentFrequencies(experiment_matrix, carrier_frequency =  TRUE)
   experiment_matrix_freq_test <- data.frame(
     term = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
     Counts = c(1, 3, 1, 0, 0),
-    Freq = formattable::percent(c(0.1, 0.3, 0.1, 0, 0), 2L),
+    Freq = formattable::percent(c(0.2, 0.6, 0.2, 0, 0), 2L),
     row.names = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
     stringsAsFactors = FALSE
   )

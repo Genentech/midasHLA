@@ -27,7 +27,7 @@ test_that("HLA allele associations are analyzed properly", {
     lm(OS_DIED ~ AGE + SEX + `A*01:01`, data = midas_data),
     lm(OS_DIED ~ AGE + SEX + `A*02:01`, data = midas_data)
   )
-  test_res <- do.call("rbind", lapply(test_res, tidy))
+  test_res <- do.call("rbind", lapply(test_res, tidy, conf.int = TRUE))
   test_res$term <- gsub("`", "", test_res$term)
   test_res <- test_res[test_res$term %in% c("A*01:01", "A*02:01"), ]
   test_res$p.adjusted <- p.adjust(test_res$p.value, "BH")
@@ -224,7 +224,7 @@ test_that("runMiDAS", {
   hla_calls <- readHlaCalls(hla_calls_file)[, 1:11] # TODO this was taking tooo much time
   kir_file <-
     system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-  kir_calls <- readKPICalls(kir_file)
+  kir_calls <- readKIRCalls(kir_file)
   pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
   pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")

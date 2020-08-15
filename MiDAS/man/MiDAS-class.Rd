@@ -145,7 +145,7 @@ transformations required for MiDAS analysis.
 }
 \details{
 A object of class \code{MiDAS} have at least one of
-\link[=readHlaCalls]{HLA calls} or \link[=readKPICalls]{KIR calls} experiment
+\link[=readHlaCalls]{HLA calls} or \link[=readKIRCalls]{KIR calls} experiment
 matrices defined (they can be accessed using \code{\link{getHlaCalls}} and
 \code{\link{getKirCalls}} functions).
 

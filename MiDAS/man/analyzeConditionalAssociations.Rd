@@ -5,8 +5,8 @@
 \title{Stepwise conditional association analysis}
 \usage{
 analyzeConditionalAssociations(object, variables, placeholder = "term",
-  correction = "bonferroni", n_correction = NULL, th, keep = FALSE,
-  rss_th = 1e-07, exponentiate = FALSE)
+  correction = "bonferroni", n_correction = NULL, th, th_adj = TRUE,
+  keep = FALSE, rss_th = 1e-07, exponentiate = FALSE)
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many
@@ -29,6 +29,8 @@ know what you are doing!}
 
 \item{th}{Number specifying p-value threshold for a variable to be considered
 significant.}
+
+\item{th_adj}{Logical}
 
 \item{keep}{Logical flag indicating if the output should be a list of results
 resulting from each selection step. Default is to return only the final

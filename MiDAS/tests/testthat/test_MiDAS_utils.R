@@ -194,7 +194,7 @@ test_that("HLA statistical models are updated properly", {
 
 test_that("statistical models are statistical model", {
   kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-  kir_calls <- readKPICalls(kir_calls_file)
+  kir_calls <- readKIRCalls(kir_calls_file)
   kir_calls <- kir_calls[1:20, ]
   pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
   pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
@@ -352,7 +352,7 @@ test_that("colnamesMatches", {
 
 test_that("KIR counts have proper format", {
   file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-  kir_counts <- readKPICalls(file)
+  kir_counts <- readKIRCalls(file)
   expect_equal(checkKirCallsFormat(kir_counts), TRUE)
 
   expect_equal(checkKirCallsFormat(NULL, accept.null = TRUE), TRUE)
@@ -740,7 +740,9 @@ test_that("iterativeModel", {
     estimate = c(4.96506830649457e-14, 3.30483848402117e-14, -2.49216213341892e-16),
     std.error = c(2.23663494529691e-15, 2.10564948334218e-15, 3.20187621515428e-16),
     statistic = c(22.1988318519966, 15.6951026757577, -0.778344310009135),
-    p.value = c(2.27209273588754e-76, 2.22149857779886e-45, 0.436736450824827)
+    p.value = c(2.27209273588754e-76, 2.22149857779886e-45, 0.436736450824827),
+    conf.low = c(4.52562576569574e-14, 2.89113129370057e-14, -8.78304398818657e-16),
+    conf.high = c(5.40451084729341e-14, 3.71854567434176e-14, 3.79871972134873e-16)
   )
   expect_equal(as.data.frame(res), as.data.frame(res_test))
 })

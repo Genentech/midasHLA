@@ -427,18 +427,82 @@ hlaCallsToCounts <- function(hla_calls,
 #' getHlaFrequencies(hla_calls)
 #'
 #' @importFrom assertthat assert_that
+#' @importFrom dplyr left_join
+#' @importFrom formattable percent
 #'
 #' @export
-getHlaFrequencies <- function(hla_calls) {
+getHlaFrequencies <- function(hla_calls,
+                              carrier_frequency = FALSE,
+                              compare = FALSE,
+                              ref_pop = c("USA NMDP African American pop 2", "USA NMDP Chinese", "USA NMDP European Caucasian"),
+                              ref = allele_frequencies) {
   assert_that(
-    checkHlaCallsFormat(hla_calls)
+    checkHlaCallsFormat(hla_calls),
+    isTRUEorFALSE(compare),
+    is.data.frame(ref),
+    colnamesMatches(ref, c("var", "population", "frequency")),
+    is.character(ref_pop),
+    characterMatches(ref_pop, unique(ref$population))
   )
 
   allele <- unlist(hla_calls[, -1])
-  allele_freq <- table(allele, useNA = "no") / (2 * nrow(hla_calls))
-  allele_freq <- as.data.frame(allele_freq, stringsAsFactors = FALSE)
+  allele_counts <- table(allele, useNA = "no")
+  allele_freq <- allele_counts / (2 * nrow(hla_calls))
+
+  allele_freq <- data.frame(
+    allele = names(allele_counts),
+    Counts = as.vector(allele_counts),
+    Freq = as.vector(allele_freq),
+    stringsAsFactors = FALSE
+  )
+
+  if (compare) {
+    ref <- getReferenceFrequencies(ref, ref_pop, carrier_frequency)
+    allele_freq <- left_join(allele_freq, ref, by = c("allele" = "var"))
+  }
+
+  # format frequencies as percent
+  allele_freq[, -c(1, 2)] <-
+    rapply(
+      object = allele_freq[, -c(1, 2), drop = FALSE],
+      f = function(col) percent(col),
+      how = "replace"
+    )
 
   return(allele_freq)
+}
+
+#' Calculate KIR genes frequencies
+#'
+#' \code{getKIRFrequencies} calculates  KIR genes frequencies in KIR calls data
+#' frame.
+#'
+#' @return Data frame containing alleles and thier corresponding frequencies.
+#'
+#' @examples
+#' ""
+#'
+#' @importFrom assertthat assert_that
+#' @importFrom dplyr left_join
+#' @importFrom formattable percent
+#'
+#' @export
+getKIRFrequencies <- function(kir_calls) {
+  assert_that(
+    checkKirCallsFormat(kir_calls)
+  )
+
+  kir_sums <- colSums(kir_calls[, -1, drop = FALSE], na.rm = TRUE)
+  kir_freq <- kir_sums / nrow(kir_calls)
+
+  kir_freq <- data.frame(
+    gene = names(kir_sums),
+    Counts = kir_sums,
+    Freq = percent(kir_freq),
+    stringsAsFactors = FALSE
+  )
+
+  return(kir_freq)
 }
 
 #' Transform amino acid variations data frame to counts table
@@ -690,13 +754,11 @@ formatResults <- function(results,
 
   filter_by <- parse_exprs(filter_by)
   arrange_by <- parse_exprs(arrange_by)
-  select_cols_quo <- parse_exprs(select_cols)
-  names(select_cols_quo) <- names(select_cols)
 
   results %<>%
     filter(!!! filter_by) %>%
     arrange(!!! arrange_by) %>%
-    select(!!! select_cols_quo)
+    select(select_cols)
 
   if (format == "html" & isTRUE(getOption("knitr.in.progress"))) {
     results <-
@@ -734,8 +796,7 @@ formatResults <- function(results,
 #' formatted table depending on the type of analysis and model type.
 #'
 #' @inheritParams formatResults
-#' @param cols Character vector specifying columns to kable. Names can be used
-#'   to rename columns.
+#' @param colnames Character vector giving new colnames in dply::rename style.
 #' @param header String specifying results table header.
 #' @param pvalue_cutoff Number specifying p-value cutoff for results to be
 #'   included in output. If \code{NULL} no filtering is done.
@@ -749,14 +810,16 @@ formatResults <- function(results,
 #' @importFrom magrittr %>% %<>%
 #' @importFrom rlang has_name list2 parse_expr warn !! :=
 #'
+#' @export
+#'
 kableResults <- function(results,
-                         cols = c("estimate", "std.error", "p.value", "p.adjusted", "Ntotal", "Ntotal (%)" = "Ntotal.frequency", Npositive = "N R=1", Npositive.frequency = "N R=1 (%%)", Nnegative = "N R=0", Nnegative.frequency = "N R=0 (%%)"),
+                         colnames = NULL,
                          header = "MiDAS analysis results",
                          pvalue_cutoff = NULL,
                          format = getOption("knitr.table.format")) {
   assert_that(
     is.data.frame(results),
-    is.character(cols),
+    isStringOrNULL(colnames),
     isNumberOrNULL(pvalue_cutoff),
     is.string(format),
     stringMatches(format, choice = c("html", "latex"))
@@ -764,50 +827,16 @@ kableResults <- function(results,
 
   filter_by <- ifelse(
     test = is.null(pvalue_cutoff),
-    yes = "p.adjusted <= 1",
+    yes = "p.value <= 1",
     no = sprintf("p.value <= %f", pvalue_cutoff)
   )
-  passed_filter <- eval(parse_expr(filter_by), envir = as.list(results))
-  if (! any(passed_filter, na.rm = TRUE)) {
-    warn(sprintf("None of the results meets filtering criteria: %s", filter_by))
-  }
 
-  term_name <- colnames(results)[1] # term name is always added..
-  if (term_name %in% cols) {
-    cols <- cols[cols != term_name]
-  }
-  select_cols <- c(
-    unlist(list2(
-      !! term_name := colnames(results)[1] # term name
-    )),
-    cols
-  )
+  select_cols <- colnames(results)
+  names(select_cols) <- select_cols
+  names(select_cols)[colnames] <- names(colnames)
 
-  present_cols <- has_name(results, select_cols)
-  if (test_present_cols <- ! all(present_cols)) {
-    warn(
-      sprintf(
-        "Columns %s could't be found in results, will be ommited.",
-        ifelse(test_present_cols,
-               paste0("\"",
-                      paste(
-                        select_cols[! present_cols],
-                        collapse = "\", \""
-                       ),
-                      "\""
-               ),
-               ""
-        )
-      )
-    )
-  }
-  assert_that(
-    sum(present_cols) != 0,
-    msg = sprintf("results does not contain any of the following columns: %s",
-                  paste(select_cols, collapse = ", ")
-    )
-  )
-  select_cols <- select_cols[present_cols]
+  # replace .frequency with %
+  names(select_cols) <- gsub(".frequency", " [%] ", names(select_cols))
 
   results %<>%
     formatResults(
@@ -859,7 +888,7 @@ kableResults <- function(results,
 #'
 #' @examples
 #' file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-#' kir_counts <- readKPICalls(file)
+#' kir_counts <- readKIRCalls(file)
 #' countsToVariables(kir_counts, "kir_haplotypes")
 #'
 #' @importFrom assertthat assert_that is.string
@@ -953,7 +982,7 @@ countsToVariables <- function(counts,
 #'
 #' @inheritParams checkHlaCallsFormat
 #' @param kir_counts Data frame containing KIR genes counts, as return by
-#'   \code{\link{readKPICalls}}.
+#'   \code{\link{readKIRCalls}}.
 #' @param interactions_dict Path to the file containing HLA - KIR interactions
 #'   matchings. See details for further details.
 #'
@@ -964,7 +993,7 @@ countsToVariables <- function(counts,
 #' hla_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(hla_file)
 #' kir_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-#' kir_counts <- readKPICalls(kir_file)
+#' kir_counts <- readKIRCalls(kir_file)
 #' getHlaKirInteractions(hla_calls, kir_counts)
 #'
 #' @importFrom assertthat assert_that is.string
@@ -1115,9 +1144,10 @@ getExperimentFrequencies.matrix <-
       experiment <- applyInheritanceModel(experiment, "dominant")
     }
 
-    # Under additive inheritance model population size equals 2 * nrow(counts_table), in other cases it's 1 * nrow(counts_table)
+    # For carrier_frequency == FALSE population size equals 2 * nrow(counts_table), in other cases it's 1 * nrow(counts_table); the population size is 2x because genes comes in two copies
+    pop_mul <- ifelse(carrier_frequency, 1, 2)
     counts_sums <- rowSums(experiment, na.rm = TRUE)
-    allele_freq <- counts_sums / (2 * ncol(experiment)) # the population size is 2x because genes comes in two copies
+    allele_freq <- counts_sums / (pop_mul * ncol(experiment))
 
     counts_df <- data.frame(
       term = rownames(experiment),
@@ -1127,9 +1157,6 @@ getExperimentFrequencies.matrix <-
     )
 
     if (! is.null(ref)) {
-      if (carrier_frequency) {
-         ref[, -1] <- lapply(ref[, -1, drop = FALSE], function (x) 2 * x * (1 - x) + x^2) # HWE 2qp + q^2
-      }
       counts_df <-
         left_join(counts_df, ref, by = c("term" = "var"))
     }

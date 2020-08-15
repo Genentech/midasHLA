@@ -8,7 +8,7 @@ NULL
 #' transformations required for MiDAS analysis.
 #'
 #' A object of class \code{MiDAS} have at least one of
-#' \link[=readHlaCalls]{HLA calls} or \link[=readKPICalls]{KIR calls} experiment
+#' \link[=readHlaCalls]{HLA calls} or \link[=readKIRCalls]{KIR calls} experiment
 #' matrices defined (they can be accessed using \code{\link{getHlaCalls}} and
 #' \code{\link{getKirCalls}} functions).
 #'
@@ -58,7 +58,7 @@ setMethod("initialize", "MiDAS", function(.Object, experiments, colData, metadat
 # Validity method for class MiDAS
 #
 # Valid \code{MiDAS} object must contain hla_calls or kir_calls experiment in
-# proper \link[=readHlaCalls]{HLA calls} or \link[=readKPICalls]{KIR calls}
+# proper \link[=readHlaCalls]{HLA calls} or \link[=readKIRCalls]{KIR calls}
 # format.
 #
 # \code{experiment} metadata's variable used to determine analyses available
@@ -307,17 +307,7 @@ setMethod(
         length(ref_pop) > 0,
         msg = "Please specify reference populations using 'ref_pop' argument."
       )
-      ref <- ref[ref$population %in% ref_pop,]
-      ref <- reshape(
-        data = ref,
-        idvar = "var",
-        timevar = "population",
-        direction = "wide"
-      )
-      colnames(ref)[-1] <-
-        gsub("frequency\\.", "", colnames(ref)[-1])
-      cols <- c("var", ref_pop)
-      ref <- select(ref, !!cols) # rename populations if needed
+      ref <- getReferenceFrequencies(ref, ref_pop, carrier_frequency)
       freq <- getExperimentFrequencies(mat, carrier_frequency, ref)
     } else {
       if (compare) warn(sprintf("Could not find reference frequencies for experiment: '%s'", experiment))
@@ -540,7 +530,7 @@ as.data.frame.MiDAS <- function(x, ...) {
 #'
 #' # read kir calls file
 #' kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-#' kir_calls <- readKPICalls(kir_calls_file)
+#' kir_calls <- readKIRCalls(kir_calls_file)
 #'
 #' # read phenotypic data and covariates
 #' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")

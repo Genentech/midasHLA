@@ -124,6 +124,7 @@ analyzeAssociations <- function(object,
 #' @inheritParams analyzeAssociations
 #' @param th Number specifying p-value threshold for a variable to be considered
 #'   significant.
+#' @param th_adj Logical
 #' @param keep Logical flag indicating if the output should be a list of results
 #'   resulting from each selection step. Default is to return only the final
 #'   result.
@@ -176,6 +177,7 @@ analyzeConditionalAssociations <- function(object,
                                            correction = "bonferroni",
                                            n_correction = NULL,
                                            th,
+                                           th_adj = TRUE,
                                            keep = FALSE,
                                            rss_th = 1e-07,
                                            exponentiate = FALSE) {
@@ -234,9 +236,12 @@ analyzeConditionalAssociations <- function(object,
     mask <- ! prev_variables %in% first_variables
     results$covariates <- paste(prev_variables[mask], collapse = " + ")
 
-    i_min <- which.min(results[["p.value"]])
+    # select optimization criteria
+    crit <- ifelse(th_adj, "p.adjusted", "p.value")
+
+    i_min <- which.min(results[[crit]])
     if (length(i_min) == 0) break
-    if (results$p.value[i_min] > th) break
+    if (results[[crit]][i_min] > th) break
 
     object <- updateModel(object,
                           results$term[i_min],
@@ -574,6 +579,7 @@ runMiDAS_conditional <- function(call,
                                  n_correction = NULL,
                                  exponentiate = FALSE,
                                  th = 0.05,
+                                 th_adj = TRUE,
                                  keep = FALSE,
                                  rss_th = 1e-07,
                                  ...) {
@@ -594,6 +600,7 @@ runMiDAS_conditional <- function(call,
     correction = correction,
     n_correction = n_correction,
     th = th,
+    th_adj = th_adj,
     keep = keep,
     rss_th = rss_th,
     exponentiate = exponentiate

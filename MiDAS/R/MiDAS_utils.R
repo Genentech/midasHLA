@@ -732,7 +732,7 @@ assertthat::on_failure(isClassOrNULL) <- function(call, env) {
 #' @return Data frame with haplotypes and corresponding gene counts. \code{NA}'s
 #'   in \code{x} are removed during conversion.
 #'
-#' @seealso \code{\link{readKPICalls}}, \code{\link{getHlaKirInteractions}},
+#' @seealso \code{\link{readKIRCalls}}, \code{\link{getHlaKirInteractions}},
 #'   \code{\link{checkKirCallsFormat}}, \code{\link{prepareMiDAS}}.
 #'
 #' @examples
@@ -852,7 +852,7 @@ assertthat::on_failure(colnamesMatches) <- function(call, env) {
 #' format.
 #'
 #' @param kir_calls Data frame containing KIR gene counts, as returned by
-#'   \code{\link{readKPICalls}} function.
+#'   \code{\link{readKIRCalls}} function.
 #' @param accept.null Logical indicating if NULL \code{kir_calls} should be
 #'   accepted.
 #'
@@ -861,13 +861,13 @@ assertthat::on_failure(colnamesMatches) <- function(call, env) {
 #'
 #' @family assert functions
 #'
-#' @seealso \code{\link{readKPICalls}}, \code{\link{getHlaKirInteractions}},
+#' @seealso \code{\link{readKIRCalls}}, \code{\link{getHlaKirInteractions}},
 #'   \code{\link{kirHaplotypeToCounts}}, \code{\link{prepareMiDAS}}.
 #'
 #' @importFrom assertthat assert_that see_if
 #' @examples
 #' file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-#' kir_calls <- readKPICalls(file)
+#' kir_calls <- readKIRCalls(file)
 #' checkKirCallsFormat(kir_calls)
 #'
 #' @export
@@ -1714,7 +1714,7 @@ iterativeModel <- function(object,
           backquote = TRUE,
           collapse = " + "
         )
-        tidy(obj, exponentiate)
+        tidy(x = obj, conf.int = TRUE, exponentiate = exponentiate)
       },
       error = function(e) {
         msg <- sprintf(
@@ -1723,7 +1723,7 @@ iterativeModel <- function(object,
           conditionMessage(e)
         )
         warn(msg)
-        failed_result <- tidy(object)[1, ]
+        failed_result <- tidy(x = object, conf.int = TRUE)[1, ]
         failed_result[1, ] <- NA
         failed_result$term <- x
 
@@ -1784,4 +1784,45 @@ assertthat::on_failure(isInheritanceModelApplicable) <- function(call, env) {
   paste0("Inheritance model can not be applied to experiment ",
          deparse(call$x)
   )
+}
+
+#' Get HLA allele frequencies in reference populations
+#'
+#' @param ref Data frame
+#' @param pop Character
+#' @param carrier_frequency Logical
+#'
+#' @return Data frame
+#'
+#' @importFrom assertthat assert_that
+#' @importFrom dplyr filter select
+#' @importFrom rlang .data !!
+#' @importFrom stats reshape
+#'
+getReferenceFrequencies <- function(ref, pop, carrier_frequency = FALSE) {
+  assert_that(
+    is.data.frame(ref),
+    colnamesMatches(ref, c("var", "population", "frequency")),
+    is.character(pop),
+    characterMatches(pop, unique(ref$population)),
+    isTRUEorFALSE(carrier_frequency)
+  )
+
+  ref <- dplyr::filter(ref, .data$population %in% pop)
+  ref <- reshape(
+    data = ref,
+    idvar = "var",
+    timevar = "population",
+    direction = "wide"
+  )
+  colnames(ref)[-1] <-
+    gsub("frequency\\.", "", colnames(ref)[-1])
+  cols <- c("var", pop)
+  ref <- select(ref, !!cols) # rename populations if needed
+
+  if (carrier_frequency) {
+    ref[, -1] <- lapply(ref[, -1, drop = FALSE], function (x) 2 * x * (1 - x) + x^2) # HWE 2qp + q^2
+  }
+
+  return(ref)
 }
