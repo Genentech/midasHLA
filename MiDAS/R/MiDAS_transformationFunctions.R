@@ -810,6 +810,8 @@ formatResults <- function(results,
 #' @importFrom magrittr %>% %<>%
 #' @importFrom rlang has_name list2 parse_expr warn !! :=
 #'
+#' @export
+#'
 kableResults <- function(results,
                          colnames = NULL,
                          header = "MiDAS analysis results",
