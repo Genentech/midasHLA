@@ -1714,7 +1714,7 @@ iterativeModel <- function(object,
           backquote = TRUE,
           collapse = " + "
         )
-        tidy(obj, exponentiate)
+        tidy(x = obj, conf.int = TRUE, exponentiate = exponentiate)
       },
       error = function(e) {
         msg <- sprintf(
@@ -1723,7 +1723,7 @@ iterativeModel <- function(object,
           conditionMessage(e)
         )
         warn(msg)
-        failed_result <- tidy(object)[1, ]
+        failed_result <- tidy(x = object, conf.int = TRUE)[1, ]
         failed_result[1, ] <- NA
         failed_result$term <- x
 

@@ -27,7 +27,7 @@ test_that("HLA allele associations are analyzed properly", {
     lm(OS_DIED ~ AGE + SEX + `A*01:01`, data = midas_data),
     lm(OS_DIED ~ AGE + SEX + `A*02:01`, data = midas_data)
   )
-  test_res <- do.call("rbind", lapply(test_res, tidy))
+  test_res <- do.call("rbind", lapply(test_res, tidy, conf.int = TRUE))
   test_res$term <- gsub("`", "", test_res$term)
   test_res <- test_res[test_res$term %in% c("A*01:01", "A*02:01"), ]
   test_res$p.adjusted <- p.adjust(test_res$p.value, "BH")
