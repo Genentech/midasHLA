@@ -262,7 +262,7 @@ readHlaAlignments <- function(file,
 
 #' Reads data table with KIR haplotypes calls
 #'
-#' \code{readKPICalls} reads table with KIR haplotypes calls from file.
+#' \code{readKiRCalls} reads table with KIR haplotypes calls from file.
 #'
 #' Input file have to be a tsv formatted table with two columns and header.
 #' First column should contain samples IDs, second column should hold
@@ -274,14 +274,14 @@ readHlaAlignments <- function(file,
 #'
 #' @examples
 #' file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-#' readKPICalls(file)
+#' readKIRCalls(file)
 #'
 #' @importFrom assertthat assert_that is.readable see_if
 #' @importFrom dplyr left_join select
 #' @importFrom stats na.omit setNames
 #'
 #' @export
-readKPICalls <- function(file,
+readKIRCalls <- function(file,
                          na.strings = c("", "NA", "uninterpretable")) {
   assert_that(
     is.readable(file),

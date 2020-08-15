@@ -732,7 +732,7 @@ assertthat::on_failure(isClassOrNULL) <- function(call, env) {
 #' @return Data frame with haplotypes and corresponding gene counts. \code{NA}'s
 #'   in \code{x} are removed during conversion.
 #'
-#' @seealso \code{\link{readKPICalls}}, \code{\link{getHlaKirInteractions}},
+#' @seealso \code{\link{readKIRCalls}}, \code{\link{getHlaKirInteractions}},
 #'   \code{\link{checkKirCallsFormat}}, \code{\link{prepareMiDAS}}.
 #'
 #' @examples
@@ -852,7 +852,7 @@ assertthat::on_failure(colnamesMatches) <- function(call, env) {
 #' format.
 #'
 #' @param kir_calls Data frame containing KIR gene counts, as returned by
-#'   \code{\link{readKPICalls}} function.
+#'   \code{\link{readKIRCalls}} function.
 #' @param accept.null Logical indicating if NULL \code{kir_calls} should be
 #'   accepted.
 #'
@@ -861,13 +861,13 @@ assertthat::on_failure(colnamesMatches) <- function(call, env) {
 #'
 #' @family assert functions
 #'
-#' @seealso \code{\link{readKPICalls}}, \code{\link{getHlaKirInteractions}},
+#' @seealso \code{\link{readKIRCalls}}, \code{\link{getHlaKirInteractions}},
 #'   \code{\link{kirHaplotypeToCounts}}, \code{\link{prepareMiDAS}}.
 #'
 #' @importFrom assertthat assert_that see_if
 #' @examples
 #' file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-#' kir_calls <- readKPICalls(file)
+#' kir_calls <- readKIRCalls(file)
 #' checkKirCallsFormat(kir_calls)
 #'
 #' @export

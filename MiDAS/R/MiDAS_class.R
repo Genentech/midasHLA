@@ -8,7 +8,7 @@ NULL
 #' transformations required for MiDAS analysis.
 #'
 #' A object of class \code{MiDAS} have at least one of
-#' \link[=readHlaCalls]{HLA calls} or \link[=readKPICalls]{KIR calls} experiment
+#' \link[=readHlaCalls]{HLA calls} or \link[=readKIRCalls]{KIR calls} experiment
 #' matrices defined (they can be accessed using \code{\link{getHlaCalls}} and
 #' \code{\link{getKirCalls}} functions).
 #'
@@ -58,7 +58,7 @@ setMethod("initialize", "MiDAS", function(.Object, experiments, colData, metadat
 # Validity method for class MiDAS
 #
 # Valid \code{MiDAS} object must contain hla_calls or kir_calls experiment in
-# proper \link[=readHlaCalls]{HLA calls} or \link[=readKPICalls]{KIR calls}
+# proper \link[=readHlaCalls]{HLA calls} or \link[=readKIRCalls]{KIR calls}
 # format.
 #
 # \code{experiment} metadata's variable used to determine analyses available
@@ -530,7 +530,7 @@ as.data.frame.MiDAS <- function(x, ...) {
 #'
 #' # read kir calls file
 #' kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-#' kir_calls <- readKPICalls(kir_calls_file)
+#' kir_calls <- readKIRCalls(kir_calls_file)
 #'
 #' # read phenotypic data and covariates
 #' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")

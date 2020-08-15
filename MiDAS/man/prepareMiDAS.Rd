@@ -18,7 +18,7 @@ prepareMiDAS_hla_alleles(hla_calls, ...)
 \code{\link{readHlaCalls}} function.}
 
 \item{kir_calls}{Data frame containing KIR gene counts, as returned by
-\code{\link{readKPICalls}} function.}
+\code{\link{readKIRCalls}} function.}
 
 \item{colData}{Data frame holding additional variables like phenotypic
 observations or covariates. It have to contain \code{'ID'} column holding
@@ -61,7 +61,7 @@ hla_calls <- readHlaCalls(hla_calls_file)
 
 # read kir calls file
 kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-kir_calls <- readKPICalls(kir_calls_file)
+kir_calls <- readKIRCalls(kir_calls_file)
 
 # read phenotypic data and covariates
 pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")

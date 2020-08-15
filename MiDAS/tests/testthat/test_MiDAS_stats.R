@@ -224,7 +224,7 @@ test_that("runMiDAS", {
   hla_calls <- readHlaCalls(hla_calls_file)[, 1:11] # TODO this was taking tooo much time
   kir_file <-
     system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-  kir_calls <- readKPICalls(kir_file)
+  kir_calls <- readKIRCalls(kir_file)
   pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
   pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")

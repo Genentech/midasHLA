@@ -163,7 +163,7 @@ test_that("HLA allele alignments are read properly", {
   unlink(fake_aln_tmp)
 })
 
-test_that("readKPICalls", {
+test_that("readKIRCalls", {
   kpi_output <- data.frame(
     ID = c("SAM24320917", "SAM24320918"),
     haplotypes = c("uninterpretable", "cA01~tA01+cB02~tA01"),
@@ -194,7 +194,7 @@ test_that("readKPICalls", {
     row.names = FALSE,
     col.names = TRUE
   )
-  kir_calls <- readKPICalls(file)
+  kir_calls <- readKIRCalls(file)
   test_kir_calls <- kpi_output[, -2, drop = FALSE]
   expect_equal(kir_calls, test_kir_calls)
 
@@ -207,7 +207,7 @@ test_that("readKPICalls", {
     row.names = FALSE,
     col.names = TRUE
   )
-  expect_error(readKPICalls(file), "Columns: 'SAMID' in kir_calls should be named 'ID'")
+  expect_error(readKIRCalls(file), "Columns: 'SAMID' in kir_calls should be named 'ID'")
 
   kpi_output <- kpi_output[-1]
   write.table(
@@ -218,6 +218,6 @@ test_that("readKPICalls", {
     row.names = FALSE,
     col.names = TRUE
   )
-  expect_error(readKPICalls(file), "Number of columns in kir_calls must equal 17.")
+  expect_error(readKIRCalls(file), "Number of columns in kir_calls must equal 17.")
 })
 

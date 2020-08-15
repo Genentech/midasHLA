@@ -8,7 +8,7 @@ checkKirCallsFormat(kir_calls, accept.null = FALSE)
 }
 \arguments{
 \item{kir_calls}{Data frame containing KIR gene counts, as returned by
-\code{\link{readKPICalls}} function.}
+\code{\link{readKIRCalls}} function.}
 
 \item{accept.null}{Logical indicating if NULL \code{kir_calls} should be
 accepted.}
@@ -23,12 +23,12 @@ format.
 }
 \examples{
 file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-kir_calls <- readKPICalls(file)
+kir_calls <- readKIRCalls(file)
 checkKirCallsFormat(kir_calls)
 
 }
 \seealso{
-\code{\link{readKPICalls}}, \code{\link{getHlaKirInteractions}},
+\code{\link{readKIRCalls}}, \code{\link{getHlaKirInteractions}},
   \code{\link{kirHaplotypeToCounts}}, \code{\link{prepareMiDAS}}.
 
 Other assert functions: \code{\link{characterMatches}},
