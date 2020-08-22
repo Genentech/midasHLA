@@ -324,9 +324,7 @@ updateModel <- function(object,
 #'
 #' @return Character vector with names of HLA alleles dictionaries.
 #'
-#' @export
-listMiDASDictionaries <- function(pattern = ".*",
-                                  file.names = FALSE) {
+listMiDASDictionaries <- function(pattern = "allele", file.names = FALSE) {
   pattern <- paste0("^Match.*", pattern, ".*.txt$")
   lib <- list.files(
     path = system.file("extdata", package = "MiDAS"),
