@@ -1075,26 +1075,25 @@ applyInheritanceModel.matrix <- function(experiment,
 #' @rdname applyInheritanceModel
 #' @method applyInheritanceModel SummarizedExperiment
 #'
-#' @importFrom SummarizedExperiment assay
-#'
 applyInheritanceModel.SummarizedExperiment <- function(experiment,
                                                        inheritance_model =  c("dominant", "recessive", "additive")) {
-  assay(experiment) <- applyInheritanceModel(assay(experiment), inheritance_model)
+  SummarizedExperiment::assay(experiment) <-
+    applyInheritanceModel(SummarizedExperiment::assay(experiment), inheritance_model)
 
   return(experiment)
 }
 
-#' Helper function for frequency data frame filtering
+#' Helper function for filtering frequency data frame
 #'
 #' @inheritParams filterExperimentByFrequency
 #' @param df Data frame as returned by \code{getExperimentFrequencies}.
 #'
-#' @return Character vector containing names of terms after filtration.
+#' @return Character vector containing names of variables after filtration.
 #'
 #' @importFrom dplyr filter
 #' @importFrom magrittr %>%
 #'
-getFrequencyMask <- function(df, # TODO test
+getFrequencyMask <- function(df,
                              lower_frequency_cutoff = NULL,
                              upper_frequency_cutoff = NULL) {
   lower_frequency_cutoff <- ifelse(is.null(lower_frequency_cutoff), -Inf, lower_frequency_cutoff)
@@ -1141,7 +1140,8 @@ filterExperimentByVariables.matrix <- function(experiment, variables) {
 #'
 filterExperimentByVariables.SummarizedExperiment <- function(experiment, variables) {
   experiment <- experiment[variables, ]
-  metadata(experiment)$omnibus_groups <- metadata(experiment)$omnibus_groups[variables]
+  S4Vectors::metadata(experiment)$omnibus_groups <-
+    S4Vectors::metadata(experiment)$omnibus_groups[variables]
 
   return(experiment)
 }

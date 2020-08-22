@@ -1,10 +1,6 @@
-library(assertthat)
-library(testthat)
+context("parsing functions")
 
-context("HLA allele information parsing")
-
-
-test_that("HLA allele calls are read properly", {
+test_that("readHlaCalls", {
   file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(file)
   load(system.file("extdata", "test_hla_calls.Rdata", package = "MiDAS"))
@@ -59,7 +55,7 @@ test_that("HLA allele calls are read properly", {
   unlink(fake_calls_NA_col)
 })
 
-test_that("HLA allele alignments are read properly", {
+test_that("readHlaAlignments", {
   file <- system.file("extdata", "TAP1_prot.txt", package = "MiDAS")
   hla_alignments <- readHlaAlignments(file)
   test_hla_alignments <- readHlaAlignments(gene = "TAP1")

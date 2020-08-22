@@ -1,22 +1,13 @@
-context("HLA allele statistical methods")
+context("stats")
 
-test_that("HLA allele associations are analyzed properly", {
-  hla_calls_file <-
-    system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(hla_calls_file)
-  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
-  covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-  covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-  coldata <- dplyr::left_join(pheno, covar, by = "ID")
+test_that("analyzeAssociations", {
   midas <-
-    prepareMiDAS(hla_calls,
-                 colData = coldata,
-                 experiment = "hla_alleles",
-                 inheritance_model = "additive")
+    prepareMiDAS(hla_calls = MiDAS_tut_HLA,
+                 colData = MiDAS_tut_pheno,
+                 experiment = "hla_alleles")
 
   midas_data <- midasToWide(midas, experiment = "hla_alleles")
-  object <- lm(OS_DIED ~ AGE + SEX + term, data = midas_data)
+  object <- lm(disease ~ term, data = midas_data)
 
   res <- analyzeAssociations(object,
                              variables = c("A*01:01", "A*02:01"),
@@ -24,8 +15,8 @@ test_that("HLA allele associations are analyzed properly", {
   )
 
   test_res <- list(
-    lm(OS_DIED ~ AGE + SEX + `A*01:01`, data = midas_data),
-    lm(OS_DIED ~ AGE + SEX + `A*02:01`, data = midas_data)
+    lm(disease ~ `A*01:01`, data = midas),
+    lm(disease ~ `A*02:01`, data = midas)
   )
   test_res <- do.call("rbind", lapply(test_res, tidy, conf.int = TRUE))
   test_res$term <- gsub("`", "", test_res$term)
@@ -79,27 +70,14 @@ test_that("HLA allele associations are analyzed properly", {
   )
 })
 
-test_that("Stepwise conditional alleles subset selection", {
-  library("survival")
-
-  hla_calls_file <-
-    system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(hla_calls_file)
-  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
-  covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-  covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-  coldata <- dplyr::left_join(pheno, covar, by = "ID")
+test_that("analyzeConditionalAssociations", {
   midas <-
-    prepareMiDAS(
-      hla_calls,
-      colData = coldata,
-      experiment = "hla_alleles",
-      inheritance_model = "additive"
-    )
+    prepareMiDAS(hla_calls = MiDAS_tut_HLA,
+                 colData = MiDAS_tut_pheno,
+                 experiment = "hla_alleles")
   midas_data <- midasToWide(midas, experiment = "hla_alleles")
 
-  object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX + term, data = midas_data)
+  object <- lm(disease ~ term, data = midas_data)
 
   # keep = FALSE
   res <- analyzeConditionalAssociations(object,
@@ -109,13 +87,13 @@ test_that("Stepwise conditional alleles subset selection", {
   res <- rapply(res, classes = "numeric", how = "replace", round, digits = 3)
 
   test_res <- tibble(term = c("B*14:02", "DRB1*11:01"),
-                     estimate = c(3.72, 2.612),
-                     std.error = c(1.59, 1.069),
-                     statistic = c(2.339, 2.442),
-                     p.value = c(0.019, 0.015),
-                     conf.low = c(0.603, 0.516),
-                     conf.high = c(6.838, 4.707),
-                     p.adjusted = c(0.039, 0.015),
+                     estimate = c(0.196, -0.092),
+                     std.error = c(0.072, 0.044),
+                     statistic = c(2.739, -2.099),
+                     p.value = c(0.006, 0.036),
+                     conf.low = c(0.056, -0.177),
+                     conf.high = c(0.337, -0.006),
+                     p.adjusted = c(0.013, 0.036),
                      covariates = c("", "B*14:02")
   )
 
@@ -129,29 +107,27 @@ test_that("Stepwise conditional alleles subset selection", {
   res <- rapply(res, classes = "numeric", how = "replace", round, digits = 3)
   test_res <- list(
     tibble(term = c("B*14:02", "DRB1*11:01"),
-           estimate = c(3.72, 1.956),
-           std.error = c(1.59, 0.960),
-           statistic = c(2.339, 2.038),
-           p.value = c(0.019, 0.042),
-           conf.low = c(0.603, 0.075),
-           conf.high = c(6.838, 3.838),
-           p.adjusted = c(0.039, 0.083),
+           estimate = c(0.196, -0.096),
+           std.error = c(0.072, 0.044),
+           statistic = c(2.739, -2.194),
+           p.value =  c(0.006, 0.028),
+           conf.low = c(0.056, -0.182),
+           conf.high = c(0.337, -0.01),
+           p.adjusted = c(0.013, 0.057),
            covariates = c("", "")
     ),
     tibble(term = "DRB1*11:01",
-           estimate = 2.612,
-           std.error = 1.069,
-           statistic = 2.442,
-           p.value = 0.015,
-           conf.low = 0.516,
-           conf.high = 4.707,
-           p.adjusted = 0.015,
+           estimate = -0.092,
+           std.error = 0.044,
+           statistic = -2.099,
+           p.value = 0.036,
+           conf.low = -0.177,
+           conf.high = -0.006,
+           p.adjusted = 0.036,
            covariates = "B*14:02"
     )
   )
   expect_equal(res, test_res)
-
-  # Tests for checkStatisticalModel errors are ommitted here
 
   expect_error(
     analyzeConditionalAssociations(object, variables = 1),
@@ -218,24 +194,46 @@ test_that("Stepwise conditional alleles subset selection", {
   )
 })
 
-test_that("runMiDAS", {
-  hla_calls_file <-
-    system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(hla_calls_file)[, 1:11] # TODO this was taking tooo much time
-  kir_file <-
-    system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-  kir_calls <- readKIRCalls(kir_file)
-  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
-  covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-  covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-  coldata <- dplyr::left_join(pheno, covar, by = "ID")
-
+test_that("omnibusTest", {
   midas <-
     prepareMiDAS(
-      hla_calls = hla_calls,
-      kir_call = kir_calls,
-      colData = coldata,
+      hla_calls = MiDAS_tut_HLA,
+      colData = MiDAS_tut_pheno,
+      experiment = "hla_aa"
+    )
+  midas_data <- midasToWide(midas, experiment = "hla_aa")
+  object <- lm(disease ~ term, data = midas_data)
+  omnibus_groups <- list(
+    A_77 = c("A_77_D", "A_77_N", "A_77_S"),
+    A_79 = c("A_79_G", "A_79_R")
+  )
+  omnibus_res <- omnibusTest(object, omnibus_groups)
+
+  obj_A77 <- lm(disease ~ A_77_D + A_77_N + A_77_S, data = midas_data)
+  obj_A79 <- lm(disease ~ A_79_G + A_79_R , data = midas_data)
+  LRT <-
+    lapply(list(obj_A77, obj_A79),
+           LRTest,
+           mod0 = lm(disease ~ 1, data = midas_data))
+  omnibus_res_test <- data.frame(
+    group = c("A_77", "A_79"),
+    term = c("A_77_D, A_77_N, A_77_S", "A_79_G, A_79_R"),
+    dof = sapply(LRT, `[[`, "dof"),
+    logLik = sapply(LRT, `[[`, "logLik"),
+    statistic = sapply(LRT, `[[`, "statistic"),
+    p.value = sapply(LRT, `[[`, "p.value"),
+    p.adjusted = p.adjust(sapply(LRT, `[[`, "p.value"), method = "bonferroni"),
+    stringsAsFactors = FALSE
+  )
+  expect_equal(omnibus_res, omnibus_res_test)
+})
+
+test_that("runMiDAS", {
+  midas <-
+    prepareMiDAS(
+      hla_calls = MiDAS_tut_HLA,
+      kir_call = MiDAS_tut_KIR,
+      colData = MiDAS_tut_pheno,
       experiment = c(
         "hla_alleles",
         "hla_aa",
@@ -245,8 +243,7 @@ test_that("runMiDAS", {
         "kir_genes",
         "hla_kir_interactions",
         "hla_divergence"
-      ),
-      inheritance_model = "additive"
+      )
     )
 
   # linear
@@ -255,7 +252,7 @@ test_that("runMiDAS", {
   experiment_choice <-
     c(
       "hla_alleles",
-      # "hla_aa", #TODO
+      "hla_aa",
       "hla_g_groups",
       "hla_supertypes",
       "hla_NK_ligands",
@@ -264,7 +261,7 @@ test_that("runMiDAS", {
       "hla_divergence"
     )
   for (experiment in experiment_choice) {
-    object <- lm(OS_DIED ~ AGE + SEX + term, data = midas)
+    object <- lm(disease ~ term, data = midas)
     res <- runMiDAS(object,
                     conditional = conditional,
                     omnibus = omnibus,
@@ -278,7 +275,9 @@ test_that("runMiDAS", {
     test_res <-
       analyzeAssociations(object, variables = test_variables, exponentiate = FALSE)
 
-    if (typeof(midas[[experiment]]) == "integer") {
+    ex <- midas[[experiment]]
+    if (is(ex, "SummarizedExperiment")) {ex <- assay(ex)}
+    if (typeof(ex) == "integer") {
       variables_freq <-
         MiDAS:::runMiDASGetVarsFreq(
           midas = midas,
@@ -301,6 +300,7 @@ test_that("runMiDAS", {
     )
     test_res <- dplyr::rename(test_res, !!term_name := term)
     test_res <- dplyr::arrange(test_res, p.value)
+    test_res <- test_res[, colnames(res)] # order columns
 
 
     expect_equal(as.data.frame(res), as.data.frame(test_res)) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
@@ -309,12 +309,12 @@ test_that("runMiDAS", {
   # conditional
   conditional <- TRUE
   omnibus <- FALSE
-  th <- 0.1
+  th <- 0.2
   keep <- FALSE
   experiment_choice <-
     c(
       "hla_alleles",
-      # "hla_aa", # TODO
+      "hla_aa",
       "hla_g_groups",
       "hla_supertypes",
       "hla_NK_ligands",
@@ -323,7 +323,7 @@ test_that("runMiDAS", {
       "hla_divergence"
     )
   for (experiment in experiment_choice) {
-    object <- lm(OS_DIED ~ AGE + SEX + term, data = midas)
+    object <- lm(disease ~ term, data = midas)
     res <- runMiDAS(object,
                     conditional = conditional,
                     omnibus = omnibus,
@@ -345,7 +345,9 @@ test_that("runMiDAS", {
         keep = keep
       )
 
-    if (typeof(midas[[experiment]]) == "integer") {
+    ex <- midas[[experiment]]
+    if (is(ex, "SummarizedExperiment")) {ex <- assay(ex)}
+    if (typeof(ex) == "integer") {
       variables_freq <-
         MiDAS:::runMiDASGetVarsFreq(
           midas = midas,
@@ -368,6 +370,7 @@ test_that("runMiDAS", {
     )
     test_res <- dplyr::rename(test_res, !!term_name := term)
     test_res <- dplyr::arrange(test_res, p.value)
+    test_res <- test_res[, colnames(res)] # order columns
 
 
     expect_equal(as.data.frame(res), as.data.frame(test_res))
@@ -384,7 +387,7 @@ test_that("runMiDAS", {
   lower_frequency_cutoff <- 0.02
   upper_frequency_cutoff <- 0.06
   for (experiment in experiment_choice) {
-    object <- lm(OS_DIED ~ AGE + SEX + term, data = midas)
+    object <- lm(disease ~ term, data = midas)
     res <- runMiDAS(object,
                     conditional = conditional,
                     omnibus = omnibus,
@@ -460,10 +463,10 @@ test_that("runMiDAS", {
                "data associated with statistical model must be an instance of MiDAS class."
   )
 
-  # validObject test is ommited here
+  # validObject test is ommited here TODO
 
   fake_object <- object
-  fake_object$call$formula <- OS ~ AGE + SEX
+  fake_object$call$formula <- disease ~ 1
   expect_error(
     runMiDAS(fake_object),
     "placeholder 'term' could not be found in object's formula"
@@ -555,46 +558,4 @@ test_that("runMiDAS", {
     "No variables available for analysis, please revisit your filtration criteria."
   )
 
-})
-
-test_that("omnibusTest", {
-  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(hla_calls_file)
-  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-  pheno <- read.table(pheno_file, header = TRUE)
-  covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-  covar <- read.table(covar_file, header = TRUE)
-  coldata <- dplyr::left_join(pheno, covar, by = "ID")
-  midas <-
-    prepareMiDAS(
-      hla_calls,
-      colData = coldata,
-      inheritance_model = "dominant",
-      experiment = "hla_aa"
-    )
-  midas_data <- midasToWide(midas, experiment = "hla_aa")
-  object <- lm(OS ~ AGE + SEX + term, data = midas_data)
-  omnibus_groups <- list(
-    A_77 = c("A_77_D", "A_77_N", "A_77_S"),
-    A_79 = c("A_79_G", "A_79_R")
-  )
-  omnibus_res <- omnibusTest(object, omnibus_groups)
-
-  obj_A77 <- lm(OS ~ AGE + SEX + A_77_D + A_77_N + A_77_S, data = midas_data)
-  obj_A79 <- lm(OS ~ AGE + SEX + A_79_G + A_79_R , data = midas_data)
-  LRT <-
-    lapply(list(obj_A77, obj_A79),
-           LRTest,
-           mod0 = lm(OS ~ AGE + SEX + 0, data = midas_data))
-  omnibus_res_test <- data.frame(
-    group = c("A_77", "A_79"),
-    term = c("A_77_D, A_77_N, A_77_S", "A_79_G, A_79_R"),
-    dof = sapply(LRT, `[[`, "dof"),
-    logLik = sapply(LRT, `[[`, "logLik"),
-    statistic = sapply(LRT, `[[`, "statistic"),
-    p.value = sapply(LRT, `[[`, "p.value"),
-    p.adjusted = p.adjust(sapply(LRT, `[[`, "p.value"), method = "bonferroni"),
-    stringsAsFactors = FALSE
-  )
-  expect_equal(omnibus_res, omnibus_res_test)
 })

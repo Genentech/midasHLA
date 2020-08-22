@@ -443,7 +443,7 @@ getObjectDetails <- function(object) {
 runMiDASGetVarsFreq <- function(midas, experiment, test_covar) {
   variables_freq <- midas[[experiment]] %>%
     getExperimentFrequencies() %>%
-    rename(Ntotal = .data$Counts, Ntotal.frequency = .data$Freq)
+    rename(Ntotal = .data$Counts, Ntotal.percent = .data$Freq)
 
   test_covar_vals <- factor(colData(midas)[[test_covar]])
   if (nlevels(test_covar_vals) == 2) {
@@ -455,7 +455,7 @@ runMiDASGetVarsFreq <- function(midas, experiment, test_covar) {
       getExperimentFrequencies() %>%
       rename(
         !!sprintf("N(%s=%s)", test_covar, levels(test_covar_vals)[1]) := .data$Counts,
-        !!sprintf("N.frequency(%s=%s)", test_covar, levels(test_covar_vals)[1]) := .data$Freq
+        !!sprintf("N(%s=%s).percent", test_covar, levels(test_covar_vals)[1]) := .data$Freq
       )
     variables_freq <- left_join(variables_freq, lvl1_freq, by = "term")
 
@@ -465,7 +465,7 @@ runMiDASGetVarsFreq <- function(midas, experiment, test_covar) {
       getExperimentFrequencies() %>%
       rename(
         !!sprintf("N(%s=%s)", test_covar, levels(test_covar_vals)[2]) := .data$Counts,
-        !!sprintf("N.frequency(%s=%s)", test_covar, levels(test_covar_vals)[2]) := .data$Freq
+        !!sprintf("N(%s=%s).percent", test_covar, levels(test_covar_vals)[2]) := .data$Freq
       )
     variables_freq <- left_join(variables_freq, lvl2_freq, by = "term")
   }
@@ -583,7 +583,7 @@ hlaCallsGranthamDistance <- function(hla_calls, genes = c("A", "B", "C")) {
     )
 
     # process alignment
-    alignment <-hlaAlignmentGrantham(gene, resolution[1])
+    alignment <- hlaAlignmentGrantham(gene, resolution[1])
 
     allele_numbers <- rownames(alignment)
     d[[gene]] <- vapply(

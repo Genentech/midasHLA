@@ -1,39 +1,32 @@
 context("Transforming MiDAS objects")
 
-test_that("Amino acids variability is infered correctly", {
-  hla_calls <- system.file("extdata/HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(hla_calls)
-  # hla_calls <- MiDAS_tut_HLA
+test_that("hlaToAAVariation", {
   aa_variation <-
-    hlaToAAVariation(hla_calls,
+    hlaToAAVariation(MiDAS_tut_HLA,
                      indels = TRUE,
                      unkchar = TRUE,
                      as_df = FALSE)
   load(system.file("extdata", "test_aa_variation.Rdata", package = "MiDAS"))
   expect_equal(aa_variation, test_aa_variation)
 
-  expect_error(hlaToAAVariation(hla_calls, indels = "foo"),
+  expect_error(hlaToAAVariation(MiDAS_tut_HLA, indels = "foo"),
                "indels is not a flag \\(a length one logical vector\\)."
   )
 
-  expect_error(hlaToAAVariation(hla_calls, unkchar = "foo"),
+  expect_error(hlaToAAVariation(MiDAS_tut_HLA, unkchar = "foo"),
                "unkchar is not a flag \\(a length one logical vector\\)."
   )
 
-  expect_error(hlaToAAVariation(hla_calls, as_df = 1),
+  expect_error(hlaToAAVariation(MiDAS_tut_HLA, as_df = 1),
                "as_df is not a flag \\(a length one logical vector\\)."
   )
 })
 
-test_that("HLA calls table is converted to additional variables", {
-  hla_calls <- system.file("extdata/HLAHD_output_example.txt",
-                           package = "MiDAS"
-  )
-  hla_calls <- readHlaCalls(hla_calls)
-  hla_supertypes <- hlaToVariable(hla_calls, dictionary = "allele_HLA_supertype")
+test_that("hlaToVariable", {
+  hla_supertypes <- hlaToVariable(MiDAS_tut_HLA, dictionary = "allele_HLA_supertype")
   test_hla_supertypes <-
     lapply(
-      hla_calls[,-1],
+      MiDAS_tut_HLA[,-1],
       convertAlleleToVariable,
       dictionary = system.file("extdata", "Match_allele_HLA_supertype.txt", package = "MiDAS")
     )
@@ -43,7 +36,7 @@ test_that("HLA calls table is converted to additional variables", {
   colnames(test_hla_supertypes) <-
     paste0("supertype_", colnames(test_hla_supertypes))
   test_hla_supertypes <-
-    cbind(hla_calls[, 1, drop = FALSE], test_hla_supertypes, stringsAsFactors = FALSE)
+    cbind(MiDAS_tut_HLA[, 1, drop = FALSE], test_hla_supertypes, stringsAsFactors = FALSE)
   expect_equal(hla_supertypes, test_hla_supertypes)
 
   expect_error(
@@ -53,7 +46,7 @@ test_that("HLA calls table is converted to additional variables", {
 
   expect_error(
     hlaToVariable(
-      hla_calls = hla_calls,
+      hla_calls = MiDAS_tut_HLA,
       dictionary = "4digit_supertype",
       reduce = "yes"
     ),
@@ -62,7 +55,7 @@ test_that("HLA calls table is converted to additional variables", {
 
   expect_error(
     hlaToVariable(
-      hla_calls = hla_calls,
+      hla_calls = MiDAS_tut_HLA,
       dictionary = "4digit_supertype",
       na.value = 1:5
     ),
@@ -71,7 +64,7 @@ test_that("HLA calls table is converted to additional variables", {
 
   expect_error(
     hlaToVariable(
-      hla_calls = hla_calls,
+      hla_calls = MiDAS_tut_HLA,
       dictionary = "4digit_supertype",
       nacols.rm = "yes"
     ),
@@ -127,7 +120,7 @@ test_that("hlaCallsToCounts", {
   )
 })
 
-test_that("hla frequencies are calculated properly", {
+test_that("getHlaFrequencies", {
   minimal_hla_calls <- data.frame(
     ID = c("P1", "P2"),
     A_1 = c("A*01:01", "A*02:01"),
@@ -142,11 +135,9 @@ test_that("hla frequencies are calculated properly", {
     stringsAsFactors = FALSE
   )
   expect_equal(hla_freq, test_hla_freq)
-
-  # checkHlaCallsFormat tests are ommited here
 })
 
-test_that("amino acids variation data frame is converted to counts table", {
+test_that("hlaToAAVariation", {
   minimal_hla_calls <- data.frame(
     ID = c("P1", "P2"),
     A_1 = c("A*01:01", "A*02:01"),
@@ -177,7 +168,7 @@ test_that("amino acids variation data frame is converted to counts table", {
   )
 })
 
-test_that("amino acids frequencies are calculated properly", {
+test_that("hlaToAAVariation", {
   minimal_hla_calls <- data.frame(
     ID = c("P1", "P2"),
     A_1 = c("A*01:01", "A*02:01"),
@@ -309,13 +300,13 @@ test_that("kableResults", {
 test_that("countsToVariables", {
   kir_haplotypes <- countsToVariables(MiDAS_tut_KIR[1:2, ], "kir_haplotypes")
   kir_haplotypes_test <- data.frame(
-    ID = c("PAT1", "PAT2"),
-    cenAA = c(1, 0),
+    ID = c("P001", "P002"),
+    cenAA = c(0, 0),
     cenBB = c(0, 0),
-    cenAB = c(0, 1),
-    telAA = c(0, 1),
+    cenAB = c(1, 1),
+    telAA = c(1, 1),
     telBB = c(0, 0),
-    telAB = c(1, 0),
+    telAB = c(0, 0),
     stringsAsFactors = FALSE
   )
   expect_equal(kir_haplotypes, kir_haplotypes_test)
@@ -330,7 +321,7 @@ test_that("countsToVariables", {
    ),
    stringsAsFactors = FALSE
   )
-  kir_haplotypes <- countsToVariables(kir_counts, dictionary)
+  kir_haplotypes <- countsToVariables(MiDAS_tut_KIR[1:2, ], dictionary)
   expect_equal(kir_haplotypes,
                kir_haplotypes_test[, c("ID", "cenAA", "cenAB", "telAA")]
   )
@@ -341,51 +332,44 @@ test_that("countsToVariables", {
   )
 
   expect_error(
-    countsToVariables(kir_counts, na.value = 1:2),
+    countsToVariables(MiDAS_tut_KIR, na.value = 1:2),
     "na.value length must equal 1."
   )
 
   expect_error(
-    countsToVariables(kir_counts, nacols.rm = 1),
+    countsToVariables(MiDAS_tut_KIR, nacols.rm = 1),
     "nacols.rm is not a flag \\(a length one logical vector\\)."
   )
 
   expect_error(
-    countsToVariables(kir_counts, dictionary = "foo"),
+    countsToVariables(MiDAS_tut_KIR, dictionary = "foo"),
     "Path 'foo' does not exist"
   )
 
   expect_error(
-    countsToVariables(kir_counts, dictionary = c("foo", "bar")),
+    countsToVariables(MiDAS_tut_KIR, dictionary = c("foo", "bar")),
     "dictionary is not a data frame"
   )
 })
 
-test_that("HLA - KIR interactions are infered correctly", {
-  hla_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(hla_file)
-  kir_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-  kir_counts <- readKIRCalls(kir_file)
-  hla_kir <- getHlaKirInteractions(hla_calls, kir_counts)
+test_that("getHlaKirInteractions", {
+  hla_kir <- getHlaKirInteractions(MiDAS_tut_HLA, MiDAS_tut_KIR)
   load(system.file("extdata", "test_hla_kir_interactions.Rdata", package = "MiDAS"))
   expect_equal(hla_kir, test_hla_kir)
 
-  # checkHlaCallsFormat are omitted here
-  # checkKirCallsFormat are omitted here
-
   expect_error(
-    getHlaKirInteractions(hla_calls, kir_counts, interactions_dict = 1),
+    getHlaKirInteractions(MiDAS_tut_HLA, MiDAS_tut_KIR, interactions_dict = 1),
     "interactions_dict is not a string \\(a length one character vector\\)."
   )
 
- fake_kir_counts <- kir_counts
- fake_kir_counts[, 1] <- paste0("foo", 1:nrow(kir_counts))
+ fake_kir_counts <- MiDAS_tut_KIR
+ fake_kir_counts[, 1] <- paste0("foo", 1:nrow(fake_kir_counts))
  expect_error(
-   getHlaKirInteractions(hla_calls, fake_kir_counts),
-   "IDs in hla_calls doesn't match IDs in kir_counts"
+   getHlaKirInteractions(MiDAS_tut_HLA, fake_kir_counts),
+   "IDs in hla_calls doesn't match IDs in kir_calls"
  )
 
- fake_kir_counts <- kir_counts
+ fake_kir_counts <- MiDAS_tut_KIR
  fake_kir_counts[1:5, 1] <- paste0("foo", 1:5)
  expect_warning(
   getHlaKirInteractions(MiDAS_tut_HLA, fake_kir_counts),
@@ -393,13 +377,11 @@ test_that("HLA - KIR interactions are infered correctly", {
  )
 })
 
-test_that("Experiments are filtered correctly", {
-  hla_calls <- reduceHlaCalls(MiDAS_tut_HLA, 4)
+test_that("filterExperimentByFrequency", {
   midas <- prepareMiDAS(
-    hla_calls = hla_calls,
+    hla_calls = MiDAS_tut_HLA,
     kir_calls = MiDAS_tut_KIR,
     colData = MiDAS_tut_pheno,
-    inheritance_model = "additive",
     experiment = c("hla_alleles", "hla_supertypes", "kir_genes", "hla_divergence")
   )
 
@@ -671,3 +653,60 @@ test_that("applyInheritanceModel", {
   )
   expect_equal(se, se_dominant)
 })
+
+test_that("getFrequencyMask", {
+  experiment_matrix <- matrix(
+    data = c(0, 2, 0, 0, 0,
+             0, 2, 0, 0, 0,
+             2, 0, 0, 0, 0,
+             0, 1, 1, 0, 0,
+             0, 0, 0, 0, 0
+    ),
+    nrow = 5,
+    ncol = 5,
+    dimnames = list(
+      c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
+      c("PAT1", "PAT2", "PAT3", "PAT4", "PAT5")
+    )
+  )
+  experiment_matrix_freq <-
+    getExperimentFrequencies(experiment_matrix)
+  mask <-
+    getFrequencyMask(
+      df = experiment_matrix_freq,
+      lower_frequency_cutoff = 0.1,
+      upper_frequency_cutoff = 0.5
+    )
+  expect_equal(mask, "A*01:01")
+
+  mask <-
+    getFrequencyMask(
+      df = experiment_matrix_freq,
+      lower_frequency_cutoff = 0.1,
+      upper_frequency_cutoff = 0.51
+    )
+  expect_equal(mask, c("A*01:01", "A*02:01"))
+})
+
+test_that("filterExperimentByVariables", {
+  experiment <- matrix(
+    data = c(0, 2, 0, 0, 0,
+             0, 2, 0, 0, 0,
+             2, 0, 0, 0, 0,
+             0, 1, 1, 0, 0,
+             0, 0, 0, 0, 0),
+    nrow = 5,
+    ncol = 5,
+    dimnames = list(
+      c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
+      c("PAT1", "PAT2", "PAT3", "PAT4", "PAT5")
+    )
+  )
+  experiment_filtered <- filterExperimentByVariables(experiment, c("A*01:01", "A*02:01"))
+  expect_equal(experiment_filtered, experiment[1:2, ])
+
+  experiment <- SummarizedExperiment::SummarizedExperiment(experiment)
+  experiment_filtered <- filterExperimentByVariables(experiment, c("A*01:01", "A*02:01"))
+  expect_equal(experiment_filtered, experiment[1:2, ])
+})
+

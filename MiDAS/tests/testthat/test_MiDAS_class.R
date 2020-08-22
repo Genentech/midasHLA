@@ -47,7 +47,7 @@ test_that("MiDAS object is valid", {
   )
 })
 
-test_that("MiDAS object's experiment is extracted correctly", {
+test_that("getExperiments", {
   midas <- prepareMiDAS(
     hla_calls = MiDAS_tut_HLA,
     colData = MiDAS_tut_pheno,
@@ -57,7 +57,7 @@ test_that("MiDAS object's experiment is extracted correctly", {
   expect_equal(getExperiments(midas), "hla_alleles")
 })
 
-test_that("MiDAS object's hla_calls is extracted correctly", {
+test_that("getHlaCalls", {
   midas <- prepareMiDAS(
     hla_calls = MiDAS_tut_HLA,
     colData = MiDAS_tut_pheno,
@@ -67,7 +67,7 @@ test_that("MiDAS object's hla_calls is extracted correctly", {
   expect_equal(getHlaCalls(midas), MiDAS_tut_HLA)
 })
 
-test_that("MiDAS object's kir_calls is extracted correctly", {
+test_that("getKirCalls", {
   midas <- prepareMiDAS(
     kir_calls = MiDAS_tut_KIR,
     colData = MiDAS_tut_pheno,
@@ -77,7 +77,7 @@ test_that("MiDAS object's kir_calls is extracted correctly", {
   expect_equal(getKirCalls(midas), MiDAS_tut_KIR)
 })
 
-test_that("MiDAS object's placeholder is extracted correctly", {
+test_that("getPlaceholder", {
   midas <- prepareMiDAS(
     kir_calls = MiDAS_tut_KIR,
     colData = MiDAS_tut_pheno,
@@ -87,7 +87,7 @@ test_that("MiDAS object's placeholder is extracted correctly", {
   expect_equal(getPlaceholder(midas), "term")
 })
 
-test_that("MiDAS object's omnibus groups are extracted correctly", {
+test_that("getOmnibusGroups", {
   midas <- prepareMiDAS(
     hla_calls = MiDAS_tut_HLA[, 1:3],
     colData = MiDAS_tut_pheno,
@@ -107,18 +107,17 @@ test_that("MiDAS object's omnibus groups are extracted correctly", {
   )
 })
 
-test_that("MiDAS object's frequencies are extracted correctly", {
-  hla_calls <- reduceHlaCalls(MiDAS_tut_HLA, resolution = 4) # allels have to be in same res. for 'hla_divergence'
+test_that("getFrequencies", {
   midas <- prepareMiDAS(
-    hla_calls = hla_calls,
+    hla_calls = MiDAS_tut_HLA,
     colData = MiDAS_tut_pheno,
     experiment = c("hla_alleles", "hla_divergence")
   )
 
   alleles_subset <-
     c("A*01:01", "A*02:01", "A*02:06", "A*26:01", "B*07:02", "B*08:01", "B*13:02", "B*15:01", "B*27:05", "B*40:01", "B*57:01")
-  midas <- midas[alleles_subset, ]
-  freq <- getFrequencies(midas, "hla_alleles")
+  midas_sub <- midas[alleles_subset, ]
+  freq <- getFrequencies(midas_sub, "hla_alleles")
   test_freq <- data.frame(
     term = alleles_subset,
     Counts = c(236, 486, 22, 90, 179, 151, 66, 86, 59, 58, 44),
@@ -160,7 +159,7 @@ test_that("MiDAS's as.data.frame method works properly", {
   expect_equal(midas_df, test_midas_df)
 })
 
-test_that("MiDAS object is prepared properly", {
+test_that("prepareMiDAS", {
   hla_calls <- reduceHlaCalls(MiDAS_tut_HLA, resolution = 4)
   kir_calls <- MiDAS_tut_KIR
   phenotype <- MiDAS_tut_pheno
@@ -206,12 +205,6 @@ test_that("MiDAS object is prepared properly", {
     "values: 2, 10 in hla_calls doesn't follow HLA numbers specification"
   )
 
-  # TODO
-  # expect_error(
-  #   prepareMiDAS(kir_calls = cars[1:2, ]),
-  #   "values: 2, 10 in kir_calls doesn't follow HLA numbers specification"
-  # )
-
   expect_error(
     prepareMiDAS(hla_calls = hla_calls, colData = cars[1:2, ]),
     "first column in colData must be named 'ID'"
@@ -256,7 +249,7 @@ test_that("MiDAS object is prepared properly", {
   )
 })
 
-test_that("MiDAS data for hla_alleles analysis is prepared properly", {
+test_that("prepareMiDAS_hla_alleles", {
   args <- list(hla_calls = MiDAS_tut_HLA)
   experiment <- do.call(prepareMiDAS_hla_alleles, args)
   experiment_test <- do.call(hlaCallsToCounts, args)
@@ -264,7 +257,7 @@ test_that("MiDAS data for hla_alleles analysis is prepared properly", {
   expect_equal(experiment, experiment_test)
 })
 
-test_that("MiDAS data for hla_aa analysis is prepared properly", { # TODO
+test_that("prepareMiDAS_hla_aa", {
   args_c <- expand.grid(
     indels = c(TRUE, FALSE),
     unkchar = c(TRUE, FALSE),
@@ -301,7 +294,7 @@ test_that("MiDAS data for hla_aa analysis is prepared properly", { # TODO
   }
 })
 
-test_that("MiDAS data for hla_g_groups analysis is prepared properly", {
+test_that("prepareMiDAS_hla_g_groups", {
   args <- list(hla_calls = MiDAS_tut_HLA)
 
   experiment <- do.call(prepareMiDAS_hla_g_groups, args)
@@ -321,7 +314,7 @@ test_that("MiDAS data for hla_g_groups analysis is prepared properly", {
 
 })
 
-test_that("MiDAS data for hla_supertypes analysis is prepared properly", {
+test_that("prepareMiDAS_hla_supertypes", {
   args <- list(hla_calls = MiDAS_tut_HLA)
 
   experiment <- do.call(prepareMiDAS_hla_supertypes, args)
@@ -343,7 +336,7 @@ test_that("MiDAS data for hla_supertypes analysis is prepared properly", {
 
 })
 
-test_that("MiDAS data for hla_NK_ligands analysis is prepared properly", {
+test_that("prepareMiDAS_hla_NK_ligands", {
   args <- list(hla_calls = MiDAS_tut_HLA)
 
   experiment <- do.call(prepareMiDAS_hla_NK_ligands, args)
@@ -354,7 +347,7 @@ test_that("MiDAS data for hla_NK_ligands analysis is prepared properly", {
         left_join(..., by = "ID"),
       x = lapply(
         c(
-          "allele_HLA_Bw4",
+          "allele_HLA_Bw",
           "allele_HLA-B_only_Bw",
           "allele_HLA-C_C1-2"
         ),
@@ -369,10 +362,9 @@ test_that("MiDAS data for hla_NK_ligands analysis is prepared properly", {
   experiment_test <- dfToExperimentMat(experiment_test)
 
   expect_equal(experiment, experiment_test)
-
 })
 
-test_that("MiDAS data for kir_genes analysis is prepared properly", {
+test_that("prepareMiDAS_kir_genes", {
   args <- list(kir_calls = MiDAS_tut_KIR)
   experiment <- do.call(prepareMiDAS_kir_genes, args)
 
@@ -381,20 +373,20 @@ test_that("MiDAS data for kir_genes analysis is prepared properly", {
   expect_equal(experiment, experiment_test)
 })
 
-test_that("MiDAS data for hla_kir_interactions analysis is prepared properly", {
+test_that("prepareMiDAS_hla_kir_interactions", {
   args <- list(hla_calls = MiDAS_tut_HLA, kir_calls = MiDAS_tut_KIR)
   experiment <- do.call(prepareMiDAS_kir_genes, args)
 
   experiment_test <- getHlaKirInteractions(
     hla_calls = args$hla_calls,
-    kir_counts = args$kir_calls
+    kir_calls = args$kir_calls
   )
   experiment_test <- dfToExperimentMat(args$kir_calls)
 
   expect_equal(experiment, experiment_test)
 })
 
-test_that("MiDAS data for hla_divergence analysis is prepared properly", {
+test_that("prepareMiDAS_hla_divergence", {
   hla_calls <- reduceHlaCalls(MiDAS_tut_HLA, 4)
   experiment <- do.call(prepareMiDAS_hla_divergence, list(hla_calls))
 
@@ -413,7 +405,48 @@ test_that("MiDAS data for hla_divergence analysis is prepared properly", {
   )
 })
 
-test_that("MiDAS is filtered correctly", {
+test_that("prepareMiDAS_hla_het", {
+  hla_calls <- data.frame(
+    ID = c("SAM1", "SAM2", "SAM3", "SAM4"),
+    A_1 = c("A*01:01:01", "A*01:01:02", "A*01:01:03", "A*01:01:04"),
+    A_2 = c("A*01:01:01", "A*01:01:03", "A*01:01:02", "A*01:01:04"),
+    stringsAsFactors = FALSE
+  )
+
+  experiment <- do.call(prepareMiDAS_hla_het, list(hla_calls))
+  experiment_test <- matrix(
+    c(0L, 1L, 1L, 0L),
+    ncol = 4,
+    dimnames = list("A_het", c("SAM1", "SAM2", "SAM3", "SAM4"))
+    )
+  expect_equal(experiment, experiment_test)
+
+  experiment <- do.call(prepareMiDAS_hla_het, list(hla_calls, hla_het_resolution = 4))
+  experiment_test <- matrix(
+    c(0L, 0L, 0L, 0L),
+    ncol = 4,
+    dimnames = list("A_het", c("SAM1", "SAM2", "SAM3", "SAM4"))
+  )
+  expect_equal(experiment, experiment_test)
+
+  expect_error(
+    prepareMiDAS_hla_het(hla_calls, hla_het_resolution = "a"),
+    "hla_het_resolution is not a count \\(a single positive integer\\)"
+  )
+
+  hla_calls <- data.frame(
+    ID = c("SAM1", "SAM2", "SAM3", "SAM4"),
+    F_1 = c("A*01:01:01", "A*01:01:02", "A*01:01:03", "A*01:01:04"),
+    F_2 = c("A*01:01:01", "A*01:01:03", "A*01:01:02", "A*01:01:04"),
+    stringsAsFactors = FALSE
+  )
+  expect_error(
+    prepareMiDAS_hla_het(hla_calls),
+    "Heterozygosity status can be calculated only for classical genes \\(A, B, C, DQA1, DQB1, DRA, DRB1, DPA1, DPB1\\)."
+  )
+})
+
+test_that("filterByFrequency", {
   hla_calls <- reduceHlaCalls(MiDAS_tut_HLA, 4)
   midas <- prepareMiDAS(
     hla_calls = hla_calls,
