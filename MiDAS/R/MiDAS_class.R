@@ -663,7 +663,9 @@ prepareMiDAS <- function(hla_calls = NULL,
                          placeholder = "term",
                          lower_frequency_cutoff = NULL,
                          upper_frequency_cutoff = NULL,
-                         ...
+                         indels = TRUE,
+                         unkchar = FALSE,
+                         hla_het_resolution = 8
 ) {
   experiment_choice <- eval(formals()[["experiment"]])
   assert_that(
@@ -695,6 +697,14 @@ prepareMiDAS <- function(hla_calls = NULL,
   if (! is.null(kir_calls)) { metadata[["kir_calls"]] <- kir_calls }
 
   # prepare data for different analyses types
+  experiments <- ExperimentList()
+  args <- list(
+    hla_calls = hla_calls,
+    kir_calls = kir_calls,
+    indels = indels,
+    unkchar = unkchar,
+    hla_het_resolution = hla_het_resolution
+  )
   for (e in experiment) {
     fun <- paste0("prepareMiDAS_", e)
     E <- do.call(
@@ -799,19 +809,14 @@ prepareMiDAS_hla_aa <- function(hla_calls,
 
 #' Prepare MiDAS data on HLA allele's G groups level
 #'
-#' \code{hla_calls} are transformed to HLA alleles groups using G group
-#' dictionary shipped with the package. Than they are transformed to counts and
-#' \code{\link{hlaCallsToCounts}} for more details).
-#'
-#' @param hla_calls Data frame
+#' @inheritParams checkHlaCallsFormat
 #' @param ... Not used
 #'
 #' @return Matrix
 #'
 #' @importFrom assertthat assert_that
 #'
-prepareMiDAS_hla_g_groups <- function(hla_calls,
-                                      ...) {
+prepareMiDAS_hla_g_groups <- function(hla_calls, ...) {
   assert_that(
     checkHlaCallsFormat(hla_calls)
   )
@@ -868,8 +873,9 @@ prepareMiDAS_hla_supertypes <- function(hla_calls, ...) {
     hlaCallsToCounts(
       hla_calls = hla_supertypes,
       check_hla_format = FALSE
-    ) %>%
-    subset(select = - Unclassified) %>%
+    )
+  hla_supertypes <-
+    hla_supertypes[, ! colnames(hla_supertypes) == "Unclassified"] %>%
     dfToExperimentMat()
 
   return(hla_supertypes)
@@ -890,7 +896,7 @@ prepareMiDAS_hla_NK_ligands <- function(hla_calls, ...) {
   )
 
   lib <- c(
-    "allele_HLA_Bw4",
+    "allele_HLA_Bw",
     "allele_HLA-B_only_Bw",
     "allele_HLA-C_C1-2"
   )
@@ -954,7 +960,7 @@ prepareMiDAS_hla_kir_interactions <- function(hla_calls, kir_calls, ...) {
   hla_kir_interactions <-
     getHlaKirInteractions(
       hla_calls = hla_calls,
-      kir_counts = kir_calls
+      kir_calls = kir_calls
     ) %>%
     dfToExperimentMat()
 
@@ -1001,7 +1007,7 @@ prepareMiDAS_hla_divergence <- function(hla_calls, ...) {
 prepareMiDAS_hla_het <- function(hla_calls, hla_het_resolution = 8, ...) {
   assert_that(
     checkHlaCallsFormat(hla_calls),
-    is.number(hla_het_resolution) # TODO see how this check was done elsewhere
+    is.count(hla_het_resolution)
   )
 
   genes <- getHlaCallsGenes(hla_calls)
