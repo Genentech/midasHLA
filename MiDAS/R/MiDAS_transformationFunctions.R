@@ -857,14 +857,14 @@ countsToVariables <- function(counts,
 #' @importFrom stringi stri_detect_regex
 #'
 getHlaKirInteractions <- function(hla_calls,
-                                  kir_counts,
+                                  kir_calls,
                                   interactions_dict = system.file("extdata", "Match_counts_hla_kir_interactions.txt", package = "MiDAS")) {
   assert_that(
     checkHlaCallsFormat(hla_calls),
-    checkKirCallsFormat(kir_counts),
+    checkKirCallsFormat(kir_calls),
     is.string(interactions_dict)
   )
-  id_matches <- hla_calls[, 1, drop = TRUE] %in% kir_counts[, 1, drop = TRUE] %>%
+  id_matches <- hla_calls[, 1, drop = TRUE] %in% kir_calls[, 1, drop = TRUE] %>%
     sum()
   assert_that(id_matches > 0,
               msg = "IDs in hla_calls doesn't match IDs in kir_calls"
@@ -899,7 +899,7 @@ getHlaKirInteractions <- function(hla_calls,
   hla_counts <- hlaCallsToCounts(hla_variables, check_hla_format = FALSE)
   hla_counts[, -1] <- ceiling(hla_counts[, -1] / 2) # reduce to presence / absence indicators
 
-  counts <- left_join(hla_counts, kir_counts, by = "ID")
+  counts <- left_join(hla_counts, kir_calls, by = "ID")
   interactions <- countsToVariables(counts, dictionary = interactions_dict)
 
   return(interactions)
