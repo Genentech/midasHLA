@@ -43,9 +43,9 @@ hlaToAAVariation <- function(hla_calls,
   ids <- hla_calls[, 1]
   hla_calls <- hla_calls[, -1]
 
-  # get names of genes and corresponding resolutions
+  # get names of genes
   gene_names <- vapply(X = colnames(hla_calls),
-                       FUN = function(x) stri_split_fixed(x, "_")[[1]][1],
+                       FUN = function(x) stri_split_fixed(x, "_")[[1]][1], # colnames are of form A_1, A_2, B_1, ...
                        FUN.VALUE = character(length = 1)
   )
   gene_names_uniq <- unique(gene_names)
@@ -75,17 +75,7 @@ hlaToAAVariation <- function(hla_calls,
     gene_names_uniq <- gene_names_uniq[av_genes_idx]
   }
 
-  # hla_resolution <- vapply(X = gene_names_uniq,
-  #                          FUN = function(x) {
-  #                            x_numbers <- unlist(hla_calls[, gene_names == x])
-  #                            x_res <- getAlleleResolution(na.omit(x_numbers))
-  #                            return(min(x_res))
-  #                          },
-  #                          FUN.VALUE = numeric(length = 1),
-  #                          USE.NAMES = TRUE
-  # )
-
-  # read alignment matrices and convert to desired resolution
+  # read alignment matrices in all resolutions
   hla_aln <- lapply(X = gene_names_uniq,
                     FUN = function(x) {
                       alns <- lapply(
@@ -135,7 +125,7 @@ hlaToAAVariation <- function(hla_calls,
                                 )
     )
     var_aln <- lapply(colnames(x_calls), function(allele) {
-      mask <- 1:nrow(hla_aln[[i]]) # This is tmp solution as NAs in character index gives oob error
+      mask <- 1:nrow(hla_aln[[i]]) # NAs in character index gives oob error, so it is needed to refer to indexes
       names(mask) <- rownames(hla_aln[[i]])
       x <- hla_aln[[i]][mask[x_calls[, allele]], var_pos, drop = FALSE]
       colnames(x) <- paste0(allele, "_", "AA_", colnames(x))
@@ -152,6 +142,7 @@ hlaToAAVariation <- function(hla_calls,
 
     aa_variation[[length(aa_variation) + 1]] <- var_aln
   }
+
   if (length(aa_variation) > 1) {
     aa_variation <- do.call(cbind, aa_variation)
     rownames(aa_variation) <- ids
@@ -286,13 +277,9 @@ hlaToVariable <- function(hla_calls,
   dict_prefix <- gsub(".txt$", "", gsub("^.*_", "", dictionary))
   colnames(variable) <- paste0(dict_prefix, "_", colnames(variable))
 
-  # # set non-original NAs to 0
-  # i <- is.na(variable) & ! is.na(hla_calls[, -1, drop = FALSE])
-
   # get all na columns
   j <- vapply(variable, function(x) ! all(is.na(x)), logical(length = 1))
 
-  # variable[i] <- na.value get all na columns
   if (nacols.rm) {
     variable <- variable[, j, drop = FALSE]
   }
