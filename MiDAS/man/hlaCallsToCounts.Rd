@@ -7,7 +7,7 @@
 hlaCallsToCounts(hla_calls, check_hla_format = TRUE)
 }
 \arguments{
-\item{hla_calls}{Data frame containing HLA allele calls, as return by
+\item{hla_calls}{HLA calls data frame, as returned by
 \code{\link{readHlaCalls}} function.}
 
 \item{check_hla_format}{Logical indicating if \code{hla_calls} format should
@@ -15,19 +15,8 @@ be checked. This is useful if one wants to use \code{hlaCallsToCounts} with
 input not adhering to HLA nomenclature standards. See examples.}
 }
 \value{
-Data frame containing counts of HLA alleles according to specified
-  inheritance model.
+HLA allele counts data frame.
 }
 \description{
-\code{hlaCallsToCounts} convert HLA calls data frame into counts table.
-}
-\examples{
-file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-hla_calls <- readHlaCalls(file)
-hlaCallsToCounts(hla_calls)
-
-# usage with non-HLA alleles numbers input
-hla_vars <- hlaToVariable(hla_calls, dictionary = "allele_HLA_supertype")
-hlaCallsToCounts(hla_calls, check_hla_format = FALSE)
-
+\code{hlaCallsToCounts} converts HLA calls data frame into a counts table.
 }

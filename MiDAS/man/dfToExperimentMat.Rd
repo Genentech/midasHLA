@@ -14,5 +14,5 @@ Matrix
 }
 \description{
 Function deletes 'ID' column from a \code{df}, then transpose it and sets
-the colum names to values from deleted 'ID' column.
+the column names to values from deleted 'ID' column.
 }

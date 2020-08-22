@@ -7,7 +7,8 @@
 prepareMiDAS_hla_g_groups(hla_calls, ...)
 }
 \arguments{
-\item{hla_calls}{Data frame}
+\item{hla_calls}{HLA calls data frame, as returned by
+\code{\link{readHlaCalls}} function.}
 
 \item{...}{Not used}
 }
@@ -15,7 +16,5 @@ prepareMiDAS_hla_g_groups(hla_calls, ...)
 Matrix
 }
 \description{
-\code{hla_calls} are transformed to HLA alleles groups using G group
-dictionary shipped with the package. Than they are transformed to counts and
-\code{\link{hlaCallsToCounts}} for more details).
+Prepare MiDAS data on HLA allele's G groups level
 }

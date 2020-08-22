@@ -7,7 +7,8 @@
 prepareMiDAS_hla_supertypes(hla_calls, ...)
 }
 \arguments{
-\item{hla_calls}{Data frame}
+\item{hla_calls}{HLA calls data frame, as returned by
+\code{\link{readHlaCalls}} function.}
 
 \item{...}{Not used}
 }
@@ -15,6 +16,5 @@ prepareMiDAS_hla_supertypes(hla_calls, ...)
 Matrix
 }
 \description{
-\code{hla_calls} are transformed to HLA alleles groups using supertypes
-dictionary shipped with the package. Than they are transformed to counts).
+Prepare MiDAS data on HLA allele's supertypes level
 }

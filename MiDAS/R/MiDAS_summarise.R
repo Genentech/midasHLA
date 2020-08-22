@@ -4,7 +4,7 @@
 #'
 #' @inheritParams checkHlaCallsFormat
 #' @inheritParams hlaToAAVariation
-#' @param aa_pos String specifying gene and amio acid position, example
+#' @param aa_pos String specifying gene and amino acid position, example
 #'   \code{"A_9"}.
 #' @param aln Matrix containing amino acid sequence alignments as returned by
 #'   \code{\link{readHlaAlignments}} function. By default function will use
@@ -16,9 +16,7 @@
 #'   residues and frequencies at requested position.
 #'
 #' @examples
-#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-#' hla_calls <- readHlaCalls(file)
-#' summariseAAPosition(hla_calls, "A_9")
+#' summariseAAPosition(MiDAS_tut_HLA, "A_9")
 #'
 #' @importFrom assertthat assert_that
 #' @importFrom dplyr group_by n select starts_with summarise

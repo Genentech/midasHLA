@@ -2,7 +2,7 @@
 % Please edit documentation in R/MiDAS_utils.R
 \name{distGrantham}
 \alias{distGrantham}
-\title{Grantham distance}
+\title{Calculate Grantham distance between amino acid sequences}
 \usage{
 distGrantham(aa1, aa2)
 }
@@ -14,23 +14,17 @@ codings. Each element must correspond to single amino acid.}
 codings. Each element must correspond to single amino acid.}
 }
 \value{
-Integer normalized Grantham distance between \code{aa1} and \
-  code{aa2}.
+Integer normalized Grantham distance between \code{aa1} and
+  \code{aa2}.
 }
 \description{
 \code{distGrantham} calculates normalized Grantham distance between two
-amino acid sequences.
+amino acid sequences. For details on calculations see
+\href{http://www.sciencemag.org/content/185/4154/862.long}{Grantham R. 1974.}.
 }
 \details{
 Distance between amino acid sequences is normalized by length of compared
 sequences.
 
 Lengths of \code{aa1} and \code{aa2} must be equal.
-}
-\examples{
-distGrantham(
-  aa1 = c("A", "S", "W"),
-  aa2 = c("A", "S", "V")
-)
-
 }

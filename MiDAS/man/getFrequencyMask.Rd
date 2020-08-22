@@ -2,7 +2,7 @@
 % Please edit documentation in R/MiDAS_transformationFunctions.R
 \name{getFrequencyMask}
 \alias{getFrequencyMask}
-\title{Helper function for frequency data frame filtering}
+\title{Helper function for filtering frequency data frame}
 \usage{
 getFrequencyMask(df, lower_frequency_cutoff = NULL,
   upper_frequency_cutoff = NULL)
@@ -10,13 +10,17 @@ getFrequencyMask(df, lower_frequency_cutoff = NULL,
 \arguments{
 \item{df}{Data frame as returned by \code{getExperimentFrequencies}.}
 
-\item{lower_frequency_cutoff}{Number of positive value or \code{NULL}}
+\item{lower_frequency_cutoff}{Positive number or \code{NULL}. Numbers greater
+than 1 are interpreted as number of feature occurrences, numbers between 0
+and 1 as fractions.}
 
-\item{upper_frequency_cutoff}{Number of positive value or \code{NULL}}
+\item{upper_frequency_cutoff}{Positive number or \code{NULL}. Numbers greater
+than 1 are interpreted as number of feature occurrences, numbers between 0
+and 1 as fractions.}
 }
 \value{
-Character vector containing names of terms after filtration.
+Character vector containing names of variables after filtration.
 }
 \description{
-Helper function for frequency data frame filtering
+Helper function for filtering frequency data frame
 }

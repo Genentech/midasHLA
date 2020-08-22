@@ -7,7 +7,8 @@
 prepareMiDAS_kir_genes(kir_calls, ...)
 }
 \arguments{
-\item{kir_calls}{Data frame}
+\item{kir_calls}{KIR calls data frame, as returned by
+\code{\link{readKIRCalls}} function.}
 
 \item{...}{Not used}
 }
@@ -15,5 +16,5 @@ prepareMiDAS_kir_genes(kir_calls, ...)
 Matrix
 }
 \description{
-\code{kir_counts} data frame is joined with other inputs.
+Prepare MiDAS data on KIR genes level
 }

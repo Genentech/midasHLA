@@ -2,7 +2,7 @@
 % Please edit documentation in R/MiDAS_utils.R
 \name{updateModel}
 \alias{updateModel}
-\title{Add new variables to statistical model}
+\title{Extend and Re-fit a Model Call}
 \usage{
 updateModel(object, x, placeholder = NULL, backquote = TRUE,
   collapse = " + ")
@@ -14,27 +14,17 @@ others.}
 \item{x}{Character vector specifying variables to be added to model.}
 
 \item{placeholder}{String specifying term to substitute with value from
-\code{x}. If more than one variable is passed in \code{x} all of them will
-be bracketed. Ignored if set to \code{NULL}.}
+\code{x}. Ignored if set to \code{NULL}.}
 
 \item{backquote}{Logical indicating if added variables should be quoted.
-Elements of this vector are recycled over \code{x}. Only relevant if
-\code{x} is of type character.}
+Elements of this vector are recycled over \code{x}.}
 
-\item{collapse}{String specifying how new characters should be added to
-old formula. Only relevant if \code{placeholder} is specified.}
+\item{collapse}{String specifying how variables should be combined. Defaults
+to \code{" + "} ie. linear combination.}
 }
 \value{
-Updated fit of input model.
+Updated fitted object.
 }
 \description{
 \code{updateModel} adds new variables to model and re-fit it.
-}
-\examples{
-object <- lm(dist ~ 1, data = cars)
-updateModel(object, "dist")
-
-object <- lm(Sepal.Length ~ Petal.Width*Species, iris)
-updateModel(object, c("Sepal.Width", "Petal.Length"), placeholde = "Petal.Width")
-
 }

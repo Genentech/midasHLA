@@ -7,7 +7,11 @@
 prepareMiDAS_hla_het(hla_calls, hla_het_resolution = 8, ...)
 }
 \arguments{
-\item{hla_calls}{Data frame}
+\item{hla_calls}{HLA calls data frame, as returned by
+\code{\link{readHlaCalls}} function.}
+
+\item{hla_het_resolution}{Number specifying HLA alleles resolution used to
+calculate heterogeneity.}
 
 \item{...}{Not used}
 }
@@ -15,6 +19,5 @@ prepareMiDAS_hla_het(hla_calls, hla_het_resolution = 8, ...)
 Matrix
 }
 \description{
-Heterozygosity status for each allele, "1" designates homozygote and "0"
-designates heterozygote.
+Prepare MiDAS data on HLA heterozygosity level
 }

@@ -11,8 +11,7 @@ iterativeModel(object, placeholder, variables, exponentiate = FALSE)
 others.}
 
 \item{placeholder}{String specifying term to substitute with value from
-\code{x}. If more than one variable is passed in \code{x} all of them will
-be bracketed. Ignored if set to \code{NULL}.}
+\code{x}. Ignored if set to \code{NULL}.}
 
 \item{variables}{Character vector specifying variables to use in association
 tests.}

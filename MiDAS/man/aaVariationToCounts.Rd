@@ -2,29 +2,18 @@
 % Please edit documentation in R/MiDAS_transformationFunctions.R
 \name{aaVariationToCounts}
 \alias{aaVariationToCounts}
-\title{Transform amino acid variations data frame to counts table}
+\title{Transform amino acid variation data frame into counts table}
 \usage{
 aaVariationToCounts(aa_variation)
 }
 \arguments{
-\item{aa_variation}{Data frame holding amino acid variation data as returned
-by \link{hlaToAAVariation}.}
+\item{aa_variation}{Amino acid variation data frame as returned by
+\link{hlaToAAVariation}.}
 }
 \value{
-Data frame containing counts of amino acid at specific positions
-  according to inheritance specified model.
+Amino acid counts data frame.
 }
 \description{
-\code{aaVariationToCounts} converts amino acid variations data frame into
+\code{aaVariationToCounts} convert amino acid variation data frame into
 counts table.
-}
-\examples{
-file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-hla_calls <- readHlaCalls(file)
-aa_variation <- hlaToAAVariation(hla_calls)
-aaVariationToCounts(aa_variation)
-
-}
-\seealso{
-\code{\link{hlaToAAVariation}}
 }

@@ -7,12 +7,16 @@
 runMiDASGetVarsFreq(midas, experiment, test_covar)
 }
 \arguments{
-\item{midas}{MiDAS object}
+\item{midas}{MiDAS object.}
 
-\item{experiment}{String}
+\item{experiment}{String specifying experiment from \code{midas}.}
 
-\item{test_covar}{String giving name of test covariate}
+\item{test_covar}{String giving name of test covariate.}
+}
+\value{
+Data frame
 }
 \description{
-This is a helper function
+Helper adding variables frequencies to statistical results. Additionally for
+binary test covariate frequencies per phenotype are added.
 }

@@ -7,10 +7,10 @@
 summariseAAPosition(hla_calls, aa_pos, aln = NULL, na.rm = FALSE)
 }
 \arguments{
-\item{hla_calls}{Data frame containing HLA allele calls, as return by
+\item{hla_calls}{HLA calls data frame, as returned by
 \code{\link{readHlaCalls}} function.}
 
-\item{aa_pos}{String specifying gene and amio acid position, example
+\item{aa_pos}{String specifying gene and amino acid position, example
 \code{"A_9"}.}
 
 \item{aln}{Matrix containing amino acid sequence alignments as returned by
@@ -28,8 +28,6 @@ Data frame containing HLA alleles, their corresponding amino acid
 List HLA alleles and amino acid residues at a given position
 }
 \examples{
-file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-hla_calls <- readHlaCalls(file)
-summariseAAPosition(hla_calls, "A_9")
+summariseAAPosition(MiDAS_tut_HLA, "A_9")
 
 }

@@ -17,21 +17,14 @@ included.}
 Data frame with the results of likelihood ratio test of the supplied
   models.
 
-  Column \code{term} holds new variables apearing in \code{mod1},
+  Column \code{term} holds new variables appearing in \code{mod1},
   \code{dof} difference in degrees of freedom between models, \code{logLik}
   difference in log likelihoods, \code{statistic} \code{Chisq} statistic and
   \code{p.value} corresponding p-value.
 }
 \description{
-\code{LRTest} carry out asymptotic likelihood ratio test for two models.
+\code{LRTest} carry out an asymptotic likelihood ratio test for two models.
 }
 \details{
 \code{mod0} have to be a reduced version of \code{mod1}. See examples.
-}
-\examples{
-df <- data.frame(OS = c(20, 30, 40), AGE = c(50, 60, 70))
-mod0 <- lm(OS ~ 1, data = df)
-mod1 <- lm(OS ~ AGE, data = df)
-MiDAS:::LRTest(mod0, mod1)
-
 }

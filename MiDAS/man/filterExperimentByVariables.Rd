@@ -2,17 +2,24 @@
 % Please edit documentation in R/MiDAS_transformationFunctions.R
 \name{filterExperimentByVariables}
 \alias{filterExperimentByVariables}
-\title{Filter experiment by frequency}
+\alias{filterExperimentByVariables.matrix}
+\alias{filterExperimentByVariables.SummarizedExperiment}
+\title{Filter experiment by variable}
 \usage{
 filterExperimentByVariables(experiment, variables)
+
+\method{filterExperimentByVariables}{matrix}(experiment, variables)
+
+\method{filterExperimentByVariables}{SummarizedExperiment}(experiment,
+  variables)
 }
 \arguments{
-\item{experiment}{matrix}
+\item{experiment}{Matrix or SummarizedExperiment object.}
 
-\item{variables}{character}
+\item{variables}{Character vector specifying features to choose.}
 }
 \value{
-Matrix
+Filtered \code{experiment} object.
 }
 \description{
 Helper function for experiments filtering

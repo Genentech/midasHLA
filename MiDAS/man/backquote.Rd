@@ -2,7 +2,7 @@
 % Please edit documentation in R/MiDAS_utils.R
 \name{backquote}
 \alias{backquote}
-\title{Backquote string}
+\title{Backquote character}
 \usage{
 backquote(x)
 }
@@ -13,13 +13,9 @@ backquote(x)
 Character vector with its elements backticked.
 }
 \description{
-\code{backquote} places backticks around string.
+\code{backquote} places backticks around elements of character vector
 }
 \details{
 \code{backquote} is useful when using HLA allele numbers in formulas, where
 \code{'*'} and \code{':'} characters have special meanings.
-}
-\examples{
-backquote("A*01:01")
-
 }

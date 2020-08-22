@@ -4,46 +4,36 @@
 \alias{getHlaKirInteractions}
 \title{Get HLA - KIR interactions}
 \usage{
-getHlaKirInteractions(hla_calls, kir_counts,
+getHlaKirInteractions(hla_calls, kir_calls,
   interactions_dict = system.file("extdata",
   "Match_counts_hla_kir_interactions.txt", package = "MiDAS"))
 }
 \arguments{
-\item{hla_calls}{Data frame containing HLA allele calls, as return by
+\item{hla_calls}{HLA calls data frame, as returned by
 \code{\link{readHlaCalls}} function.}
 
-\item{kir_counts}{Data frame containing KIR genes counts, as return by
-\code{\link{readKIRCalls}}.}
+\item{kir_calls}{KIR calls data frame, as returned by
+\code{\link{readKIRCalls}} function.}
 
-\item{interactions_dict}{Path to the file containing HLA - KIR interactions
-matchings. See details for further details.}
+\item{interactions_dict}{Path to HLA - KIR interactions dictionary.}
 }
 \value{
-Data frame with binary presence-absence indicators for HLA - KIR
+Data frame with presence-absence indicators for HLA - KIR
   interactions.
 }
 \description{
-\code{getHlaKirInteractions} calculates binary presence-absence matrix of HLA
-- KIR interactions.
+\code{getHlaKirInteractions} calculate presence-absence matrix of HLA - KIR
+interactions.
 }
 \details{
-In order to be able to compare input data with \code{interactions_dict}
-\code{hla_calls} are first converted to variables such as G groups, using
-matching files shipped with the packages. Moreover \code{hla_calls} are also
-reduced to all possible resolutions.
+\code{hla_calls} are first reduced to all possible resolutions and converted
+to additional variables, such as G groups, using dictionaries shipped with
+the package.
 
 \code{interactions_dict} file should be a tsv format with header and two
 columns. First column should be named \code{"Name"} and hold interactions
 names, second should be named \code{"Expression"} and hold expression used to
 identify interaction (eg. \code{"C2 & KIR2DL1"} will match all samples
 with \code{C2} and \code{KIR2DL1}). The package is shipped with interactions
-file created based on Pende, et al. 2019.
-}
-\examples{
-hla_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-hla_calls <- readHlaCalls(hla_file)
-kir_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-kir_counts <- readKIRCalls(kir_file)
-getHlaKirInteractions(hla_calls, kir_counts)
-
+file based on \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6558367/}{Pende et al., 2019.}
 }

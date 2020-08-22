@@ -3,23 +3,17 @@ NULL
 
 #' MiDAS class
 #'
+#' @description
 #' The \code{MiDAS} class is a \code{\link{MultiAssayExperiment}} object
-#' containing all the data and metadata about a set of measurments and thier
-#' transformations required for MiDAS analysis.
+#' containing data and metadata required for MiDAS analysis.
 #'
-#' A object of class \code{MiDAS} have at least one of
-#' \link[=readHlaCalls]{HLA calls} or \link[=readKIRCalls]{KIR calls} experiment
-#' matrices defined (they can be accessed using \code{\link{getHlaCalls}} and
-#' \code{\link{getKirCalls}} functions).
-#'
-#' Other experiments slots can be occupied by transformations of those matrices.
-#' Those transformations can be further used by \code{\link{runMiDAS}} function
-#' for performing statistical analyses. See \code{\link{prepareMiDAS}} and
-#' \code{\link{runMiDAS}} for more informations.
-#'
-#' Experiments slots available for \code{\link{runMiDAS}} function are defined
-#' in object's metadata under \code{experiment} variable. It can be accessed
-#' using \code{\link{getExperiments}} function.
+#' Valid \code{MiDAS} object must have unique features names across all
+#' experiments and colData. It's metadata list need to have \code{placeholder}
+#' element, which is a string specifying name of column in colData used when
+#' defining statistical model for downstream analyses (see
+#' \code{\link{runMiDAS}} for more details). Optionally the object's metadata
+#' can also store \code{'hla_calls'} and \code{'kir_calls'} data frames (see
+#' \code{\link{prepareMiDAS}} for more details).
 #'
 #' @importFrom methods setClass new
 #' @importClassesFrom MultiAssayExperiment MultiAssayExperiment
@@ -30,20 +24,15 @@ MiDAS <- setClass(
   contains = "MultiAssayExperiment"
 )
 
-#' @rdname MiDAS-class
-#'
-#' MiDAS class initialize method
-#'
-#' @inheritParams methods::initialize
-#' @param experiments ExperimentList
-#' @param colData DataFrame
-#' @param metadata list
-#'
-#' @return MiDAS object
-#'
-#' @importClassesFrom MultiAssayExperiment MultiAssayExperiment
-#'
-#' @export
+# MiDAS class initialize method
+#
+# @inheritParams methods::initialize
+# @inheritParams MultiAssayExperiment
+#
+# @return MiDAS object
+#
+# @importFrom MultiAssayExperiment MultiAssayExperiment
+#
 setMethod("initialize", "MiDAS", function(.Object, experiments, colData, metadata) {
   midas <- MultiAssayExperiment(
     experiments = experiments,
@@ -57,13 +46,12 @@ setMethod("initialize", "MiDAS", function(.Object, experiments, colData, metadat
 
 # Validity method for class MiDAS
 #
-# Valid \code{MiDAS} object must contain hla_calls or kir_calls experiment in
-# proper \link[=readHlaCalls]{HLA calls} or \link[=readKIRCalls]{KIR calls}
-# format.
-#
-# \code{experiment} metadata's variable used to determine analyses available
-# via \code{\link{runMiDAS}} is optional and does not determine object
-# validity.
+# A valid \code{MiDAS} object must have unique features names across all
+# experiments and colData. It's metadata list need to have "placeholder"
+# element, which is a string specifying name of column in colData that should
+# be used in statistical model definitions for downstream analyses. Optionally
+# the object's metadata can also store \code{'hla_calls'} and \code{'kir_calls'}
+# data frames. See \code{\link{prepareMiDAS}} for more details.
 #
 # @importFrom assertthat assert_that is.string see_if
 #
@@ -89,14 +77,13 @@ setValidity(Class = "MiDAS", method = function(object) {
   return(TRUE)
 })
 
-#' @rdname MiDAS-class
+#' Get available experiments in MiDAS object.
 #'
-#' @title Extract available analysis types from MiDAS object.
+#' @param object \code{\link{MiDAS}} object.
 #'
-#' @param object \code{\link{MiDAS}} object
+#' @return Character vector giving names of experiments in \code{object}.
 #'
-#' @return Character giving names of available analysis types.
-#'
+#' @importFrom S4Vectors metadata
 #' @export
 setGeneric(
   name = "getExperiments",
@@ -105,22 +92,22 @@ setGeneric(
 
 #' @rdname MiDAS-class
 #'
-#' @importFrom S4Vectors metadata
+#' @title Get available experiments in MiDAS object.
 #'
+#' @export
 setMethod(
   f = "getExperiments",
   signature = "MiDAS",
   definition = function (object) metadata(object)$experiment
 )
 
-#' @rdname MiDAS-class
+#' Get HLA calls from MiDAS object.
 #'
-#' @title Extract HLA calls from MiDAS object.
+#' @param object \code{\link{MiDAS}} object.
 #'
-#' @param object \code{\link{MiDAS}} object
+#' @return HLA calls data frame.
 #'
-#' @return Data frame with object's HLA calls.
-#'
+#' @importFrom S4Vectors metadata
 #' @export
 setGeneric(
   name = "getHlaCalls",
@@ -129,27 +116,23 @@ setGeneric(
 
 #' @rdname MiDAS-class
 #'
+#' @title Get HLA calls from MiDAS object.
+#'
+#' @importFrom S4Vectors metadata
+#' @export
 setMethod(
   f = "getHlaCalls",
   signature = "MiDAS",
-  definition = function (object) {
-    hla_calls <- object[["hla_calls"]]
-    if (! is.null(hla_calls)) {
-      hla_calls <- experimentMatToDf(hla_calls)
-    }
-
-    return(hla_calls)
-  }
+  definition = function (object) { metadata(object)[["hla_calls"]] }
 )
 
-#' @rdname MiDAS-class
-#'
-#' @title Extract KIR calls from MiDAS object.
+#' Get KIR calls from MiDAS object.
 #'
 #' @param object \code{\link{MiDAS}} object.
 #'
-#' @return Data frame with object's KIR calls.
+#' @return KIR calls data frame.
 #'
+#' @importFrom S4Vectors metadata
 #' @export
 setGeneric(
   name = "getKirCalls",
@@ -158,27 +141,23 @@ setGeneric(
 
 #' @rdname MiDAS-class
 #'
+#' @title Get KIR calls from MiDAS object.
+#'
+#' @importFrom S4Vectors metadata
+#' @export
 setMethod(
   f = "getKirCalls",
   signature = "MiDAS",
-  definition = function (object) {
-    kir_calls <- object[["kir_calls"]]
-    if (! is.null(kir_calls)) {
-      kir_calls <- experimentMatToDf(kir_calls)
-    }
-
-    return(kir_calls)
-  }
+  definition = function (object) { metadata(object)[["kir_calls"]] }
 )
 
-#' @rdname MiDAS-class
-#'
-#' @title Extract placeholder name from MiDAS object.
+#' Get placeholder name from MiDAS object.
 #'
 #' @param object \code{\link{MiDAS}} object.
 #'
-#' @return String giving object's placeholder.
+#' @return String giving name of placeholder.
 #'
+#' @importFrom S4Vectors metadata
 #' @export
 setGeneric(
   name = "getPlaceholder",
@@ -187,38 +166,57 @@ setGeneric(
 
 #' @rdname MiDAS-class
 #'
-#' @importFrom S4Vectors metadata
+#' @title Get placeholder name from MiDAS object.
 #'
+#' @importFrom S4Vectors metadata
+#' @export
 setMethod(
   f = "getPlaceholder",
   signature = "MiDAS",
   definition = function (object) {
-    placeholder <- metadata(object)$placeholder
+    placeholder <- metadata(object)[["placeholder"]]
 
     return(placeholder)
   }
 )
 
-#' @rdname MiDAS-class
+#' Get omnibus groups from MiDAS object.
 #'
-#' @title Extract omnibus groups from MiDAS object.
+#' @details For some experiments features can be naturally divided into groups
+#' (here called omnibus groups). For example, in \code{'hla_aa'} experiment
+#' features can be grouped by amino acid position (\code{"B_46_E"},
+#' \code{"B_46_A"}) can be grouped into \code{B_46} group). Such groups can be
+#' than used to perform omnibus test, see \code{\link{runMiDAS}} for more
+#' details.
 #'
 #' @param object \code{\link{MiDAS}} object.
 #' @param experiment String specifying experiment.
 #'
-#' @return Character vector of omnibus groups for given experiment.
+#' @return List of omnibus groups for given experiment.
 #'
+#' @importFrom assertthat assert_that is.string
+#' @importFrom S4Vectors metadata
 #' @export
 setGeneric(
   name = "getOmnibusGroups",
   def = function(object, experiment) standardGeneric("getOmnibusGroups")
 )
 
-#' @rdname MiDAS-class
+#' Get omnibus groups from MiDAS object.
+#'
+#' @details For some experiments features can be naturally divided into groups
+#' (here called omnibus groups). For example, in \code{'hla_aa'} experiment
+#' features can be grouped by amino acid position (\code{"B_46_E"},
+#' \code{"B_46_A"}) can be grouped into \code{B_46} group). Such groups can be
+#' than used to perform omnibus test, see \code{\link{runMiDAS}} for more
+#' details.
+#'
+#' @param object \code{\link{MiDAS}} object.
+#' @param experiment String specifying experiment.
 #'
 #' @importFrom assertthat assert_that is.string
 #' @importFrom S4Vectors metadata
-#'
+#' @export
 setMethod(
   f = "getOmnibusGroups",
   signature = "MiDAS",
@@ -235,26 +233,27 @@ setMethod(
   }
 )
 
-#' @rdname MiDAS-class
+#' Calculate features frequencies for given experiment in MiDAS object.
 #'
-#' @title Calculate variables frequencies for given experiment in MiDAS object.
-#'
+#' @inheritParams getExperimentFrequencies
 #' @param object \code{\link{MiDAS}} object.
-#' @param experiment String specifying experiment.
-#' @param ref_pop Character giving the names of reference populations to use. The
-#'   vector can be named then names will be used as population names.
+#' @param compare Logical flag indicating if \code{hla_calls} frequencies
+#'   should be compared to reference frequencies given in \code{ref}.
+#' @param ref_pop Character vector giving names of reference populations in
+#'   \code{ref} to compare with. Optionally vector can be named, then those
+#'   names will be used as population names.
+#' @param ref Named list of reference frequencies data frames. See
+#'   \code{\link{allele_frequencies}} for an example on how reference
+#'   frequency data frame should be formatted.
 #'
-#' @return Data frame containing variables, its corresponding total counts
-#'   and frequencies.
+#' @return Data frame with features from selected experiment and their
+#'   corresponding frequencies.
 #'
-#' Variables frequencies are counted in reference to sample size, depending on
-#' the inheritance model under which the counts table has been generated one
-#' might need to take under consideration both gene copies. Here sample size is
-#' assumed to be depended on both gene copies for \code{"additive"} inheritance
-#' model (`n / (2 * j)` where `n` is the number of term occurrences and `j`
-#' is the sample size). For other models the sample size is taken as is
-#' (`n / j`).
-#'
+#' @importFrom assertthat assert_that is.string
+#' @importFrom dplyr select
+#' @importFrom rlang !!
+#' @importFrom stats reshape
+#' @importFrom S4Vectors metadata
 #' @export
 setGeneric(
   name = "getFrequencies",
@@ -271,12 +270,24 @@ setGeneric(
 
 #' @rdname MiDAS-class
 #'
+#' @title Calculate features frequencies for given experiment in MiDAS object.
+#'
+#' @inheritParams getExperimentFrequencies
+#' @param compare Logical flag indicating if \code{hla_calls} frequencies
+#'   should be compared to reference frequencies given in \code{ref}.
+#' @param ref_pop Character vector giving names of reference populations in
+#'   \code{ref} to compare with. Optionally vector can be named, then those
+#'   names will be used as population names.
+#' @param ref Named list of reference frequencies data frames. See
+#'   \code{\link{allele_frequencies}} for an example on how reference
+#'   frequency data frame should be formatted.
+#'
 #' @importFrom assertthat assert_that is.string
 #' @importFrom dplyr select
 #' @importFrom rlang !!
 #' @importFrom stats reshape
 #' @importFrom S4Vectors metadata
-#'
+#' @export
 setMethod(
   f = "getFrequencies",
   signature = "MiDAS",
@@ -318,20 +329,22 @@ setMethod(
   }
 )
 
-#' @rdname MiDAS-class
+#' Filter MiDAS object by frequency
 #'
-#' @title Filter MiDAS object by frqeuncy
+#' @inheritParams getExperimentFrequencies
+#' @param object \code{\link{MiDAS}} object.
+#' @param experiment String specifying experiment.
+#' @param lower_frequency_cutoff Number giving lower frequency threshold.
+#'   Numbers greater than 1 are interpreted as number of feature occurrences,
+#'   numbers between 0 and 1 as fractions.
+#' @param upper_frequency_cutoff Number giving upper frequency threshold.
+#'   Numbers greater than 1 are interpreted as number of feature occurrences,
+#'   numbers between 0 and 1 as fractions.
 #'
-#' @param object \code{\link{MiDAS}} object
-#' @param experiment Matrix
-#' @param lower_frequency_cutoff Number
-#' @param upper_frequency_cutoff Number
+#' @return Filtered \code{\link{MiDAS}} object.
 #'
-#' @return Object of class MiDAS.
-#'
-#' @importFrom assertthat assert_that is.string see_if
-#' @importFrom methods validObject
-#'
+#' @importFrom assertthat assert_that is.string
+#' @importFrom S4Vectors metadata
 #' @export
 setGeneric(
   name = "filterByFrequency",
@@ -346,9 +359,18 @@ setGeneric(
 
 #' @rdname MiDAS-class
 #'
+#' @title Filter MiDAS object by frequency
+#'
+#' @param lower_frequency_cutoff Number giving lower frequency threshold.
+#'   Numbers greater than 1 are interpreted as number of feature occurrences,
+#'   numbers between 0 and 1 as fractions.
+#' @param upper_frequency_cutoff Number giving upper frequency threshold.
+#'   Numbers greater than 1 are interpreted as number of feature occurrences,
+#'   numbers between 0 and 1 as fractions.
+#'
 #' @importFrom assertthat assert_that is.string
 #' @importFrom S4Vectors metadata
-#'
+#' @export
 setMethod(
   f = "filterByFrequency",
   signature = "MiDAS",
@@ -380,19 +402,18 @@ setMethod(
   return(object)
 })
 
-#' @rdname MiDAS-class
+
+#' Filter MiDAS object by omnibus groups
 #'
-#' @title Filter MiDAS object by omnibus groups
+#' @param object \code{\link{MiDAS}} object.
+#' @param experiment String specifying experiment.
+#' @param groups Character vector specifying omnibus groups to select. See
+#'   \code{\link{getOmnibusGroups}} for more details.
 #'
-#' @param object \code{\link{MiDAS}} object
-#' @param experiment Matrix
-#' @param groups Character
-#'
-#' @return Object of class MiDAS.
+#' @return Filtered \code{\link{MiDAS}} object.
 #'
 #' @importFrom assertthat assert_that is.string see_if
-#' @importFrom methods validObject
-#'
+#' @importFrom S4Vectors metadata
 #' @export
 setGeneric(
   name = "filterByOmnibusGroups",
@@ -405,9 +426,16 @@ setGeneric(
 
 #' @rdname MiDAS-class
 #'
+#' @title Filter MiDAS object by omnibus groups
+#'
+#' @param object \code{\link{MiDAS}} object.
+#' @param experiment String specifying experiment.
+#' @param groups Character vector specifying omnibus groups to select. See
+#'   \code{\link{getOmnibusGroups}} for more details.
+#'
 #' @importFrom assertthat assert_that is.string see_if
 #' @importFrom S4Vectors metadata
-#'
+#' @export
 setMethod(
   f = "filterByOmnibusGroups",
   signature = "MiDAS",
@@ -439,22 +467,21 @@ setMethod(
       characterMatches(groups, names(omnibus_groups))
     )
 
-    mask <- unlist(omnibus_groups[groups])
+    mask <- unlist(omnibus_groups[groups]) # TODO what if some groups are missing due to smth
     object[[experiment]] <- se[mask, ]
-    metadata(object[[experiment]])$omnibus_groups <- omnibus_groups[groups]
+    S4Vectors::metadata(object[[experiment]])$omnibus_groups <- omnibus_groups[groups]
 
     return(object)
   })
 
-#' @rdname MiDAS-class
+
+#' Filter MiDAS object by features
 #'
-#' @title Filter MiDAS object by variables
+#' @param object \code{\link{MiDAS}} object.
+#' @param experiment String specifying experiment.
+#' @param variables Character vector specifying features to select.
 #'
-#' @param object \code{\link{MiDAS}} object
-#' @param experiment string
-#' @param variables character
-#'
-#' @return MiDAS object
+#' @return Filtered \code{\link{MiDAS}} object.
 #'
 #' @export
 setGeneric(
@@ -464,8 +491,12 @@ setGeneric(
 
 #' @rdname MiDAS-class
 #'
-#' @importFrom S4Vectors metadata
+#' @title Filter MiDAS object by features
 #'
+#' @param variables Character vector specifying features to select.
+#'
+#' @importFrom S4Vectors metadata
+#' @export
 setMethod(
   f = "filterByVariables",
   signature = "MiDAS",
@@ -487,23 +518,84 @@ setMethod(
 #'
 #' @method as.data.frame MiDAS
 #'
-#' @inheritParams as.data.frame
-#'
+#' @inheritParams base::as.data.frame
 #' @export
-#'
 as.data.frame.MiDAS <- function(x, ...) {
   midasToWide(object = x,
               experiment = getExperiments(x))
 }
 
-#' Prepare MiDAS object for statistical analysis
+#' Construct a MiDAS object
 #'
 #' \code{prepareMiDAS} transform HLA alleles calls and KIR calls according
-#' to selected analysis creating \code{\link{MiDAS}} object.
+#' to selected \code{experiment}s creating a \code{\link{MiDAS}} object.
+#'
+#' \code{experiment} specifies analysis types for which \code{hla_calls} and
+#' \code{kir_call} should be prepared.
+#' \describe{
+#'   \item{\code{'hla_alleles'}}{
+#'     \code{hla_calls} are transformed to counts matrix describing number of
+#'     allele occurrences for each sample. This experiment is used to test
+#'     associations on HLA alleles level.
+#'   }
+#'   \item{\code{'hla_aa'}}{
+#'     \code{hla_calls} are transformed to a matrix of variable amino acid
+#'     positions. See \code{\link{hlaToAAVariation}} for more details. This
+#'     experiment is used to test associations on amino acid level.
+#'   }
+#'   \item{\code{"hla_g_groups"}}{
+#'     \code{hla_calls} are translated into HLA G groups and transformed to
+#'     matrix describing number of G group occurrences for each sample. See
+#'     \code{\link{hlaToVariable}} for more details. This experiment is used to
+#'     test associations on HLA G groups level.
+#'   }
+#'   \item{\code{"hla_supertypes"}}{
+#'     \code{hla_calls} are translated into HLA supertypes and transformed to
+#'     matrix describing number of G group occurrences for each sample. See
+#'     \code{\link{hlaToVariable}} for more details. This experiment is used to
+#'     test associations on HLA supertypes level.
+#'   }
+#'   \item{\code{"hla_NK_ligands"}}{
+#'     \code{hla_calls} are translated into NK ligands, which includes HLA
+#'     Bw4/Bw6 and HLA C1/C2 groups and transformed to matrix describing number
+#'     of their occurrences for each sample. See \code{\link{hlaToVariable}} for
+#'     more details.This experiment is used to test associations on HLA NK
+#'     ligands level.
+#'   }
+#'   \item{\code{"kir_genes"}}{
+#'     \code{kir_calls} are transformed to counts matrix describing number of
+#'     KIR gene occurrences for each sample. This experiment is used to test
+#'     associations on KIR genes level.
+#'   }
+#'   \item{\code{"hla_kir_interactions"}}{
+#'     \code{hla_calls} and \code{kir_calls} are translated to HLA - KIR
+#'     interactions as defined in
+#'     \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6558367/}{Pende et al., 2019.}.
+#'     See \code{\link{getHlaKirInteractions}} for more details. This experiment
+#'     is used to test associations on HLA - KIR interactions level.
+#'   }
+#'   \item{\code{"hla_divergence"}}{
+#'     Grantham distance for class I HLA alleles is calculated based on
+#'     \code{hla_calls} using original formula by
+#'     \href{http://www.sciencemag.org/content/185/4154/862.long}{Grantham R. 1974.}.
+#'     See \code{\link{hlaCallsGranthamDistance}} for more details. This
+#'     experiment is used to test associations on HLA divergence level measured
+#'     by Grantham distance.
+#'   }
+#'   \item{\code{"hla_het"}}{
+#'     \code{hla_calls} are transformed to heterozygosity status, where \code{1}
+#'     designates a heterozygote and \code{0} homozygote. Heterozygosity status
+#'     is calculated only for classical HLA genes (A, B, C, DQA1, DQB1, DRA,
+#'     DRB1, DPA1, DPB1). This experiment is used to test associations on HLA
+#'     divergence level measured by heterozygosity.
+#'   }
+#' }
 #'
 #' @inheritParams checkHlaCallsFormat
 #' @inheritParams checkKirCallsFormat
 #' @inheritParams hlaCallsToCounts
+#' @inheritParams filterByFrequency
+#' @inheritParams prepareMiDAS_hla_het
 #' @param colData Data frame holding additional variables like phenotypic
 #'   observations or covariates. It have to contain \code{'ID'} column holding
 #'   samples identifiers corresponding to identifiers in \code{hla_calls} and
@@ -513,39 +605,26 @@ as.data.frame.MiDAS <- function(x, ...) {
 #'   should be prepared. Valid choices are \code{"hla_alleles"},
 #'   \code{"hla_aa"}, \code{"hla_g_groups"}, \code{"hla_supertypes"},
 #'   \code{"hla_NK_ligands"}, \code{"kir_genes"}, \code{"hla_kir_interactions"},
-#'   \code{"hla_divergence"}.
+#'   \code{"hla_divergence"}, \code{"hla_het"}.
 #'   See details for further explanations.
-#' @param placeholder String
-#' @param lower_frequency_cutoff Number
-#' @param upper_frequency_cutoff Number
-#' @param ... Attributes used in data transformation.
+#' @param placeholder String giving name for dummy variable inserted to
+#'   \code{colData}. This variable can be than used to define base statistical
+#'   model used by \code{\link{runMiDAS}}.
+#' @param indels Logical indicating whether indels should be considered when
+#'   checking amino acid variability in \code{'hla_aa'} experiment.
+#' @param unkchar Logical indicating whether unknown characters in the alignment
+#'   should be considered when checking amino acid variability in
+#'   \code{'hla_aa'} experiment.
+#' @param hla_het_resolution Number specifying HLA alleles resolution used to
+#'   calculate heterogeneity in \code{"hla_het"} experiment.
 #'
 #' @return Object of class \code{\link{MiDAS}}
 #'
 #' @examples
-#' \dontrun{
-#' # read hla calls file
-#' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-#' hla_calls <- readHlaCalls(hla_calls_file)
-#'
-#' # read kir calls file
-#' kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-#' kir_calls <- readKIRCalls(kir_calls_file)
-#'
-#' # read phenotypic data and covariates
-#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-#' pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
-#' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-#' covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-#' phenotype <- left_join(pheno, covar, by ="ID")
-#'
-#' # create MiDAS object
-#' midas <- prepareMiDAS(hla_calls = hla_calls,
-#'                       kir_calls = kir_calls,
-#'                       colData = phenotype,
-#'                       experiment = "hla_alleles"
-#' )
-#' }
+#' midas <- prepareMiDAS(hla_calls = MiDAS_tut_HLA,
+#'                       kir_calls = MiDAS_tut_KIR,
+#'                       colData = MiDAS_tut_pheno,
+#'                       experiment = "hla_alleles")
 #'
 #' @importFrom assertthat assert_that see_if
 #' @importFrom MultiAssayExperiment ExperimentList MultiAssayExperiment
@@ -644,25 +723,18 @@ prepareMiDAS <- function(hla_calls = NULL,
   # insert placeholder
   colData[[placeholder]] <- runif(nrow(colData))
 
-  colData <-
-    DataFrame(colData, row.names = colData[["ID"]], check.names = TRUE)
-
-  metadata <- list(
-    experiment = experiment,
-    placeholder = placeholder
-  )
+  colData <- DataFrame(colData[, ! colnames(colData) == "ID"],
+                       row.names = colData[["ID"]],
+                       check.names = TRUE)
 
   new("MiDAS", experiments = experiments, colData = colData, metadata = metadata)
 }
 
 
-#' @rdname prepareMiDAS
-#'
-#' @title Prepare MiDAS data on HLA allele level
-#'
-#' @details \code{'hla_alleles'} - \code{hla_calls} are transformed into counts.
+#' Prepare MiDAS data on HLA allele level
 #'
 #' @inheritParams prepareMiDAS
+#' @param ... Not used
 #'
 #' @return Matrix
 #'
@@ -679,12 +751,8 @@ prepareMiDAS_hla_alleles <- function(hla_calls, ...) {
 
 #' Prepare MiDAS data on HLA amino acid level
 #'
-#' \code{hla_calls} are first converted to amino acid level, taking only
-#' variable positions under consideration. Than variable amino acid positions
-#' are transformed to counts.
-#'
+#' @inheritParams checkHlaCallsFormat
 #' @inheritParams hlaToAAVariation
-#' @param hla_calls Data frame
 #' @param ... Not used
 #'
 #' @return Matrix
@@ -775,15 +843,14 @@ prepareMiDAS_hla_g_groups <- function(hla_calls,
 
 #' Prepare MiDAS data on HLA allele's supertypes level
 #'
-#' \code{hla_calls} are transformed to HLA alleles groups using supertypes
-#' dictionary shipped with the package. Than they are transformed to counts).
-#'
-#' @param hla_calls Data frame
+#' @inheritParams checkHlaCallsFormat
 #' @param ... Not used
 #'
 #' @return Matrix
 #'
 #' @importFrom assertthat assert_that
+#' @importFrom dplyr select
+#' @importFrom rlang .data
 #'
 prepareMiDAS_hla_supertypes <- function(hla_calls, ...) {
   assert_that(
@@ -814,11 +881,7 @@ prepareMiDAS_hla_supertypes <- function(hla_calls, ...) {
 
 #' Prepare MiDAS data on HLA allele's groups level
 #'
-#' \code{hla_calls} are transformed to HLA alleles groups using Bw4/6, C1/2 and
-#' Bw4+A23+A24+A32 dictionaries shipped with the package. Than they are
-#' transformed to counts.
-#'
-#' @param hla_calls Data frame
+#' @inheritParams checkHlaCallsFormat
 #' @param ... Not used
 #'
 #' @return Matrix
@@ -857,9 +920,7 @@ prepareMiDAS_hla_NK_ligands <- function(hla_calls, ...) {
 
 #' Prepare MiDAS data on KIR genes level
 #'
-#' \code{kir_counts} data frame is joined with other inputs.
-#'
-#' @param kir_calls Data frame
+#' @inheritParams checkKirCallsFormat
 #' @param ... Not used
 #'
 #' @return Matrix
@@ -880,12 +941,8 @@ prepareMiDAS_kir_genes <- function(kir_calls, ...) {
 
 #' Prepare MiDAS data on HLA - KIR interactions level
 #'
-#' \code{hla_calls} are processed with \code{kir_counts} into HLA - KIR
-#' interactions variables (see \code{\link{getHlaKirInteractions}} for more
-#' details).
-#'
-#' @param hla_calls Data frame
-#' @param kir_calls Data frame
+#' @inheritParams checkHlaCallsFormat
+#' @inheritParams checkKirCallsFormat
 #' @param ... Not used
 #'
 #' @return Matrix
@@ -910,11 +967,7 @@ prepareMiDAS_hla_kir_interactions <- function(hla_calls, kir_calls, ...) {
 
 #' Prepare MiDAS data on HLA divergence level
 #'
-#' Distances between Class I alleles are calculated using Grantham distance,
-#' as implemented in \code{hlaCallsGranthamDistance} function. Additionally
-#' average distance in Class I genese is calculated.
-#'
-#' @param hla_calls Data frame
+#' @inheritParams checkHlaCallsFormat
 #' @param ... Not used
 #'
 #' @return Matrix
@@ -942,10 +995,9 @@ prepareMiDAS_hla_divergence <- function(hla_calls, ...) {
 
 #' Prepare MiDAS data on HLA heterozygosity level
 #'
-#' Heterozygosity status for each allele, "1" designates homozygote and "0"
-#' designates heterozygote.
-#'
-#' @param hla_calls Data frame
+#' @inheritParams checkHlaCallsFormat
+#' @param hla_het_resolution Number specifying HLA alleles resolution used to
+#'   calculate heterogeneity.
 #' @param ... Not used
 #'
 #' @return Matrix

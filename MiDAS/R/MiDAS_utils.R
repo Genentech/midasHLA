@@ -1,4 +1,4 @@
-#' Check allele format
+#' Check HLA allele format
 #'
 #' \code{checkAlleleFormat} test if the input character follows HLA nomenclature
 #' specifications.
@@ -12,12 +12,13 @@
 #' HLA alleles with identical sequences across exons encoding the peptide
 #' binding domains might be designated with G group allele numbers. Those
 #' numbers have additional G or GG suffix. See
-#' \url{http://hla.alleles.org/alleles/g_groups.html} for more details.
+#' \url{http://hla.alleles.org/alleles/g_groups.html} for more details. They are
+#' interpreted as valid HLA alleles designations.
 #'
-#' @param allele Character vector containing HLA allele numbers.
+#' @param allele Character vector with HLA allele numbers.
 #'
-#' @return Logical vector specifying if \code{allele} follows HLA alleles naming
-#'   conventions.
+#' @return Logical vector specifying if \code{allele} elements follows HLA
+#'   alleles naming conventions.
 #'
 #' @examples
 #' allele <- c("A*01:01", "A*01:02")
@@ -32,19 +33,19 @@ checkAlleleFormat <- function(allele) {
   return(is_correct)
 }
 
-#' Infers HLA allele resolution
+#' Infer HLA allele resolution
 #'
 #' \code{getAlleleResolution} returns the resolution of input HLA allele
 #' numbers.
 #'
-#' HLA allele resolution can take the following values: 2, 4, 6, 8.See
+#' HLA allele resolution can take the following values: 2, 4, 6, 8. See
 #' \url{http://hla.alleles.org/nomenclature/naming.html} for more details.
+#'
+#' \code{NA} values are accepted and returned as \code{NA}.
 #'
 #' @inheritParams checkAlleleFormat
 #'
-#' @return Integer vector specifying alleles resolutions.
-#'
-#'   \code{NA} values are accepted and returned as \code{NA}.
+#' @return Integer vector specifying allele resolutions.
 #'
 #' @examples
 #' allele <- c("A*01:01", "A*01:02")
@@ -63,22 +64,29 @@ getAlleleResolution <- function(allele) {
   return(allele_resolution)
 }
 
-#' Reduce HLA allele resolution
+#' Reduce HLA alleles
 #'
-#' \code{reduceAlleleResolution} reduces HLA allele numbers vector to specified
-#' resolution.
+#' \code{reduceAlleleResolution} reduce HLA allele numbers resolution.
 #'
-#' In cases when allele numbers contains additional suffix their resolution
+#' In cases when allele number contain additional suffix their resolution
 #' can not be unambiguously reduced. These cases are returned unchanged.
 #' Function behaves in the same manner if \code{resolution} is higher than
 #' resolution of input HLA allele numbers.
 #'
+#' \code{NA} values are accepted and returned as \code{NA}.
+#'
+#' TODO here we give such warning when alleles have G or GG suffix (see
+#' http://hla.alleles.org/alleles/g_groups.html)
+#'   "Reducing G groups alleles, major allele gene name will be used."
+#' I dond't really remember why we are doing this xd These allele numbers are
+#' processed as normal alleles (without suffix). Let me know if this warning is
+#' relevant or we could go without it. If we want to leave it lets also add text
+#' in documentation.
+#'
 #' @inheritParams checkAlleleFormat
-#' @param resolution Numeric vector of length one specifying output resolution.
+#' @param resolution Number specifying desired resolution.
 #'
 #' @return Character vector containing reduced HLA allele numbers.
-#'
-#'   \code{NA} values are accepted and returned as \code{NA}.
 #'
 #' @examples
 #' reduceAlleleResolution(c("A*01", "A*01:24", "C*05:24:55:54"), 2)
@@ -115,20 +123,21 @@ reduceAlleleResolution <- function(allele,
   return(allele)
 }
 
-#' Returns positions of variable amino acids in the alignment
+#' Find variable positions in sequence alignment
 #'
-#' \code{getVariableAAPos} finds variable amino acid positions in the
-#' alignment.
+#' \code{getVariableAAPos} finds variable amino acid positions in protein
+#' sequence alignment.
 #'
 #' The variable amino acid positions in the alignment are those at which
 #' different amino acids can be found. As the alignments can also contain indels
 #' and unknown characters, the user choice might be to consider those positions
-#' also as variable. This can be achieved by passing appropriate regular
+#' as variable or not. This can be achieved by passing appropriate regular
 #' expression in \code{varchar}. Eg. when \code{varchar = "[A-Z]"} occurence of
 #' deletion/insertion (".") will not be treated as variability. In order to
 #' detect this kind of variability \code{varchar = "[A-Z\\\\.]"} should be used.
 #'
-#' @param alignment Matrix containing amino acid level alignment.
+#' @param alignment Matrix containing amino acid level alignment, as returned by
+#'   \code{\link{readHlaAlignments}},
 #' @param varchar Regex matching characters that should be considered when
 #'   looking for variable amino acid positions. See details for further
 #'   explanations.
@@ -160,27 +169,23 @@ getVariableAAPos <- function(alignment,
   return(which(var_cols))
 }
 
-#' Converts allele numbers to additional variables
+#' Convert allele numbers to additional variables
 #'
 #' \code{convertAlleleToVariable} convert input HLA allele numbers to additional
-#' variables based on the supplied match table (dictionary).
+#' variables based on the supplied dictionary.
 #'
 #' \code{dictionary} file should be a tsv format with header and two columns.
-#' First column should hold allele numbers and second corresponding additional
-#' variables. Optionally a data frame formatted in the same manner can be passed
-#' instead.
+#' First column should hold allele numbers, second additional variables (eg.
+#' expression level).
+#'
+#' Type of the returned vector depends on the type of the additional variable.
 #'
 #' @inheritParams checkAlleleFormat
-#' @param dictionary Path to the file containing HLA allele numbers matchings or
-#'   data frame providing this information. See details for further
-#'   explanations.
+#' @param dictionary Path to file containing HLA allele dictionary or a
+#'   data frame.
 #'
 #' @return Vector containing HLA allele numbers converted to additional
-#'   variables according to matching file.
-#'
-#'   Type of the returned vector depends on the type of the additional variable.
-#'   For example for HLA alleles supertypes character vector is returned while
-#'   for expression values numeric vector will be returned.
+#'   variables according to \code{dictionary}.
 #'
 #' @examples
 #' dictionary <- system.file("extdata", "Match_allele_HLA_supertype.txt", package = "MiDAS")
@@ -228,57 +233,9 @@ convertAlleleToVariable <- function(allele,
   return(variable)
 }
 
-#' Assert hla calls data frame format
+#' Backquote character
 #'
-#' \code{checkHlaCallsFormat} asserts if hla calls data frame have proper
-#' format.
-#'
-#' @param hla_calls Data frame containing HLA allele calls, as return by
-#'   \code{\link{readHlaCalls}} function.
-#'
-#' @return Logical indicating if \code{hla_calls} follows hla calls data frame
-#'   format. Otherwise raise error.
-#'
-#' @family assert functions
-#'
-#' @importFrom assertthat assert_that see_if
-#' @examples
-#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-#' hla_calls <- readHlaCalls(file)
-#' checkHlaCallsFormat(hla_calls)
-#'
-#' @export
-checkHlaCallsFormat <- function(hla_calls) {
-  assert_that(
-    is.data.frame(hla_calls),
-    see_if(nrow(hla_calls) >= 1 & ncol(hla_calls) >= 2,
-           msg = "hla_calls have to have at least 1 rows and 2 columns. Make sure the input file is in tsv format."
-    ),
-    see_if(! any(vapply(hla_calls, is.factor, logical(length = 1))),
-           msg = "hla_calls can't contain factors"
-    ),
-    see_if(! all(checkAlleleFormat(as.character(hla_calls[, 1])), na.rm = TRUE),
-           msg = "first column of hla_calls should specify samples id"
-    )
-  )
-
-  alleles <- unlist(hla_calls[, -1])
-  test_values <- checkAlleleFormat(alleles)
-  alleles <- alleles[! test_values & ! is.na(alleles)]
-  assert_that(
-      all(test_values, na.rm = TRUE),
-      msg = sprintf(
-        "values: %s in hla_calls doesn't follow HLA numbers specification",
-        paste(alleles, collapse = ", ")
-      )
-  )
-
-  return(TRUE)
-}
-
-#' Backquote string
-#'
-#' \code{backquote} places backticks around string.
+#' \code{backquote} places backticks around elements of character vector
 #'
 #' \code{backquote} is useful when using HLA allele numbers in formulas, where
 #' \code{'*'} and \code{':'} characters have special meanings.
@@ -286,9 +243,6 @@ checkHlaCallsFormat <- function(hla_calls) {
 #' @param x Character vector.
 #'
 #' @return Character vector with its elements backticked.
-#'
-#' @examples
-#' backquote("A*01:01")
 #'
 #' @importFrom assertthat assert_that
 #' @export
@@ -299,67 +253,7 @@ backquote <- function(x) {
   return(backquoted)
 }
 
-#' Assert additional data
-#'
-#' \code{checkAdditionalData} asserts if phenotype or covariate data frame
-#' has proper format.
-#'
-#' @inheritParams checkHlaCallsFormat
-#' @param data_frame Data frame containing phenotype or covariate data
-#'   corresponding to accompanying hla calls data frame.
-#' @param accept.null Logical indicating if NULL data_frame should be accepted.
-#'
-#' @return Logical indicating if \code{data_frame} is properly formatted.
-#'   Otherwise raise error.
-#'
-#' @family assert functions
-#'
-#' @importFrom assertthat assert_that see_if
-#' @examples
-#' hla_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-#' pheno <- read.table(pheno_file, header = TRUE)
-#' hla_calls <- readHlaCalls(hla_file)
-#' checkAdditionalData(pheno, hla_calls)
-#'
-#' @export
-checkAdditionalData <- function(data_frame,
-                                hla_calls,
-                                accept.null = FALSE) {
-  data_frame_name <- deparse(substitute(data_frame))
-  hla_calls_name <- deparse(substitute(hla_calls))
-  if (! (is.null(data_frame) & accept.null)) {
-    assert_that(
-      see_if(is.data.frame(data_frame),
-             msg = sprintf("%s have to be a data frame",
-                           data_frame_name
-             )
-      ),
-      checkHlaCallsFormat(hla_calls),
-      see_if(nrow(data_frame) >= 1 & ncol(data_frame) >= 2,
-             msg = sprintf("%s have to have at least 1 rows and 2 columns",
-                           data_frame_name
-             )
-      ),
-      see_if(colnames(data_frame)[1] == colnames(hla_calls)[1],
-             msg = sprintf(
-               "first column in %s must be named as first column in %s",
-               data_frame_name, hla_calls_name
-             )
-      ),
-      see_if(any(hla_calls[, 1, drop = TRUE] %in% data_frame[, 1, drop = TRUE]),
-             msg = sprintf(
-               "IDs in %s doesn't match IDs in %s",
-               data_frame_name, hla_calls_name
-             )
-      )
-    )
-  }
-
-  return(TRUE)
-}
-
-#' Add new variables to statistical model
+#' Extend and Re-fit a Model Call
 #'
 #' \code{updateModel} adds new variables to model and re-fit it.
 #'
@@ -367,29 +261,19 @@ checkAdditionalData <- function(data_frame,
 #'   others.
 #' @param x Character vector specifying variables to be added to model.
 #' @param placeholder String specifying term to substitute with value from
-#'   \code{x}. If more than one variable is passed in \code{x} all of them will
-#'   be bracketed. Ignored if set to \code{NULL}.
+#'   \code{x}. Ignored if set to \code{NULL}.
 #' @param backquote Logical indicating if added variables should be quoted.
-#'   Elements of this vector are recycled over \code{x}. Only relevant if
-#'   \code{x} is of type character.
-#' @param collapse String specifying how new characters should be added to
-#'   old formula. Only relevant if \code{placeholder} is specified.
+#'   Elements of this vector are recycled over \code{x}.
+#' @param collapse String specifying how variables should be combined. Defaults
+#'   to \code{" + "} ie. linear combination.
 #'
-#' @return Updated fit of input model.
+#' @return Updated fitted object.
 #'
 #' @importFrom assertthat assert_that is.string
 #' @importFrom magrittr %>%
 #' @importFrom stats update
 #' @importFrom purrr is_formula
 #'
-#' @examples
-#' object <- lm(dist ~ 1, data = cars)
-#' updateModel(object, "dist")
-#'
-#' object <- lm(Sepal.Length ~ Petal.Width*Species, iris)
-#' updateModel(object, c("Sepal.Width", "Petal.Length"), placeholde = "Petal.Width")
-#'
-#' @export
 updateModel <- function(object,
                         x,
                         placeholder = NULL,
@@ -422,207 +306,16 @@ updateModel <- function(object,
     x <- gsub(pattern = placeholder, replacement = x, x = deparse(object_form))
   }
 
-  # print(x)
   new_object <- update(object = object, x, evaluate = FALSE)
   new_object <- eval(new_object, envir = object_env)
 
   return(new_object)
 }
 
-#' Assert statistical model
-#'
-#' \code{checkStatisticalModel} asserts if object is an existing fit from a
-#' model function such as lm, glm and many others. Containing MiDAS object as
-#' its data atribute.
-#'
-#' @inheritParams updateModel
-#'
-#' @return Logical indicating if \code{object} is an existing fit from a
-#' model function such as lm, glm and many others. ontaining MiDAS object as
-#' its data atribute. Otherwise raise error.
-#'
-#' @family assert functions
-#'
-#' @importFrom assertthat assert_that see_if
-#' @importFrom stats getCall
-#'
-checkStatisticalModel <- function(object) { # TODO simplyfy output of this function; or something like object is not a stat model: potential problem bla bla
-  assert_that(
-    is.object(object),
-    msg = "object is required to have the internal OBJECT bit set"
-  )
-
-  object_call <- getCall(object)
-  assert_that(
-    ! is.null(object_call),
-    msg = "object have to have an attribute 'call'"
-  )
-
-  object_env <- attr(object$terms, ".Environment")
-
-  object_formula <- eval(object_call[["formula"]], envir = object_env)
-  assert_that(
-    is_formula(object_formula),
-    msg = "object have to be a model with defined formula"
-  )
-
-  object_data <- eval(object_call[["data"]], envir = object_env)
-  assert_that(!is.null(object_data),
-              msg = "object need to have data attribute defined")
-}
-
-#' Check if vector contains only counts or zeros
-#'
-#' \code{isCountsOrZeros} checks if vector contains only positive integers or
-#' zeros.
-#'
-#' @param x Numeric vector or object that can be \code{unlist} to numeric
-#'   vector.
-#' @param na.rm Logical indicating if \code{NA} values should be accepted.
-#'
-#' @return Logical indicating if provided vector contains only positive integers
-#'   or zeros.
-#'
-#' @family assert functions
-#'
-#' @importFrom rlang is_integerish
-#'
-isCountsOrZeros <- function(x, na.rm = TRUE) {
-    x <- unlist(x)
-    test <- is_integerish(x) & x >= 0
-    test <- all(test, na.rm = na.rm)
-
-  return(test)
-}
-
-assertthat::on_failure(isCountsOrZeros) <- function(call, env) {
-  paste0("values in ", deparse(call$x), " are not counts (a positive integers) or zeros.")
-}
-
-#' Check if object is character vector or NULL
-#'
-#' \code{isCharacterOrNULL} checks if object is character vector or NULL.
-#'
-#' @param x object to test.
-#'
-#' @return Logical indicating if object is character vector or NULL
-#'
-#' @family assert functions
-#'
-isCharacterOrNULL <- function(x) {
-    test <- is.character(x) | is.null(x)
-
-  return(test)
-}
-
-assertthat::on_failure(isCharacterOrNULL) <- function(call, env) {
-  paste0(deparse(call$x), " is not a character vector or NULL.")
-}
-
-#' Check if object is number or NULL
-#'
-#' \code{isNumberOrNULL} checks if object is number (a length one numeric
-#' vector) or NULL.
-#'
-#' @param x object to test.
-#'
-#' @return Logical indicating if object is number or NULL
-#'
-#' @family assert functions
-#'
-#' @importFrom assertthat is.number
-#'
-isNumberOrNULL <- function(x) {
-    test <- is.number(x) | is.null(x)
-
-  return(test)
-}
-
-assertthat::on_failure(isNumberOrNULL) <- function(call, env) {
-  paste0(deparse(call$x),
-         " is not a number (a length one numeric vector) or NULL."
-  )
-}
-
-#' Check if object is string or NULL
-#'
-#' \code{isStringOrNULL} checks if object is string (a length one character
-#' vector) or NULL.
-#'
-#' @param x object to test.
-#'
-#' @return Logical indicating if object is string or NULL
-#'
-#' @family assert functions
-#'
-#' @importFrom assertthat is.string
-#'
-isStringOrNULL <- function(x) {
-    test <- is.string(x) | is.null(x)
-
-  return(test)
-}
-
-assertthat::on_failure(isStringOrNULL) <- function(call, env) {
-  paste0(deparse(call$x),
-         " is not a string (a length one character vector) or NULL."
-  )
-}
-
-#' Check if string matches one of possible values
-#'
-#' \code{stringMatches} checks if string is equal to one of the choices.
-#'
-#' @param x string to test.
-#' @param choice Character vector with possible values for \code{x}.
-#'
-#' @return Logical indicating if \code{x} matches one of the strings in
-#'   \code{choice}.
-#'
-#' @family assert functions
-#'
-stringMatches <- function(x, choice) {
-    test <- x %in% choice
-
-  return(test)
-}
-
-assertthat::on_failure(stringMatches) <- function(call, env) {
-  paste0(deparse(call$x),
-         ' should be one of "',
-         paste(eval(call$choice, envir = env), collapse = '", "'),
-         '".'
-  )
-}
-
-#' Check if object is flag or NULL
-#'
-#' \code{isFlagOrNULL} checks if object is flag (a length one logical vector) or
-#' NULL.
-#'
-#' @param x object to test.
-#'
-#' @return Logical indicating if object is flag or NULL
-#'
-#' @family assert functions
-#'
-#' @importFrom assertthat is.flag
-#'
-isFlagOrNULL <- function(x) {
-    test <- (is.flag(x) && ! is.na(x)) || is.null(x)
-
-  return(test)
-}
-
-assertthat::on_failure(isFlagOrNULL) <- function(call, env) {
-  paste0(deparse(call$x),
-         " is not a flag (a length one logical vector) or NULL."
-  )
-}
-
 #' List HLA alleles dictionaries
 #'
-#' \code{listMiDASDictionaries} lists dictionaries shipped with MiDAS package.
+#' \code{listMiDASDictionaries} lists dictionaries shipped with the MiDAS package.
+#' See \code{\link{hlaToVariable}} for more details on dictionaries.
 #'
 #' @param file.names Logical value. If FALSE, only the names of dictionaries are
 #' returned. If TRUE their paths are returned.
@@ -648,344 +341,9 @@ listMiDASDictionaries <- function(pattern = ".*",
   return(lib)
 }
 
-#' Check if character matches one of possible values
-#'
-#' \code{characterMatches} checks if all elements of a character vector matches
-#' values in choices.
-#'
-#' @param x Character vector to test.
-#' @param choice Character vector with possible values for \code{x}.
-#'
-#' @return Logical indicating if \code{x}'s elements matches any of the values
-#' in \code{choice}.
-#'
-#' @family assert functions
-#'
-#' @importFrom assertthat assert_that
-characterMatches <- function(x, choice) {
-  assert_that(is.character(x))
-  test <- if (length(x)) {
-    all(x %in% choice)
-  } else {
-    FALSE
-  }
-
-  return(test)
-}
-
-assertthat::on_failure(characterMatches) <- function(call, env) {
-  paste0(deparse(call$x),
-         ' should match values "',
-         paste(eval(call$choice, envir = env), collapse = '", "'),
-         '".'
-  )
-}
-
-#' Check if object is of class x or null
-#'
-#' \code{isClassOrNULL} checks if object is an instance of a specified class or
-#' is null.
-#'
-#' @param x object to test.
-#' @param class String specifying class to test.
-#'
-#' @return Logical indicating if \code{x} is an instance of \code{class}.
-#'
-#' @family assert functions
-#'
-#' @importFrom assertthat assert_that
-#' @importFrom methods is
-isClassOrNULL <- function(x, class) {
-  test <- is(x, class) | is.null(x)
-
-  return(test)
-}
-
-assertthat::on_failure(isClassOrNULL) <- function(call, env) {
-  paste0(deparse(call$x),
-         " must be an instance of ",
-         deparse(call$class),
-         " or NULL."
-  )
-}
-
-#' Convert KIR haplotypes to gene counts
-#'
-#' \code{kirHaplotypeToCounts} convert vector of KIR haplotypes to data frame
-#' of KIR gene counts.
-#'
-#' @param x Character vector specifying KIR haplotypes.
-#' @param hap_dict String specifying path to KIR haplotypes dictionary. By
-#'   default file shipped together with package is being used. See details for
-#'   more information.
-#' @param binary Logical flag indicating if haplotypes should be converted only
-#'   to gene presence / absence indicators (it is the only way that allows
-#'   unambiguous conversion). This argument is currently ignored.
-#'
-#' \code{hap_dict} have to be a tab separated values formatted file with first
-#' column holding KIR haplotypes and gene counts in others. File should have
-#' header with first column unnamed and gene names in the others.
-#'
-#' Haplotypes are converted to gene presence / absence indicators as it is the
-#' only way that allows unambiguous conversion.
-#'
-#' @return Data frame with haplotypes and corresponding gene counts. \code{NA}'s
-#'   in \code{x} are removed during conversion.
-#'
-#' @seealso \code{\link{readKIRCalls}}, \code{\link{getHlaKirInteractions}},
-#'   \code{\link{checkKirCallsFormat}}, \code{\link{prepareMiDAS}}.
-#'
-#' @examples
-#' x <- c(NA, "cA01~tA01+cB02~tA01", "cA01~tA01+cA01~tB01_2DS5")
-#' kirHaplotypeToCounts(x)
-#'
-#' @importFrom assertthat assert_that is.readable see_if
-#' @importFrom stats na.omit
-#' @importFrom stringi stri_split_fixed
-#'
-#' @export
-kirHaplotypeToCounts <-
-  function(x,
-           hap_dict = system.file("extdata", "Match_kir_nomenclature_gene.txt", package = "MiDAS"),
-           binary = TRUE) {
-  assert_that(
-    is.character(x),
-    is.readable(hap_dict),
-    isTRUEorFALSE(binary)
-  )
-  hap_dict <- read.table(hap_dict, stringsAsFactors = FALSE)
-
-  # x <- na.omit(x)
-  x_split <- stri_split_fixed(x, "|")
-  x_split_unlist <- unlist(x_split)
-
-  x_split_unlist_haps <- stri_split_fixed(x_split_unlist, pattern = "+")
-  assert_that(
-    all(haps_match <- vapply(
-      X = x_split_unlist_haps,
-      FUN = function(x) all(na.omit(x) %in% rownames(hap_dict)),
-      FUN.VALUE = logical(1)
-    )),
-    msg = sprintf(
-      fmt = "%s haplotype was not found in hap_dict",
-      paste(unique(x_split_unlist[! haps_match]), collapse = ", ")
-    )
-  )
-
-  counts <- do.call(cbind, x_split_unlist_haps)
-  counts <- apply(counts, 2, function(i) colSums(hap_dict[i, ]))
-  colnames(counts) <- x_split_unlist
-
-  if (binary) {
-    counts <- ifelse(counts > 1, 1, counts)
-  }
-
-  counts <- vapply(
-    X = x_split,
-    FUN = function(hap) {
-      hap <- ifelse(is.na(hap), NA, hap) # class character NA cannot be used for columns indexing
-      hap <- counts[, hap, drop = FALSE]
-      if (ncol(hap) > 1) {
-        assert_that(
-          all(apply(hap, 2, function(col) all(col == hap[, 1])), na.rm = TRUE),
-          msg = sprintf("haplotype %s can not be unambigously converted to counts", hap)
-        )
-      }
-      hap <- hap[, 1, drop = TRUE]
-      return(hap)
-    },
-    FUN.VALUE = numeric(length = ncol(hap_dict))
-  )
-  counts <- t(counts)
-  counts <- as.data.frame(counts, optional = TRUE, stringsAsFactors = FALSE)
-  counts <- cbind(haplotypes = x, counts, stringsAsFactors = FALSE)
-
-  return(counts)
-}
-
-#' Check column names
-#'
-#' \code{colnamesMatches} check if  data frame's columns are named as specified
-#'
-#' @param x Data frame to test.
-#' @param cols Ordered character vector to test against \code{x}'s colnames.
-#'
-#' @return Logical indicating if \code{x}'s colnames equals \code{choice}.
-#'
-#' @family assert functions
-#'
-#' @importFrom assertthat assert_that
-colnamesMatches <- function(x, cols) {
-  assert_that(
-    is.data.frame(x),
-    see_if(ncol(x) == length(cols),
-           msg = sprintf(
-             "Number of columns in %s must equal %i.",
-             deparse(substitute(x)),
-             length(cols)
-           )
-    )
-  )
-
-  columns_names <- colnames(x)
-  columns_test <- columns_names == cols
-  test <- all(columns_test)
-
-  return(test)
-}
-
-assertthat::on_failure(colnamesMatches) <- function(call, env) {
-  curr_colnames <- colnames(eval(call$x, envir = env))
-  future_colnames <- eval(call$cols, envir = env)
-  mask <- ! curr_colnames %in% future_colnames
-
-  sprintf("Columns: '%s' in %s should be named '%s'",
-           paste(curr_colnames[mask], collapse = "', '"),
-           deparse(call$x),
-           paste(future_colnames[mask], collapse = "', '")
-  )
-}
-
-#' Assert KIR counts data frame format
-#'
-#' \code{checkKirCallsFormat} asserts if KIR counts data frame have proper
-#' format.
-#'
-#' @param kir_calls Data frame containing KIR gene counts, as returned by
-#'   \code{\link{readKIRCalls}} function.
-#' @param accept.null Logical indicating if NULL \code{kir_calls} should be
-#'   accepted.
-#'
-#' @return Logical indicating if \code{kir_calls} follow KIR counts data frame
-#'   format. Otherwise raise error.
-#'
-#' @family assert functions
-#'
-#' @seealso \code{\link{readKIRCalls}}, \code{\link{getHlaKirInteractions}},
-#'   \code{\link{kirHaplotypeToCounts}}, \code{\link{prepareMiDAS}}.
-#'
-#' @importFrom assertthat assert_that see_if
-#' @examples
-#' file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-#' kir_calls <- readKIRCalls(file)
-#' checkKirCallsFormat(kir_calls)
-#'
-#' @export
-checkKirCallsFormat <- function(kir_calls,
-                                 accept.null = FALSE) {
-  if (! (is.null(kir_calls) & accept.null)) {
-    assert_that(
-      is.data.frame(kir_calls),
-      see_if(! any(vapply(kir_calls, is.factor, logical(length = 1))),
-             msg = paste0(deparse(substitute(kir_calls)), " can't contain factors")
-      ),
-      colnamesMatches(
-        kir_calls,
-        c(
-          "ID",
-          "KIR3DL3",
-          "KIR2DS2",
-          "KIR2DL2",
-          "KIR2DL3",
-          "KIR2DP1",
-          "KIR2DL1",
-          "KIR3DP1",
-          "KIR2DL4",
-          "KIR3DL1",
-          "KIR3DS1",
-          "KIR2DL5",
-          "KIR2DS3",
-          "KIR2DS5",
-          "KIR2DS4",
-          "KIR2DS1",
-          "KIR3DL2"
-        )
-      )
-    )
-  }
-
-  return(TRUE)
-}
-
-#' Check if object is count or NULL
-#'
-#' \code{isCountOrNULL} check if object is a count (a single positive integer)
-#' or NULL.
-#'
-#' @param x object to test.
-#'
-#' @return Logical indicating if object is count or NULL
-#'
-#' @family assert functions
-#'
-#' @importFrom assertthat is.count
-#'
-isCountOrNULL <- function(x) {
-  test <- is.count(x) | is.null(x)
-
-  return(test)
-}
-
-assertthat::on_failure(isCountOrNULL) <- function(call, env) {
-  paste0(deparse(call$x),
-         " is not a count (a single positive integer) or NULL."
-  )
-}
-
-#' Check if object is TRUE or FALSE flag
-#'
-#' \code{isTRUEorFALSE} check if object is a flag (a length one logical vector)
-#' except NA.
-#'
-#' @param x object to test.
-#'
-#' @return Logical indicating if object is TRUE or FALSE flag
-#'
-#' @family assert functions
-#'
-#' @importFrom assertthat is.flag
-#'
-isTRUEorFALSE <- function(x) {
-  test <- is.flag(x) && ! is.na(x)
-
-  return(test)
-}
-
-assertthat::on_failure(isTRUEorFALSE) <- function(call, env) {
-  paste0(deparse(call$x),
-         " is not a flag (a length one logical vector)."
-  )
-}
-
-#' Check if tidy method for class exist
-#'
-#' \code{hasTidyMethod} check if there is tidy method available for given class.
-#'
-#' @param class String giving object class.
-#'
-#' @return Logical indicating if there is tidy method for given class.
-#'
-#' @family assert functions
-#'
-#' @importFrom utils methods
-#'
-hasTidyMethod <- function(class) {
-  cl_fun <- paste0("tidy.", class)
-  test <- cl_fun %in% methods("tidy")
-
-  return(test)
-}
-
-assertthat::on_failure(hasTidyMethod) <- function(call, env) {
-  paste0("Could not find 'tidy' function for statistical model '",
-         eval(expr = call$class, envir = env),
-         "'. Please ensure that 'tidy' for selected model is available. See 'broom' package for more information on 'tidy' function."
-  )
-}
-
 #' Likelihood ratio test
 #'
-#' \code{LRTest} carry out asymptotic likelihood ratio test for two models.
+#' \code{LRTest} carry out an asymptotic likelihood ratio test for two models.
 #'
 #' \code{mod0} have to be a reduced version of \code{mod1}. See examples.
 #'
@@ -997,16 +355,10 @@ assertthat::on_failure(hasTidyMethod) <- function(call, env) {
 #' @return Data frame with the results of likelihood ratio test of the supplied
 #'   models.
 #'
-#'   Column \code{term} holds new variables apearing in \code{mod1},
+#'   Column \code{term} holds new variables appearing in \code{mod1},
 #'   \code{dof} difference in degrees of freedom between models, \code{logLik}
 #'   difference in log likelihoods, \code{statistic} \code{Chisq} statistic and
 #'   \code{p.value} corresponding p-value.
-#'
-#' @examples
-#' df <- data.frame(OS = c(20, 30, 40), AGE = c(50, 60, 70))
-#' mod0 <- lm(OS ~ 1, data = df)
-#' mod1 <- lm(OS ~ AGE, data = df)
-#' MiDAS:::LRTest(mod0, mod1)
 #'
 #' @importFrom assertthat assert_that
 #' @importFrom stats logLik pchisq
@@ -1042,45 +394,14 @@ LRTest <- function(mod0, mod1) {
   return(res)
 }
 
-#' Check if placeholder is present in object formula
-#'
-#' \code{isTRUEorFALSE} check if object is a flag (a length one logical vector)
-#' except NA.
-#'
-#' @param object statistical model to test.
-#' @param placeholder string specifying name of placeholder.
-#'
-#' @return Logical indicating if placeholder is present in object formula.
-#'
-#' @family assert functions
-#'
-objectHasPlaceholder <- function(object, placeholder) {
-  object_env <- attr(object$terms, ".Environment")
-  object_call <- getCall(object)
-  object_form <- object_call[["formula"]] %>%
-    eval(envir = object_env)
-  test <- placeholder %in% all.vars(object_form)
-
-  return(test)
-}
-
-assertthat::on_failure(objectHasPlaceholder) <- function(call, env) {
-  paste0("placeholder '",
-         eval(call$placeholder, envir = env),
-         "' could not be found in object's formula"
-  )
-}
-
 #' Get attributes of statistical model object
 #'
 #' \code{getObjectDetails} extracts some of the statistical model object
 #' attributes that are needed for \code{runMiDAS} internal calculations.
 #'
-#' TODO write unit tests
-#'
 #' @inheritParams checkStatisticalModel
 #'
-#' @return List with following elemnts:
+#' @return List with following elements:
 #' \describe{
 #'   \item{call}{Object's call}
 #'   \item{formula_vars}{Character containing names of variables in object
@@ -1106,80 +427,16 @@ getObjectDetails <- function(object) {
   return(object_details)
 }
 
-#' Assert colData data
-#'
-#' \code{checkColDataFormat} asserts if colData data frame has proper format.
-#'
-#' @param data_frame Data frame containing colData data used to construct
-#'   \code{\link{MiDAS}} object.
-#'
-#' @return Logical indicating if \code{data_frame} is properly formatted.
-#'   Otherwise raise error.
-#'
-#' @family assert functions
-#'
-#' @importFrom assertthat assert_that see_if
-#' @examples
-#' \dontrun{
-#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-#' pheno <- read.table(pheno_file, header = TRUE)
-#' checkColDataFormat(pheno)
-#' }
-#'
-checkColDataFormat <- function(data_frame) {
-  data_frame_name <- deparse(substitute(data_frame))
-  assert_that(
-    see_if(
-      is.data.frame(data_frame),
-      msg = sprintf("%s have to be a data frame",
-                    data_frame_name)
-    ),
-    see_if(
-      nrow(data_frame) >= 1 & ncol(data_frame) >= 2,
-      msg = sprintf("%s have to have at least 1 row and 2 columns",
-                    data_frame_name)
-    ),
-    see_if(
-      colnames(data_frame)[1] == "ID",
-      msg = sprintf(
-        "first column in %s must be named 'ID'",
-        data_frame_name
-      )
-    )
-  )
-
-  return(TRUE)
-}
-
-#' Check if function can be found in environment
-#'
-#' \code{functionExists} check if function exists
-#'
-#' @param name String giving name of function to check.
-#'
-#' @return Logical indicating if function exists.
-#'
-#' @family assert functions
-#'
-functionExists <- function(name) {
-  fun <- get0(name)
-  test <- is.function(fun)
-
-  return(test)
-}
-
-assertthat::on_failure(functionExists) <- function(call, env) {
-  sprintf("Function %s could not be found.", call$name)
-}
-
-
 #' Add variables frequencies to runMiDAS results
 #'
-#' This is a helper function
+#' Helper adding variables frequencies to statistical results. Additionally for
+#' binary test covariate frequencies per phenotype are added.
 #'
-#' @param midas MiDAS object
-#' @param experiment String
-#' @param test_covar String giving name of test covariate
+#' @param midas MiDAS object.
+#' @param experiment String specifying experiment from \code{midas}.
+#' @param test_covar String giving name of test covariate.
+#'
+#' @return Data frame
 #'
 #' @importFrom dplyr filter left_join rename select
 #' @importFrom magrittr %>%
@@ -1218,39 +475,11 @@ runMiDASGetVarsFreq <- function(midas, experiment, test_covar) {
   return(variables_freq)
 }
 
-#' Check if object is of class x
-#'
-#' \code{isClassOrNULL} checks if object is an instance of a specified class or
-#' is null.
-#'
-#' @param x object to test.
-#' @param class String specifying class to test.
-#'
-#' @return Logical indicating if \code{x} is an instance of \code{class}.
-#'
-#' @family assert functions
-#'
-#' @importFrom assertthat assert_that
-#' @importFrom methods is
-#'
-isClass <- function(x, class) {
-  test <- is(x, class)
-
-  return(test)
-}
-
-assertthat::on_failure(isClass) <- function(call, env) {
-  paste0(deparse(call$x),
-         " must be an instance of ",
-         deparse(call$class),
-         "."
-  )
-}
-
-#' Grantham distance
+#' Calculate Grantham distance between amino acid sequences
 #'
 #' \code{distGrantham} calculates normalized Grantham distance between two
-#' amino acid sequences.
+#' amino acid sequences. For details on calculations see
+#' \href{http://www.sciencemag.org/content/185/4154/862.long}{Grantham R. 1974.}.
 #'
 #' Distance between amino acid sequences is normalized by length of compared
 #' sequences.
@@ -1262,18 +491,11 @@ assertthat::on_failure(isClass) <- function(call, env) {
 #' @param aa2 Character vector giving amino acid sequence using one letter
 #'   codings. Each element must correspond to single amino acid.
 #'
-#' @return Integer normalized Grantham distance between \code{aa1} and \
-#'   code{aa2}.
-#'
-#' @examples
-#' distGrantham(
-#'   aa1 = c("A", "S", "W"),
-#'   aa2 = c("A", "S", "V")
-#' )
+#' @return Integer normalized Grantham distance between \code{aa1} and
+#'   \code{aa2}.
 #'
 #' @importFrom assertthat assert_that see_if
 #'
-#' @export
 distGrantham <- function(aa1, aa2) {
   assert_that(
     is.character(aa1),
@@ -1298,14 +520,11 @@ distGrantham <- function(aa1, aa2) {
   return(d)
 }
 
-#' Calculate Grantham disttance between alleles
+#' Calculate Grantham distance between HLA alleles
 #'
-#' \code{hlaCallsGranthamDistance} calculate distance between HLA alleles using
-#' distance of choice.
-#'
-#' The Grantham distance is calculated for pairs of alleles for HLA gene.
-#'
-#' In case of missing alleles \code{NA} are returned.
+#' \code{hlaCallsGranthamDistance} calculate Grantham distance between two HLA
+#' alleles of a given, using original formula by
+#' \href{http://www.sciencemag.org/content/185/4154/862.long}{Grantham R. 1974.}.
 #'
 #' Grantham distance is calculated only for class I HLA alleles. First
 #' exons forming the variable region in the peptide binding groove (i.e.,
@@ -1314,14 +533,16 @@ distGrantham <- function(aa1, aa2) {
 #' containing gaps, stop codons or indels are discarded. Finally distance is
 #' calculated for each pair.
 #'
+#' See \href{https://europepmc.org/article/med/28650991}{Robinson J. 2017.} for
+#' more details on the choice of exons 2 and 3.
+#'
 #' @inheritParams checkHlaCallsFormat
-#' @param genes Character vector spcifying genes for which allelic distance
+#' @param genes Character vector specifying genes for which allelic distance
 #'   should be calculated.
 #'
 #' @return Data frame of normalized Grantham distances between pairs of alleles
 #'   for each specified HLA gene. First column (\code{ID}) is the same as in
-#'   \code{hla_calls}, further columns are named as given by \code{genes} and
-#'   contain numeric values.
+#'   \code{hla_calls}, further columns are named as given by \code{genes}.
 #'
 #' @importFrom assertthat assert_that is.string noNA see_if
 #' @importFrom magrittr %>%
@@ -1329,9 +550,7 @@ distGrantham <- function(aa1, aa2) {
 #' @importFrom stats na.omit
 #'
 #' @examples
-#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-#' hla_calls <- readHlaCalls(file)
-#' hlaCallsGranthamDistance(hla_calls, genes = "A")
+#' hlaCallsGranthamDistance(MiDAS_tut_HLA, genes = "A")
 #'
 #' @export
 hlaCallsGranthamDistance <- function(hla_calls, genes = c("A", "B", "C")) {
@@ -1397,14 +616,14 @@ hlaCallsGranthamDistance <- function(hla_calls, genes = c("A", "B", "C")) {
   return(hla_dist)
 }
 
-#' Helper function alignment for Grantham distance calculations
+#' Helper function returning alignment for Grantham distance calculations
 #'
-#' \code{hlaAlignmentGrantham} get HLA alignment processed so that grantham
-#' distance between alleles can be calculated. Processing includes extracting
-#' exons 1 and 2, masking indels, gaps and stop codons.
+#' @param gene Character vector specifying HLA gene
+#' @param resolution Number giving allele resolution
 #'
-#' @param gene Character
-#' @param resolution Number
+#' @return HLA alignment processed for grantham distance between alleles can be
+#'   calculated. Processing includes extracting exons 1 and 2, masking indels,
+#'   gaps and stop codons.
 #'
 hlaAlignmentGrantham <- function(gene, resolution) {
   alignment <- readHlaAlignments(
@@ -1415,54 +634,8 @@ hlaAlignmentGrantham <- function(gene, resolution) {
   alignment <- alignment[, 2:182] # select exons 2 and 3 w/o 1st position as it is biased towards missing data
   mask <- apply(alignment, 1, function(x) any(x == "" | x == "X" | x == ".")) # mask gaps, stop codons, indels
   alignment <- alignment[! mask, ]
-}
 
-#' Validate frequency cutoffs
-#'
-#' \code{validateFrequencyCutoffs} checks if \code{lower_frequency_cutoff} and
-#' \code{upper_frequency_cutoff} are valid.
-#'
-#' \code{lower_frequency_cutoff} and \code{upper_frequency_cutoff} should be a
-#' positive numbers, giving either frequency or counts.
-#' \code{lower_frequency_cutoff} has to be lower than
-#' \code{upper_frequency_cutoff}.
-#'
-#' @param lower_frequency_cutoff Number
-#' @param upper_frequency_cutoff Number
-#'
-#' @return Logical indicating if \code{lower_frequency_cutoff} and
-#'   \code{upper_frequency_cutoff} are valid.
-#'
-#' @family assert functions
-#'
-#' @importFrom assertthat assert_that see_if
-#'
-validateFrequencyCutoffs <- function(lower_frequency_cutoff, upper_frequency_cutoff) {
-  assert_that(
-    isNumberOrNULL(lower_frequency_cutoff),
-    if (! is.null(lower_frequency_cutoff)) {
-      see_if(lower_frequency_cutoff >= 0,
-             msg = "lower_frequency_cutoff must be a number greater than 0."
-      )
-    } else TRUE,
-    isNumberOrNULL(upper_frequency_cutoff),
-    if (! is.null(upper_frequency_cutoff)) {
-      see_if(upper_frequency_cutoff >= 0,
-             msg = "upper_frequency_cutoff must be a number greater than 0."
-      )
-    } else TRUE,
-    if (! is.null(lower_frequency_cutoff) && ! is.null(upper_frequency_cutoff)) {
-      see_if(! lower_frequency_cutoff > upper_frequency_cutoff,
-             msg = "lower_frequency_cutoff cannot be higher than upper_frequency_cutoff."
-      )
-    } else TRUE,
-    if (! is.null(lower_frequency_cutoff) && ! is.null(upper_frequency_cutoff)) {
-      see_if((lower_frequency_cutoff <= 1 && upper_frequency_cutoff <= 1) ||
-               (lower_frequency_cutoff >= 1 && upper_frequency_cutoff >= 1),
-             msg = "Both lower_frequency_cutoff and upper_frequency_cutoff have to be either frequencies or counts."
-      )
-    } else TRUE
-  )
+  return(alignment)
 }
 
 #' Get HLA calls genes
@@ -1492,7 +665,7 @@ getHlaCallsGenes <- function(hla_calls) {
 #' Helper transform data frame to experiment matrix
 #'
 #' Function deletes 'ID' column from a \code{df}, then transpose it and sets
-#' the colum names to values from deleted 'ID' column.
+#' the column names to values from deleted 'ID' column.
 #'
 #' @param df Data frame
 #'
@@ -1513,7 +686,7 @@ dfToExperimentMat <- function(df) {
 
 #' Helper transform experiment matrix to data frame
 #'
-#' Function transpose \code{mat} and inserts colum names of input \code{mat} as
+#' Function transpose \code{mat} and inserts column names of input \code{mat} as
 #' a 'ID' column.
 #'
 #' @param mat Matrix
@@ -1535,18 +708,9 @@ experimentMatToDf <- function(mat) {
 }
 
 #' Transform MiDAS to wide format data.frame
-### TODO maybe anyReps check could be added to MiDAS validateObject and no duplicated rows is a must, maybe this is what is being checked here>?
-### check that ID column in colData corresponds to primary
-# 1. experiments are converted to long list, goal is to next combine it with primary IDs *
-# 2. here the primary IDs from sampleMap are added to longFormat experiment *
-# 3. combine assay and primary, clearly nonunique rownames are allowed * -- to tell the truth, we already impose that all input data have the same sample ids naming, so we should be safe with just skipping this steps and just duble check that it is imposible to go into state where experiment colnames are different from primary IDS
-# 4. spread to wide format with ID column => transpose
-# 5. Combine list into single data.frame add colData
-# 6. ordering and stuff, not very important
-#
 #'
 #' @param object Object of class MiDAS
-#' @param experiment Character
+#' @param experiment Character specifying experiments to include
 #'
 #' @return Data frame
 #'
@@ -1573,55 +737,34 @@ midasToWide <- function(object, experiment) {
       x %>%
         t() %>%
         as.data.frame(optional = TRUE) %>%
-        rownames_to_column(var = "ID") # In MiDAS ID corresponds to MAE primary
+        rownames_to_column(var = "ID")
     }
   )
   col_data <- colData(object) %>%
-    as.data.frame(optional = TRUE)
-  ex_list[[length(ex_list) + 1]] <- col_data
+    as.data.frame(optional = TRUE) %>%
+    rownames_to_column(var = "ID")
+  ex_list[[length(ex_list) + 1]] <- col_data # append
   wide_df <- Reduce(function(x, y) left_join(x, y, by = "ID"), ex_list)
 
   return(wide_df)
 }
 
-#' Check if frequencies can be calculated for an experiment
-#'
-#' \code{isExperimentCountsOrZeros} checks if experiment contains only positive
-#' integers or zeros.
-#'
-#' @param x Matrix or SummarizedExperiment object.
-#' @param na.rm Logical indicating if \code{NA} values should be accepted.
-#'
-#' @return Logical indicating if \code{x} contains only positive integers or
-#'   zeros.
-#'
-#' @family assert functions
-#'
-isExperimentCountsOrZeros <- function(x, na.rm = TRUE) {
-  test <- if (is.matrix(x)) {
-    isCountsOrZeros(x)
-  } else if (isClass(x, "SummarizedExperiment")) {
-    isCountsOrZeros(assay(x))
-  } else {
-    FALSE
-  }
-
-  return(test)
-}
-
 #' Check KIR genes format
 #'
-#' \code{checkKirGenesFormat} test if the input character contains correct KIR
-#' gene names
+#' \code{checkKirGenesFormat} test if the input character follows KIR gene names
+#' naming conventions.
 #'
-#' @param genes Character vector containing KIR gene names.
+#' KIR genes: "KIR3DL3", "KIR2DS2", "KIR2DL2", "KIR2DL3", "KIR2DP1", "KIR2DL1",
+#' "KIR3DP1", "KIR2DL1", "KIR3DP1", "KIR2DL4", "KIR3DL1", "KIR3DS1", "KIR2DL5",
+#' "KIR2DS3", "KIR2DS5", "KIR2DS4", "KIR2DS1", "KIR3DL2".
 #'
-#' @return Logical vector specifying if values of \code{genes} follows KIR genes
+#' @param genes Character vector with KIR gene names.
+#'
+#' @return Logical vector specifying if \code{genes} elements follows KIR genes
 #'   naming conventions.
 #'
 #' @examples
-#' genes <- c("KIR3DL3", "KIR2DS2", "KIR2DL2")
-#' checkKirGenesFormat(genes)
+#' checkKirGenesFormat(c("KIR3DL3", "KIR2DS2", "KIR2DL2"))
 #'
 #' @importFrom assertthat assert_that
 #' @importFrom stringi stri_detect_regex
@@ -1629,6 +772,7 @@ isExperimentCountsOrZeros <- function(x, na.rm = TRUE) {
 checkKirGenesFormat <- function(genes) {
   pattern <- "^KIR[0-9]{1}D[A-Z]{1}[0-9]{1}$"
   is_correct <- stri_detect_regex(genes, pattern)
+
   return(is_correct)
 }
 
@@ -1753,46 +897,16 @@ iterativeModel <- function(object,
   return(results)
 }
 
-#' Check if experiment is inheritance model applicable
+#' Helper transforming reference frequencies
 #'
-#' Helper function checking if for given experiment type inheritance model can
-#' be applied (eg. "hla_alleles") or not (eg. "hla_kir_interactions")
+#' @param ref Long format data frame with three columns "var", "population",
+#'   "frequency".
+#' @param pop Character giving names of populations to include
+#' @param carrier_frequency Logical indicating if carrier frequency should be
+#'   returned instead of frequency. Carrier frequency is calculated based on
+#'   Hardy-Weinberg equilibrium model.
 #'
-#' @param x String giving experiment type.
-#'
-#' @return Logical indicating if inheritance model can be applied.
-#'
-#' @family assert functions
-#'
-#' @importFrom assertthat assert_that
-#'
-isInheritanceModelApplicable <- function(x) {
-  im_applicable <- c("hla_alleles", "hla_aa", "hla_g_groups", "hla_supertypes", "hla_NK_ligands")
-  im_nonapplicable <- c("kir_genes", "hla_kir_interactions", "hla_divergence")
-  test <- if (x %in% im_applicable) {
-    TRUE
-  } else if (x %in% im_nonapplicable) {
-    FALSE
-  } else {
-    FALSE
-  }
-
-  return(test)
-}
-
-assertthat::on_failure(isInheritanceModelApplicable) <- function(call, env) {
-  paste0("Inheritance model can not be applied to experiment ",
-         deparse(call$x)
-  )
-}
-
-#' Get HLA allele frequencies in reference populations
-#'
-#' @param ref Data frame
-#' @param pop Character
-#' @param carrier_frequency Logical
-#'
-#' @return Data frame
+#' @return Wide format data frame with population frequencies as columns.
 #'
 #' @importFrom assertthat assert_that
 #' @importFrom dplyr filter select

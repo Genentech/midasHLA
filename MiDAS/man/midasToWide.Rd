@@ -9,7 +9,7 @@ midasToWide(object, experiment)
 \arguments{
 \item{object}{Object of class MiDAS}
 
-\item{experiment}{Character}
+\item{experiment}{Character specifying experiments to include}
 }
 \value{
 Data frame

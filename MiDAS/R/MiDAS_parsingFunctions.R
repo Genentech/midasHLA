@@ -1,14 +1,15 @@
-#' Read HLA allele calls data
+#' Read HLA allele calls
 #'
 #' \code{readHlaCalls} read HLA allele calls from file
 #'
-#' Input file have to be a tsv formatted table with header. First column should
-#' contain sample IDs, further columns should hold corresponding HLA allele
-#' numbers.
+#' Input file has to be a tsv formatted table with header. First column should
+#' contain sample IDs, further columns hold HLA allele numbers. See
+#' \code{system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")}
+#' for an example.
 #'
 #' \code{resolution} parameter can be used to reduce HLA allele numbers. If
 #' reduction is not needed \code{resolution} can be set to 8. \code{resolution}
-#' parameter can take following values: 2, 4, 6, 8. For more details
+#' parameter can take the following values: 2, 4, 6, 8. For more details
 #' about HLA allele numbers resolution see
 #' \url{http://hla.alleles.org/nomenclature/naming.html}.
 #'
@@ -16,7 +17,7 @@
 #' @inheritParams utils::read.table
 #' @param file Path to input file.
 #'
-#' @return Data frame containing HLA allele calls.
+#' @return HLA calls data frame.
 #'
 #' @examples
 #' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
@@ -84,7 +85,7 @@ readHlaCalls <- function(file,
 #' see
 #' \url{ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/alignments/README.md}.
 #'
-#' All protein alignment files from EBI database are shipped with the package.
+#' All protein alignment files from the EBI database are shipped with the package.
 #' They can be easily accessed using \code{gene} parameter. If \code{gene} is
 #' set to \code{NULL} file parameter is used instead and alignment is read from
 #' the provided file. In EBI database alignments for DRB1, DRB3, DRB4 and DRB5
@@ -260,17 +261,21 @@ readHlaAlignments <- function(file,
   return(aln)
 }
 
-#' Reads data table with KIR haplotypes calls
+#' Read KIR calls
 #'
-#' \code{readKiRCalls} reads table with KIR haplotypes calls from file.
+#' \code{readKiRCalls} read KIR calls from file.
 #'
-#' Input file have to be a tsv formatted table with two columns and header.
-#' First column should contain samples IDs, second column should hold
-#' corresponding KIR haplotypes.
+#' Input file has to be a tsv formatted table. First column should be named
+#' "ID" and contain samples IDs, second column should hold corresponding KIR
+#' haplotypes, further columns should hold KIR genes presence / absence
+#' indicators. See
+#' \code{system.file("extdata", "KPI_output_example.txt", package = "MiDAS")}
+#' for an example.
 #'
 #' @inheritParams utils::read.table
+#' @param file Path to input file.
 #'
-#' @return Data frame containing KIR gene counts.
+#' @return Data frame containing KIR gene's counts.
 #'
 #' @examples
 #' file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
@@ -279,7 +284,6 @@ readHlaAlignments <- function(file,
 #' @importFrom assertthat assert_that is.readable see_if
 #' @importFrom dplyr left_join select
 #' @importFrom stats na.omit setNames
-#'
 #' @export
 readKIRCalls <- function(file,
                          na.strings = c("", "NA", "uninterpretable")) {

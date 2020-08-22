@@ -10,8 +10,8 @@
 #' @inheritParams updateModel
 #' @param variables Character vector specifying variables to use in association
 #'   tests.
-#' @param placeholder String specyfing term in \code{object}'s formula which
-#'   should be substituted with an allele during analysis.
+#' @param placeholder String specifying term in \code{object}'s formula which
+#'   should be substituted with variables during analysis.
 #' @param correction String specifying multiple testing correction method. See
 #'   details for further information.
 #' @param n_correction Integer specifying number of comparisons to consider
@@ -24,43 +24,27 @@
 #'   regressions, but a bad idea if there is no log or logit link. Defaults to
 #'   FALSE.
 #'
-#' @return Tibble containing combined results for all alleles in
-#'   \code{hla_calls}.
-#'
-#' @family MiDAS statistical functions
-#' @seealso \code{\link[stats]{p.adjust}}, \code{\link[broom]{tidy}}
+#' @return Tibble containing combined results for all \code{variables}.
 #'
 #' @examples
-#' \dontrun{
-#' library("survival")
-#' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-#' hla_calls <- readHlaCalls(hla_calls_file)
-#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-#' pheno <- read.table(pheno_file, header = TRUE)
-#' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-#' covar <- read.table(covar_file, header = TRUE)
-#' midas_data <- prepareMiDAS(hla_calls = hla_calls,
-#'                                pheno = pheno,
-#'                                covar = covar,
-#'                                experiment = "hla_alleles",
-#'                                inheritance_model = "additive"
-#' )
+#' midas <- prepareMiDAS(hla_calls = MiDAS_tut_HLA,
+#'                       colData = MiDAS_tut_pheno,
+#'                       experiment = "hla_alleles")
 #'
-#' # Cox proportional hazards regression model
-#' ## define base model with response and covariates
-#' object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX + term, data = midas_data)
+#' # analyzeAssociations expects model data to be a data.frame
+#' midas_data <- as.data.frame(midas)
 #'
-#' ## test for alleles associations
+#' # define base model
+#' object <- lm(disease ~ term, data = midas_data)
+#'
+#' # test for alleles associations
 #' analyzeAssociations(object = object,
-#'                     variables = c("B*14:02", "DRB1*11:01")
-#' )
-#' }
+#'                     variables = c("B*14:02", "DRB1*11:01"))
 #'
 #' @importFrom assertthat assert_that see_if is.string
 #' @importFrom broom tidy
 #' @importFrom dplyr bind_rows
 #' @importFrom stats p.adjust
-#'
 #' @export
 analyzeAssociations <- function(object,
                                 variables,
@@ -118,58 +102,42 @@ analyzeAssociations <- function(object,
 #' adding the previous top-associated variable as covariate, until there is no
 #' more significant variables based on a self-defined threshold.
 #'
-#' Selection criteria is the p-value from the test on coefficients values.
-#'
 #' @inheritParams updateModel
 #' @inheritParams analyzeAssociations
-#' @param th Number specifying p-value threshold for a variable to be considered
+#' @param th Number specifying threshold for a variable to be considered
 #'   significant.
-#' @param th_adj Logical
+#' @param th_adj Logical flag indicating if adjusted p-value should be used as
+#'   threshold criteria, otherwise unadjusted p-value is used.
 #' @param keep Logical flag indicating if the output should be a list of results
 #'   resulting from each selection step. Default is to return only the final
 #'   result.
 #' @param rss_th Number specifying residual sum of squares threshold at which
 #'   function should stop adding additional variables. As the residual sum of
 #'   squares approaches \code{0} the perfect fit is obtained making further
-#'   attempts at variables selection nonsense, thus function is stopped. This
-#'   behavior can be controlled using \code{rss_th}.
+#'   attempts at variable selection nonsense. This behavior can be controlled
+#'   using \code{rss_th}.
 #'
 #' @return Tibble with stepwise conditional testing results.
 #'
-#' @family MiDAS statistical functions
-#' @seealso \code{\link[stats]{p.adjust}}, \code{\link[broom]{tidy}}
-#'
 #' @examples
-#' \dontrun{
-#' library("survival")
-#' hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-#' hla_calls <- readHlaCalls(hla_calls_file)
-#' pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-#' pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
-#' covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-#' covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-#' midas_data <- prepareMiDAS(hla_calls = hla_calls,
-#'                              pheno = pheno,
-#'                              covar = covar,
-#'                              experiment = "hla_alleles",
-#'                              inheritance_model = "additive"
-#' )
+#' midas <- prepareMiDAS(hla_calls = MiDAS_tut_HLA,
+#'                       colData = MiDAS_tut_pheno,
+#'                       experiment = "hla_alleles")
 #'
-#' ## define base model with covariates only
-#' object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX + term, data = midas_data)
+#' # analyzeConditionalAssociations expects model data to be a data.frame
+#' midas_data <- as.data.frame(midas)
+#'
+#' # define base model
+#' object <- lm(disease ~ term, data = midas_data)
 #' analyzeConditionalAssociations(object,
 #'                             variables = c("B*14:02", "DRB1*11:01"),
-#'                             th = 0.05,
-#'                             rss_th = 1e-07
-#' )
-#' }
+#'                             th = 0.05)
 #'
 #' @importFrom assertthat assert_that is.number is.string
 #' @importFrom dplyr bind_rows tibble
 #' @importFrom purrr map_dfr
 #' @importFrom rlang warn
 #' @importFrom stats formula resid
-#'
 #' @export
 analyzeConditionalAssociations <- function(object,
                                            variables,
@@ -286,20 +254,34 @@ analyzeConditionalAssociations <- function(object,
 #' Omnibus test
 #'
 #' \code{OmnibusTest} calculate overall p-value for linear combination of
-#' vairables using likelihood rato test.
+#' variables using likelihood ratio test.
 #'
 #' Likelihood ratio test is conducted by comparing model given in \code{object}
 #' with extended model, that is created by including effect of variables given
-#' in \code{variables} as thie linear combination.
+#' in \code{variables} as their linear combination.
 #'
 #' @inheritParams analyzeAssociations
-#' @param omnibus_groups List of character vectors
+#' @param omnibus_groups List of character vectors giving sets of variables for
+#'  which omnibus test should be applied.
 #'
 #' @return Data frame containing omnibus test results for specified variables.
 #'
+#' @examples
+#' midas <- prepareMiDAS(hla_calls = MiDAS_tut_HLA,
+#'                       colData = MiDAS_tut_pheno,
+#'                       experiment = "hla_aa")
+#'
+#' # define base model
+#' object <- lm(disease ~ term, data = midas)
+#' omnibusTest(object,
+#'             omnibus_groups = list(
+#'               A_29 = c("A_29_D", "A_29_A"),
+#'               A_43 = c("A_43_Q", "A_43_R")
+#'             ))
+#'
 #' @importFrom dplyr bind_cols
 #' @importFrom stats p.adjust
-#'
+#' @export
 omnibusTest <- function(object,
                         omnibus_groups,
                         placeholder = "term",
@@ -323,60 +305,78 @@ omnibusTest <- function(object,
 
 #' Run MiDAS statistical analysis
 #'
-#' \code{runMiDAS} perform association analysis on MiDAS data using mode and
-#' statistical model specified by user. Function is intended for use with
-#' \code{\link{prepareMiDAS}}. See examples section.
+#' \code{runMiDAS} perform association analysis on MiDAS data using statistical
+#' model of choice. Function is intended for use with \code{\link{prepareMiDAS}}.
+#' See examples section.
 #'
-#' \code{experiment} is used to select an experiment from \code{MiDAS} object
-#' associated with \code{object} using. In standard work flow data are first
-#' processed using \code{\link{prepareMiDAS}} creating experiments with
-#' transformed data for given \code{experiment}. Next user constructs the
-#' statistical model using function of choice (eg. \code{lm}. \code{coxph}).
-#' Than \code{runMiDAS} is used to evaluate specified model uder \code{mode}
-#' of choice. See the details of different \code{mode}'s implmenetions for
-#' more details.
+#' By default statistical analysis is performed iteratively on each variable in
+#' selected experiment. This is done by substituting \code{placeholder} in the
+#' \code{object}'s formula with each variable in the experiment.
+#'
+#' Setting \code{conditional} argument to \code{TRUE} will cause the statistical
+#' analysis to be performed in a stepwise conditional testing manner, adding the
+#' previous top-associated variable as a covariate to \code{object}'s formula.
+#' The analysis stops when there is no more significant variables, based on
+#' self-defined threshold (\code{th} argument). Either adjusted or unadjusted
+#' p-values can be used as the selection criteria, which is controlled using
+#' \code{th_adj} argument.
+#'
+#' Setting \code{omnibus} argument to \code{TRUE} will cause the statistical
+#' analysis to be performed iteratively on groups of variables (like residues at
+#' particular amino acid position) using likelihood ratio test.
 #'
 #' \code{correction} specifies p-value adjustment method to use, common choice
 #' is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
-#' \link[stats]{p.adjust}. Check there to get more details.
+#' \link[stats]{p.adjust}.
 #'
 #' @inheritParams analyzeAssociations
+#' @inheritParams analyzeConditionalAssociations
 #' @inheritParams filterByFrequency
+#' @inheritParams applyInheritanceModel
 #' @param experiment String indicating the experiment associated with
 #'   \code{object}'s \code{MiDAS} data to use. Valid values includes:
 #'   \code{"hla_alleles"}, \code{"hla_aa"}, \code{"hla_g_groups"},
 #'   \code{"hla_supertypes"}, \code{"hla_NK_ligands"}, \code{"kir_genes"},
-#'   \code{"hla_kir_interactions"}. See \code{link{prepareMiDAS}} for more
-#'   informations.
-#' @param conditional Logical flag,
-#' @param omnibus Logical flag.
-#' @param omnibus_groups_filter Character
-#' @param ... other arguments
+#'   \code{"hla_kir_interactions"}, \code{"hla_divergence"}, \code{"hla_het"}.
+#'   See \code{\link{prepareMiDAS}} for more information.
+#' @param conditional Logical flag indicating if conditional analysis should be
+#'   performed.
+#' @param omnibus Logical flag indicating if omnibus test should be used.
+#' @param omnibus_groups_filter Character vector specifying omnibus groups to
+#'   use.
 #'
 #' @return Tibble containing analysis results.
 #'
-#' @family MiDAS statistical functions
-#' @seealso \code{\link[stats]{p.adjust}}, \code{\link[broom]{tidy}}
-#'
 #' @examples
-#' \dontrun{
 #' # create MiDAS object
 #' midas <- prepareMiDAS(hla_calls = MiDAS_tut_HLA,
-#'                       kir_calls = MiDAS_tut_KIR,
 #'                       colData = MiDAS_tut_pheno,
-#'                       experiment = "hla_alleles"
+#'                       experiment = c("hla_alleles", "hla_aa")
 #' )
 #'
-#' # constructs statistical model
-#' object <- lm(disease ~ outcome + term, data = midas)
+#' # construct statistical model
+#' object <- lm(disease ~ term, data = midas)
 #'
 #' # run analysis
 #' runMiDAS(object, experiment = "hla_alleles", inheritance_model = "dominant")
-#' }
 #'
-#' @importFrom assertthat assert_that is.number is.string
-#' @importFrom rlang warn
+#' # omnibus test
+#' # omnibus_groups_filter argument can be used to restrict omnibus test only
+#' # to selected variables groups, here we restrict the analysis to HLA-A
+#' # positions 29 and 43.
+#' runMiDAS(
+#'   object,
+#'   experiment = "hla_aa",
+#'   inheritance_model = "dominant",
+#'   omnibus = TRUE,
+#'   omnibus_groups_filter = c("A_29", "A_43")
+#' )
 #'
+#' @importFrom assertthat assert_that is.number is.number is.string
+#' @importFrom dplyr arrange as_tibble bind_rows mutate rename select
+#' @importFrom magrittr %>%
+#' @importFrom stats formula
+#' @importFrom rlang call_modify warn !! :=
 #' @export
 runMiDAS <- function(object,
                      experiment,
@@ -476,19 +476,7 @@ runMiDAS <- function(object,
   return(results)
 }
 
-#' @rdname runMiDAS
-#'
-#' @title runMiDAS linear
-#'
-#' @details statistical analysis is performed iteratively
-#'   on each variable in selected experiment. This is done by substituting
-#'   \code{placeholder} in the \code{object}'s formula with each variable in the
-#'   experiment.
-#'
-#' @importFrom assertthat assert_that
-#' @importFrom dplyr arrange rename
-#' @importFrom rlang call_modify !! :=
-#'
+#
 runMiDAS_linear <- function(call,
                             midas,
                             experiment,
@@ -552,25 +540,7 @@ runMiDAS_linear <- function(call,
   return(results)
 }
 
-#' @rdname runMiDAS
-#'
-#' @title runMiDAS conditional
-#'
-#' @details statistical analysis is performed in a
-#'   stepwise conditional testing manner, adding the previous top-associated
-#'   variable as a covariate to \code{object}'s formula. The analysis stops
-#'   when there is no more siginifcant variabls, based on self-defined
-#'   threshold. The p-values of variables are used as the selection criteria.
-#'   This proces is reapeated for each variable available in the selected
-#'   experiment. This is done by substituting \code{placeholder} in the
-#'   \code{object}'s formula with each variable in the experiment.
-#'
-#' @inheritParams analyzeConditionalAssociations
-#'
-#' @importFrom assertthat assert_that
-#' @importFrom dplyr arrange rename bind_rows
-#' @importFrom rlang call_modify !! :=
-#'
+#
 runMiDAS_conditional <- function(call,
                                  midas,
                                  experiment,
@@ -662,23 +632,7 @@ runMiDAS_conditional <- function(call,
   return(results)
 }
 
-#' @rdname runMiDAS
-#'
-#' @title runMiDAS linear omnibus
-#'
-#' @details statistical analysis is performed iteratively on groups of variables
-#'   like residues at particular amino acid position, using likelyhood ratio
-#'   test. This is done by substituting \code{placeholder} in the
-#'   \code{object}'s formula with linear combination of variable in particular
-#'   group.
-#'
-#' @param object_details TODO
-#'
-#' @importFrom assertthat assert_that
-#' @importFrom dplyr as_tibble mutate select
-#' @importFrom magrittr %>%
-#' @importFrom rlang call_modify !! :=
-#'
+#
 runMiDAS_linear_omnibus <- function(call,
                                     midas,
                                     experiment,
@@ -742,25 +696,7 @@ runMiDAS_linear_omnibus <- function(call,
   return(results)
 }
 
-#' @rdname runMiDAS
-#'
-#' @title runMiDAS conditonal omnibus
-#'
-#' @details statistical analysis is performed iteratively on groups of variables
-#'   like residues at particular amino acid position, using likelyhood ratio
-#'   test. This is done by substituting \code{placeholder} in the
-#'   \code{object}'s formula with linear combination of variable in particular
-#'   group. In each iteration best variable from previous one is added to
-#'   formula.
-#'
-#' @param object_details TODO
-#'
-#' @importFrom assertthat assert_that is.number
-#' @importFrom dplyr arrange as_tibble mutate select
-#' @importFrom magrittr %>%
-#' @importFrom stats formula
-#' @importFrom rlang call_modify !! :=
-#'
+#
 runMiDAS_conditional_omnibus <- function(call,
                                     midas,
                                     experiment,
@@ -894,30 +830,56 @@ runMiDAS_conditional_omnibus <- function(call,
   return(results)
 }
 
-#' Test for Hardy Weinberg Equilibrium
+#' Test for Hardy Weinberg equilibrium
 #'
-#' Test HLA calls experiment (matrix) for Hardy Weinberg Equilibrium. This
-#' function \code{HWChisqStats} from \code{\link{HardyWeinberg}} package.
+#' Test experiment features for Hardy Weinberg equilibrium.
 #'
-#' @inheritParams stats::p.adjust
-#' @param X Matrix with genotype counts, with samples as columns and alleles as
-#'   rows.
+#' Setting \code{as.MiDAS} to \code{TRUE} will filter MiDAS object based on
+#' p-value cut-off given by \code{HWE_cutoff}.
 #'
-#' @return A vector of p-values
+#' @param object \code{\link{MiDAS}} object.
+#' @param experiment String specifying experiment to test. Valid values
+#'   includes \code{"hla_alleles"}, \code{"hla_aa"}, \code{"hla_g_groups"},
+#'   \code{"hla_supertypes"}, \code{"hla_NK_ligands"}.
+#' @param HWE_group Expression defining samples grouping to test for Hardy
+#'   Weinberg equilibrium. By default samples are not grouped.
+#' @param HWE_cutoff Number specifying p-value threshold. When \code{HWE_group}
+#'   is specified both groups are thresholded.
+#' @param as.MiDAS Logical flag indicating if MiDAS object should be returned.
+#'
+#' @return Data frame with Hardy Weinberg Equilibrium test results or a filtered
+#'   MiDAS object.
+#'
+#' @examples
+#' # create MiDAS object
+#' midas <- prepareMiDAS(hla_calls = MiDAS_tut_HLA,
+#'                       colData = MiDAS_tut_pheno,
+#'                       experiment = "hla_alleles"
+#' )
+#'
+#' # get HWE p-values as data frame
+#' HWETest(midas, experiment = "hla_alleles")
+#'
+#' # get HWE in groups defined by disease status
+#' # grouping by `disease == 1` will divide samples into two groups:
+#' # `disease == 1` and `not disease == 1`
+#' HWETest(midas, experiment = "hla_alleles", HWE_group = disease == 1)
+#'
+#' # filter MiDAS object by HWE test p-value
+#' HWETest(midas, experiment = "hla_alleles", HWE_cutoff = 0.05, as.MiDAS = TRUE)
 #'
 #' @importFrom assertthat assert_that is.string
 #' @importFrom stats p.adjust
 #' @importFrom methods validObject
 #' @importFrom MultiAssayExperiment colData
 #' @importFrom HardyWeinberg HWChisqStats
-#'
+#' @export
 HWETest <-
   function(object,
            experiment = c("hla_alleles", "hla_aa", "hla_g_groups", "hla_supertypes", "hla_NK_ligands"),
            HWE_group = NULL,
            HWE_cutoff = NULL,
            as.MiDAS = FALSE) {
-
     experiment_choice <- eval(formals()[["experiment"]])
     assert_that(
       validObject(object),

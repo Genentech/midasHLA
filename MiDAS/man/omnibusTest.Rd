@@ -11,10 +11,11 @@ omnibusTest(object, omnibus_groups, placeholder = "term",
 \item{object}{An existing fit from a model function such as lm, glm and many
 others.}
 
-\item{omnibus_groups}{List of character vectors}
+\item{omnibus_groups}{List of character vectors giving sets of variables for
+which omnibus test should be applied.}
 
-\item{placeholder}{String specyfing term in \code{object}'s formula which
-should be substituted with an allele during analysis.}
+\item{placeholder}{String specifying term in \code{object}'s formula which
+should be substituted with variables during analysis.}
 
 \item{correction}{String specifying multiple testing correction method. See
 details for further information.}
@@ -29,10 +30,24 @@ Data frame containing omnibus test results for specified variables.
 }
 \description{
 \code{OmnibusTest} calculate overall p-value for linear combination of
-vairables using likelihood rato test.
+variables using likelihood ratio test.
 }
 \details{
 Likelihood ratio test is conducted by comparing model given in \code{object}
 with extended model, that is created by including effect of variables given
-in \code{variables} as thie linear combination.
+in \code{variables} as their linear combination.
+}
+\examples{
+midas <- prepareMiDAS(hla_calls = MiDAS_tut_HLA,
+                      colData = MiDAS_tut_pheno,
+                      experiment = "hla_aa")
+
+# define base model
+object <- lm(disease ~ term, data = midas)
+omnibusTest(object,
+            omnibus_groups = list(
+              A_29 = c("A_29_D", "A_29_A"),
+              A_43 = c("A_43_Q", "A_43_R")
+            ))
+
 }

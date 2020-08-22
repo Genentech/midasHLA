@@ -7,7 +7,7 @@
 #'   \code{\link{readHlaCalls}} function.
 #'
 #' @return Logical indicating if \code{hla_calls} follows hla calls data frame
-#'   format. Otherwise raise error.
+#'   format. Otherwise raise an error.
 #'
 #' @importFrom assertthat assert_that see_if
 #'
@@ -48,7 +48,7 @@ checkHlaCallsFormat <- function(hla_calls) {
 #'   \code{\link{readKIRCalls}} function.
 #'
 #' @return Logical indicating if \code{kir_calls} follow KIR counts data frame
-#'   format. Otherwise raise error.
+#'   format. Otherwise raise an error.
 #'
 #' @importFrom assertthat assert_that see_if
 #'
@@ -120,7 +120,7 @@ isExperimentCountsOrZeros <- function(x, na.rm = TRUE) {
 #'
 #' @param x String giving experiment type.
 #'
-#' @return Logical indicating if inheritance model can be applied.
+#' @return Logical indicating if the inheritance model can be applied.
 #'
 #' @importFrom assertthat assert_that
 #'
@@ -147,14 +147,14 @@ assertthat::on_failure(isInheritanceModelApplicable) <- function(call, env) {
 #' Assert statistical model
 #'
 #' \code{checkStatisticalModel} asserts if object is an existing fit from a
-#' model function such as lm, glm and many others. Containing MiDAS object as
+#' model functions such as lm, glm and many others. Containing MiDAS object as
 #' its data atribute.
 #'
 #' @inheritParams updateModel
 #'
 #' @return Logical indicating if \code{object} is an existing fit from a
-#' model function such as lm, glm and many others. Containing MiDAS object as
-#' its data atribute. Otherwise raise error.
+#' model functions such as lm, glm and many others. Containing MiDAS object as
+#' its data attribute. Otherwise raise an error.
 #'
 #' @importFrom assertthat assert_that see_if
 #' @importFrom stats getCall
@@ -194,11 +194,11 @@ checkStatisticalModel <- function(object) {
 
 #' Check if tidy method for class exist
 #'
-#' \code{hasTidyMethod} check if there is tidy method available for given class.
+#' \code{hasTidyMethod} check if there is a tidy method available for a given class.
 #'
 #' @param class String giving object class.
 #'
-#' @return Logical indicating if there is tidy method for given class.
+#' @return Logical indicating if there is a tidy method for a given class.
 #'
 #' @family assert functions
 #'
@@ -246,7 +246,7 @@ assertthat::on_failure(isCountsOrZeros) <- function(call, env) {
 
 #' Check if object is character vector or NULL
 #'
-#' \code{isCharacterOrNULL} checks if object is character vector or NULL.
+#' \code{isCharacterOrNULL} checks if the object is a character vector or NULL.
 #'
 #' @param x object to test.
 #'
@@ -537,13 +537,13 @@ assertthat::on_failure(objectHasPlaceholder) <- function(call, env) {
 
 #' Assert colData data
 #'
-#' \code{checkColDataFormat} asserts if colData data frame has proper format.
+#' \code{checkColDataFormat} asserts if the colData data frame has proper format.
 #'
 #' @param data_frame Data frame containing colData data used to construct
 #'   \code{\link{MiDAS}} object.
 #'
 #' @return Logical indicating if \code{data_frame} is properly formatted.
-#'   Otherwise raise error.
+#'   Otherwise raise an error.
 #'
 #' @family assert functions
 #'

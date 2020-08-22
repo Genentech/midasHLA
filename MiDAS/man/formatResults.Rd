@@ -2,7 +2,7 @@
 % Please edit documentation in R/MiDAS_transformationFunctions.R
 \name{formatResults}
 \alias{formatResults}
-\title{Helper function for pretty formating statistical analysis results}
+\title{Pretty format statistical analysis results helper}
 \usage{
 formatResults(results, filter_by = "p.value <= 0.05",
   arrange_by = "p.value", select_cols = c("term", "estimate",
@@ -10,11 +10,11 @@ formatResults(results, filter_by = "p.value <= 0.05",
   header = NULL)
 }
 \arguments{
-\item{results}{Tibble as returned by \code{\link{analyzeAssociations}}.}
+\item{results}{Tibble as returned by \code{\link{runMiDAS}}.}
 
 \item{filter_by}{Character vector specifying conditional expression used to
 filter \code{results}, this is equivalent to \code{...} argument passed to
-\code{\link[dplyr]{filter}} except it has to be a character vector.}
+\code{\link[dplyr]{filter}}.}
 
 \item{arrange_by}{Character vector specifying variable names to use for
 sorting. Equivalent to \code{...} argument passed to
@@ -24,7 +24,7 @@ sorting. Equivalent to \code{...} argument passed to
 included in the output table. Can be also used to rename selected
 variables, see examples.}
 
-\item{format}{String with possible values \code{"latex"} and \code{"html"}.}
+\item{format}{String \code{"latex"} or \code{"html"}.}
 
 \item{header}{String specifying header for result table. If \code{NULL}
 no header is added.}
@@ -37,24 +37,16 @@ Character vector of formatted table source code.
 latex format.
 }
 \examples{
-\dontrun{
-hla_calls <- readHlaCalls(system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS"))
-pheno <- read.table(
-  system.file("extdata", "pheno_example.txt", package = "MiDAS"),
-  header = TRUE)
-midas_data <- prepareMiDAS(hla_calls, pheno, analysis_type = "hla_alleles")
-object <- lm(OS ~ 1 + term, data = midas_data)
-res <- analyzeAssociations(object, variables = colnames(midas_data)[-1])
+midas <- prepareMiDAS(hla_calls = MiDAS_tut_HLA,
+                      colData = MiDAS_tut_pheno,
+                      experiment = "hla_alleles")
+object <- lm(disease ~ term, data = midas)
+res <- runMiDAS(object, experiment = "hla_alleles")
 formatResults(res,
               filter_by = c("p.value <= 0.05", "estimate > 0"),
               arrange_by = c("p.value * estimate"),
-              select_cols = c("allele" = "term", "p.value"),
+              select_cols = c("allele", "p-value" = "p.value"),
               format = "html",
               header = "HLA allelic associations")
-}
 
-}
-\seealso{
-\code{\link{runMiDAS}}, \code{\link{analyzeAssociations}},
-  \code{\link{analyzeConditionalAssociations}}.
 }

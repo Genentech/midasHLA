@@ -7,7 +7,8 @@
 prepareMiDAS_hla_aa(hla_calls, indels = TRUE, unkchar = FALSE, ...)
 }
 \arguments{
-\item{hla_calls}{Data frame}
+\item{hla_calls}{HLA calls data frame, as returned by
+\code{\link{readHlaCalls}} function.}
 
 \item{indels}{Logical indicating whether indels should be considered when
 checking variability.}
@@ -21,7 +22,5 @@ should be considered when checking variability.}
 Matrix
 }
 \description{
-\code{hla_calls} are first converted to amino acid level, taking only
-variable positions under consideration. Than variable amino acid positions
-are transformed to counts.
+Prepare MiDAS data on HLA amino acid level
 }

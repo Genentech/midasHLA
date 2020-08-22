@@ -19,7 +19,7 @@ of the mature protein.}
 \item{unkchar}{Character to be used to represent positions with unknown
 sequence.}
 
-\item{resolution}{Numeric vector of length one specifying output resolution.}
+\item{resolution}{Number specifying desired resolution.}
 }
 \value{
 Matrix containing HLA allele alignments.
@@ -38,7 +38,7 @@ HLA allele alignment file should follow EBI database format, for details
 see
 \url{ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/alignments/README.md}.
 
-All protein alignment files from EBI database are shipped with the package.
+All protein alignment files from the EBI database are shipped with the package.
 They can be easily accessed using \code{gene} parameter. If \code{gene} is
 set to \code{NULL} file parameter is used instead and alignment is read from
 the provided file. In EBI database alignments for DRB1, DRB3, DRB4 and DRB5

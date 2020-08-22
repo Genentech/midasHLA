@@ -4,7 +4,7 @@
 \alias{getExperimentFrequencies}
 \alias{getExperimentFrequencies.matrix}
 \alias{getExperimentFrequencies.SummarizedExperiment}
-\title{Calculate variables frequencies TODO}
+\title{Calculate experiment's features frequencies}
 \usage{
 getExperimentFrequencies(experiment, carrier_frequency = FALSE,
   ref = NULL)
@@ -13,30 +13,22 @@ getExperimentFrequencies(experiment, carrier_frequency = FALSE,
   carrier_frequency = FALSE, ref = NULL)
 
 \method{getExperimentFrequencies}{SummarizedExperiment}(experiment,
-  carrier_frequency = TRUE)
+  carrier_frequency = TRUE, ref = NULL)
 }
 \arguments{
-\item{experiment}{Matrix}
+\item{experiment}{Matrix or SummarizedExperiment object.}
 
-\item{type}{String "allele_frequency" or "carrier_frequency"}
+\item{carrier_frequency}{Logical flag indicating if carrier frequency should
+be returned.}
+
+\item{ref}{Wide format data frame with first column named "var" holding
+features matching \code{experiment} and specific populations frequencies in
+following columns. See \code{\link{getReferenceFrequencies}} for more
+details.}
 }
 \value{
-Data frame containing variables, its corresponding total counts
-  and frequencies.
+Data frame containing variables and their corresponding frequencies.
 }
 \description{
-\code{getExperimentFrequencies} calculate variables frequencies based on counts
-table, such as produced by \code{\link{hlaCallsToCounts}}.
-}
-\details{
-Variables frequencies are counted in reference to sample size, depending on
-the inheritance model under which the counts table has been generated one
-might need to take under consideration both gene copies. Here sample size is
-assumed to be depended on both gene copies for \code{"additive"} inheritance
-model (`n / (2 * j)` where `n` is the number of term occurrences and `j`
-is the sample size). For other models the sample size is taken as is
-(`n / j`).
-}
-\seealso{
-\code{\link{hlaCallsToCounts}}
+\code{getExperimentFrequencies} calculate features frequencies.
 }

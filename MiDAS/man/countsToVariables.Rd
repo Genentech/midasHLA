@@ -2,7 +2,7 @@
 % Please edit documentation in R/MiDAS_transformationFunctions.R
 \name{countsToVariables}
 \alias{countsToVariables}
-\title{Convert counts data frame according to match table}
+\title{Convert counts table to variables}
 \usage{
 countsToVariables(counts, dictionary, na.value = NA, nacols.rm = TRUE)
 }
@@ -12,23 +12,21 @@ countsToVariables(counts, dictionary, na.value = NA, nacols.rm = TRUE)
 samples IDs, following columns should contain counts (natural numbers
 including zero).}
 
-\item{dictionary}{Path to the file containing variables matchings or data
-frame providing this information. See details for further explanations.}
+\item{dictionary}{Path to file containing variables dictionary or data
+frame. See details for further explanations.}
 
-\item{na.value}{Vector of length one speciyfing value for variables for which
-no matching is found in \code{counts}. Default behaviour is to mark such
-instances with \code{NA}.}
+\item{na.value}{Vector of length one speciyfing value for variables with no
+matching entry in \code{dictionary}. Default is to use \code{0}.}
 
-\item{nacols.rm}{logical indicating if result columns that contain only
+\item{nacols.rm}{Logical indicating if result columns that contain only
 \code{NA} should be removed.}
 }
 \value{
-Data frame of indicators for new variables, with \code{1} signaling
-  presence of variable and \code{0} absence.
+Data frame of indicators for new variables, with \code{1} and
+  \code{0} signaling presence and  absence of a variable respectively.
 }
 \description{
-\code{countsToVariables} convert counts data frame to variables based on
-match table (dictionary).
+\code{countsToVariables} converts counts table to additional variables.
 }
 \details{
 \code{dictionary} file should be a tsv format with header and two columns.
@@ -41,7 +39,7 @@ in the same manner can be passed instead.
 Dictionaries shipped with the package:
 \describe{
   \item{\code{hla_kir_interactions}}{
-    HLA - KIR interactions based on Pende et al., 2019.
+    HLA - KIR interactions based on \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6558367/}{Pende et al., 2019.}
   }
   \item{\code{kir_haplotypes}}{
     KIR genes to KIR haplotypes dictionary.
@@ -49,8 +47,6 @@ Dictionaries shipped with the package:
 }
 }
 \examples{
-file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-kir_counts <- readKIRCalls(file)
-countsToVariables(kir_counts, "kir_haplotypes")
+countsToVariables(MiDAS_tut_KIR, "kir_haplotypes")
 
 }

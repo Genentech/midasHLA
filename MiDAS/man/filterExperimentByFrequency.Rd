@@ -8,14 +8,21 @@ filterExperimentByFrequency(experiment, carrier_frequency = FALSE,
   lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL)
 }
 \arguments{
-\item{experiment}{Matrix}
+\item{experiment}{Matrix or SummarizedExperiment object.}
 
-\item{lower_frequency_cutoff}{Number of positive value or \code{NULL}}
+\item{carrier_frequency}{Logical flag indicating if carrier frequency should
+be returned.}
 
-\item{upper_frequency_cutoff}{Number of positive value or \code{NULL}}
+\item{lower_frequency_cutoff}{Positive number or \code{NULL}. Numbers greater
+than 1 are interpreted as number of feature occurrences, numbers between 0
+and 1 as fractions.}
+
+\item{upper_frequency_cutoff}{Positive number or \code{NULL}. Numbers greater
+than 1 are interpreted as number of feature occurrences, numbers between 0
+and 1 as fractions.}
 }
 \value{
-Matrix
+Filtered experiment matrix.
 }
 \description{
 Helper function for experiments filtering

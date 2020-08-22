@@ -11,7 +11,7 @@ getObjectDetails(object)
 others.}
 }
 \value{
-List with following elemnts:
+List with following elements:
 \describe{
   \item{call}{Object's call}
   \item{formula_vars}{Character containing names of variables in object
@@ -22,7 +22,4 @@ List with following elemnts:
 \description{
 \code{getObjectDetails} extracts some of the statistical model object
 attributes that are needed for \code{runMiDAS} internal calculations.
-}
-\details{
-TODO write unit tests
 }

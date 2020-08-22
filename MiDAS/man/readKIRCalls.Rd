@@ -2,31 +2,12 @@
 % Please edit documentation in R/MiDAS_parsingFunctions.R
 \name{readKIRCalls}
 \alias{readKIRCalls}
-\title{Reads data table with KIR haplotypes calls}
+\title{Read KIR calls}
 \usage{
 readKIRCalls(file, na.strings = c("", "NA", "uninterpretable"))
 }
 \arguments{
-\item{file}{the name of the file which the data are to be read from.
-    Each row of the table appears as one line of the file.  If it does
-    not contain an \emph{absolute} path, the file name is
-    \emph{relative} to the current working directory,
-    \code{\link{getwd}()}. Tilde-expansion is performed where supported.
-    This can be a compressed file (see \code{\link{file}}).
-
-    Alternatively, \code{file} can be a readable text-mode
-    \link{connection} (which will be opened for reading if
-    necessary, and if so \code{\link{close}}d (and hence destroyed) at
-    the end of the function call).  (If \code{\link{stdin}()} is used,
-    the prompts for lines may be somewhat confusing.  Terminate input
-    with a blank line or an EOF signal, \code{Ctrl-D} on Unix and
-    \code{Ctrl-Z} on Windows.  Any pushback on \code{stdin()} will be
-    cleared before return.)
-
-    \code{file} can also be a complete URL.  (For the supported URL
-    schemes, see the \sQuote{URLs} section of the help for
-    \code{\link{url}}.)
-  }
+\item{file}{Path to input file.}
 
 \item{na.strings}{a character vector of strings which are to be
     interpreted as \code{\link{NA}} values.  Blank fields are also
@@ -36,15 +17,18 @@ readKIRCalls(file, na.strings = c("", "NA", "uninterpretable"))
     values may need their own white space stripped in advance.}
 }
 \value{
-Data frame containing KIR gene counts.
+Data frame containing KIR gene's counts.
 }
 \description{
-\code{readKiRCalls} reads table with KIR haplotypes calls from file.
+\code{readKiRCalls} read KIR calls from file.
 }
 \details{
-Input file have to be a tsv formatted table with two columns and header.
-First column should contain samples IDs, second column should hold
-corresponding KIR haplotypes.
+Input file has to be a tsv formatted table. First column should be named
+"ID" and contain samples IDs, second column should hold corresponding KIR
+haplotypes, further columns should hold KIR genes presence / absence
+indicators. See
+\code{system.file("extdata", "KPI_output_example.txt", package = "MiDAS")}
+for an example.
 }
 \examples{
 file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")

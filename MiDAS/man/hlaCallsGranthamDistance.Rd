@@ -2,42 +2,39 @@
 % Please edit documentation in R/MiDAS_utils.R
 \name{hlaCallsGranthamDistance}
 \alias{hlaCallsGranthamDistance}
-\title{Calculate Grantham disttance between alleles}
+\title{Calculate Grantham distance between HLA alleles}
 \usage{
 hlaCallsGranthamDistance(hla_calls, genes = c("A", "B", "C"))
 }
 \arguments{
-\item{hla_calls}{Data frame containing HLA allele calls, as return by
+\item{hla_calls}{HLA calls data frame, as returned by
 \code{\link{readHlaCalls}} function.}
 
-\item{genes}{Character vector spcifying genes for which allelic distance
+\item{genes}{Character vector specifying genes for which allelic distance
 should be calculated.}
 }
 \value{
 Data frame of normalized Grantham distances between pairs of alleles
   for each specified HLA gene. First column (\code{ID}) is the same as in
-  \code{hla_calls}, further columns are named as given by \code{genes} and
-  contain numeric values.
+  \code{hla_calls}, further columns are named as given by \code{genes}.
 }
 \description{
-\code{hlaCallsGranthamDistance} calculate distance between HLA alleles using
-distance of choice.
+\code{hlaCallsGranthamDistance} calculate Grantham distance between two HLA
+alleles of a given, using original formula by
+\href{http://www.sciencemag.org/content/185/4154/862.long}{Grantham R. 1974.}.
 }
 \details{
-The Grantham distance is calculated for pairs of alleles for HLA gene.
-
-In case of missing alleles \code{NA} are returned.
-
 Grantham distance is calculated only for class I HLA alleles. First
 exons forming the variable region in the peptide binding groove (i.e.,
 exon 2 and 3) are selected (positions 1-182 in IMGT/HLA alignments, however
 here we take 2-182 as many 1st positions are missing). Then all the alleles
 containing gaps, stop codons or indels are discarded. Finally distance is
 calculated for each pair.
+
+See \href{https://europepmc.org/article/med/28650991}{Robinson J. 2017.} for
+more details on the choice of exons 2 and 3.
 }
 \examples{
-file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-hla_calls <- readHlaCalls(file)
-hlaCallsGranthamDistance(hla_calls, genes = "A")
+hlaCallsGranthamDistance(MiDAS_tut_HLA, genes = "A")
 
 }

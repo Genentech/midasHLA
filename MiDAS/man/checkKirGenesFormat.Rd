@@ -7,18 +7,22 @@
 checkKirGenesFormat(genes)
 }
 \arguments{
-\item{genes}{Character vector containing KIR gene names.}
+\item{genes}{Character vector with KIR gene names.}
 }
 \value{
-Logical vector specifying if values of \code{genes} follows KIR genes
+Logical vector specifying if \code{genes} elements follows KIR genes
   naming conventions.
 }
 \description{
-\code{checkKirGenesFormat} test if the input character contains correct KIR
-gene names
+\code{checkKirGenesFormat} test if the input character follows KIR gene names
+naming conventions.
+}
+\details{
+KIR genes: "KIR3DL3", "KIR2DS2", "KIR2DL2", "KIR2DL3", "KIR2DP1", "KIR2DL1",
+"KIR3DP1", "KIR2DL1", "KIR3DP1", "KIR2DL4", "KIR3DL1", "KIR3DS1", "KIR2DL5",
+"KIR2DS3", "KIR2DS5", "KIR2DS4", "KIR2DS1", "KIR3DL2".
 }
 \examples{
-genes <- c("KIR3DL3", "KIR2DS2", "KIR2DL2")
-checkKirGenesFormat(genes)
+checkKirGenesFormat(c("KIR3DL3", "KIR2DS2", "KIR2DL2"))
 
 }

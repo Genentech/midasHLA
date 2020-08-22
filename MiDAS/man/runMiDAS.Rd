@@ -2,34 +2,14 @@
 % Please edit documentation in R/MiDAS_stats.R
 \name{runMiDAS}
 \alias{runMiDAS}
-\alias{runMiDAS_linear}
-\alias{runMiDAS_conditional}
-\alias{runMiDAS_linear_omnibus}
-\alias{runMiDAS_conditional_omnibus}
 \title{Run MiDAS statistical analysis}
 \usage{
 runMiDAS(object, experiment, inheritance_model = NULL,
   conditional = FALSE, omnibus = FALSE, omnibus_groups_filter = NULL,
   lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL,
   correction = "bonferroni", n_correction = NULL,
-  exponentiate = FALSE, ...)
-
-runMiDAS_linear(call, midas, experiment, test_covar,
-  correction = "bonferroni", n_correction = NULL,
-  exponentiate = FALSE, ...)
-
-runMiDAS_conditional(call, midas, experiment, test_covar,
-  correction = "bonferroni", n_correction = NULL,
   exponentiate = FALSE, th = 0.05, th_adj = TRUE, keep = FALSE,
-  rss_th = 1e-07, ...)
-
-runMiDAS_linear_omnibus(call, midas, experiment, test_covar,
-  correction = "bonferroni", n_correction = NULL,
-  exponentiate = FALSE, ...)
-
-runMiDAS_conditional_omnibus(call, midas, experiment, test_covar,
-  correction = "bonferroni", n_correction = NULL, keep = FALSE, th,
-  rss_th = 1e-07, exponentiate = FALSE, ...)
+  rss_th = 1e-07)
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many
@@ -39,18 +19,28 @@ others.}
 \code{object}'s \code{MiDAS} data to use. Valid values includes:
 \code{"hla_alleles"}, \code{"hla_aa"}, \code{"hla_g_groups"},
 \code{"hla_supertypes"}, \code{"hla_NK_ligands"}, \code{"kir_genes"},
-\code{"hla_kir_interactions"}. See \code{link{prepareMiDAS}} for more
-informations.}
+\code{"hla_kir_interactions"}, \code{"hla_divergence"}, \code{"hla_het"}.
+See \code{\link{prepareMiDAS}} for more information.}
 
-\item{conditional}{Logical flag,}
+\item{inheritance_model}{String specifying inheritance model to use.
+Available choices are \code{"dominant"}, \code{"recessive"},
+\code{"additive"}.}
 
-\item{omnibus}{Logical flag.}
+\item{conditional}{Logical flag indicating if conditional analysis should be
+performed.}
 
-\item{omnibus_groups_filter}{Character}
+\item{omnibus}{Logical flag indicating if omnibus test should be used.}
 
-\item{lower_frequency_cutoff}{Number}
+\item{omnibus_groups_filter}{Character vector specifying omnibus groups to
+use.}
 
-\item{upper_frequency_cutoff}{Number}
+\item{lower_frequency_cutoff}{Number giving lower frequency threshold.
+Numbers greater than 1 are interpreted as number of feature occurrences,
+numbers between 0 and 1 as fractions.}
+
+\item{upper_frequency_cutoff}{Number giving upper frequency threshold.
+Numbers greater than 1 are interpreted as number of feature occurrences,
+numbers between 0 and 1 as fractions.}
 
 \item{correction}{String specifying multiple testing correction method. See
 details for further information.}
@@ -66,12 +56,11 @@ the coefficient estimates. Internally this is passed to
 regressions, but a bad idea if there is no log or logit link. Defaults to
 FALSE.}
 
-\item{...}{other arguments}
-
-\item{th}{Number specifying p-value threshold for a variable to be considered
+\item{th}{Number specifying threshold for a variable to be considered
 significant.}
 
-\item{th_adj}{Logical}
+\item{th_adj}{Logical flag indicating if adjusted p-value should be used as
+threshold criteria, otherwise unadjusted p-value is used.}
 
 \item{keep}{Logical flag indicating if the output should be a list of results
 resulting from each selection step. Default is to return only the final
@@ -80,83 +69,61 @@ result.}
 \item{rss_th}{Number specifying residual sum of squares threshold at which
 function should stop adding additional variables. As the residual sum of
 squares approaches \code{0} the perfect fit is obtained making further
-attempts at variables selection nonsense, thus function is stopped. This
-behavior can be controlled using \code{rss_th}.}
-
-\item{object_details}{TODO}
-
-\item{object_details}{TODO}
+attempts at variable selection nonsense. This behavior can be controlled
+using \code{rss_th}.}
 }
 \value{
 Tibble containing analysis results.
 }
 \description{
-\code{runMiDAS} perform association analysis on MiDAS data using mode and
-statistical model specified by user. Function is intended for use with
-\code{\link{prepareMiDAS}}. See examples section.
+\code{runMiDAS} perform association analysis on MiDAS data using statistical
+model of choice. Function is intended for use with \code{\link{prepareMiDAS}}.
+See examples section.
 }
 \details{
-\code{experiment} is used to select an experiment from \code{MiDAS} object
-associated with \code{object} using. In standard work flow data are first
-processed using \code{\link{prepareMiDAS}} creating experiments with
-transformed data for given \code{experiment}. Next user constructs the
-statistical model using function of choice (eg. \code{lm}. \code{coxph}).
-Than \code{runMiDAS} is used to evaluate specified model uder \code{mode}
-of choice. See the details of different \code{mode}'s implmenetions for
-more details.
+By default statistical analysis is performed iteratively on each variable in
+selected experiment. This is done by substituting \code{placeholder} in the
+\code{object}'s formula with each variable in the experiment.
+
+Setting \code{conditional} argument to \code{TRUE} will cause the statistical
+analysis to be performed in a stepwise conditional testing manner, adding the
+previous top-associated variable as a covariate to \code{object}'s formula.
+The analysis stops when there is no more significant variables, based on
+self-defined threshold (\code{th} argument). Either adjusted or unadjusted
+p-values can be used as the selection criteria, which is controlled using
+\code{th_adj} argument.
+
+Setting \code{omnibus} argument to \code{TRUE} will cause the statistical
+analysis to be performed iteratively on groups of variables (like residues at
+particular amino acid position) using likelihood ratio test.
 
 \code{correction} specifies p-value adjustment method to use, common choice
 is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
-\link[stats]{p.adjust}. Check there to get more details.
-
-statistical analysis is performed iteratively
-  on each variable in selected experiment. This is done by substituting
-  \code{placeholder} in the \code{object}'s formula with each variable in the
-  experiment.
-
-statistical analysis is performed in a
-  stepwise conditional testing manner, adding the previous top-associated
-  variable as a covariate to \code{object}'s formula. The analysis stops
-  when there is no more siginifcant variabls, based on self-defined
-  threshold. The p-values of variables are used as the selection criteria.
-  This proces is reapeated for each variable available in the selected
-  experiment. This is done by substituting \code{placeholder} in the
-  \code{object}'s formula with each variable in the experiment.
-
-statistical analysis is performed iteratively on groups of variables
-  like residues at particular amino acid position, using likelyhood ratio
-  test. This is done by substituting \code{placeholder} in the
-  \code{object}'s formula with linear combination of variable in particular
-  group.
-
-statistical analysis is performed iteratively on groups of variables
-  like residues at particular amino acid position, using likelyhood ratio
-  test. This is done by substituting \code{placeholder} in the
-  \code{object}'s formula with linear combination of variable in particular
-  group. In each iteration best variable from previous one is added to
-  formula.
+\link[stats]{p.adjust}.
 }
 \examples{
-\dontrun{
 # create MiDAS object
 midas <- prepareMiDAS(hla_calls = MiDAS_tut_HLA,
-                      kir_calls = MiDAS_tut_KIR,
                       colData = MiDAS_tut_pheno,
-                      experiment = "hla_alleles"
+                      experiment = c("hla_alleles", "hla_aa")
 )
 
-# constructs statistical model
-object <- lm(disease ~ outcome + term, data = midas)
+# construct statistical model
+object <- lm(disease ~ term, data = midas)
 
 # run analysis
 runMiDAS(object, experiment = "hla_alleles", inheritance_model = "dominant")
-}
+
+# omnibus test
+# omnibus_groups_filter argument can be used to restrict omnibus test only
+# to selected variables groups, here we restrict the analysis to HLA-A
+# positions 29 and 43.
+runMiDAS(
+  object,
+  experiment = "hla_aa",
+  inheritance_model = "dominant",
+  omnibus = TRUE,
+  omnibus_groups_filter = c("A_29", "A_43")
+)
 
 }
-\seealso{
-\code{\link[stats]{p.adjust}}, \code{\link[broom]{tidy}}
-
-Other MiDAS statistical functions: \code{\link{analyzeAssociations}},
-  \code{\link{analyzeConditionalAssociations}}
-}
-\concept{MiDAS statistical functions}

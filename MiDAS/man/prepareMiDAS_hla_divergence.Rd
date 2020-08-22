@@ -7,7 +7,8 @@
 prepareMiDAS_hla_divergence(hla_calls, ...)
 }
 \arguments{
-\item{hla_calls}{Data frame}
+\item{hla_calls}{HLA calls data frame, as returned by
+\code{\link{readHlaCalls}} function.}
 
 \item{...}{Not used}
 }
@@ -15,7 +16,5 @@ prepareMiDAS_hla_divergence(hla_calls, ...)
 Matrix
 }
 \description{
-Distances between Class I alleles are calculated using Grantham distance,
-as implemented in \code{hlaCallsGranthamDistance} function. Additionally
-average distance in Class I genese is calculated.
+Prepare MiDAS data on HLA divergence level
 }

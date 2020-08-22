@@ -11,10 +11,10 @@ iterativeLRT(object, placeholder, omnibus_groups)
 others.}
 
 \item{placeholder}{String specifying term to substitute with value from
-\code{x}. If more than one variable is passed in \code{x} all of them will
-be bracketed. Ignored if set to \code{NULL}.}
+\code{x}. Ignored if set to \code{NULL}.}
 
-\item{omnibus_groups}{List of character vectors}
+\item{omnibus_groups}{List of character vectors giving sets of variables for
+which omnibus test should be applied.}
 }
 \value{
 Data.frame containing summarised likelihood ratio test results.

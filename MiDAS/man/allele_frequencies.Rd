@@ -6,14 +6,9 @@
 \title{Alleles frequencies scraped from allelefrequencies.net in wide format}
 \format{A data frame with 2096 rows and 8 variables:
 \describe{
-  \item{allele}{allele number, character}
-  \item{African American}{allele frequency in general reference population, float}
-  \item{Amerindian}{allele frequency in general reference population, float}
-  \item{Chinese}{allele frequency in general reference population, float}
-  \item{European Caucasian}{allele frequency in general reference population, float}
-  \item{Hispanic}{allele frequency in general reference population, float}
-  \item{Indian}{allele frequency in general reference population, float}
-  \item{Japanese}{allele frequency in general reference population, float}
+  \item{var}{allele number, character}
+  \item{population}{reference population name, character}
+  \item{frequency}{allele frequency in reference population, float}
 }}
 \source{
 \url{www.allelefrequencies.net}

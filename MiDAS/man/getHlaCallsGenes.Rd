@@ -7,7 +7,7 @@
 getHlaCallsGenes(hla_calls)
 }
 \arguments{
-\item{hla_calls}{Data frame containing HLA allele calls, as return by
+\item{hla_calls}{HLA calls data frame, as returned by
 \code{\link{readHlaCalls}} function.}
 }
 \value{

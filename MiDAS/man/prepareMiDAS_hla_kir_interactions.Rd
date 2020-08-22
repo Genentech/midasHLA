@@ -7,9 +7,11 @@
 prepareMiDAS_hla_kir_interactions(hla_calls, kir_calls, ...)
 }
 \arguments{
-\item{hla_calls}{Data frame}
+\item{hla_calls}{HLA calls data frame, as returned by
+\code{\link{readHlaCalls}} function.}
 
-\item{kir_calls}{Data frame}
+\item{kir_calls}{KIR calls data frame, as returned by
+\code{\link{readKIRCalls}} function.}
 
 \item{...}{Not used}
 }
@@ -17,7 +19,5 @@ prepareMiDAS_hla_kir_interactions(hla_calls, kir_calls, ...)
 Matrix
 }
 \description{
-\code{hla_calls} are processed with \code{kir_counts} into HLA - KIR
-interactions variables (see \code{\link{getHlaKirInteractions}} for more
-details).
+Prepare MiDAS data on HLA - KIR interactions level
 }

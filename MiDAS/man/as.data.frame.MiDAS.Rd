@@ -6,6 +6,11 @@
 \usage{
 \method{as.data.frame}{MiDAS}(x, ...)
 }
+\arguments{
+\item{x}{any \R object.}
+
+\item{...}{additional arguments to be passed to or from methods.}
+}
 \description{
 Coerce MiDAS to Data Frame
 }

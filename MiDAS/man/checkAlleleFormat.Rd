@@ -2,16 +2,16 @@
 % Please edit documentation in R/MiDAS_utils.R
 \name{checkAlleleFormat}
 \alias{checkAlleleFormat}
-\title{Check allele format}
+\title{Check HLA allele format}
 \usage{
 checkAlleleFormat(allele)
 }
 \arguments{
-\item{allele}{Character vector containing HLA allele numbers.}
+\item{allele}{Character vector with HLA allele numbers.}
 }
 \value{
-Logical vector specifying if \code{allele} follows HLA alleles naming
-  conventions.
+Logical vector specifying if \code{allele} elements follows HLA
+  alleles naming conventions.
 }
 \description{
 \code{checkAlleleFormat} test if the input character follows HLA nomenclature
@@ -27,7 +27,8 @@ additional suffix indicating its expression status. See
 HLA alleles with identical sequences across exons encoding the peptide
 binding domains might be designated with G group allele numbers. Those
 numbers have additional G or GG suffix. See
-\url{http://hla.alleles.org/alleles/g_groups.html} for more details.
+\url{http://hla.alleles.org/alleles/g_groups.html} for more details. They are
+interpreted as valid HLA alleles designations.
 }
 \examples{
 allele <- c("A*01:01", "A*01:02")

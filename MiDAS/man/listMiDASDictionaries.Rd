@@ -4,7 +4,7 @@
 \alias{listMiDASDictionaries}
 \title{List HLA alleles dictionaries}
 \usage{
-listMiDASDictionaries(pattern = ".*", file.names = FALSE)
+listMiDASDictionaries(pattern = "allele", file.names = FALSE)
 }
 \arguments{
 \item{pattern}{String used to match dictionary names, it can be a regular
@@ -17,5 +17,6 @@ returned. If TRUE their paths are returned.}
 Character vector with names of HLA alleles dictionaries.
 }
 \description{
-\code{listMiDASDictionaries} lists dictionaries shipped with MiDAS package.
+\code{listMiDASDictionaries} lists dictionaries shipped with the MiDAS package.
+See \code{\link{hlaToVariable}} for more details on dictionaries.
 }

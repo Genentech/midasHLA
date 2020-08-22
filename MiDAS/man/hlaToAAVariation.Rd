@@ -2,13 +2,13 @@
 % Please edit documentation in R/MiDAS_transformationFunctions.R
 \name{hlaToAAVariation}
 \alias{hlaToAAVariation}
-\title{Convert HLA allele numbers to amino acid variation matrix}
+\title{Generate amino acid variation matrix}
 \usage{
 hlaToAAVariation(hla_calls, indels = TRUE, unkchar = FALSE,
   as_df = TRUE)
 }
 \arguments{
-\item{hla_calls}{Data frame containing HLA allele calls, as return by
+\item{hla_calls}{HLA calls data frame, as returned by
 \code{\link{readHlaCalls}} function.}
 
 \item{indels}{Logical indicating whether indels should be considered when
@@ -18,33 +18,28 @@ checking variability.}
 should be considered when checking variability.}
 
 \item{as_df}{Logical indicating if data frame should be returned.
-Otherwise matrix is returned.}
+Otherwise a matrix is returned.}
 }
 \value{
-Matrix or data frame containing variable amino acid positions. See
-  \code{as_df} parameter.
-
-  Rownames corresponds to ID column of input data frame, and colnames to
-  alignment positions for given genes. If no variation in amino acid
-  alignments is found function return one column matrix filled with `NA`s.
+Matrix or data frame containing variable amino acid positions.
+  Rownames corresponds to ID column in \code{hla_calls}, and colnames to
+  alignment positions. If no variation is found one column matrix filled with
+  \code{NA}'s is returned.
 }
 \description{
-\code{hlaToAAVariation} convert HLA allele numbers data frame to a matrix
-holding information on amino acid variation.
+\code{hlaToAAVariation} convert HLA calls data frame to a matrix of variable
+ amino acid positions.
 }
 \details{
 Variable amino acid positions are found by comparing elements of the
 alignment column wise. Some of the values in alignment can be treated
-specially using \code{indels} and \code{unkchar} arguments. Function process
-alignments for all HLA genes found in \code{hla_calls}.
+specially using \code{indels} and \code{unkchar} arguments. Function
+processes alignments for all HLA genes found in \code{hla_calls}.
 
-To infer variable amino acid position function uses protein alignment files
-that are shipped with the package. Those files were downloaded from
+Variable amino acid position uses protein alignments from
 \href{ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/alignments/}{EBI database}.
 }
 \examples{
-file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-hla_calls <- readHlaCalls(file)
-hlaToAAVariation(hla_calls)
+hlaToAAVariation(MiDAS_tut_HLA)
 
 }

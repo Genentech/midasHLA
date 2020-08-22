@@ -6,14 +6,18 @@
 \usage{
 getKIRFrequencies(kir_calls)
 }
+\arguments{
+\item{kir_calls}{KIR calls data frame, as returned by
+\code{\link{readKIRCalls}} function.}
+}
 \value{
-Data frame containing alleles and thier corresponding frequencies.
+Data frame containing KIR genes and their corresponding frequencies.
 }
 \description{
-\code{getKIRFrequencies} calculates  KIR genes frequencies in KIR calls data
+\code{getKIRFrequencies} calculates KIR genes frequencies in KIR calls data
 frame.
 }
 \examples{
-""
+getKIRFrequencies(MiDAS_tut_KIR)
 
 }

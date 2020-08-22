@@ -2,22 +2,20 @@
 % Please edit documentation in R/MiDAS_class.R
 \name{prepareMiDAS}
 \alias{prepareMiDAS}
-\alias{prepareMiDAS_hla_alleles}
-\title{Prepare MiDAS object for statistical analysis}
+\title{Construct a MiDAS object}
 \usage{
 prepareMiDAS(hla_calls = NULL, kir_calls = NULL, colData,
   experiment = c("hla_alleles", "hla_aa", "hla_g_groups",
   "hla_supertypes", "hla_NK_ligands", "kir_genes", "hla_kir_interactions",
   "hla_divergence", "hla_het"), placeholder = "term",
-  lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL, ...)
-
-prepareMiDAS_hla_alleles(hla_calls, ...)
+  lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL,
+  indels = TRUE, unkchar = FALSE, hla_het_resolution = 8)
 }
 \arguments{
-\item{hla_calls}{Data frame containing HLA allele calls, as return by
+\item{hla_calls}{HLA calls data frame, as returned by
 \code{\link{readHlaCalls}} function.}
 
-\item{kir_calls}{Data frame containing KIR gene counts, as returned by
+\item{kir_calls}{KIR calls data frame, as returned by
 \code{\link{readKIRCalls}} function.}
 
 \item{colData}{Data frame holding additional variables like phenotypic
@@ -30,52 +28,104 @@ samples identifiers corresponding to identifiers in \code{hla_calls} and
 should be prepared. Valid choices are \code{"hla_alleles"},
 \code{"hla_aa"}, \code{"hla_g_groups"}, \code{"hla_supertypes"},
 \code{"hla_NK_ligands"}, \code{"kir_genes"}, \code{"hla_kir_interactions"},
-\code{"hla_divergence"}.
+\code{"hla_divergence"}, \code{"hla_het"}.
 See details for further explanations.}
 
-\item{placeholder}{String}
+\item{placeholder}{String giving name for dummy variable inserted to
+\code{colData}. This variable can be than used to define base statistical
+model used by \code{\link{runMiDAS}}.}
 
-\item{lower_frequency_cutoff}{Number}
+\item{lower_frequency_cutoff}{Number giving lower frequency threshold.
+Numbers greater than 1 are interpreted as number of feature occurrences,
+numbers between 0 and 1 as fractions.}
 
-\item{upper_frequency_cutoff}{Number}
+\item{upper_frequency_cutoff}{Number giving upper frequency threshold.
+Numbers greater than 1 are interpreted as number of feature occurrences,
+numbers between 0 and 1 as fractions.}
 
-\item{...}{Attributes used in data transformation.}
+\item{indels}{Logical indicating whether indels should be considered when
+checking amino acid variability in \code{'hla_aa'} experiment.}
+
+\item{unkchar}{Logical indicating whether unknown characters in the alignment
+should be considered when checking amino acid variability in
+\code{'hla_aa'} experiment.}
+
+\item{hla_het_resolution}{Number specifying HLA alleles resolution used to
+calculate heterogeneity in \code{"hla_het"} experiment.}
 }
 \value{
 Object of class \code{\link{MiDAS}}
-
-Matrix
 }
 \description{
 \code{prepareMiDAS} transform HLA alleles calls and KIR calls according
-to selected analysis creating \code{\link{MiDAS}} object.
+to selected \code{experiment}s creating a \code{\link{MiDAS}} object.
 }
 \details{
-\code{'hla_alleles'} - \code{hla_calls} are transformed into counts.
+\code{experiment} specifies analysis types for which \code{hla_calls} and
+\code{kir_call} should be prepared.
+\describe{
+  \item{\code{'hla_alleles'}}{
+    \code{hla_calls} are transformed to counts matrix describing number of
+    allele occurrences for each sample. This experiment is used to test
+    associations on HLA alleles level.
+  }
+  \item{\code{'hla_aa'}}{
+    \code{hla_calls} are transformed to a matrix of variable amino acid
+    positions. See \code{\link{hlaToAAVariation}} for more details. This
+    experiment is used to test associations on amino acid level.
+  }
+  \item{\code{"hla_g_groups"}}{
+    \code{hla_calls} are translated into HLA G groups and transformed to
+    matrix describing number of G group occurrences for each sample. See
+    \code{\link{hlaToVariable}} for more details. This experiment is used to
+    test associations on HLA G groups level.
+  }
+  \item{\code{"hla_supertypes"}}{
+    \code{hla_calls} are translated into HLA supertypes and transformed to
+    matrix describing number of G group occurrences for each sample. See
+    \code{\link{hlaToVariable}} for more details. This experiment is used to
+    test associations on HLA supertypes level.
+  }
+  \item{\code{"hla_NK_ligands"}}{
+    \code{hla_calls} are translated into NK ligands, which includes HLA
+    Bw4/Bw6 and HLA C1/C2 groups and transformed to matrix describing number
+    of their occurrences for each sample. See \code{\link{hlaToVariable}} for
+    more details.This experiment is used to test associations on HLA NK
+    ligands level.
+  }
+  \item{\code{"kir_genes"}}{
+    \code{kir_calls} are transformed to counts matrix describing number of
+    KIR gene occurrences for each sample. This experiment is used to test
+    associations on KIR genes level.
+  }
+  \item{\code{"hla_kir_interactions"}}{
+    \code{hla_calls} and \code{kir_calls} are translated to HLA - KIR
+    interactions as defined in
+    \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6558367/}{Pende et al., 2019.}.
+    See \code{\link{getHlaKirInteractions}} for more details. This experiment
+    is used to test associations on HLA - KIR interactions level.
+  }
+  \item{\code{"hla_divergence"}}{
+    Grantham distance for class I HLA alleles is calculated based on
+    \code{hla_calls} using original formula by
+    \href{http://www.sciencemag.org/content/185/4154/862.long}{Grantham R. 1974.}.
+    See \code{\link{hlaCallsGranthamDistance}} for more details. This
+    experiment is used to test associations on HLA divergence level measured
+    by Grantham distance.
+  }
+  \item{\code{"hla_het"}}{
+    \code{hla_calls} are transformed to heterozygosity status, where \code{1}
+    designates a heterozygote and \code{0} homozygote. Heterozygosity status
+    is calculated only for classical HLA genes (A, B, C, DQA1, DQB1, DRA,
+    DRB1, DPA1, DPB1). This experiment is used to test associations on HLA
+    divergence level measured by heterozygosity.
+  }
+}
 }
 \examples{
-\dontrun{
-# read hla calls file
-hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-hla_calls <- readHlaCalls(hla_calls_file)
-
-# read kir calls file
-kir_calls_file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-kir_calls <- readKIRCalls(kir_calls_file)
-
-# read phenotypic data and covariates
-pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
-covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-phenotype <- left_join(pheno, covar, by ="ID")
-
-# create MiDAS object
-midas <- prepareMiDAS(hla_calls = hla_calls,
-                      kir_calls = kir_calls,
-                      colData = phenotype,
-                      experiment = "hla_alleles"
-)
-}
+midas <- prepareMiDAS(hla_calls = MiDAS_tut_HLA,
+                      kir_calls = MiDAS_tut_KIR,
+                      colData = MiDAS_tut_pheno,
+                      experiment = "hla_alleles")
 
 }

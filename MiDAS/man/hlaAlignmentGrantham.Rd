@@ -2,17 +2,20 @@
 % Please edit documentation in R/MiDAS_utils.R
 \name{hlaAlignmentGrantham}
 \alias{hlaAlignmentGrantham}
-\title{Helper function alignment for Grantham distance calculations}
+\title{Helper function returning alignment for Grantham distance calculations}
 \usage{
 hlaAlignmentGrantham(gene, resolution)
 }
 \arguments{
-\item{gene}{Character}
+\item{gene}{Character vector specifying HLA gene}
 
-\item{resolution}{Number}
+\item{resolution}{Number giving allele resolution}
+}
+\value{
+HLA alignment processed for grantham distance between alleles can be
+  calculated. Processing includes extracting exons 1 and 2, masking indels,
+  gaps and stop codons.
 }
 \description{
-\code{hlaAlignmentGrantham} get HLA alignment processed so that grantham
-distance between alleles can be calculated. Processing includes extracting
-exons 1 and 2, masking indels, gaps and stop codons.
+Helper function returning alignment for Grantham distance calculations
 }

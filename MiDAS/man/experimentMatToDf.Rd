@@ -13,6 +13,6 @@ experimentMatToDf(mat)
 Data frame
 }
 \description{
-Function transpose \code{mat} and inserts colum names of input \code{mat} as
+Function transpose \code{mat} and inserts column names of input \code{mat} as
 a 'ID' column.
 }

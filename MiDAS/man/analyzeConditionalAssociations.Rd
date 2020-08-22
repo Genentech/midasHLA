@@ -16,8 +16,7 @@ others.}
 tests.}
 
 \item{placeholder}{String specifying term to substitute with value from
-\code{x}. If more than one variable is passed in \code{x} all of them will
-be bracketed. Ignored if set to \code{NULL}.}
+\code{x}. Ignored if set to \code{NULL}.}
 
 \item{correction}{String specifying multiple testing correction method. See
 details for further information.}
@@ -27,10 +26,11 @@ during multiple testing correction calculations, must be at least equal to
 number of comparisons being made; only set this (to non-default) when you
 know what you are doing!}
 
-\item{th}{Number specifying p-value threshold for a variable to be considered
+\item{th}{Number specifying threshold for a variable to be considered
 significant.}
 
-\item{th_adj}{Logical}
+\item{th_adj}{Logical flag indicating if adjusted p-value should be used as
+threshold criteria, otherwise unadjusted p-value is used.}
 
 \item{keep}{Logical flag indicating if the output should be a list of results
 resulting from each selection step. Default is to return only the final
@@ -39,8 +39,8 @@ result.}
 \item{rss_th}{Number specifying residual sum of squares threshold at which
 function should stop adding additional variables. As the residual sum of
 squares approaches \code{0} the perfect fit is obtained making further
-attempts at variables selection nonsense, thus function is stopped. This
-behavior can be controlled using \code{rss_th}.}
+attempts at variable selection nonsense. This behavior can be controlled
+using \code{rss_th}.}
 
 \item{exponentiate}{Logical flag indicating whether or not to exponentiate
 the coefficient estimates. Internally this is passed to
@@ -56,39 +56,18 @@ Tibble with stepwise conditional testing results.
 adding the previous top-associated variable as covariate, until there is no
 more significant variables based on a self-defined threshold.
 }
-\details{
-Selection criteria is the p-value from the test on coefficients values.
-}
 \examples{
-\dontrun{
-library("survival")
-hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-hla_calls <- readHlaCalls(hla_calls_file)
-pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
-covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-midas_data <- prepareMiDAS(hla_calls = hla_calls,
-                             pheno = pheno,
-                             covar = covar,
-                             experiment = "hla_alleles",
-                             inheritance_model = "additive"
-)
+midas <- prepareMiDAS(hla_calls = MiDAS_tut_HLA,
+                      colData = MiDAS_tut_pheno,
+                      experiment = "hla_alleles")
 
-## define base model with covariates only
-object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX + term, data = midas_data)
+# analyzeConditionalAssociations expects model data to be a data.frame
+midas_data <- as.data.frame(midas)
+
+# define base model
+object <- lm(disease ~ term, data = midas_data)
 analyzeConditionalAssociations(object,
                             variables = c("B*14:02", "DRB1*11:01"),
-                            th = 0.05,
-                            rss_th = 1e-07
-)
-}
+                            th = 0.05)
 
 }
-\seealso{
-\code{\link[stats]{p.adjust}}, \code{\link[broom]{tidy}}
-
-Other MiDAS statistical functions: \code{\link{analyzeAssociations}},
-  \code{\link{runMiDAS}}
-}
-\concept{MiDAS statistical functions}

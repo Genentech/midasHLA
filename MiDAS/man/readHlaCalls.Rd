@@ -2,7 +2,7 @@
 % Please edit documentation in R/MiDAS_parsingFunctions.R
 \name{readHlaCalls}
 \alias{readHlaCalls}
-\title{Read HLA allele calls data}
+\title{Read HLA allele calls}
 \usage{
 readHlaCalls(file, resolution = 4, na.strings = c("Not typed", "-",
   "NA"))
@@ -10,7 +10,7 @@ readHlaCalls(file, resolution = 4, na.strings = c("Not typed", "-",
 \arguments{
 \item{file}{Path to input file.}
 
-\item{resolution}{Numeric vector of length one specifying output resolution.}
+\item{resolution}{Number specifying desired resolution.}
 
 \item{na.strings}{a character vector of strings which are to be
     interpreted as \code{\link{NA}} values.  Blank fields are also
@@ -20,19 +20,20 @@ readHlaCalls(file, resolution = 4, na.strings = c("Not typed", "-",
     values may need their own white space stripped in advance.}
 }
 \value{
-Data frame containing HLA allele calls.
+HLA calls data frame.
 }
 \description{
 \code{readHlaCalls} read HLA allele calls from file
 }
 \details{
-Input file have to be a tsv formatted table with header. First column should
-contain sample IDs, further columns should hold corresponding HLA allele
-numbers.
+Input file has to be a tsv formatted table with header. First column should
+contain sample IDs, further columns hold HLA allele numbers. See
+\code{system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")}
+for an example.
 
 \code{resolution} parameter can be used to reduce HLA allele numbers. If
 reduction is not needed \code{resolution} can be set to 8. \code{resolution}
-parameter can take following values: 2, 4, 6, 8. For more details
+parameter can take the following values: 2, 4, 6, 8. For more details
 about HLA allele numbers resolution see
 \url{http://hla.alleles.org/nomenclature/naming.html}.
 }

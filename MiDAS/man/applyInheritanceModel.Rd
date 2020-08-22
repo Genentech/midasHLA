@@ -4,7 +4,7 @@
 \alias{applyInheritanceModel}
 \alias{applyInheritanceModel.matrix}
 \alias{applyInheritanceModel.SummarizedExperiment}
-\title{Format experiment to inheritance model}
+\title{Apply inheritance model}
 \usage{
 applyInheritanceModel(experiment, inheritance_model = c("dominant",
   "recessive", "additive"))
@@ -16,23 +16,22 @@ applyInheritanceModel(experiment, inheritance_model = c("dominant",
   inheritance_model = c("dominant", "recessive", "additive"))
 }
 \arguments{
-\item{experiment}{Matrix}
+\item{experiment}{Matrix or SummarizedExperiment object.}
 
 \item{inheritance_model}{String specifying inheritance model to use.
 Available choices are \code{"dominant"}, \code{"recessive"},
-\code{"additive"}. In \code{"dominant"} model homozygotes and heterozygotes
-are coded as \code{1}. In \code{"recessive"} model homozygotes are coded as
-\code{1} and all other as \code{0}. In \code{"additive"} model homozygotes
-are coded as \code{2} and heterozygotes as \code{1}.}
+\code{"additive"}.}
 }
 \value{
-Matrix
+\code{experiment} converted to specified inheritance model.
 }
 \description{
-Helper function transforming experiments counts to selected
-\code{inheritance_model}. Under \code{"additive"} inheritance model
-experiment is returned unchanged. For \code{"dominant"} occurence of the
-variable is reported as \code{1} and \code{0} otherwise. Under
-\code{"recessive"} inheritence model occurence of the variable occurence of
-two copies of the variable is reported as \code{1} and \code{0} otherwise.
+Helper function transforming experiment counts to selected
+\code{inheritance_model}.
+}
+\details{
+Under \code{"dominant"} model homozygotes and heterozygotes are coded as
+\code{1}. In \code{"recessive"} model homozygotes are coded as \code{1} and
+other as \code{0}. In \code{"additive"} model homozygotes are coded as
+\code{2} and heterozygotes as \code{1}.
 }

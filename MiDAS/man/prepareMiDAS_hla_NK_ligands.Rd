@@ -7,7 +7,8 @@
 prepareMiDAS_hla_NK_ligands(hla_calls, ...)
 }
 \arguments{
-\item{hla_calls}{Data frame}
+\item{hla_calls}{HLA calls data frame, as returned by
+\code{\link{readHlaCalls}} function.}
 
 \item{...}{Not used}
 }
@@ -15,7 +16,5 @@ prepareMiDAS_hla_NK_ligands(hla_calls, ...)
 Matrix
 }
 \description{
-\code{hla_calls} are transformed to HLA alleles groups using Bw4/6, C1/2 and
-Bw4+A23+A24+A32 dictionaries shipped with the package. Than they are
-transformed to counts.
+Prepare MiDAS data on HLA allele's groups level
 }
