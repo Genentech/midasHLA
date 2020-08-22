@@ -516,6 +516,14 @@ runMiDAS_linear <- function(call,
     msg = "Could not process any variables. Please check warning messages for more information (warnings())."
   )
 
+  # oreder results columns
+  col_ord <- c("term", "p.value", "p.adjusted", "estimate", "std.error",
+               "conf.low", "conf.high", "statistic")
+  if (all(col_ord  %in% colnames(results))) {
+    col_ord <- c(col_ord, colnames(results)[! colnames(results) %in% col_ord]) # append columns not specified in col_ord
+    results <- results[, col_ord]
+  }
+
   # format linear results
   ## add variables frequencies
   if (isExperimentCountsOrZeros(midas[[experiment]])) {
@@ -590,6 +598,14 @@ runMiDAS_conditional <- function(call,
     msg = "Could not process any variables. Please check warning messages for more information (warnings())."
   )
 
+ # oreder results columns
+ col_ord <- c("term", "p.value", "p.adjusted", "estimate", "std.error",
+              "conf.low", "conf.high", "statistic", "covariates")
+ if (all(col_ord %in% colnames(results))) {
+   col_ord <- c(col_ord, colnames(results)[! colnames(results) %in% col_ord]) # append columns not specified in col_ord
+   results <- results[, col_ord]
+ }
+
   # format conditional results
   term_name <- switch (experiment,
                        "hla_alleles" = "allele",
@@ -619,7 +635,7 @@ runMiDAS_conditional <- function(call,
               by = "term"
             )
           rename(.data = x, !! term_name := .data$term) %>%
-            arrange(p.value)
+            arrange(.data$p.value)
         }
       )
     } else {
