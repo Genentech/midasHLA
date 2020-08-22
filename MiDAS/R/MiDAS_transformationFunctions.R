@@ -981,8 +981,8 @@ getExperimentFrequencies.matrix <-
     assert_that(
       is.matrix(experiment),
       isCountsOrZeros(experiment),
-      isTRUEorFALSE(carrier_frequency)
-      # TODO ref
+      isTRUEorFALSE(carrier_frequency),
+      if (! is.null(ref)) { is.data.frame(ref) } else { TRUE }
     )
 
     if (carrier_frequency) {
