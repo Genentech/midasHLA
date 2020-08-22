@@ -66,11 +66,23 @@ setValidity(Class = "MiDAS", method = function(object) {
     is.string(placeholder),
     see_if(
       ! getPlaceholder(object) %in% unlist(rownames(object)),
-      msg = sprintf("Placeholder '%s' is used in one of the experiments", getPlaceholder(object))
+      msg = sprintf("Placeholder '%s' is used in one of object's experiments",
+                    getPlaceholder(object))
     ),
     see_if(
       getPlaceholder(object) %in% colnames(colData(object)),
-      msg = sprintf("Placeholder '%s' can not be found in object's colData", getPlaceholder(object))
+      msg = sprintf("Placeholder '%s' can not be found in object's colData",
+                    getPlaceholder(object))
+    ),
+    see_if(
+      getPlaceholder(object) %in% colnames(colData(object)),
+      msg = sprintf("Placeholder '%s' can not be found in object's colData",
+                    getPlaceholder(object))
+    ),
+    see_if(
+      ! any(duplicated(variables)),
+      msg = sprintf("Object contain duplicated features: %s",
+                    paste(variables[duplicated(variables)], collapse = ", "))
     )
   )
 
@@ -671,7 +683,7 @@ prepareMiDAS <- function(hla_calls = NULL,
     see_if(
       !placeholder %in% c(colnames(hla_calls), colnames(kir_calls), colnames(colData)),
       msg = sprintf(
-        "Placeholder '%s' can not be used, it is alredy used as column name in one of the inputs.",
+        "Placeholder '%s' can not be used, it is already used as column name in one of the inputs.",
         placeholder
       )
     )

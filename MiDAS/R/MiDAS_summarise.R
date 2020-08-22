@@ -72,7 +72,7 @@ summariseAAPosition <- function(hla_calls,
     see_if(
       all(i <- alleles_wo_na %in% rownames(aln)),
       msg = sprintf(
-        fmt = "allele %s could not be found in the nucleotide alignment file.",
+        fmt = "allele %s could not be found in the alignment file.",
         paste(unique(alleles_wo_na[! i]), collapse = ", ")
       )
     )

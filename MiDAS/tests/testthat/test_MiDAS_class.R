@@ -29,7 +29,7 @@ test_that("MiDAS object is valid", {
   S4Vectors::metadata(bad_placeholder)$placeholder <- "A_1"
   expect_error(
     validObject(bad_placeholder),
-    "Placeholder 'A_1' is used in one of the experiments"
+    "Placeholder 'A_1' is used in one of object's experiments"
   )
 
   bad_placeholder <- midas
@@ -245,7 +245,7 @@ test_that("MiDAS object is prepared properly", {
       experiment = "hla_alleles",
       placeholder = "outcome"
     ),
-    "Placeholder 'outcome' can not be used, it is alredy used as column name in one of the inputs."
+    "Placeholder 'outcome' can not be used, it is already used as column name in one of the inputs."
   )
 })
 

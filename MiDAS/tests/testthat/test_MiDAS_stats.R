@@ -434,21 +434,22 @@ test_that("runMiDAS", {
     )
     test_res <- dplyr::rename(test_res, !!term_name := term)
     test_res <- dplyr::arrange(test_res, p.value)
+    test_res <- test_res[, colnames(res)] # order columns
 
     expect_equal(lapply(res, as.data.frame), lapply(test_res, as.data.frame))
   }
 
   #
-  object <- lm(OS_DIED ~ AGE + SEX + term, data = midas)
+  object <- lm(disease ~ term, data = midas)
 
   expect_error(runMiDAS(list()),
-               "object is required to have the internal OBJECT bit set"
+               "object was not recognized as a fit from a model function \\(such as lm, glm and many others\\)."
   )
 
   fake_object <- list(call = list(formula = 1 ~ 1, data = 1:5))
   class(fake_object) <- "foo"
   expect_error(runMiDAS(fake_object),
-               "Could not find 'tidy' function for statistical model 'foo'. Please ensure that 'tidy' for selected model is available. See 'broom' package for more information on 'tidy' function."
+               "Could not find 'tidy' function for statistical model 'foo'. Please ensure that 'tidy' for selected model is available. See the 'broom' package for more information on 'tidy' function."
   )
 
   fake_object <- object
@@ -456,7 +457,7 @@ test_that("runMiDAS", {
   class(fake_midas) <- structure("MultiAssayExperiment", package = "MultiAssayExperiment")
   fake_object$call$data <- fake_midas
   expect_error(runMiDAS(fake_object),
-               "object_details\\$data must be an instance of \"MiDAS\"." #TODO
+               "data associated with statistical model must be an instance of MiDAS class."
   )
 
   # validObject test is ommited here

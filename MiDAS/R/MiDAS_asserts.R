@@ -161,7 +161,7 @@ assertthat::on_failure(isInheritanceModelApplicable) <- function(call, env) {
 #'
 checkStatisticalModel <- function(object) {
   on <- deparse(substitute(object))
-  msg <- " was not recognized as an fit from a model function (such as lm, glm and many others)."
+  msg <- " was not recognized as a fit from a model function (such as lm, glm and many others)."
   assert_that(
     is.object(object),
     msg = paste0(on, msg)
@@ -214,7 +214,7 @@ hasTidyMethod <- function(class) {
 assertthat::on_failure(hasTidyMethod) <- function(call, env) {
   paste0("Could not find 'tidy' function for statistical model '",
          eval(expr = call$class, envir = env),
-         "'. Please ensure that 'tidy' for selected model is available. See 'broom' package for more information on 'tidy' function."
+         "'. Please ensure that 'tidy' for selected model is available. See the 'broom' package for more information on 'tidy' function."
   )
 }
 

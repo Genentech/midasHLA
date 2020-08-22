@@ -50,6 +50,6 @@ test_that("summarize amino acid position", {
   hla_calls[1, "DRB1_1"] <- "DRB1*00:00"
   expect_error(
     summariseAAPosition(hla_calls, "DRB1_100"),
-    "allele DRB1\\*00:00 could not be found in the nucleotide alignment file."
+    "allele DRB1\\*00:00 could not be found in the alignment file."
   )
 })

@@ -398,7 +398,10 @@ runMiDAS <- function(object,
   object_details <- getObjectDetails(object)
 
   assert_that(
-    isClass(object_details$data, "MiDAS"),
+    see_if(
+      isClass(object_details$data, "MiDAS"),
+      msg = "data associated with statistical model must be an instance of MiDAS class."
+    ),
     validObject(object_details$data),
     objectHasPlaceholder(object, getPlaceholder(object_details$data)),
     is.string(experiment),
@@ -504,7 +507,7 @@ runMiDAS_linear <- function(call,
 
   assert_that(
     nrow(results) > 0,
-    msg = "Could not process any variables. Please check warning messages for more informations (warnings())."
+    msg = "Could not process any variables. Please check warning messages for more information (warnings())."
   )
 
   # format linear results
@@ -578,7 +581,7 @@ runMiDAS_conditional <- function(call,
 
   assert_that(
     ! (nrow(results) == 0 && ! keep) || ! (length(results) == 0 && keep),
-    msg = "Could not process any variables. Please check warning messages for more informations (warnings())."
+    msg = "Could not process any variables. Please check warning messages for more information (warnings())."
   )
 
   # format conditional results
@@ -664,7 +667,7 @@ runMiDAS_linear_omnibus <- function(call,
 
   assert_that(
     nrow(results) > 0,
-    msg = "Could not process any variables. Please check warning messages for more informations (warnings())."
+    msg = "Could not process any variables. Please check warning messages for more information (warnings())."
   )
 
   # format linear omnibus results

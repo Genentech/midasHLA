@@ -202,7 +202,7 @@ convertAlleleToVariable <- function(allele,
            msg = "allele have to be a valid HLA allele number"
     ),
     see_if(is.string(dictionary) | is.data.frame(dictionary),
-           msg = "dictionary have to be either path or data.frame"
+           msg = "dictionary have to be either a path or a data.frame"
     )
   )
   if (is.character(dictionary)) {
@@ -218,13 +218,13 @@ convertAlleleToVariable <- function(allele,
   }
   assert_that(
     see_if(ncol(dictionary) == 2,
-           msg = "match table have to consist out of two columns"
+           msg = "dictionary must have two columns"
     ),
     see_if(all(checkAlleleFormat(dictionary[, 1]), na.rm = TRUE),
-           msg = "first column of match table must contain valid HLA allele numbers"
+           msg = "first column in dictionary must contain valid HLA allele numbers"
     ),
     see_if(! any(duplicated(dictionary[, 1]), na.rm = TRUE),
-           msg = "match table contains duplicated allele numbers")
+           msg = "dictionary contains duplicated allele numbers")
   )
   dictionary <- setNames(dictionary[, 2], dictionary[, 1])
   variable <- dictionary[as.character(allele)] # for all NAs vectrors default type is logical; recycling mechanism leads to unwanted results
@@ -562,14 +562,14 @@ hlaCallsGranthamDistance <- function(hla_calls, genes = c("A", "B", "C")) {
 
   target_genes <- getHlaCallsGenes(hla_calls)
   assert_that(
-    characterMatches(x = genes, choice = target_genes) # asset is buggy hlaAlleleDistance(hla_calls, genes = c("A", "B", "FA"))
+    characterMatches(x = genes, choice = target_genes)
   )
   target_genes <- genes
 
   d <- list(ID = hla_calls[, 1, drop = TRUE])
   for (gene in target_genes) {
     if (! gene %in% c("A", "B", "C")) {
-      warn(sprintf("Grantham distance is calculated only for class I HLA alleles. Ommiting gene %s", gene))
+      warn(sprintf("Grantham distance is calculated only for class I HLA alleles. Omitting gene %s", gene))
       next()
     }
 
@@ -600,7 +600,7 @@ hlaCallsGranthamDistance <- function(hla_calls, genes = c("A", "B", "C")) {
         } else {
           warn(
             sprintf(
-              fmt = "Alleles %s could not be found in the alignmnet coercing to NA",
+              fmt = "Alleles %s could not be found in the alignment coercing to NA",
               paste(allele1, allele1, sep = ", ")
             )
           )
