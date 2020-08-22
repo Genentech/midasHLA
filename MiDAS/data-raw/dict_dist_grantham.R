@@ -14,4 +14,4 @@ dict_dist_grantham <- grantham_matrix %>%
 idx <- paste(dict_dist_grantham[, "FIRST"], dict_dist_grantham[, "SECOND"], sep = "")
 dict_dist_grantham <- setNames(dict_dist_grantham$SCORE, idx)
 
-usethis::use_data(dict_dist_grantham, internal = TRUE, overwrite = TRUE)
+usethis::use_data(dict_dist_grantham, internal = FALSE, overwrite = TRUE)
