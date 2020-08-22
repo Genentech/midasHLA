@@ -389,7 +389,10 @@ runMiDAS <- function(object,
                      correction = "bonferroni",
                      n_correction = NULL,
                      exponentiate = FALSE,
-                     ...
+                     th = 0.05,
+                     th_adj = TRUE,
+                     keep = FALSE,
+                     rss_th = 1e-07
                     ) {
   assert_that(
     checkStatisticalModel(object),
@@ -463,7 +466,10 @@ runMiDAS <- function(object,
     correction = correction,
     n_correction = n_correction,
     exponentiate = exponentiate,
-    ...
+    th = th,
+    th_adj = th_adj,
+    keep = keep,
+    rss_th = rss_th
   )
 
   results <- if (! conditional && ! omnibus) {
