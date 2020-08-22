@@ -519,7 +519,7 @@ setMethod(
       is.string(experiment),
       stringMatches(experiment, getExperiments(object)),
       is.character(variables),
-      characterMatches(variables, rownames(object))
+      characterMatches(variables, unlist(rownames(object)))
     )
     object[[experiment]] <- filterExperimentByVariables(object[[experiment]], variables)
 
