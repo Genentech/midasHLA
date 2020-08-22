@@ -913,6 +913,7 @@ HWETest <-
       isNumberOrNULL(HWE_cutoff),
       isTRUEorFALSE(as.MiDAS)
     )
+
     HWE_group <- substitute(HWE_group)
     if (is.null(HWE_group)) {
       X <- list(p.value = object[[experiment]])
@@ -924,7 +925,7 @@ HWETest <-
                   subset = HWE_group
                 )
         )
-      subset_ids <- colData$ID
+      subset_ids <- rownames(colData)
       x <- object[[experiment]]
       X <- list(
         x[, colnames(x) %in% subset_ids],
@@ -938,7 +939,7 @@ HWETest <-
       stringsAsFactors = FALSE
     )
     for (i in 1:length(X)) {
-      HWE.pvalue <- apply(
+      HWE.pvalue <- apply( # get haplotypes for each variable
         X = X[[i]],
         MARGIN = 1,
         FUN = function(x) {
@@ -955,10 +956,12 @@ HWETest <-
       HWE.result[[nm]] <- HWE.pvalue[HWE.result$var] # NAs will be inserted on missing
     }
 
+    # filter based on p-value cut-off
     if (! is.null(HWE_cutoff)) {
+      # get p-value mask over columns ie. p.value or optional grouping columns
       mask <- lapply(1:(ncol(HWE.result) - 1), function(i) {
-        m <- HWE.result[, i + 1] < HWE_cutoff[i]
-        m[is.na(m)] <- FALSE
+        m <- HWE.result[, i + 1] < HWE_cutoff
+        m[is.na(m)] <- TRUE
         m
       })
       mask <- Reduce(f = `&`, x = mask)
@@ -966,7 +969,9 @@ HWETest <-
     }
 
     if(as.MiDAS) {
-      HWE.result <- filterByVariables(object, experiment, HWE.result$var)
+      vars <- rownames(object[[experiment]])
+      vars <- vars[! vars %in% HWE.result$var]
+      HWE.result <- filterByVariables(object, experiment, vars)
     }
 
     return(HWE.result)
