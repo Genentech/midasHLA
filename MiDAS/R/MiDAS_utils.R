@@ -675,7 +675,7 @@ getHlaCallsGenes <- function(hla_calls) {
 #'
 dfToExperimentMat <- function(df) {
   cols <- df[["ID"]]
-  mat <- t(subset(df, select = -ID))
+  mat <- t(df[, ! colnames(df) == "ID", drop = FALSE])
   colnames(mat) <- cols
 
   # convert to apropiate type
@@ -728,8 +728,7 @@ midasToWide <- function(object, experiment) {
     characterMatches(experiment, getExperiments(object))
   )
 
-  ex_list <-
-    experiments(object)[experiment] # do not include hla_calls and kir_calls, they are stored as experiment just for convinience
+  ex_list <- experiments(object)[experiment]
   ex_list <- lapply(
     X = ex_list,
     FUN = function(x) {

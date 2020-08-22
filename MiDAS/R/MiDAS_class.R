@@ -59,6 +59,7 @@ setValidity(Class = "MiDAS", method = function(object) {
   hla_calls <- getHlaCalls(object)
   kir_calls <- getKirCalls(object)
   placeholder <- getPlaceholder(object)
+  variables <- c(unlist(rownames(object)), colnames(colData(object)))
 
   assert_that(
     if (! is.null(hla_calls)) { checkHlaCallsFormat(hla_calls) } else { TRUE },

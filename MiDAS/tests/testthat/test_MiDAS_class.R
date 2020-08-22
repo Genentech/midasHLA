@@ -38,6 +38,13 @@ test_that("MiDAS object is valid", {
     validObject(bad_placeholder),
     "Placeholder 'foo' can not be found in object's colData"
   )
+
+  duplicated_features <- midas
+  rownames(duplicated_features[["hla_calls"]])[1] <- "ID"
+  expect_error(
+    validObject(duplicated_features),
+    "Object contain duplicated features: ID"
+  )
 })
 
 test_that("MiDAS object's experiment is extracted correctly", {
