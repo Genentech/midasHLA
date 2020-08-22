@@ -111,7 +111,7 @@ setGeneric(
 setMethod(
   f = "getExperiments",
   signature = "MiDAS",
-  definition = function (object) metadata(object)$experiment
+  definition = function (object) names(object)
 )
 
 #' Get HLA calls from MiDAS object.
@@ -690,30 +690,13 @@ prepareMiDAS <- function(hla_calls = NULL,
     )
   )
 
-  dot.args <- if (...length()) {
-    list(...)
-  } else {
-    list()
-  }
-
-  experiments <- ExperimentList()
-
-  if (! is.null(hla_calls)) {
-    experiments[["hla_calls"]] <- dfToExperimentMat(hla_calls)
-  }
-
-  if (! is.null(kir_calls)) {
-    experiments[["kir_calls"]] <- dfToExperimentMat(kir_calls)
-  }
+  metadata <- list(placeholder = placeholder)
+  if (! is.null(hla_calls)) { metadata[["hla_calls"]] <- hla_calls }
+  if (! is.null(kir_calls)) { metadata[["kir_calls"]] <- kir_calls }
 
   # prepare data for different analyses types
   for (e in experiment) {
     fun <- paste0("prepareMiDAS_", e)
-    args <- list(
-      hla_calls = hla_calls,
-      kir_calls = kir_calls
-    )
-    args <- c(args, dot.args)
     E <- do.call(
       what = fun,
       args = args
