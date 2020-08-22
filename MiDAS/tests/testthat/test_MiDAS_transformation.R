@@ -204,54 +204,7 @@ test_that("amino acids frequencies are calculated properly", {
   )
 })
 
-test_that("hla counts table can be reverted to hla calls", {
-  hla_calls <- data.frame(ID = c("PAT1", "PAT2", "PAT3"),
-                          A_1 = c("A*02:01", "A*02:01", "A*01:01"),
-                          A_2 = c("A*02:01", "A*02:06", "A*24:02"),
-                          B_1 = c("B*13:02", "B*15:01", "B*13:02"),
-                          B_2 = c("B*40:01", "B*57:01", "B*57:01"),
-                          stringsAsFactors = FALSE
-  )
-  hla_counts <- hlaCallsToCounts(hla_calls)
-  expect_equal(countsToHlaCalls(hla_counts), hla_calls)
-
-  err_hla_counts <- hla_counts
-  colnames(err_hla_counts) <- NULL
-  expect_error(
-    countsToHlaCalls(err_hla_counts),
-    "count table has no column names"
-  )
-
-  err_hla_counts <- hla_counts
-  colnames(err_hla_counts)[2] <- NA
-  expect_error(
-    countsToHlaCalls(err_hla_counts),
-    "column names contains NA values"
-  )
-
-  err_hla_counts <- hla_counts
-  colnames(err_hla_counts) <- make.names(colnames(err_hla_counts))
-  expect_error(
-    countsToHlaCalls(err_hla_counts),
-    "counts table column names contains improperly formated HLA alleles numbers"
-  )
-
-  err_hla_counts <- hla_counts
-  err_hla_counts[2, 2] <- 1.5
-  expect_error(
-    countsToHlaCalls(err_hla_counts),
-    "counts can only take values 0, 1 or 2"
-  )
-
-  err_hla_counts <- hla_counts
-  err_hla_counts[2, 2:3] <- 2
-  expect_error(
-    countsToHlaCalls(err_hla_counts),
-    "some samples have more than two alleles per gene"
-  )
-})
-
-test_that("results are formatted properly", {
+test_that("formatResults", {
   res <- tibble(term = c("A*01:01", "A*02:01"),
                 estimate = c(5, -6),
                 p.value = c(0.05, 0.1))
@@ -268,7 +221,7 @@ test_that("results are formatted properly", {
   correct_tab <-
     dplyr::select(correct_tab, "allele" = .data[["term"]], .data[["p.value"]])
   correct_tab <-
-    knitr::kable(correct_tab, format = "html", digits = 50)
+    knitr::kable(correct_tab, format = "html", format.args = list(digits = 4, scientific = -5))
   correct_tab <-
     kableExtra::add_header_above(correct_tab, header = c("informative header" = 2))
   correct_tab <-
@@ -298,60 +251,63 @@ test_that("results are formatted properly", {
                "header is not a string \\(a length one character vector\\) or NULL.")
 })
 
-# TODO
-# test_that("results are formatted properly with preselected args", {
-#   hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-#   hla_calls <- readHlaCalls(hla_calls_file)
-#   pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-#   pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
-#   covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-#   covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-#   phenotype <- dplyr::left_join(pheno, covar, by = "ID")
-#   midas <- prepareMiDAS(
-#     hla_calls = hla_calls,
-#     colData = phenotype,
-#     inheritance_model = "dominant",
-#     analysis_type = c(
-#       "hla_alleles"
-#     )
-#   )
-#
-#   object <- stats::glm(OS_DIED ~ 1 + term, data = midas, family = stats::binomial)
-#   res <- runMiDAS(object, mode = "linear", analysis_type = "hla_alleles")
-#   res_kable <- kableResults(res)
-#   res_kable_test <- formatResults(res,
-#                                   filter_by = "p.adjusted <= 1",
-#                                   arrange_by = "p.value",
-#                                   select_cols = c(
-#                                     "allele",
-#                                     "estimate",
-#                                     "std.error",
-#                                     "p.value",
-#                                     "p.adjusted"
-#   ),
-#                                   format = "html",
-#                                   header = "MiDAS analysis results"
-#   )
-#
-#   expect_equal(res_kable, res_kable_test)
-#
-#   expect_error(kableResults(res, pvalue_cutoff = "a"),
-#                "pvalue_cutoff is not a number \\(a length one numeric vector\\) or NULL."
-#   )
-#
-#   expect_error(kableResults(res, format = 1),
-#                "format is not a string \\(a length one character vector\\)."
-#   )
-#
-#   expect_error(kableResults(res, format = "foo"),
-#                "format should be one of \"html\", \"latex\"."
-#   )
-# })
+test_that("kableResults", {
+  midas <- prepareMiDAS(
+    hla_calls = MiDAS_tut_HLA,
+    colData = MiDAS_tut_pheno,
+    experiment = "hla_alleles"
+  )
+  object <- lm(disease ~ term, data = midas)
+  res <- runMiDAS(object, experiment = "hla_alleles")
+  res_kable <- kableResults(res)
+  res_kable_test <- formatResults(res,
+                                  filter_by = "p.value <= 1",
+                                  arrange_by = "p.value",
+                                  select_cols = c("allele",
+                                                  "p.value",
+                                                  "p.adjusted",
+                                                  "estimate",
+                                                  "std.error",
+                                                  "conf.low",
+                                                  "conf.high",
+                                                  "statistic",
+                                                  "Ntotal",
+                                                  "Ntotal [%]" = "Ntotal.percent",
+                                                  "N(disease=0)",
+                                                  "N(disease=0) [%]" = "N(disease=0).percent",
+                                                  "N(disease=1)",
+                                                  "N(disease=1) [%]" = "N(disease=1).percent"
+                                  ),
+                                  format = "html",
+                                  header = "MiDAS analysis results"
+  )
 
-test_that("counts to variables conversion", {
-  file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-  kir_counts <- readKIRCalls(file)[1:2, ]
-  kir_haplotypes <- countsToVariables(kir_counts, "kir_haplotypes")
+  expect_equal(res_kable, res_kable_test)
+
+  expect_error(kableResults(LETTERS), "results is not a data frame")
+
+  expect_error(kableResults(res, 1:5), "colnames is not a character vector or NULL.")
+
+  expect_error(kableResults(res, pvalue_cutoff = "a"),
+               "pvalue_cutoff is not a number \\(a length one numeric vector\\) or NULL."
+  )
+
+  expect_error(kableResults(res, format = 1),
+               "format is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(kableResults(res, format = "foo"),
+               "format should be one of \"html\", \"latex\"."
+  )
+
+  expect_error(
+    kableResults(res, c("foo", "bar")),
+    "colnames should match values \"allele\", \"p.value\", \"p.adjusted\", \"estimate\", \"std.error\", \"conf.low\", \"conf.high\", \"statistic\", \"Ntotal\", \"Ntotal.percent\", \"N\\(disease=0\\)\", \"N\\(disease=0\\).percent\", \"N\\(disease=1\\)\", \"N\\(disease=1\\).percent\"."
+  )
+})
+
+test_that("countsToVariables", {
+  kir_haplotypes <- countsToVariables(MiDAS_tut_KIR[1:2, ], "kir_haplotypes")
   kir_haplotypes_test <- data.frame(
     ID = c("PAT1", "PAT2"),
     cenAA = c(1, 0),

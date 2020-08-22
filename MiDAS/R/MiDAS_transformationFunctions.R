@@ -634,7 +634,7 @@ formatResults <- function(results,
   }
 
   results %<>%
-    kable(format = format, digits = 50) %>% # TODO empty results throw corrupted data.frame warning
+    kable(format = format, format.args = list(digits = 4, scientific = -5)) %>%
     add_header_above(header = header)
 
   if (format == "html") {
@@ -681,24 +681,31 @@ kableResults <- function(results,
                          format = getOption("knitr.table.format")) {
   assert_that(
     is.data.frame(results),
-    isStringOrNULL(colnames),
+    isCharacterOrNULL(colnames),
     isNumberOrNULL(pvalue_cutoff),
     is.string(format),
     stringMatches(format, choice = c("html", "latex"))
   )
+  if (! is.null(colnames)) {
+    assert_that(
+      characterMatches(colnames, choice = colnames(results))
+    )
+  }
 
   filter_by <- ifelse(
     test = is.null(pvalue_cutoff),
     yes = "p.value <= 1",
-    no = sprintf("p.value <= %f", pvalue_cutoff)
+    no = sprintf("p.value < %f", pvalue_cutoff)
   )
 
+  # create rename vector
   select_cols <- colnames(results)
   names(select_cols) <- select_cols
-  names(select_cols)[colnames] <- names(colnames)
+  i <- na.omit(match(x = select_cols, table = colnames))
+  names(select_cols)[i] <- names(colnames)
 
-  # replace .frequency with %
-  names(select_cols) <- gsub(".frequency", " [%] ", names(select_cols))
+  # replace .percent with %
+  names(select_cols) <- gsub(".percent", " [%]", names(select_cols))
 
   results %<>%
     formatResults(
