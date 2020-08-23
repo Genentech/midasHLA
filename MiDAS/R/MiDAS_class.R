@@ -313,13 +313,14 @@ setMethod(
     assert_that(
       is.string(experiment),
       stringMatches(experiment, getExperiments(object)),
+      isTRUEorFALSE(carrier_frequency),
       isTRUEorFALSE(compare),
       is.character(ref_pop),
       is.list(ref)
     )
-    mat <- object[[experiment]]
+    ex <- object[[experiment]]
     assert_that(
-      is.matrix(mat) && isCountsOrZeros(mat),
+      ! is.null(getExperimentPopulationMultiplicator(ex)), # if pop_mul is not set frequency cannot be calculated
       msg = sprintf("Frequencies can not be calculated for experiment '%s'",
                     experiment
             )
@@ -332,10 +333,13 @@ setMethod(
         msg = "Please specify reference populations using 'ref_pop' argument."
       )
       ref <- getReferenceFrequencies(ref, ref_pop, carrier_frequency)
-      freq <- getExperimentFrequencies(mat, carrier_frequency, ref)
+      freq <- getExperimentFrequencies(experiment = ex,
+                                       carrier_frequency = carrier_frequency,
+                                       ref = ref)
     } else {
       if (compare) warn(sprintf("Could not find reference frequencies for experiment: '%s'", experiment))
-      freq <- getExperimentFrequencies(mat, carrier_frequency)
+      freq <- getExperimentFrequencies(experiment = ex,
+                                       carrier_frequency = carrier_frequency)
     }
 
     return(freq)
@@ -401,7 +405,7 @@ setMethod(
   for (ex in experiment) {
     mat <- object[[ex]]
     assert_that(
-      is.matrix(mat) && isCountsOrZeros(mat),
+      ! is.null(getExperimentPopulationMultiplicator(mat)), # if pop_mul is not set frequency cannot be calculated
       msg = sprintf("Frequency filtration does not support experiment '%s'", ex)
     )
     object[[ex]] <- filterExperimentByFrequency(
@@ -736,6 +740,15 @@ prepareMiDAS <- function(hla_calls = NULL,
   new("MiDAS", experiments = experiments, colData = colData, metadata = metadata)
 }
 
+# Note
+# Experiment metadata can contain following elements:
+# \code{inheritance_model_applicable} - logical flag indicating if inheritance
+# model can be applied to this experiment, \code{pop_mul} - population
+# multiplicator used for features frequency calcualtions (for experiments like
+# \code{"hla_alleles"} population size have to take into account presence of
+# two gene copies (2 * number of samples)), \code{omnibus_groups} - named list
+# of chartacter vectors giving the features groupins used for omnibus test and
+# omnibus groups filtering. Set them to \code{NULL} where not applicable.
 
 #' Prepare MiDAS data on HLA allele level
 #'
@@ -744,6 +757,9 @@ prepareMiDAS <- function(hla_calls = NULL,
 #'
 #' @return Matrix
 #'
+#' @importFrom assertthat assert_that is.flag
+#' @importFrom SummarizedExperiment SummarizedExperiment
+#'
 prepareMiDAS_hla_alleles <- function(hla_calls, ...) {
   assert_that(
     checkHlaCallsFormat(hla_calls)
@@ -751,6 +767,14 @@ prepareMiDAS_hla_alleles <- function(hla_calls, ...) {
 
   hla_alleles <- hlaCallsToCounts(hla_calls = hla_calls) %>%
     dfToExperimentMat()
+
+  hla_alleles <- SummarizedExperiment(
+    assays = hla_alleles,
+    metadata = list(
+      inheritance_model_applicable = TRUE,
+      pop_mul = 2,
+      omnibus_groups = NULL)
+  )
 
   return(hla_alleles)
 }
@@ -761,7 +785,7 @@ prepareMiDAS_hla_alleles <- function(hla_calls, ...) {
 #' @inheritParams hlaToAAVariation
 #' @param ... Not used
 #'
-#' @return Matrix
+#' @return SummarizedExperiment
 #'
 #' @importFrom assertthat assert_that is.flag
 #' @importFrom SummarizedExperiment SummarizedExperiment
@@ -801,7 +825,11 @@ prepareMiDAS_hla_aa <- function(hla_calls,
 
   hla_aa <- SummarizedExperiment(
     assays = counts,
-    metadata = list(omnibus_groups = omnibus_groups)
+    metadata = list(
+      inheritance_model_applicable = TRUE,
+      pop_mul = 2,
+      omnibus_groups = omnibus_groups
+    )
   )
 
   return(hla_aa)
@@ -815,6 +843,7 @@ prepareMiDAS_hla_aa <- function(hla_calls,
 #' @return Matrix
 #'
 #' @importFrom assertthat assert_that
+#' @importFrom SummarizedExperiment SummarizedExperiment
 #'
 prepareMiDAS_hla_g_groups <- function(hla_calls, ...) {
   assert_that(
@@ -839,6 +868,14 @@ prepareMiDAS_hla_g_groups <- function(hla_calls, ...) {
     ) %>%
     dfToExperimentMat()
 
+  hla_g_groups <- SummarizedExperiment(
+    assays = hla_g_groups,
+    metadata = list(
+      inheritance_model_applicable = TRUE,
+      pop_mul = 2,
+      omnibus_groups = NULL)
+  )
+
   return(hla_g_groups)
 }
 
@@ -852,6 +889,7 @@ prepareMiDAS_hla_g_groups <- function(hla_calls, ...) {
 #' @importFrom assertthat assert_that
 #' @importFrom dplyr select
 #' @importFrom rlang .data
+#' @importFrom SummarizedExperiment SummarizedExperiment
 #'
 prepareMiDAS_hla_supertypes <- function(hla_calls, ...) {
   assert_that(
@@ -878,6 +916,14 @@ prepareMiDAS_hla_supertypes <- function(hla_calls, ...) {
     hla_supertypes[, ! colnames(hla_supertypes) == "Unclassified"] %>%
     dfToExperimentMat()
 
+  hla_supertypes <- SummarizedExperiment(
+    assays = hla_supertypes,
+    metadata = list(
+      inheritance_model_applicable = TRUE,
+      pop_mul = 2,
+      omnibus_groups = NULL)
+  )
+
   return(hla_supertypes)
 }
 
@@ -889,6 +935,7 @@ prepareMiDAS_hla_supertypes <- function(hla_calls, ...) {
 #' @return Matrix
 #'
 #' @importFrom assertthat assert_that
+#' @importFrom SummarizedExperiment SummarizedExperiment
 #'
 prepareMiDAS_hla_NK_ligands <- function(hla_calls, ...) {
   assert_that(
@@ -917,6 +964,14 @@ prepareMiDAS_hla_NK_ligands <- function(hla_calls, ...) {
     ) %>%
     dfToExperimentMat()
 
+  hla_NK_ligands <- SummarizedExperiment(
+    assays = hla_NK_ligands,
+    metadata = list(
+      inheritance_model_applicable = TRUE,
+      pop_mul = 2,
+      omnibus_groups = NULL)
+  )
+
   return(hla_NK_ligands)
 }
 
@@ -928,6 +983,7 @@ prepareMiDAS_hla_NK_ligands <- function(hla_calls, ...) {
 #' @return Matrix
 #'
 #' @importFrom assertthat assert_that
+#' @importFrom SummarizedExperiment SummarizedExperiment
 #'
 prepareMiDAS_kir_genes <- function(kir_calls, ...) {
   assert_that(
@@ -937,6 +993,14 @@ prepareMiDAS_kir_genes <- function(kir_calls, ...) {
   kir_genes <-
     kir_calls %>%
     dfToExperimentMat()
+
+  kir_genes <- SummarizedExperiment(
+    assays = kir_genes,
+    metadata = list(
+      inheritance_model_applicable = FALSE,
+      pop_mul = 1,
+      omnibus_groups = NULL)
+  )
 
   return(kir_genes)
 }
@@ -950,6 +1014,7 @@ prepareMiDAS_kir_genes <- function(kir_calls, ...) {
 #' @return Matrix
 #'
 #' @importFrom magrittr %>%
+#' @importFrom SummarizedExperiment SummarizedExperiment
 #'
 prepareMiDAS_hla_kir_interactions <- function(hla_calls, kir_calls, ...) {
   assert_that(
@@ -963,6 +1028,14 @@ prepareMiDAS_hla_kir_interactions <- function(hla_calls, kir_calls, ...) {
       kir_calls = kir_calls
     ) %>%
     dfToExperimentMat()
+
+  hla_kir_interactions <- SummarizedExperiment(
+    assays = hla_kir_interactions,
+    metadata = list(
+      inheritance_model_applicable = FALSE,
+      pop_mul = 1,
+      omnibus_groups = NULL)
+  )
 
   return(hla_kir_interactions)
 }

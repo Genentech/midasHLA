@@ -452,19 +452,6 @@ test_that("filterExperimentByFrequency", {
   expected_vars <- character(0L)
   expect_equal(experiment_filtered, experiment[expected_vars, ])
 
-  # experiment must be a matrix
-  experiment <- LETTERS
-  lower_frequency_cutoff <- 0.1
-  upper_frequency_cutoff <- 0.5
-  expect_error(
-    filterExperimentByFrequency(
-      experiment = experiment,
-      lower_frequency_cutoff = lower_frequency_cutoff,
-      upper_frequency_cutoff = upper_frequency_cutoff
-    ),
-    "experiment is not a matrix"
-  )
-
   # experiment must be of type integer
   experiment <- matrix(LETTERS)
   lower_frequency_cutoff <- 0.1
@@ -475,7 +462,7 @@ test_that("filterExperimentByFrequency", {
       lower_frequency_cutoff = lower_frequency_cutoff,
       upper_frequency_cutoff = upper_frequency_cutoff
     ),
-    "values in experiment are not counts \\(a positive integers\\) or zeros."
+    "Frequency filtration does not support provided experiment."
   )
 
   # inheritance_model must be a string
@@ -573,7 +560,6 @@ test_that("filterExperimentByFrequency", {
 })
 
 test_that("getExperimentFrequencies", {
-  # matirx
   experiment_matrix <- matrix(
     data = c(0, 2, 0, 0, 0,
              0, 2, 0, 0, 0,
@@ -588,41 +574,58 @@ test_that("getExperimentFrequencies", {
       c("PAT1", "PAT2", "PAT3", "PAT4", "PAT5")
     )
   )
+  experiment_se <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(experiment_matrix),
+    metadata = list(
+      inheritance_model_applicable = TRUE,
+      pop_mul = 2,
+      omnibus_groups = NULL
+    )
+  )
 
   # allele frequecny
-  experiment_matrix_freq <-
-    getExperimentFrequencies(experiment_matrix)
-  experiment_matrix_freq_test <- data.frame(
+  experiment_freq_test <- data.frame(
     term = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
     Counts = c(2, 5, 1, 0, 0),
     Freq = formattable::percent(c(0.2, 0.5, 0.1, 0, 0), 2L),
     row.names = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
     stringsAsFactors = FALSE
   )
-  expect_equal(experiment_matrix_freq, experiment_matrix_freq_test)
+
+  # matrix
+  expect_equal(getExperimentFrequencies(experiment_matrix, 2), experiment_freq_test)
+
+  # se
+  experiment_freq <-
+    getExperimentFrequencies(experiment_se)
+  expect_equal(experiment_freq, experiment_freq_test)
 
   # carrier frequency
-  experiment_matrix_freq <-
-    getExperimentFrequencies(experiment_matrix, carrier_frequency =  TRUE)
-  experiment_matrix_freq_test <- data.frame(
+  experiment_freq <-
+    getExperimentFrequencies(experiment_se, carrier_frequency =  TRUE)
+  experiment_freq_test <- data.frame(
     term = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
     Counts = c(1, 3, 1, 0, 0),
     Freq = formattable::percent(c(0.2, 0.6, 0.2, 0, 0), 2L),
     row.names = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
     stringsAsFactors = FALSE
   )
-  expect_equal(experiment_matrix_freq, experiment_matrix_freq_test)
+  expect_equal(experiment_freq, experiment_freq_test)
 
-  # SummarizedExperiment
-  experiment_se <- SummarizedExperiment::SummarizedExperiment(experiment_matrix)
-  experiment_se_freq <- getExperimentFrequencies(experiment_se)
-  expect_equal(experiment_matrix_freq, experiment_matrix_freq_test)
+  expect_error(
+    getExperimentFrequencies(matrix(LETTERS)),
+    "values in experiment are not counts \\(a positive integers\\) or zeros."
+  )
 
-  expect_error(getExperimentFrequencies(as.matrix(LETTERS)),
-               "values in experiment are not counts \\(a positive integers\\) or zeros.")
+  expect_error(getExperimentFrequencies(experiment_matrix),
+               "pop_mul is not a number \\(a length one numeric vector\\)."
+  )
 
-  expect_error(getExperimentFrequencies(experiment_matrix, 1),
+  expect_error(getExperimentFrequencies(experiment_matrix, 1, carrier_frequency = 1),
                "carrier_frequency is not a flag \\(a length one logical vector\\).")
+
+  expect_error(getExperimentFrequencies(experiment_matrix, 1, ref = "foo"),
+               "ref is not a data frame")
 })
 
 test_that("applyInheritanceModel", {
@@ -670,7 +673,7 @@ test_that("getFrequencyMask", {
     )
   )
   experiment_matrix_freq <-
-    getExperimentFrequencies(experiment_matrix)
+    getExperimentFrequencies(experiment_matrix, 2)
   mask <-
     getFrequencyMask(
       df = experiment_matrix_freq,
@@ -710,3 +713,36 @@ test_that("filterExperimentByVariables", {
   expect_equal(experiment_filtered, experiment[1:2, ])
 })
 
+test_that("getExperimentPopulationMultiplicator", {
+  se <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(matrix(1:5)),
+    metadata = list(pop_mul = 2)
+  )
+  expect_equal(
+    getExperimentPopulationMultiplicator(se),
+    2
+  )
+
+  mat <- matrix(1:5)
+  expect_equal(
+    getExperimentPopulationMultiplicator(mat),
+    NULL
+  )
+})
+
+test_that("isExperimentInheritanceModelApplicable", {
+  se <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(matrix(1:5)),
+    metadata = list(inheritance_model_applicable = TRUE)
+  )
+  expect_equal(
+    isExperimentInheritanceModelApplicable(se),
+    TRUE
+  )
+
+  mat <- matrix(1:5)
+  expect_equal(
+    isExperimentInheritanceModelApplicable(mat),
+    FALSE
+  )
+})

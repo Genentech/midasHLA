@@ -6,17 +6,20 @@
 \alias{getExperimentFrequencies.SummarizedExperiment}
 \title{Calculate experiment's features frequencies}
 \usage{
-getExperimentFrequencies(experiment, carrier_frequency = FALSE,
-  ref = NULL)
+getExperimentFrequencies(experiment, pop_mul = NULL,
+  carrier_frequency = FALSE, ref = NULL)
 
-\method{getExperimentFrequencies}{matrix}(experiment,
+\method{getExperimentFrequencies}{matrix}(experiment, pop_mul = NULL,
   carrier_frequency = FALSE, ref = NULL)
 
 \method{getExperimentFrequencies}{SummarizedExperiment}(experiment,
-  carrier_frequency = TRUE, ref = NULL)
+  pop_mul = NULL, carrier_frequency = FALSE, ref = NULL)
 }
 \arguments{
 \item{experiment}{Matrix or SummarizedExperiment object.}
+
+\item{pop_mul}{Number by which number of samples should be multiplied to get
+the population size.}
 
 \item{carrier_frequency}{Logical flag indicating if carrier frequency should
 be returned.}

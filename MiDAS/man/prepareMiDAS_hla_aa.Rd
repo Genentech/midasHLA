@@ -19,7 +19,7 @@ should be considered when checking variability.}
 \item{...}{Not used}
 }
 \value{
-Matrix
+SummarizedExperiment
 }
 \description{
 Prepare MiDAS data on HLA amino acid level

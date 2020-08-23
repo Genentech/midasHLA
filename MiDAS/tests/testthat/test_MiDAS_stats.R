@@ -413,7 +413,9 @@ test_that("runMiDAS", {
       exponentiate = FALSE
     )
 
-    if (typeof(midas_filtered[[experiment]]) == "integer") {
+    ex <- midas[[experiment]]
+    if (is(ex, "SummarizedExperiment")) { ex <- assay(ex) }
+    if (typeof(ex) == "integer") {
       variables_freq <-
         runMiDASGetVarsFreq(
           midas = midas_filtered,
@@ -462,8 +464,6 @@ test_that("runMiDAS", {
   expect_error(runMiDAS(fake_object),
                "data associated with statistical model must be an instance of MiDAS class."
   )
-
-  # validObject test is ommited here TODO
 
   fake_object <- object
   fake_object$call$formula <- disease ~ 1
@@ -557,5 +557,4 @@ test_that("runMiDAS", {
     ),
     "No variables available for analysis, please revisit your filtration criteria."
   )
-
 })

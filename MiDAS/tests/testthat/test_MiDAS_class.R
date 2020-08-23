@@ -254,6 +254,14 @@ test_that("prepareMiDAS_hla_alleles", {
   experiment <- do.call(prepareMiDAS_hla_alleles, args)
   experiment_test <- do.call(hlaCallsToCounts, args)
   experiment_test <- dfToExperimentMat(experiment_test)
+  experiment_test <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(experiment_test),
+    metadata = list(
+      inheritance_model_applicable = TRUE,
+      pop_mul = 2,
+      omnibus_groups = NULL
+    )
+  )
   expect_equal(experiment, experiment_test)
 })
 
@@ -288,8 +296,11 @@ test_that("prepareMiDAS_hla_aa", {
     names(omnibus_groups) <- pos
     experiment_test <-
       SummarizedExperiment(assays = counts,
-                           metadata = list(omnibus_groups = omnibus_groups))
-
+                           metadata = list(
+                             inheritance_model_applicable = TRUE,
+                             pop_mul = 2,
+                             omnibus_groups = omnibus_groups)
+                           )
     expect_equal(experiment, experiment_test)
   }
 })
@@ -309,6 +320,14 @@ test_that("prepareMiDAS_hla_g_groups", {
     hlaCallsToCounts(experiment_test,
                      check_hla_format = FALSE)
   experiment_test <- dfToExperimentMat(experiment_test)
+  experiment_test <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(experiment_test),
+    metadata = list(
+      inheritance_model_applicable = TRUE,
+      pop_mul = 2,
+      omnibus_groups = NULL
+    )
+  )
 
   expect_equal(experiment, experiment_test)
 
@@ -331,6 +350,14 @@ test_that("prepareMiDAS_hla_supertypes", {
   experiment_test <- dfToExperimentMat(experiment_test)
   experiment_test <-
     experiment_test[rownames(experiment_test) != "Unclassified",]
+  experiment_test <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(experiment_test),
+    metadata = list(
+      inheritance_model_applicable = TRUE,
+      pop_mul = 2,
+      omnibus_groups = NULL
+    )
+  )
 
   expect_equal(experiment, experiment_test)
 
@@ -360,6 +387,14 @@ test_that("prepareMiDAS_hla_NK_ligands", {
     hlaCallsToCounts(experiment_test,
                      check_hla_format = FALSE)
   experiment_test <- dfToExperimentMat(experiment_test)
+  experiment_test <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(experiment_test),
+    metadata = list(
+      inheritance_model_applicable = TRUE,
+      pop_mul = 2,
+      omnibus_groups = NULL
+    )
+  )
 
   expect_equal(experiment, experiment_test)
 })
@@ -369,6 +404,14 @@ test_that("prepareMiDAS_kir_genes", {
   experiment <- do.call(prepareMiDAS_kir_genes, args)
 
   experiment_test <- dfToExperimentMat(args$kir_calls)
+  experiment_test <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(experiment_test),
+    metadata = list(
+      inheritance_model_applicable = FALSE,
+      pop_mul = 1,
+      omnibus_groups = NULL
+    )
+  )
 
   expect_equal(experiment, experiment_test)
 })
@@ -382,6 +425,14 @@ test_that("prepareMiDAS_hla_kir_interactions", {
     kir_calls = args$kir_calls
   )
   experiment_test <- dfToExperimentMat(args$kir_calls)
+  experiment_test <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(experiment_test),
+    metadata = list(
+      inheritance_model_applicable = FALSE,
+      pop_mul = 1,
+      omnibus_groups = NULL
+    )
+  )
 
   expect_equal(experiment, experiment_test)
 })

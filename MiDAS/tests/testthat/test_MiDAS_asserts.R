@@ -71,15 +71,6 @@ test_that("isExperimentCountsOrZeros", {
   expect_equal(isExperimentCountsOrZeros(LETTERS), FALSE)
 })
 
-test_that("isExperimentCountsOrZeros", {
-  for (x in c("hla_alleles", "hla_aa", "hla_g_groups", "hla_supertypes", "hla_NK_ligands")) {
-    expect_equal(isInheritanceModelApplicable("hla_alleles"), TRUE)
-  }
-  for (x in c("kir_genes", "hla_kir_interactions", "hla_divergence")) {
-    expect_equal(isInheritanceModelApplicable("hla_alleles"), TRUE)
-  }
-})
-
 test_that("checkStatisticalModel", {
   midas <- prepareMiDAS(
     kir_calls = MiDAS_tut_KIR,

@@ -113,37 +113,6 @@ isExperimentCountsOrZeros <- function(x, na.rm = TRUE) {
   return(test)
 }
 
-#' Check if experiment is inheritance model applicable
-#'
-#' Helper function checking if for given experiment type inheritance model can
-#' be applied (eg. "hla_alleles") or not (eg. "hla_kir_interactions")
-#'
-#' @param x String giving experiment type.
-#'
-#' @return Logical indicating if the inheritance model can be applied.
-#'
-#' @importFrom assertthat assert_that
-#'
-isInheritanceModelApplicable <- function(x) {
-  im_applicable <- c("hla_alleles", "hla_aa", "hla_g_groups", "hla_supertypes", "hla_NK_ligands")
-  im_nonapplicable <- c("kir_genes", "hla_kir_interactions", "hla_divergence")
-  test <- if (x %in% im_applicable) {
-    TRUE
-  } else if (x %in% im_nonapplicable) {
-    FALSE
-  } else {
-    FALSE
-  }
-
-  return(test)
-}
-
-assertthat::on_failure(isInheritanceModelApplicable) <- function(call, env) {
-  paste0("Inheritance model can not be applied to experiment ",
-         deparse(call$x)
-  )
-}
-
 #' Assert statistical model
 #'
 #' \code{checkStatisticalModel} asserts if object is an existing fit from a

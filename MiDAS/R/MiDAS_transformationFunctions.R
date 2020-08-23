@@ -928,8 +928,10 @@ filterExperimentByFrequency <- function(experiment,
                                         upper_frequency_cutoff = NULL) {
   inheritance_model_choice <- eval(formals()[["inheritance_model"]])
   assert_that(
-    is.matrix(experiment),
-    isCountsOrZeros(experiment),
+    see_if(
+     ! is.null(getExperimentPopulationMultiplicator(experiment)), # if pop_mul is not set frequency cannot be calculated
+     msg = "Frequency filtration does not support provided experiment."
+    ),
     isTRUEorFALSE(carrier_frequency),
     validateFrequencyCutoffs(lower_frequency_cutoff, upper_frequency_cutoff)
   )
@@ -951,6 +953,8 @@ filterExperimentByFrequency <- function(experiment,
 #' \code{getExperimentFrequencies} calculate features frequencies.
 #'
 #' @param experiment Matrix or SummarizedExperiment object.
+#' @param pop_mul Number by which number of samples should be multiplied to get
+#'   the population size.
 #' @param carrier_frequency Logical flag indicating if carrier frequency should
 #'   be returned.
 #' @param ref Wide format data frame with first column named "var" holding
@@ -966,6 +970,7 @@ filterExperimentByFrequency <- function(experiment,
 #'
 getExperimentFrequencies <-
   function(experiment,
+           pop_mul = NULL,
            carrier_frequency = FALSE,
            ref = NULL) {
     UseMethod("getExperimentFrequencies", experiment)
@@ -976,21 +981,23 @@ getExperimentFrequencies <-
 #'
 getExperimentFrequencies.matrix <-
   function(experiment,
+           pop_mul = NULL,
            carrier_frequency = FALSE,
            ref = NULL) {
     assert_that(
-      is.matrix(experiment),
       isCountsOrZeros(experiment),
-      isTRUEorFALSE(carrier_frequency),
-      if (! is.null(ref)) { is.data.frame(ref) } else { TRUE }
+      is.number(pop_mul),
+      isTRUEorFALSE(carrier_frequency)
     )
+    if (! is.null(ref)) {
+      assert_that(is.data.frame(ref))
+    }
 
     if (carrier_frequency) {
       experiment <- applyInheritanceModel(experiment, "dominant")
+      pop_mul <- 1 # carrier frequency does not take account of gene copies
     }
 
-    # For carrier_frequency == FALSE population size equals 2 * nrow(counts_table), in other cases it's 1 * nrow(counts_table); the population size is 2x because genes comes in two copies
-    pop_mul <- ifelse(carrier_frequency, 1, 2)
     counts_sums <- rowSums(experiment, na.rm = TRUE)
     allele_freq <- counts_sums / (pop_mul * ncol(experiment))
 
@@ -1022,10 +1029,21 @@ getExperimentFrequencies.matrix <-
 #'
 getExperimentFrequencies.SummarizedExperiment <-
   function(experiment,
-           carrier_frequency = TRUE,
+           pop_mul = NULL,
+           carrier_frequency = FALSE,
            ref = NULL) {
+    assert_that(
+      isNumberOrNULL(pop_mul),
+      isTRUEorFALSE(carrier_frequency)
+    )
+    if (! is.null(ref)) {
+      assert_that(is.data.frame(ref))
+    }
+
     counts <- assay(experiment)
+    pop_mul <- getExperimentPopulationMultiplicator(experiment)
     getExperimentFrequencies(experiment = counts,
+                             pop_mul = pop_mul,
                              carrier_frequency = carrier_frequency,
                              ref = ref
     )
@@ -1145,3 +1163,67 @@ filterExperimentByVariables.SummarizedExperiment <- function(experiment, variabl
 
   return(experiment)
 }
+
+#' Get experiment's population multiplicator
+#'
+#' \code{getExperimentPopulationMultiplicator} extracts population multiplicator
+#' from experiment's metadata.
+#'
+#' @param experiment Matrix or SummarizedExperiment object.
+#'
+#' @return Experiment's population multiplicator number.
+#'
+#' @importFrom S4Vectors metadata
+#'
+getExperimentPopulationMultiplicator <-
+  function(experiment) {
+    UseMethod("getExperimentPopulationMultiplicator", experiment)
+  }
+
+#' @rdname getExperimentPopulationMultiplicator
+#' @method getExperimentPopulationMultiplicator matrix
+#'
+getExperimentPopulationMultiplicator.matrix <- function(experiment) return(NULL)
+
+#' @rdname getExperimentPopulationMultiplicator
+#' @method getExperimentPopulationMultiplicator SummarizedExperiment
+#'
+getExperimentPopulationMultiplicator.SummarizedExperiment <-
+  function(experiment) {
+      pop_mul <- metadata(experiment)[["pop_mul"]]
+      return(pop_mul)
+  }
+
+#' Check if experiment is inheritance model applicable
+#'
+#' \code{isExperimentInheritanceModelApplicable} check experiment's metadata
+#' for presence of \code{"inheritance_model_applicable"} flag, indicating if
+#' inheritance model can be applied.
+#'
+#' @param experiment Matrix or SummarizedExperiment object.
+#'
+#' @return Logical flag.
+#'
+#' @importFrom S4Vectors metadata
+#'
+isExperimentInheritanceModelApplicable <-
+  function(experiment) {
+    UseMethod("isExperimentInheritanceModelApplicable", experiment)
+  }
+
+#' @rdname isExperimentInheritanceModelApplicable
+#' @method isExperimentInheritanceModelApplicable matrix
+#'
+isExperimentInheritanceModelApplicable.matrix <- function(experiment) {
+  return(FALSE)
+}
+
+#' @rdname isExperimentInheritanceModelApplicable
+#' @method isExperimentInheritanceModelApplicable SummarizedExperiment
+#'
+isExperimentInheritanceModelApplicable.SummarizedExperiment <-
+  function(experiment) {
+    inheritance_model_applicable <-
+      metadata(experiment)[["inheritance_model_applicable"]]
+    return(inheritance_model_applicable)
+  }

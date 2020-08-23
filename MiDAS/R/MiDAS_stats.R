@@ -421,7 +421,7 @@ runMiDAS <- function(object,
 
   # convert experiment to specifed inheritance model
   if (! is.null(inheritance_model)) {
-    if (isInheritanceModelApplicable(experiment)) {
+    if (isExperimentInheritanceModelApplicable(object_details$data[[experiment]])) {
       assert_that(
         characterMatches(inheritance_model, c("dominant", "recessive", "additive"))
       )
@@ -893,11 +893,12 @@ runMiDAS_conditional_omnibus <- function(call,
 #' # filter MiDAS object by HWE test p-value
 #' HWETest(midas, experiment = "hla_alleles", HWE_cutoff = 0.05, as.MiDAS = TRUE)
 #'
-#' @importFrom assertthat assert_that is.string
-#' @importFrom stats p.adjust
-#' @importFrom methods validObject
-#' @importFrom MultiAssayExperiment colData
 #' @importFrom HardyWeinberg HWChisqStats
+#' @importFrom assertthat assert_that is.string
+#' @importFrom methods validObject
+#' @importFrom stats p.adjust
+#' @importFrom SummarizedExperiment assay
+#' @importFrom MultiAssayExperiment colData
 #' @export
 HWETest <-
   function(object,
@@ -914,9 +915,14 @@ HWETest <-
       isTRUEorFALSE(as.MiDAS)
     )
 
+    if (is(object[[experiment]], "SummarizedExperiment")) {
+      x <- assay(object[[experiment]])
+    } else {
+      x <- object[[experiment]]
+    }
     HWE_group <- substitute(HWE_group)
     if (is.null(HWE_group)) {
-      X <- list(p.value = object[[experiment]])
+      X <- list(p.value = x)
     } else {
       colData <-
         do.call(subset,
@@ -926,7 +932,6 @@ HWETest <-
                 )
         )
       subset_ids <- rownames(colData)
-      x <- object[[experiment]]
       X <- list(
         x[, colnames(x) %in% subset_ids],
         x[, ! colnames(x) %in% subset_ids]
