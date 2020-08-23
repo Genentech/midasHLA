@@ -19,8 +19,9 @@ others.}
 \code{object}'s \code{MiDAS} data to use. Valid values includes:
 \code{"hla_alleles"}, \code{"hla_aa"}, \code{"hla_g_groups"},
 \code{"hla_supertypes"}, \code{"hla_NK_ligands"}, \code{"kir_genes"},
-\code{"hla_kir_interactions"}, \code{"hla_divergence"}, \code{"hla_het"}.
-See \code{\link{prepareMiDAS}} for more information.}
+\code{"kir_haplotypes"}, \code{"hla_kir_interactions"},
+\code{"hla_divergence"}, \code{"hla_het"}, \code{"hla_custom"},
+\code{"kir_custom"}. See \code{\link{prepareMiDAS}} for more information.}
 
 \item{inheritance_model}{String specifying inheritance model to use.
 Available choices are \code{"dominant"}, \code{"recessive"},

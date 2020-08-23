@@ -634,6 +634,12 @@ as.data.frame.MiDAS <- function(x, ...) {
 #'   \code{'hla_aa'} experiment.
 #' @param hla_het_resolution Number specifying HLA alleles resolution used to
 #'   calculate heterogeneity in \code{"hla_het"} experiment.
+#' @param hla_dictionary Data frame giving HLA allele dictionary used in
+#'   \code{'hla_custom'} experiment. See \code{\link{hlaToVariable}} for more
+#'   details.
+#' @param kir_dictionary Data frame giving KIR genes dictionary used in
+#'   \code{'kir_custom'} experiment. See \code{\link{countsToVariables}} for more
+#'   details.
 #'
 #' @return Object of class \code{\link{MiDAS}}
 #'
@@ -660,16 +666,21 @@ prepareMiDAS <- function(hla_calls = NULL,
                            "hla_supertypes",
                            "hla_NK_ligands",
                            "kir_genes",
+                           "kir_haplotypes",
                            "hla_kir_interactions",
                            "hla_divergence",
-                           "hla_het"
+                           "hla_het",
+                           "hla_custom",
+                           "kir_custom"
                          ),
                          placeholder = "term",
                          lower_frequency_cutoff = NULL,
                          upper_frequency_cutoff = NULL,
                          indels = TRUE,
                          unkchar = FALSE,
-                         hla_het_resolution = 8
+                         hla_het_resolution = 8,
+                         hla_dictionary = NULL,
+                         kir_dictionary = NULL
 ) {
   experiment_choice <- eval(formals()[["experiment"]])
   assert_that(
@@ -707,7 +718,9 @@ prepareMiDAS <- function(hla_calls = NULL,
     kir_calls = kir_calls,
     indels = indels,
     unkchar = unkchar,
-    hla_het_resolution = hla_het_resolution
+    hla_het_resolution = hla_het_resolution,
+    hla_dictionary = hla_dictionary,
+    kir_dictionary = kir_dictionary
   )
   for (e in experiment) {
     fun <- paste0("prepareMiDAS_", e)
@@ -944,7 +957,7 @@ prepareMiDAS_hla_NK_ligands <- function(hla_calls, ...) {
 
   lib <- c(
     "allele_HLA_Bw",
-    "allele_HLA-B_only_Bw",
+    "allele_HLA-Bw_only_B",
     "allele_HLA-C_C1-2"
   )
   hla_NK_ligands <- Reduce(
@@ -1003,6 +1016,40 @@ prepareMiDAS_kir_genes <- function(kir_calls, ...) {
   )
 
   return(kir_genes)
+}
+
+#' Prepare MiDAS data on KIR haplotypes level
+#'
+#' @inheritParams checkKirCallsFormat
+#'
+#' @return Matrix
+#'
+#' @importFrom assertthat assert_that
+#'
+prepareMiDAS_kir_haplotypes <- function(kir_calls, ...) {
+  assert_that(
+    checkKirCallsFormat(kir_calls)
+  )
+
+  kir_haplotypes <- countsToVariables(counts = kir_calls,
+                                      dictionary = "kir_haplotypes")
+
+  assert_that(
+    ncol(kir_haplotypes) > 1,
+    msg = "None of the KIR genes could be assigned to custom variables."
+  )
+
+  kir_haplotypes <- dfToExperimentMat(kir_haplotypes)
+
+  kir_haplotypes <- SummarizedExperiment(
+    assays = kir_haplotypes,
+    metadata = list(
+      inheritance_model_applicable = FALSE,
+      pop_mul = 1,
+      omnibus_groups = NULL)
+  )
+
+  return(kir_haplotypes)
 }
 
 #' Prepare MiDAS data on HLA - KIR interactions level
@@ -1109,4 +1156,98 @@ prepareMiDAS_hla_het <- function(hla_calls, hla_het_resolution = 8, ...) {
   hla_het <- dfToExperimentMat(hla_het)
 
   return(hla_het)
+}
+
+#' Prepare MiDAS data on custom HLA level
+#'
+#' @inheritParams checkHlaCallsFormat
+#' @param hla_dictionary Data frame giving HLA allele dictionary. See
+#'   \code{\link{hlaToVariable}} for more details.
+#' @param ... Not used
+#'
+#' @return Matrix
+#'
+#' @importFrom assertthat assert_that
+#'
+prepareMiDAS_hla_custom <- function(hla_calls, hla_dictionary, ...) {
+  assert_that(
+    checkHlaCallsFormat(hla_calls),
+    is.data.frame(hla_dictionary)
+  )
+
+  hla_custom <- hlaToVariable(hla_calls = hla_calls,
+                              dictionary = hla_dictionary)
+
+  assert_that(
+    ncol(hla_custom) > 1,
+    msg = "None of the HLA alleles could be assigned to custom variables."
+  )
+
+  # check variables types, character need to be summarized into counts
+  if (is.character(unlist(hla_custom[, -1]))) {
+    hla_custom <-
+      hlaCallsToCounts(
+        hla_calls = hla_custom,
+        check_hla_format = FALSE
+      ) %>%
+      dfToExperimentMat()
+    hla_custom <- SummarizedExperiment(
+      assays = list(hla_custom),
+      metadata = list(
+        inheritance_model_applicable = TRUE,
+        pop_mul = 2,
+        omnibus_groups = NULL
+      )
+    )
+  } else {
+    hla_custom <- dfToExperimentMat(hla_custom)
+    hla_custom <- SummarizedExperiment(
+      assays = list(hla_custom),
+      metadata = list(
+        inheritance_model_applicable = FALSE,
+        pop_mul = NULL,
+        omnibus_groups = NULL
+      )
+    )
+  }
+
+  return(hla_custom)
+}
+
+#' Prepare MiDAS data on custom KIR level
+#'
+#' @inheritParams checkKirCallsFormat
+#' @param kir_dictionary Data frame giving KIR genes dictionary. See
+#'   \code{\link{countsToVariables}} for more details.
+#' @param ... Not used
+#'
+#' @return Matrix
+#'
+#' @importFrom assertthat assert_that
+#'
+prepareMiDAS_kir_custom <- function(kir_calls, kir_dictionary, ...) {
+  assert_that(
+    checkKirCallsFormat(kir_calls),
+    is.data.frame(kir_dictionary)
+  )
+
+  kir_custom <- countsToVariables(counts = kir_calls,
+                                  dictionary = kir_dictionary)
+
+  assert_that(
+    ncol(kir_calls) > 1,
+    msg = "None of the KIR genes could be assigned to custom variables."
+  )
+
+  kir_custom <- dfToExperimentMat(kir_custom)
+
+  kir_custom <- SummarizedExperiment(
+    assays = kir_custom,
+    metadata = list(
+      inheritance_model_applicable = FALSE,
+      pop_mul = 1,
+      omnibus_groups = NULL)
+  )
+
+  return(kir_custom)
 }

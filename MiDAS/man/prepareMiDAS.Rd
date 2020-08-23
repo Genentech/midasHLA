@@ -6,10 +6,12 @@
 \usage{
 prepareMiDAS(hla_calls = NULL, kir_calls = NULL, colData,
   experiment = c("hla_alleles", "hla_aa", "hla_g_groups",
-  "hla_supertypes", "hla_NK_ligands", "kir_genes", "hla_kir_interactions",
-  "hla_divergence", "hla_het"), placeholder = "term",
-  lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL,
-  indels = TRUE, unkchar = FALSE, hla_het_resolution = 8)
+  "hla_supertypes", "hla_NK_ligands", "kir_genes", "kir_haplotypes",
+  "hla_kir_interactions", "hla_divergence", "hla_het", "hla_custom",
+  "kir_custom"), placeholder = "term", lower_frequency_cutoff = NULL,
+  upper_frequency_cutoff = NULL, indels = TRUE, unkchar = FALSE,
+  hla_het_resolution = 8, hla_dictionary = NULL,
+  kir_dictionary = NULL)
 }
 \arguments{
 \item{hla_calls}{HLA calls data frame, as returned by
@@ -52,6 +54,14 @@ should be considered when checking amino acid variability in
 
 \item{hla_het_resolution}{Number specifying HLA alleles resolution used to
 calculate heterogeneity in \code{"hla_het"} experiment.}
+
+\item{hla_dictionary}{Data frame giving HLA allele dictionary used in
+\code{'hla_custom'} experiment. See \code{\link{hlaToVariable}} for more
+details.}
+
+\item{kir_dictionary}{Data frame giving KIR genes dictionary used in
+\code{'kir_custom'} experiment. See \code{\link{countsToVariables}} for more
+details.}
 }
 \value{
 Object of class \code{\link{MiDAS}}

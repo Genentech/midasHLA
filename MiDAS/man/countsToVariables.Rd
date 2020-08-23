@@ -38,9 +38,6 @@ in the same manner can be passed instead.
 
 Dictionaries shipped with the package:
 \describe{
-  \item{\code{hla_kir_interactions}}{
-    HLA - KIR interactions based on \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6558367/}{Pende et al., 2019.}
-  }
   \item{\code{kir_haplotypes}}{
     KIR genes to KIR haplotypes dictionary.
   }

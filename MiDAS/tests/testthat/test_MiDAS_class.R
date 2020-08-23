@@ -225,7 +225,7 @@ test_that("prepareMiDAS", {
       colData = phenotype,
       experiment = "foo"
     ),
-    "experiment should match values \"hla_alleles\", \"hla_aa\", \"hla_g_groups\", \"hla_supertypes\", \"hla_NK_ligands\", \"kir_genes\", \"hla_kir_interactions\"."
+    "experiment should match values \"hla_alleles\", \"hla_aa\", \"hla_g_groups\", \"hla_supertypes\", \"hla_NK_ligands\", \"kir_genes\", \"kir_haplotypes\", \"hla_kir_interactions\", \"hla_divergence\", \"hla_het\", \"hla_custom\", \"kir_custom\"."
   )
 
   expect_error(
@@ -246,6 +246,85 @@ test_that("prepareMiDAS", {
       placeholder = "outcome"
     ),
     "Placeholder 'outcome' can not be used, it is already used as column name in one of the inputs."
+  )
+})
+
+test_that("filterByFrequency", {
+  hla_calls <- reduceHlaCalls(MiDAS_tut_HLA, 4)
+  midas <- prepareMiDAS(
+    hla_calls = hla_calls,
+    kir_calls = MiDAS_tut_KIR,
+    colData = MiDAS_tut_pheno,
+    experiment = c("hla_alleles", "hla_supertypes", "kir_genes", "hla_divergence")
+  )
+
+  # filtration works as expected
+  experiment <- "hla_alleles"
+  lower_frequency_cutoff <- 0.53
+  upper_frequency_cutoff <- 0.56
+  filtered_midas <-
+    filterByFrequency(
+      object = midas,
+      experiment = experiment,
+      lower_frequency_cutoff = lower_frequency_cutoff,
+      upper_frequency_cutoff = upper_frequency_cutoff
+    )
+  test_filtered_midas <- midas
+  test_filtered_midas[[experiment]] <-
+    filterExperimentByFrequency(
+      experiment = midas[[experiment]],
+      lower_frequency_cutoff = lower_frequency_cutoff,
+      upper_frequency_cutoff = upper_frequency_cutoff
+    )
+  expect_equal(filtered_midas, test_filtered_midas)
+
+  # unsported experiments raise error
+  experiment <- "hla_divergence"
+  lower_frequency_cutoff <- 0.53
+  upper_frequency_cutoff <- 0.56
+  expect_error(
+    filterByFrequency(
+      object = midas,
+      experiment = experiment,
+      lower_frequency_cutoff = lower_frequency_cutoff,
+      upper_frequency_cutoff = upper_frequency_cutoff
+    ),
+    "Frequency filtration does not support experiment 'hla_divergence'"
+  )
+})
+
+test_that("filterByOmnibusGroups", {
+  midas <- prepareMiDAS(
+    hla_calls = MiDAS_tut_HLA,
+    colData = MiDAS_tut_pheno,
+    experiment = c("hla_alleles", "hla_aa")
+  )
+
+  # filtration works as expected
+  experiment <- "hla_aa"
+  mask <- c("A_83", "A_90")
+  filtered_midas <-
+    filterByOmnibusGroups(
+      object = midas,
+      experiment = experiment,
+      groups = mask
+    )
+  test_filtered_midas <- midas
+  vars <- c("A_83_G", "A_83_R",  "A_90_D", "A_90_A")
+  test_filtered_midas[[experiment]] <- test_filtered_midas[[experiment]][vars, ]
+  metadata(test_filtered_midas[[experiment]])$omnibus_groups <-
+    metadata(test_filtered_midas[[experiment]])$omnibus_groups[mask]
+  expect_equal(filtered_midas, test_filtered_midas)
+
+  # unsported experiments raise error
+  experiment <- "hla_alleles"
+  expect_error(
+    filterByOmnibusGroups(
+      object = midas,
+      experiment = experiment,
+      groups = mask
+    ),
+    "Omnibus groups filtration does not support experiment 'hla_alleles'"
   )
 })
 
@@ -375,7 +454,7 @@ test_that("prepareMiDAS_hla_NK_ligands", {
       x = lapply(
         c(
           "allele_HLA_Bw",
-          "allele_HLA-B_only_Bw",
+          "allele_HLA-Bw_only_B",
           "allele_HLA-C_C1-2"
         ),
         hlaToVariable,
@@ -404,6 +483,24 @@ test_that("prepareMiDAS_kir_genes", {
   experiment <- do.call(prepareMiDAS_kir_genes, args)
 
   experiment_test <- dfToExperimentMat(args$kir_calls)
+  experiment_test <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(experiment_test),
+    metadata = list(
+      inheritance_model_applicable = FALSE,
+      pop_mul = 1,
+      omnibus_groups = NULL
+    )
+  )
+
+  expect_equal(experiment, experiment_test)
+})
+
+test_that("prepareMiDAS_kir_haplotypes", {
+  args <- list(kir_calls = MiDAS_tut_KIR)
+  experiment <- do.call(prepareMiDAS_kir_haplotypes, args)
+
+  experiment_test <- countsToVariables(args$kir_calls, "kir_haplotypes")
+  experiment_test <- dfToExperimentMat(experiment_test)
   experiment_test <- SummarizedExperiment::SummarizedExperiment(
     assays = list(experiment_test),
     metadata = list(
@@ -497,81 +594,36 @@ test_that("prepareMiDAS_hla_het", {
   )
 })
 
-test_that("filterByFrequency", {
-  hla_calls <- reduceHlaCalls(MiDAS_tut_HLA, 4)
-  midas <- prepareMiDAS(
-    hla_calls = hla_calls,
-    kir_calls = MiDAS_tut_KIR,
-    colData = MiDAS_tut_pheno,
-    experiment = c("hla_alleles", "hla_supertypes", "kir_genes", "hla_divergence")
+test_that("prepareMiDAS_hla_custom", {
+  hla_dictionary <- read.table(
+    file = system.file("extdata", "Match_allele_HLA_Ggroup.txt", package = "MiDAS"),
+    header = TRUE,
+    sep = "\t",
+    quote = "",
+    stringsAsFactors = FALSE
   )
-
-  # filtration works as expected
-  experiment <- "hla_alleles"
-  lower_frequency_cutoff <- 0.53
-  upper_frequency_cutoff <- 0.56
-  filtered_midas <-
-    filterByFrequency(
-      object = midas,
-      experiment = experiment,
-      lower_frequency_cutoff = lower_frequency_cutoff,
-      upper_frequency_cutoff = upper_frequency_cutoff
-    )
-  test_filtered_midas <- midas
-  test_filtered_midas[[experiment]] <-
-    filterExperimentByFrequency(
-      experiment = midas[[experiment]],
-      lower_frequency_cutoff = lower_frequency_cutoff,
-      upper_frequency_cutoff = upper_frequency_cutoff
-    )
-  expect_equal(filtered_midas, test_filtered_midas)
-
-  # unsported experiments raise error
-  experiment <- "hla_divergence"
-  lower_frequency_cutoff <- 0.53
-  upper_frequency_cutoff <- 0.56
-  expect_error(
-    filterByFrequency(
-      object = midas,
-      experiment = experiment,
-      lower_frequency_cutoff = lower_frequency_cutoff,
-      upper_frequency_cutoff = upper_frequency_cutoff
-    ),
-    "Frequency filtration does not support experiment 'hla_divergence'"
-  )
-})
-
-test_that("filterByOmnibusGroups", {
   midas <- prepareMiDAS(
     hla_calls = MiDAS_tut_HLA,
     colData = MiDAS_tut_pheno,
-    experiment = c("hla_alleles", "hla_aa")
+    experiment = c("hla_g_groups", "hla_custom"),
+    hla_dictionary = hla_dictionary
   )
+  expect_equal(midas[["hla_g_groups"]], midas[["hla_custom"]])
+})
 
-  # filtration works as expected
-  experiment <- "hla_aa"
-  mask <- c("A_83", "A_90")
-  filtered_midas <-
-    filterByOmnibusGroups(
-      object = midas,
-      experiment = experiment,
-      groups = mask
-    )
-  test_filtered_midas <- midas
-  vars <- c("A_83_G", "A_83_R",  "A_90_D", "A_90_A")
-  test_filtered_midas[[experiment]] <- test_filtered_midas[[experiment]][vars, ]
-  metadata(test_filtered_midas[[experiment]])$omnibus_groups <-
-    metadata(test_filtered_midas[[experiment]])$omnibus_groups[mask]
-  expect_equal(filtered_midas, test_filtered_midas)
-
-  # unsported experiments raise error
-  experiment <- "hla_alleles"
-  expect_error(
-    filterByOmnibusGroups(
-      object = midas,
-      experiment = experiment,
-      groups = mask
-    ),
-    "Omnibus groups filtration does not support experiment 'hla_alleles'"
+test_that("prepareMiDAS_kir_custom", {
+  kir_dictionary <- read.table(
+    file = system.file("extdata", "Match_counts_kir_haplotypes.txt", package = "MiDAS"),
+    header = TRUE,
+    sep = "\t",
+    quote = "",
+    stringsAsFactors = FALSE
   )
+  midas <- prepareMiDAS(
+    kir_calls = MiDAS_tut_KIR,
+    colData = MiDAS_tut_pheno,
+    experiment = c("kir_haplotypes", "kir_custom"),
+    kir_dictionary = kir_dictionary
+  )
+  expect_equal(midas[["kir_haplotypes"]], midas[["kir_custom"]])
 })

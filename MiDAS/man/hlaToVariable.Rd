@@ -58,7 +58,7 @@ package. They can be referred to by using one of the following strings:
    Translates HLA-A and HLA-B alleles into supertypes, a classification that
    group HLA alleles based on peptide binding specificities.
   }
-  \item{\code{allele_HLA_Ggroup}}{
+  \item{\code{"allele_HLA_Ggroup"}}{
     Translates HLA alleles into G groups, which defines amino acid identity
     only in the exons relevant for peptide binding. Note that alleles
     DRB1*01:01:01 and DRB1*01:16 match more than one G group, here this

@@ -198,7 +198,7 @@ hlaToAAVariation <- function(hla_calls,
 #'    Translates HLA-A and HLA-B alleles into supertypes, a classification that
 #'    group HLA alleles based on peptide binding specificities.
 #'   }
-#'   \item{\code{allele_HLA_Ggroup}}{
+#'   \item{\code{"allele_HLA_Ggroup"}}{
 #'     Translates HLA alleles into G groups, which defines amino acid identity
 #'     only in the exons relevant for peptide binding. Note that alleles
 #'     DRB1*01:01:01 and DRB1*01:16 match more than one G group, here this
@@ -243,7 +243,7 @@ hlaToVariable <- function(hla_calls,
   if (is.string(dictionary)) {
     lib <- listMiDASDictionaries()
     if (dictionary %in% lib) {
-      if (dictionary == "allele_HLA-B_Bw") {
+      if (dictionary %in% c("allele_HLA-B_Bw", "allele_HLA-Bw_only_B")) {
         warn("In ambiguous cases Bw4 will be assigned! See 'hlaToVariable' documentation for more details.")
       }
       dictionary <- system.file(
@@ -274,7 +274,11 @@ hlaToVariable <- function(hla_calls,
   }
 
   # add dictionary prefix to column names
-  dict_prefix <- gsub(".txt$", "", gsub("^.*_", "", dictionary))
+  if (is.string(dictionary)) {
+    dict_prefix <- gsub(".txt$", "", gsub("^.*_", "", dictionary))
+  } else {
+    dict_prefix <- colnames(dictionary)[2] # colnames are allele, name_of_variable
+  }
   colnames(variable) <- paste0(dict_prefix, "_", colnames(variable))
 
   # get all na columns
@@ -732,9 +736,6 @@ kableResults <- function(results,
 #'
 #' Dictionaries shipped with the package:
 #' \describe{
-#'   \item{\code{hla_kir_interactions}}{
-#'     HLA - KIR interactions based on \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6558367/}{Pende et al., 2019.}
-#'   }
 #'   \item{\code{kir_haplotypes}}{
 #'     KIR genes to KIR haplotypes dictionary.
 #'   }
