@@ -525,11 +525,13 @@ distGrantham <- function(aa1, aa2) {
 #' \href{http://www.sciencemag.org/content/185/4154/862.long}{Grantham R. 1974.}.
 #'
 #' Grantham distance is calculated only for class I HLA alleles. First
-#' exons forming the variable region in the peptide binding groove (i.e.,
-#' exon 2 and 3) are selected (positions 1-182 in IMGT/HLA alignments, however
-#' here we take 2-182 as many 1st positions are missing). Then all the alleles
-#' containing gaps, stop codons or indels are discarded. Finally distance is
-#' calculated for each pair.
+#' exons forming the variable region in the peptide binding groove are selected.
+#' Here we provide option to choose either  \code{"binding_groove"} - exon 2 and
+#' 3 (positions 1-182 in IMGT/HLA alignments, however here we take 2-182 as many
+#' 1st positions are missing), \code{"B_pocket"} -  residues 7, 9, 24, 25, 34,
+#' 45, 63, 66, 67, 70, 99 and \code{"F_pocket"} - residues 77, 80, 81, 84, 95,
+#' 116, 123, 143, 146, 147. Then all the alleles containing gaps, stop codons or
+#' indels are discarded. Finally distance is calculated for each pair.
 #'
 #' See \href{https://europepmc.org/article/med/28650991}{Robinson J. 2017.} for
 #' more details on the choice of exons 2 and 3.
@@ -537,6 +539,10 @@ distGrantham <- function(aa1, aa2) {
 #' @inheritParams checkHlaCallsFormat
 #' @param genes Character vector specifying genes for which allelic distance
 #'   should be calculated.
+#' @param divergence_range String specifying variable region in peptide binding
+#'   groove which should be considered for Grantham distance calculation. Valid
+#'   choices includes: \code{"binding_groove"}, \code{"B_pocket"},
+#'   \code{"F_pocket"}. See details for more information.
 #'
 #' @return Data frame of normalized Grantham distances between pairs of alleles
 #'   for each specified HLA gene. First column (\code{ID}) is the same as in
@@ -551,11 +557,14 @@ distGrantham <- function(aa1, aa2) {
 #' hlaCallsGranthamDistance(MiDAS_tut_HLA, genes = "A")
 #'
 #' @export
-hlaCallsGranthamDistance <- function(hla_calls, genes = c("A", "B", "C")) {
+hlaCallsGranthamDistance <- function(hla_calls,
+                                     genes = c("A", "B", "C"),
+                                     divergence_range = "binding_groove") {
   assert_that(
     checkHlaCallsFormat(hla_calls),
     is.character(genes),
-    noNA(genes)
+    noNA(genes),
+    stringMatches(divergence_range, c("binding_groove", "B_pocket", "F_pocket"))
   )
 
   target_genes <- getHlaCallsGenes(hla_calls)
@@ -583,7 +592,12 @@ hlaCallsGranthamDistance <- function(hla_calls, genes = c("A", "B", "C")) {
     )
 
     # process alignment
-    alignment <- hlaAlignmentGrantham(gene, resolution[1])
+    aa_sel <- list(
+      binding_groove = 2:182,
+      B_pocket =  c(7, 9, 24, 25, 34, 45, 63, 66, 67, 70, 99),
+      F_pocket = c(77, 80, 81, 84, 95, 116, 123, 143, 146, 147)
+    )
+    alignment <- hlaAlignmentGrantham(gene, resolution[1], aa_sel[[divergence_range]])
 
     allele_numbers <- rownames(alignment)
     d[[gene]] <- vapply(
@@ -616,20 +630,21 @@ hlaCallsGranthamDistance <- function(hla_calls, genes = c("A", "B", "C")) {
 
 #' Helper function returning alignment for Grantham distance calculations
 #'
-#' @param gene Character vector specifying HLA gene
-#' @param resolution Number giving allele resolution
+#' @param gene Character vector specifying HLA gene.
+#' @param resolution Number giving allele resolution.
+#' @param aa_sel Numeric vector specifying amino acids that should be extracted.
 #'
 #' @return HLA alignment processed for grantham distance between alleles can be
-#'   calculated. Processing includes extracting exons 1 and 2, masking indels,
-#'   gaps and stop codons.
+#'   calculated. Processing includes extracting specific amino acids, masking
+#'   indels, gaps and stop codons.
 #'
-hlaAlignmentGrantham <- function(gene, resolution) {
+hlaAlignmentGrantham <- function(gene, resolution, aa_sel = 2:182) {
   alignment <- readHlaAlignments(
     gene = gene,
     resolution = resolution,
     trim = TRUE
   )
-  alignment <- alignment[, 2:182] # select exons 2 and 3 w/o 1st position as it is biased towards missing data
+  alignment <- alignment[, aa_sel] # select amino acids
   mask <- apply(alignment, 1, function(x) any(x == "" | x == "X" | x == ".")) # mask gaps, stop codons, indels
   alignment <- alignment[! mask, ]
 

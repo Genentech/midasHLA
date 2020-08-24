@@ -10,8 +10,8 @@ prepareMiDAS(hla_calls = NULL, kir_calls = NULL, colData,
   "hla_kir_interactions", "hla_divergence", "hla_het", "hla_custom",
   "kir_custom"), placeholder = "term", lower_frequency_cutoff = NULL,
   upper_frequency_cutoff = NULL, indels = TRUE, unkchar = FALSE,
-  hla_het_resolution = 8, hla_dictionary = NULL,
-  kir_dictionary = NULL)
+  hla_divergence_range = "binding_groove", hla_het_resolution = 8,
+  hla_dictionary = NULL, kir_dictionary = NULL)
 }
 \arguments{
 \item{hla_calls}{HLA calls data frame, as returned by

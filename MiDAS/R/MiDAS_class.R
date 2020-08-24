@@ -621,6 +621,7 @@ as.data.frame.MiDAS <- function(x, ...) {
 #' @inheritParams hlaCallsToCounts
 #' @inheritParams filterByFrequency
 #' @inheritParams prepareMiDAS_hla_het
+#' @inheritParams hlaCallsGranthamDistance
 #' @param colData Data frame holding additional variables like phenotypic
 #'   observations or covariates. It have to contain \code{'ID'} column holding
 #'   samples identifiers corresponding to identifiers in \code{hla_calls} and
@@ -686,6 +687,7 @@ prepareMiDAS <- function(hla_calls = NULL,
                          upper_frequency_cutoff = NULL,
                          indels = TRUE,
                          unkchar = FALSE,
+                         hla_divergence_range = "binding_groove",
                          hla_het_resolution = 8,
                          hla_dictionary = NULL,
                          kir_dictionary = NULL
@@ -726,6 +728,7 @@ prepareMiDAS <- function(hla_calls = NULL,
     kir_calls = kir_calls,
     indels = indels,
     unkchar = unkchar,
+    hla_divergence_range = hla_divergence_range,
     hla_het_resolution = hla_het_resolution,
     hla_dictionary = hla_dictionary,
     kir_dictionary = kir_dictionary
@@ -1102,7 +1105,9 @@ prepareMiDAS_hla_kir_interactions <- function(hla_calls, kir_calls, ...) {
 #'
 #' @return Matrix
 #'
-prepareMiDAS_hla_divergence <- function(hla_calls, ...) {
+prepareMiDAS_hla_divergence <- function(hla_calls,
+                                        hla_divergence_range = "binding_groove",
+                                        ...) {
   assert_that(
     checkHlaCallsFormat(hla_calls)
   )
@@ -1115,7 +1120,8 @@ prepareMiDAS_hla_divergence <- function(hla_calls, ...) {
   hla_divergence <-
     hlaCallsGranthamDistance(
       hla_calls = hla_calls,
-      genes = genes[genes %in% c("A", "B", "C")]
+      genes = genes[genes %in% c("A", "B", "C")],
+      divergence_range = hla_divergence_range
     )
   hla_divergence$ABC_avg <- rowMeans(hla_divergence[-1])
   experiment_mat <- dfToExperimentMat(hla_divergence)

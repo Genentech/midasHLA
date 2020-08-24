@@ -254,6 +254,17 @@ test_that("hlaCallsGranthamDistance", {
   row.names = c(NA,-5L))
   expect_equal(gdist, gdist_test)
 
+  gdist <- hlaCallsGranthamDistance(hla_calls, genes = c("A", "B", "C"), divergence_range = "B_pocket")
+  gdist_test <- structure(list(
+    ID = c("PAT1", "PAT2", "PAT3", "PAT4", "PAT5"),
+    A = c(0, 0, 0, 2, 0),
+    B = c(5.27272727272727, 51.4545454545455, 0, 23.8181818181818, 0),
+    C = c(23.5454545454545, 23.5454545454545, 0, 0, 0)
+  ),
+  class = "data.frame",
+  row.names = c(NA,-5L))
+  expect_equal(gdist, gdist_test)
+
   # checkHlaCallsFormat test is ommitted here
 
   expect_error(hlaCallsGranthamDistance(hla_calls, genes = 1),
@@ -268,10 +279,13 @@ test_that("hlaCallsGranthamDistance", {
     hlaCallsGranthamDistance(hla_calls_bad, genes = "A"),
     "Allele resolutions for gene A are not equal"
   )
+
+  expect_error(hlaCallsGranthamDistance(hla_calls, genes = "A", divergence_range = "Z"),
+               "divergence_range should be one of \"binding_groove\", \"B_pocket\", \"F_pocket\".")
 })
 
 test_that("hlaAlignmentGrantham", {
-  aln <- hlaAlignmentGrantham("TAP1", 2)
+  aln <- hlaAlignmentGrantham("TAP1", 2, 2:182)
   aln_test <- readHlaAlignments(gene = "TAP1", resolution = 2)
   aln_test <- aln_test[, 2:182]
   mask <- apply(aln_test, 1, function(x) any(x == "" | x == "X" | x == "."))
