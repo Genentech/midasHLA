@@ -2,7 +2,7 @@
 % Please edit documentation in R/MiDAS_class.R
 \name{getFrequencies}
 \alias{getFrequencies}
-\title{Calculate features frequencies for given experiment in MiDAS object.}
+\title{Calculate features frequencies for given a experiment in MiDAS object.}
 \usage{
 getFrequencies(object, experiment, carrier_frequency = FALSE,
   compare = FALSE, ref_pop = c("USA NMDP African American pop 2",
@@ -35,5 +35,5 @@ Data frame with features from selected experiment and their
   corresponding frequencies.
 }
 \description{
-Calculate features frequencies for given experiment in MiDAS object.
+Calculate features frequencies for given a experiment in MiDAS object.
 }

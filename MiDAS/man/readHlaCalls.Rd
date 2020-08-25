@@ -26,7 +26,7 @@ HLA calls data frame.
 \code{readHlaCalls} read HLA allele calls from file
 }
 \details{
-Input file has to be a tsv formatted table with header. First column should
+Input file has to be a tsv formatted table with a header. First column should
 contain sample IDs, further columns hold HLA allele numbers. See
 \code{system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")}
 for an example.

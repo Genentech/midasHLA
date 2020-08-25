@@ -24,7 +24,7 @@ sequence.}
 \value{
 Matrix containing HLA allele alignments.
 
-  Rownames corresponds to allele numbers and columns to positions in the
+  Rownames correspond to allele numbers and columns to positions in the
   alignment. Sequences following the termination codon are marked as empty
   character (\code{""}). Unknown sequences are marked with a character of
   choice, by default \code{""}. Stop codons are represented by a hash (X).
@@ -40,9 +40,9 @@ see
 
 All protein alignment files from the EBI database are shipped with the package.
 They can be easily accessed using \code{gene} parameter. If \code{gene} is
-set to \code{NULL} file parameter is used instead and alignment is read from
-the provided file. In EBI database alignments for DRB1, DRB3, DRB4 and DRB5
-genes are provided as a single file, here they are separated.
+set to \code{NULL}, \code{file} parameter is used instead and alignment is
+read from the provided file. In EBI database alignments for DRB1, DRB3, DRB4
+and DRB5 genes are provided as a single file, here they are separated.
 }
 \examples{
 hla_alignments <- readHlaAlignments(gene = "A")

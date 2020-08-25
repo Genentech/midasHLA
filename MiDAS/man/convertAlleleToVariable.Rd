@@ -17,7 +17,7 @@ Vector containing HLA allele numbers converted to additional
   variables according to \code{dictionary}.
 }
 \description{
-\code{convertAlleleToVariable} convert input HLA allele numbers to additional
+\code{convertAlleleToVariable} converts input HLA allele numbers to additional
 variables based on the supplied dictionary.
 }
 \details{

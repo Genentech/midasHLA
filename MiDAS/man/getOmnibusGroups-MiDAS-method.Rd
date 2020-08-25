@@ -20,6 +20,6 @@ For some experiments features can be naturally divided into groups
 (here called omnibus groups). For example, in \code{'hla_aa'} experiment
 features can be grouped by amino acid position (\code{"B_46_E"},
 \code{"B_46_A"}) can be grouped into \code{B_46} group). Such groups can be
-than used to perform omnibus test, see \code{\link{runMiDAS}} for more
+then used to perform omnibus test, see \code{\link{runMiDAS}} for more
 details.
 }

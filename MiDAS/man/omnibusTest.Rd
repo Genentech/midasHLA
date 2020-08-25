@@ -29,13 +29,13 @@ know what you are doing!}
 Data frame containing omnibus test results for specified variables.
 }
 \description{
-\code{OmnibusTest} calculate overall p-value for linear combination of
+\code{OmnibusTest} calculates overall p-value for linear combination of
 variables using likelihood ratio test.
 }
 \details{
-Likelihood ratio test is conducted by comparing model given in \code{object}
-with extended model, that is created by including effect of variables given
-in \code{variables} as their linear combination.
+Likelihood ratio test is conducted by comparing a model given in an
+\code{object} with an extended model, that is created by including the effect
+of variables given in \code{variables} as their linear combination.
 }
 \examples{
 midas <- prepareMiDAS(hla_calls = MiDAS_tut_HLA,

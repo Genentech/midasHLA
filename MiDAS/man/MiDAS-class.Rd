@@ -79,7 +79,7 @@ The \code{MiDAS} class is a \code{\link{MultiAssayExperiment}} object
 containing data and metadata required for MiDAS analysis.
 
 Valid \code{MiDAS} object must have unique features names across all
-experiments and colData. It's metadata list need to have \code{placeholder}
+experiments and colData. It's metadata list needs to have a \code{placeholder}
 element, which is a string specifying name of column in colData used when
 defining statistical model for downstream analyses (see
 \code{\link{runMiDAS}} for more details). Optionally the object's metadata
