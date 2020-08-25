@@ -38,7 +38,7 @@ test_that("checkKirCallsFormat", {
 
   expect_error(
     checkKirCallsFormat(MiDAS_tut_KIR[, 1, drop = FALSE]),
-    "Number of columns in kir_calls must equal 17."
+    "kir_calls shiuld have 17 columns: ID, KIR3DL3, KIR2DS2, KIR2DL2, KIR2DL3, KIR2DP1, KIR2DL1, KIR3DP1, KIR2DL4, KIR3DL1, KIR3DS1, KIR2DL5, KIR2DS3, KIR2DS5, KIR2DS4, KIR2DS1, KIR3DL2"
   )
 
   fake_kir_counts <- MiDAS_tut_KIR
@@ -197,7 +197,7 @@ test_that("colnamesMatches", {
   expect_error(colnamesMatches(1:2, c("foo", "bar")), "x is not a data frame")
 
   expect_error(colnamesMatches(data.frame(one = 1:2), c("foo", "bar")),
-               "Number of columns in data.frame\\(one = 1:2\\) must equal 2."
+               "data.frame\\(one = 1:2\\) shiuld have 2 columns: foo, bar"
   )
 
   expect_error(

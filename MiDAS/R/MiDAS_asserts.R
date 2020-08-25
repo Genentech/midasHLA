@@ -399,9 +399,10 @@ colnamesMatches <- function(x, cols) {
     is.data.frame(x),
     see_if(ncol(x) == length(cols),
            msg = sprintf(
-             "Number of columns in %s must equal %i.",
+             "%s shiuld have %i columns: %s",
              deparse(substitute(x)),
-             length(cols)
+             length(cols),
+             paste(cols, collapse = ", ")
            )
     )
   )
