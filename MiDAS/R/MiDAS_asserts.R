@@ -29,6 +29,7 @@ checkHlaCallsFormat <- function(hla_calls) {
   alleles <- unlist(hla_calls[, -1])
   test_values <- checkAlleleFormat(alleles)
   alleles <- alleles[! test_values & ! is.na(alleles)]
+  if (length(alleles) > 10) { alleles <- alleles[1:10] }
   truncated <- ifelse(length(alleles) < 10, "", ", ...")
   msg <- sprintf("values: %s%s in %s doesn't follow HLA numbers specification", paste(alleles, collapse = ", "), truncated, an)
   assert_that(
