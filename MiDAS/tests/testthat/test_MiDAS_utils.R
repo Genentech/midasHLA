@@ -241,25 +241,26 @@ test_that("distGrantham", {
 })
 
 test_that("hlaCallsGranthamDistance", {
-  file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(file)[1:5, ]
-  gdist <- hlaCallsGranthamDistance(hla_calls, genes = c("A", "B", "C"))
+  gdist <- hlaCallsGranthamDistance(MiDAS_tut_HLA[1:5, ], genes = c("A", "B", "C"))
   gdist_test <- structure(list(
-    ID = c("PAT1", "PAT2", "PAT3", "PAT4", "PAT5"),
-    A = c(0, 0, 0, 0.121546961325967, 0),
-    B = c(7.20441988950276, 13.9337016574586, 0, 10.2265193370166, 0),
-    C = c(7.27624309392265, 6.58563535911602, 0, 0, 0)
+    ID = c("P001", "P002", "P003", "P004", "P005"),
+    A = c(10.9447513812155, 0, 8.10497237569061, 10.6629834254144, 10.6574585635359),
+    B = c(10.3480662983425, 9.20441988950276, 8.4475138121547, 2.88950276243094, 9.01104972375691),
+    C = c(5.37569060773481, 4.98895027624309, 6.70718232044199, 5.87292817679558, 6.70718232044199)
   ),
   class = "data.frame",
   row.names = c(NA,-5L))
   expect_equal(gdist, gdist_test)
 
-  gdist <- hlaCallsGranthamDistance(hla_calls, genes = c("A", "B", "C"), divergence_range = "B_pocket")
+  gdist <-
+    hlaCallsGranthamDistance(MiDAS_tut_HLA[1:5,],
+                             genes = c("A", "B", "C"),
+                             aa_selection = "B_pocket")
   gdist_test <- structure(list(
-    ID = c("PAT1", "PAT2", "PAT3", "PAT4", "PAT5"),
-    A = c(0, 0, 0, 2, 0),
-    B = c(5.27272727272727, 51.4545454545455, 0, 23.8181818181818, 0),
-    C = c(23.5454545454545, 23.5454545454545, 0, 0, 0)
+    ID = c("P001", "P002", "P003", "P004", "P005"),
+    A = c(25.8181818181818, 0, 12.7272727272727, 15.8181818181818, 16.0909090909091),
+    B = c(21.0909090909091, 31.3636363636364, 21.0909090909091, 0, 21.0909090909091),
+    C = c(29, 28.6363636363636, 29, 15.0909090909091, 29)
   ),
   class = "data.frame",
   row.names = c(NA,-5L))
@@ -267,21 +268,21 @@ test_that("hlaCallsGranthamDistance", {
 
   # checkHlaCallsFormat test is ommitted here
 
-  expect_error(hlaCallsGranthamDistance(hla_calls, genes = 1),
+  expect_error(hlaCallsGranthamDistance(MiDAS_tut_HLA, genes = 1),
                "genes is not a character vector")
 
-  expect_error(hlaCallsGranthamDistance(hla_calls, genes = c("A", NA)),
+  expect_error(hlaCallsGranthamDistance(MiDAS_tut_HLA, genes = c("A", NA)),
                "genes contains 1 missing values")
 
-  hla_calls_bad <- hla_calls
+  hla_calls_bad <- MiDAS_tut_HLA
   hla_calls_bad[2, 2] <- "A*01"
   expect_error(
     hlaCallsGranthamDistance(hla_calls_bad, genes = "A"),
     "Allele resolutions for gene A are not equal"
   )
 
-  expect_error(hlaCallsGranthamDistance(hla_calls, genes = "A", divergence_range = "Z"),
-               "divergence_range should be one of \"binding_groove\", \"B_pocket\", \"F_pocket\".")
+  expect_error(hlaCallsGranthamDistance(MiDAS_tut_HLA, genes = "A", aa_selection = "Z"),
+               "aa_selection should be one of \"binding_groove\", \"B_pocket\", \"F_pocket\".")
 })
 
 test_that("hlaAlignmentGrantham", {

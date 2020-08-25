@@ -539,7 +539,7 @@ distGrantham <- function(aa1, aa2) {
 #' @inheritParams checkHlaCallsFormat
 #' @param genes Character vector specifying genes for which allelic distance
 #'   should be calculated.
-#' @param divergence_range String specifying variable region in peptide binding
+#' @param aa_selection String specifying variable region in peptide binding
 #'   groove which should be considered for Grantham distance calculation. Valid
 #'   choices includes: \code{"binding_groove"}, \code{"B_pocket"},
 #'   \code{"F_pocket"}. See details for more information.
@@ -559,12 +559,12 @@ distGrantham <- function(aa1, aa2) {
 #' @export
 hlaCallsGranthamDistance <- function(hla_calls,
                                      genes = c("A", "B", "C"),
-                                     divergence_range = "binding_groove") {
+                                     aa_selection = "binding_groove") {
   assert_that(
     checkHlaCallsFormat(hla_calls),
     is.character(genes),
     noNA(genes),
-    stringMatches(divergence_range, c("binding_groove", "B_pocket", "F_pocket"))
+    stringMatches(aa_selection, c("binding_groove", "B_pocket", "F_pocket"))
   )
 
   target_genes <- getHlaCallsGenes(hla_calls)
@@ -597,7 +597,7 @@ hlaCallsGranthamDistance <- function(hla_calls,
       B_pocket =  c(7, 9, 24, 25, 34, 45, 63, 66, 67, 70, 99),
       F_pocket = c(77, 80, 81, 84, 95, 116, 123, 143, 146, 147)
     )
-    alignment <- hlaAlignmentGrantham(gene, resolution[1], aa_sel[[divergence_range]])
+    alignment <- hlaAlignmentGrantham(gene, resolution[1], aa_sel[[aa_selection]])
 
     allele_numbers <- rownames(alignment)
     d[[gene]] <- vapply(

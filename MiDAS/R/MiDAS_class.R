@@ -747,7 +747,7 @@ prepareMiDAS <- function(hla_calls = NULL,
                          upper_frequency_cutoff = NULL,
                          indels = TRUE,
                          unkchar = FALSE,
-                         hla_divergence_range = "binding_groove",
+                         hla_divergence_aa_selection = "binding_groove",
                          hla_het_resolution = 8,
                          hla_dictionary = NULL,
                          kir_dictionary = NULL
@@ -788,7 +788,7 @@ prepareMiDAS <- function(hla_calls = NULL,
     kir_calls = kir_calls,
     indels = indels,
     unkchar = unkchar,
-    hla_divergence_range = hla_divergence_range,
+    hla_divergence_aa_selection = hla_divergence_aa_selection,
     hla_het_resolution = hla_het_resolution,
     hla_dictionary = hla_dictionary,
     kir_dictionary = kir_dictionary
@@ -1162,12 +1162,16 @@ prepareMiDAS_hla_kir_interactions <- function(hla_calls, kir_calls, ...) {
 #' Prepare MiDAS data on HLA divergence level
 #'
 #' @inheritParams checkHlaCallsFormat
+#' @param hla_divergence_aa_selection String specifying variable region in peptide binding
+#'   groove which should be considered for Grantham distance calculation. Valid
+#'   choices includes: \code{"binding_groove"}, \code{"B_pocket"},
+#'   \code{"F_pocket"}. See details for more information.
 #' @param ... Not used
 #'
 #' @return Matrix
 #'
 prepareMiDAS_hla_divergence <- function(hla_calls,
-                                        hla_divergence_range = "binding_groove",
+                                        hla_divergence_aa_selection = "binding_groove",
                                         ...) {
   assert_that(
     checkHlaCallsFormat(hla_calls)
@@ -1182,7 +1186,7 @@ prepareMiDAS_hla_divergence <- function(hla_calls,
     hlaCallsGranthamDistance(
       hla_calls = hla_calls,
       genes = genes[genes %in% c("A", "B", "C")],
-      divergence_range = hla_divergence_range
+      aa_selection = hla_divergence_aa_selection
     )
   hla_divergence$ABC_avg <- rowMeans(hla_divergence[-1])
   experiment_mat <- dfToExperimentMat(hla_divergence)

@@ -20,7 +20,7 @@
 #' @return HLA calls data frame.
 #'
 #' @examples
-#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' file <- system.file("extdata", "MiDAS_tut_HLA.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(file)
 #'
 #' @importFrom assertthat assert_that is.readable see_if
@@ -277,28 +277,27 @@ readHlaAlignments <- function(file,
 #' @return Data frame containing KIR gene's counts.
 #'
 #' @examples
-#' file <- system.file("extdata", "KPI_output_example.txt", package = "MiDAS")
-#' readKIRCalls(file)
+#' file <- system.file("extdata", "MiDAS_tut_KIR.txt", package = "MiDAS")
+#' readKirCalls(file)
 #'
 #' @importFrom assertthat assert_that is.readable see_if
 #' @importFrom dplyr left_join select
 #' @importFrom stats na.omit setNames
 #' @export
-readKIRCalls <- function(file,
+readKirCalls <- function(file,
                          na.strings = c("", "NA", "uninterpretable")) {
   assert_that(
     is.readable(file),
     is.character(na.strings)
   )
 
-  kpi_output <- read.table(
+  kir_calls <- read.table(
     file = file,
     header = TRUE,
     sep = "\t",
     stringsAsFactors = FALSE,
     na.strings = na.strings
   )
-  kir_calls <- kpi_output[, -2, drop = FALSE]
   checkKirCallsFormat(kir_calls)
 
   return(kir_calls)
