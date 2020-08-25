@@ -1,7 +1,7 @@
 #' Association analysis
 #'
-#' \code{analyzeAssociations} perform association analysis on single variable
-#' level using statistical model of choice.
+#' \code{analyzeAssociations} perform association analysis on a single variable
+#' level using a statistical model of choice.
 #'
 #' \code{correction} specifies p-value adjustment method to use, common choice
 #' is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
@@ -99,7 +99,7 @@ analyzeAssociations <- function(object,
 #' Stepwise conditional association analysis
 #'
 #' \code{analyzeConditionalAssociations} perform stepwise conditional testing
-#' adding the previous top-associated variable as covariate, until there is no
+#' adding the previous top-associated variable as covariate, until there are no
 #' more significant variables based on a self-defined threshold.
 #'
 #' @inheritParams updateModel
@@ -253,12 +253,12 @@ analyzeConditionalAssociations <- function(object,
 
 #' Omnibus test
 #'
-#' \code{OmnibusTest} calculate overall p-value for linear combination of
+#' \code{OmnibusTest} calculates overall p-value for linear combination of
 #' variables using likelihood ratio test.
 #'
-#' Likelihood ratio test is conducted by comparing model given in \code{object}
-#' with extended model, that is created by including effect of variables given
-#' in \code{variables} as their linear combination.
+#' Likelihood ratio test is conducted by comparing a model given in an
+#' \code{object} with an extended model, that is created by including the effect
+#' of variables given in \code{variables} as their linear combination.
 #'
 #' @inheritParams analyzeAssociations
 #' @param omnibus_groups List of character vectors giving sets of variables for

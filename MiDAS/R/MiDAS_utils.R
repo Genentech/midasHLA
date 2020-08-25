@@ -171,7 +171,7 @@ getVariableAAPos <- function(alignment,
 
 #' Convert allele numbers to additional variables
 #'
-#' \code{convertAlleleToVariable} convert input HLA allele numbers to additional
+#' \code{convertAlleleToVariable} converts input HLA allele numbers to additional
 #' variables based on the supplied dictionary.
 #'
 #' \code{dictionary} file should be a tsv format with header and two columns.
@@ -772,7 +772,7 @@ midasToWide <- function(object, experiment) {
 #'
 #' @param genes Character vector with KIR gene names.
 #'
-#' @return Logical vector specifying if \code{genes} elements follows KIR genes
+#' @return Logical vector specifying if \code{genes} elements follow KIR genes
 #'   naming conventions.
 #'
 #' @examples

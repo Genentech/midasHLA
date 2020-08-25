@@ -2,7 +2,7 @@
 #'
 #' \code{readHlaCalls} read HLA allele calls from file
 #'
-#' Input file has to be a tsv formatted table with header. First column should
+#' Input file has to be a tsv formatted table with a header. First column should
 #' contain sample IDs, further columns hold HLA allele numbers. See
 #' \code{system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")}
 #' for an example.
@@ -87,9 +87,9 @@ readHlaCalls <- function(file,
 #'
 #' All protein alignment files from the EBI database are shipped with the package.
 #' They can be easily accessed using \code{gene} parameter. If \code{gene} is
-#' set to \code{NULL} file parameter is used instead and alignment is read from
-#' the provided file. In EBI database alignments for DRB1, DRB3, DRB4 and DRB5
-#' genes are provided as a single file, here they are separated.
+#' set to \code{NULL}, \code{file} parameter is used instead and alignment is
+#' read from the provided file. In EBI database alignments for DRB1, DRB3, DRB4
+#' and DRB5 genes are provided as a single file, here they are separated.
 #'
 #' @inheritParams readHlaCalls
 #' @inheritParams reduceAlleleResolution
@@ -102,7 +102,7 @@ readHlaCalls <- function(file,
 #'
 #' @return Matrix containing HLA allele alignments.
 #'
-#'   Rownames corresponds to allele numbers and columns to positions in the
+#'   Rownames correspond to allele numbers and columns to positions in the
 #'   alignment. Sequences following the termination codon are marked as empty
 #'   character (\code{""}). Unknown sequences are marked with a character of
 #'   choice, by default \code{""}. Stop codons are represented by a hash (X).
@@ -263,14 +263,13 @@ readHlaAlignments <- function(file,
 
 #' Read KIR calls
 #'
-#' \code{readKiRCalls} read KIR calls from file.
+#' \code{readKirCalls} read KIR calls from file.
 #'
 #' Input file has to be a tsv formatted table. First column should be named
-#' "ID" and contain samples IDs, second column should hold corresponding KIR
-#' haplotypes, further columns should hold KIR genes presence / absence
-#' indicators. See
-#' \code{system.file("extdata", "KPI_output_example.txt", package = "MiDAS")}
-#' for an example.
+#' "ID" and contain samples IDs, further columns should hold KIR genes presence
+#' / absence indicators. See
+#' \code{system.file("extdata", "MiDAS_tut_KIR", package = "MiDAS")} for an
+#' example.
 #'
 #' @inheritParams utils::read.table
 #' @param file Path to input file.

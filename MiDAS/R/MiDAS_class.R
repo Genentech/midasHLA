@@ -8,7 +8,7 @@ NULL
 #' containing data and metadata required for MiDAS analysis.
 #'
 #' Valid \code{MiDAS} object must have unique features names across all
-#' experiments and colData. It's metadata list need to have \code{placeholder}
+#' experiments and colData. It's metadata list needs to have a \code{placeholder}
 #' element, which is a string specifying name of column in colData used when
 #' defining statistical model for downstream analyses (see
 #' \code{\link{runMiDAS}} for more details). Optionally the object's metadata
@@ -199,13 +199,13 @@ setMethod(
 #' (here called omnibus groups). For example, in \code{'hla_aa'} experiment
 #' features can be grouped by amino acid position (\code{"B_46_E"},
 #' \code{"B_46_A"}) can be grouped into \code{B_46} group). Such groups can be
-#' than used to perform omnibus test, see \code{\link{runMiDAS}} for more
+#' then used to perform omnibus test, see \code{\link{runMiDAS}} for more
 #' details.
 #'
 #' @param object \code{\link{MiDAS}} object.
 #' @param experiment String specifying experiment.
 #'
-#' @return List of omnibus groups for given experiment.
+#' @return List of omnibus groups for a given experiment.
 #'
 #' @importFrom assertthat assert_that is.string
 #' @importFrom S4Vectors metadata
@@ -221,7 +221,7 @@ setGeneric(
 #' (here called omnibus groups). For example, in \code{'hla_aa'} experiment
 #' features can be grouped by amino acid position (\code{"B_46_E"},
 #' \code{"B_46_A"}) can be grouped into \code{B_46} group). Such groups can be
-#' than used to perform omnibus test, see \code{\link{runMiDAS}} for more
+#' then used to perform omnibus test, see \code{\link{runMiDAS}} for more
 #' details.
 #'
 #' @param object \code{\link{MiDAS}} object.
@@ -246,7 +246,7 @@ setMethod(
   }
 )
 
-#' Calculate features frequencies for given experiment in MiDAS object.
+#' Calculate features frequencies for given a experiment in MiDAS object.
 #'
 #' @inheritParams getExperimentFrequencies
 #' @param object \code{\link{MiDAS}} object.
@@ -291,7 +291,7 @@ setGeneric(
 
 #' @rdname MiDAS-class
 #'
-#' @title Calculate features frequencies for given experiment in MiDAS object.
+#' @title Calculate features frequencies for a given experiment in MiDAS object.
 #'
 #' @inheritParams getExperimentFrequencies
 #' @param compare Logical flag indicating if \code{hla_calls} frequencies
@@ -360,10 +360,10 @@ setMethod(
 #' @param object \code{\link{MiDAS}} object.
 #' @param experiment String specifying experiment.
 #' @param lower_frequency_cutoff Number giving lower frequency threshold.
-#'   Numbers greater than 1 are interpreted as number of feature occurrences,
+#'   Numbers greater than 1 are interpreted as the number of feature occurrences,
 #'   numbers between 0 and 1 as fractions.
 #' @param upper_frequency_cutoff Number giving upper frequency threshold.
-#'   Numbers greater than 1 are interpreted as number of feature occurrences,
+#'   Numbers greater than 1 are interpreted as the number of feature occurrences,
 #'   numbers between 0 and 1 as fractions.
 #'
 #' @return Filtered \code{\link{MiDAS}} object.
@@ -387,10 +387,10 @@ setGeneric(
 #' @title Filter MiDAS object by frequency
 #'
 #' @param lower_frequency_cutoff Number giving lower frequency threshold.
-#'   Numbers greater than 1 are interpreted as number of feature occurrences,
+#'   Numbers greater than 1 are interpreted as the number of feature occurrences,
 #'   numbers between 0 and 1 as fractions.
 #' @param upper_frequency_cutoff Number giving upper frequency threshold.
-#'   Numbers greater than 1 are interpreted as number of feature occurrences,
+#'   Numbers greater than 1 are interpreted as the number of feature occurrences,
 #'   numbers between 0 and 1 as fractions.
 #'
 #' @importFrom assertthat assert_that is.string
@@ -697,6 +697,10 @@ as.data.frame.MiDAS <- function(x, ...) {
 #' @param unkchar Logical indicating whether unknown characters in the alignment
 #'   should be considered when checking amino acid variability in
 #'   \code{'hla_aa'} experiment.
+#' @param hla_divergence_aa_selection String specifying variable region in peptide binding
+#'   groove which should be considered for Grantham distance calculation. Valid
+#'   choices includes: \code{"binding_groove"}, \code{"B_pocket"},
+#'   \code{"F_pocket"}. See details for more information.
 #' @param hla_het_resolution Number specifying HLA alleles resolution used to
 #'   calculate heterogeneity in \code{"hla_het"} experiment.
 #' @param hla_dictionary Data frame giving HLA allele dictionary used in
@@ -1088,6 +1092,7 @@ prepareMiDAS_kir_genes <- function(kir_calls, ...) {
 #' Prepare MiDAS data on KIR haplotypes level
 #'
 #' @inheritParams checkKirCallsFormat
+#' @param ... Not used
 #'
 #' @return Matrix
 #'
