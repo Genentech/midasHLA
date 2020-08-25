@@ -328,6 +328,33 @@ test_that("filterByOmnibusGroups", {
   )
 })
 
+test_that("getAllelesForAA", {
+  midas <- prepareMiDAS(
+    hla_calls = MiDAS_tut_HLA,
+    colData = MiDAS_tut_pheno,
+    experiment = "hla_alleles"
+  )
+  aa <- getAllelesForAA(midas, "DRA_2")
+  aa_test <- data.frame(
+    `HLA-DRA (2)` = c("*", "A"),
+    `HLA-DRA alleles` = c("*01:02", "*01:01"),
+    count = c(711L, 1289L),
+    frequency = formattable::percent(c(0.3555, 0.6445)),
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
+
+  expect_error(getAllelesForAA(midas, 2),
+               "aa_pos is not a string \\(a length one character vector\\).")
+
+  expect_error(getAllelesForAA(midas, "A"),
+               "amino acid position should be formatted like: A_9.")
+
+  MultiAssayExperiment::metadata(midas)[["hla_calls"]] <- NULL
+  expect_error(getAllelesForAA(midas, "A_9"),
+               "Could not find HLA calls associated with MiDAS object. Make sure to use prepareMiDAS for MiDAS object creation.")
+})
+
 test_that("prepareMiDAS_hla_alleles", {
   args <- list(hla_calls = MiDAS_tut_HLA)
   experiment <- do.call(prepareMiDAS_hla_alleles, args)

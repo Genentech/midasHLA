@@ -1,15 +1,15 @@
 context("Summarising MiDAS results")
 
 test_that("summarize amino acid position", {
-  file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  file <- system.file("extdata", "MiDAS_tut_HLA.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(file)
-  aa_sum <- summariseAAPosition(hla_calls, "DMA_135")
+  aa_sum <- summariseAAPosition(hla_calls, "DRA_2")
 
   aa_sum_test <- data.frame(
-    `HLA-DMA (135)` = c("K"),
-    `HLA-DMA alleles` = "*01:01, *01:02, *01:03",
-    count = 40,
-    frequency = formattable::percent(1),
+    `HLA-DRA (2)` = c("*", "A"),
+    `HLA-DRA alleles` = c("*01:02", "*01:01"),
+    count = c(711L, 1289L),
+    frequency = formattable::percent(c(0.3555, 0.6445)),
     stringsAsFactors = FALSE,
     check.names = FALSE
   )

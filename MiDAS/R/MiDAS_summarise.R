@@ -1,6 +1,6 @@
 #' Summarize amino acid position
 #'
-#' List HLA alleles and amino acid residues at a given position
+#' List HLA alleles and amino acid residues at a given position.
 #'
 #' @inheritParams checkHlaCallsFormat
 #' @inheritParams hlaToAAVariation
@@ -48,7 +48,7 @@ summariseAAPosition <- function(hla_calls,
 
   alleles <- select(hla_calls, starts_with(gene)) %>%
     unlist()
-  alleles_wo_na <- na.omit(alleles)
+  alleles_wo_na <- alleles[! is.na(alleles)]
   assert_that(length(alleles_wo_na) != 0,
               msg = "hla_calls for given gene contains only NA."
   )
@@ -80,7 +80,7 @@ summariseAAPosition <- function(hla_calls,
   )
 
   aa <- data.frame(
-    allele = gsub("[A-Z]+[0-9]*", "", alleles),
+    allele = gsub("[A-Z]+[0-9]*", "", alleles_wo_na),
     residue = aln[alleles_wo_na, aa_pos],
     stringsAsFactors = FALSE
   ) %>%

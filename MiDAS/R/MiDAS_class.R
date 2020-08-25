@@ -539,6 +539,63 @@ setMethod(
   }
 )
 
+#' Get HLA alleles for amino acid position
+#'
+#' List HLA alleles and amino acid residues at a given position.
+#'
+#' @inheritParams summariseAAPosition
+#' @param object \code{\link{MiDAS}} object.
+#'
+#' @return Data frame containing HLA alleles, their corresponding amino acid
+#'   residues and frequencies at requested position.
+#'
+#' @export
+setGeneric(
+  name = "getAllelesForAA",
+  def = function(object, aa_pos) standardGeneric("getAllelesForAA")
+)
+
+#' @rdname MiDAS-class
+#'
+#' @title Get HLA alleles for amino acid position
+#'
+#' @inheritParams summariseAAPosition
+#'
+#' @importFrom S4Vectors metadata
+#' @export
+setMethod(
+  f = "getAllelesForAA",
+  signature = "MiDAS",
+  definition = function (object, aa_pos) {
+    assert_that(
+      validObject(object),
+      is.string(aa_pos),
+      see_if(grepl("^[A-Z]+[0-9]*_[0-9]+$", aa_pos),
+             msg = "amino acid position should be formatted like: A_9."
+      )
+    )
+
+    hla_calls <- getHlaCalls(object)
+    assert_that(
+      see_if(! is.null(hla_calls),
+             msg = "Could not find HLA calls associated with MiDAS object. Make sure to use prepareMiDAS for MiDAS object creation."
+      )
+    )
+    if (! is.null(object[["hla_alleles"]])) { # filter hla calls to match hla_alleles experiment
+      alleles <- rownames(object[["hla_alleles"]])
+      hla_calls[, -1] <- rapply(
+        object = hla_calls[, -1],
+        f = function(x) ifelse(x %in% alleles, x, as.character(NA)),
+        how = "replace"
+      )
+    }
+
+    alleles_for_aa <- summariseAAPosition(hla_calls, aa_pos)
+
+    return(alleles_for_aa)
+  }
+)
+
 #' Coerce MiDAS to Data Frame
 #'
 #' @method as.data.frame MiDAS
@@ -621,7 +678,6 @@ as.data.frame.MiDAS <- function(x, ...) {
 #' @inheritParams hlaCallsToCounts
 #' @inheritParams filterByFrequency
 #' @inheritParams prepareMiDAS_hla_het
-#' @inheritParams hlaCallsGranthamDistance
 #' @param colData Data frame holding additional variables like phenotypic
 #'   observations or covariates. It have to contain \code{'ID'} column holding
 #'   samples identifiers corresponding to identifiers in \code{hla_calls} and
