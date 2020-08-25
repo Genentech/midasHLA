@@ -1,7 +1,7 @@
 context("parsing functions")
 
 test_that("readHlaCalls", {
-  file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  file <- system.file("extdata", "MiDAS_tut_HLA.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(file)
   load(system.file("extdata", "test_hla_calls.Rdata", package = "MiDAS"))
   expect_equal(hla_calls, test_hla_calls)
@@ -9,7 +9,7 @@ test_that("readHlaCalls", {
   hla_calls_res2 <- readHlaCalls(file, resolution = 2)
   res2 <- getAlleleResolution(unlist(hla_calls_res2[, -1]))
   load(system.file("extdata", "test_hla_calls_res.Rdata", package = "MiDAS"))
-  expect_equal(res2, test_res2)
+  expect_equal(res2, test_hla_calls_res)
 
   expect_error(readHlaCalls(file.path("path", "to", "nonexisting", "file")),
                sprintf("Path '%s' does not exist",

@@ -50,15 +50,9 @@ test_that("checkKirCallsFormat", {
 })
 
 test_that("isExperimentCountsOrZeros", {
-  hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(hla_calls_file)[1:5, 1:5]
-
-  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)[1:5, ]
-
   midas <- prepareMiDAS(
-    hla_calls = hla_calls,
-    colData = pheno,
+    hla_calls = MiDAS_tut_HLA,
+    colData = MiDAS_tut_pheno,
     experiment = c("hla_alleles", "hla_aa")
   )
 
