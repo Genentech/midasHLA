@@ -159,10 +159,9 @@ test_that("readHlaAlignments", {
   unlink(fake_aln_tmp)
 })
 
-test_that("readKIRCalls", {
+test_that("readKirCalls", {
   kpi_output <- data.frame(
     ID = c("SAM24320917", "SAM24320918"),
-    haplotypes = c("uninterpretable", "cA01~tA01+cB02~tA01"),
     KIR3DL3 = c(1L, 1L),
     KIR2DS2 = 0:1,
     KIR2DL2 = 0:1,
@@ -190,8 +189,8 @@ test_that("readKIRCalls", {
     row.names = FALSE,
     col.names = TRUE
   )
-  kir_calls <- readKIRCalls(file)
-  test_kir_calls <- kpi_output[, -2, drop = FALSE]
+  kir_calls <- readKirCalls(file)
+  test_kir_calls <- kpi_output[, drop = FALSE]
   expect_equal(kir_calls, test_kir_calls)
 
   colnames(kpi_output)[1] <- "SAMID"
@@ -203,7 +202,7 @@ test_that("readKIRCalls", {
     row.names = FALSE,
     col.names = TRUE
   )
-  expect_error(readKIRCalls(file), "Columns: 'SAMID' in kir_calls should be named 'ID'")
+  expect_error(readKirCalls(file), "Columns: 'SAMID' in kir_calls should be named 'ID'")
 
   kpi_output <- kpi_output[-1]
   write.table(
@@ -214,6 +213,6 @@ test_that("readKIRCalls", {
     row.names = FALSE,
     col.names = TRUE
   )
-  expect_error(readKIRCalls(file), "Number of columns in kir_calls must equal 17.")
+  expect_error(readKirCalls(file), "kir_calls shiuld have 17 columns: ID, KIR3DL3, KIR2DS2, KIR2DL2, KIR2DL3, KIR2DP1, KIR2DL1, KIR3DP1, KIR2DL4, KIR3DL1, KIR3DS1, KIR2DL5, KIR2DS3, KIR2DS5, KIR2DS4, KIR2DS1, KIR3DL2")
+  unlink(file)
 })
-

@@ -46,7 +46,7 @@ checkHlaCallsFormat <- function(hla_calls) {
 #' format.
 #'
 #' @param kir_calls KIR calls data frame, as returned by
-#'   \code{\link{readKIRCalls}} function.
+#'   \code{\link{readKirCalls}} function.
 #'
 #' @return Logical indicating if \code{kir_calls} follow KIR counts data frame
 #'   format. Otherwise raise an error.
@@ -64,8 +64,7 @@ checkKirCallsFormat <- function(kir_calls) {
     )),
     colnamesMatches(
       kir_calls,
-      c(
-        "ID",
+      c("ID",
         "KIR3DL3",
         "KIR2DS2",
         "KIR2DL2",
