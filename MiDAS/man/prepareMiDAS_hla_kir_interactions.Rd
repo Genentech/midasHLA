@@ -11,7 +11,7 @@ prepareMiDAS_hla_kir_interactions(hla_calls, kir_calls, ...)
 \code{\link{readHlaCalls}} function.}
 
 \item{kir_calls}{KIR calls data frame, as returned by
-\code{\link{readKIRCalls}} function.}
+\code{\link{readKirCalls}} function.}
 
 \item{...}{Not used}
 }

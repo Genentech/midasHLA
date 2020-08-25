@@ -4,11 +4,17 @@
 \alias{prepareMiDAS_hla_divergence}
 \title{Prepare MiDAS data on HLA divergence level}
 \usage{
-prepareMiDAS_hla_divergence(hla_calls, hla_divergence_range, ...)
+prepareMiDAS_hla_divergence(hla_calls,
+  hla_divergence_aa_selection = "binding_groove", ...)
 }
 \arguments{
 \item{hla_calls}{HLA calls data frame, as returned by
 \code{\link{readHlaCalls}} function.}
+
+\item{hla_divergence_aa_selection}{String specifying variable region in peptide binding
+groove which should be considered for Grantham distance calculation. Valid
+choices includes: \code{"binding_groove"}, \code{"B_pocket"},
+\code{"F_pocket"}. See details for more information.}
 
 \item{...}{Not used}
 }

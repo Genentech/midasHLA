@@ -4,17 +4,19 @@
 \alias{hlaAlignmentGrantham}
 \title{Helper function returning alignment for Grantham distance calculations}
 \usage{
-hlaAlignmentGrantham(gene, resolution)
+hlaAlignmentGrantham(gene, resolution, aa_sel = 2:182)
 }
 \arguments{
-\item{gene}{Character vector specifying HLA gene}
+\item{gene}{Character vector specifying HLA gene.}
 
-\item{resolution}{Number giving allele resolution}
+\item{resolution}{Number giving allele resolution.}
+
+\item{aa_sel}{Numeric vector specifying amino acids that should be extracted.}
 }
 \value{
 HLA alignment processed for grantham distance between alleles can be
-  calculated. Processing includes extracting exons 1 and 2, masking indels,
-  gaps and stop codons.
+  calculated. Processing includes extracting specific amino acids, masking
+  indels, gaps and stop codons.
 }
 \description{
 Helper function returning alignment for Grantham distance calculations

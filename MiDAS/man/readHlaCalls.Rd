@@ -38,7 +38,7 @@ about HLA allele numbers resolution see
 \url{http://hla.alleles.org/nomenclature/naming.html}.
 }
 \examples{
-file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+file <- system.file("extdata", "MiDAS_tut_HLA.txt", package = "MiDAS")
 hla_calls <- readHlaCalls(file)
 
 }

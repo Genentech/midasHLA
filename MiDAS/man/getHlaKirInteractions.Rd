@@ -13,7 +13,7 @@ getHlaKirInteractions(hla_calls, kir_calls,
 \code{\link{readHlaCalls}} function.}
 
 \item{kir_calls}{KIR calls data frame, as returned by
-\code{\link{readKIRCalls}} function.}
+\code{\link{readKirCalls}} function.}
 
 \item{interactions_dict}{Path to HLA - KIR interactions dictionary.}
 }

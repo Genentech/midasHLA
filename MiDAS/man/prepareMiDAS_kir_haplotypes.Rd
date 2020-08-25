@@ -8,7 +8,9 @@ prepareMiDAS_kir_haplotypes(kir_calls, ...)
 }
 \arguments{
 \item{kir_calls}{KIR calls data frame, as returned by
-\code{\link{readKIRCalls}} function.}
+\code{\link{readKirCalls}} function.}
+
+\item{...}{Not used}
 }
 \value{
 Matrix

@@ -6,7 +6,9 @@
 \usage{
 getFrequencies(object, experiment, carrier_frequency = FALSE,
   compare = FALSE, ref_pop = c("USA NMDP African American pop 2",
-  "USA NMDP Chinese", "USA NMDP European Caucasian"),
+  "USA NMDP Chinese", "USA NMDP European Caucasian",
+  "USA NMDP Hispanic South or Central American", "USA NMDP Japanese",
+  "USA NMDP North American Amerindian", "USA NMDP South Asian Indian"),
   ref = list(hla_alleles = allele_frequencies))
 }
 \arguments{

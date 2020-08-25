@@ -8,7 +8,7 @@ getKIRFrequencies(kir_calls)
 }
 \arguments{
 \item{kir_calls}{KIR calls data frame, as returned by
-\code{\link{readKIRCalls}} function.}
+\code{\link{readKirCalls}} function.}
 }
 \value{
 Data frame containing KIR genes and their corresponding frequencies.

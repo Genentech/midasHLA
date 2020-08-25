@@ -12,6 +12,7 @@
 \alias{filterByFrequency,MiDAS-method}
 \alias{filterByOmnibusGroups,MiDAS-method}
 \alias{filterByVariables,MiDAS-method}
+\alias{getAllelesForAA,MiDAS-method}
 \title{MiDAS class}
 \usage{
 \S4method{getExperiments}{MiDAS}(object)
@@ -35,6 +36,8 @@
 \S4method{filterByOmnibusGroups}{MiDAS}(object, experiment, groups)
 
 \S4method{filterByVariables}{MiDAS}(object, experiment, variables)
+
+\S4method{getAllelesForAA}{MiDAS}(object, aa_pos)
 }
 \arguments{
 \item{object}{\code{\link{MiDAS}} object.}
@@ -56,17 +59,20 @@ names will be used as population names.}
 frequency data frame should be formatted.}
 
 \item{lower_frequency_cutoff}{Number giving lower frequency threshold.
-Numbers greater than 1 are interpreted as number of feature occurrences,
+Numbers greater than 1 are interpreted as the number of feature occurrences,
 numbers between 0 and 1 as fractions.}
 
 \item{upper_frequency_cutoff}{Number giving upper frequency threshold.
-Numbers greater than 1 are interpreted as number of feature occurrences,
+Numbers greater than 1 are interpreted as the number of feature occurrences,
 numbers between 0 and 1 as fractions.}
 
 \item{groups}{Character vector specifying omnibus groups to select. See
 \code{\link{getOmnibusGroups}} for more details.}
 
 \item{variables}{Character vector specifying features to select.}
+
+\item{aa_pos}{String specifying gene and amino acid position, example
+\code{"A_9"}.}
 }
 \description{
 The \code{MiDAS} class is a \code{\link{MultiAssayExperiment}} object

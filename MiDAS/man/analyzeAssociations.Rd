@@ -36,8 +36,8 @@ FALSE.}
 Tibble containing combined results for all \code{variables}.
 }
 \description{
-\code{analyzeAssociations} perform association analysis on single variable
-level using statistical model of choice.
+\code{analyzeAssociations} perform association analysis on a single variable
+level using a statistical model of choice.
 }
 \details{
 \code{correction} specifies p-value adjustment method to use, common choice

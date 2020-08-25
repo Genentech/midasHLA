@@ -53,7 +53,7 @@ Tibble with stepwise conditional testing results.
 }
 \description{
 \code{analyzeConditionalAssociations} perform stepwise conditional testing
-adding the previous top-associated variable as covariate, until there is no
+adding the previous top-associated variable as covariate, until there are no
 more significant variables based on a self-defined threshold.
 }
 \examples{

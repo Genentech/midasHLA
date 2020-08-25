@@ -8,7 +8,7 @@ checkKirCallsFormat(kir_calls)
 }
 \arguments{
 \item{kir_calls}{KIR calls data frame, as returned by
-\code{\link{readKIRCalls}} function.}
+\code{\link{readKirCalls}} function.}
 }
 \value{
 Logical indicating if \code{kir_calls} follow KIR counts data frame

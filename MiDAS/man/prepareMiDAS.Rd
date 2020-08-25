@@ -10,15 +10,16 @@ prepareMiDAS(hla_calls = NULL, kir_calls = NULL, colData,
   "hla_kir_interactions", "hla_divergence", "hla_het", "hla_custom",
   "kir_custom"), placeholder = "term", lower_frequency_cutoff = NULL,
   upper_frequency_cutoff = NULL, indels = TRUE, unkchar = FALSE,
-  hla_divergence_range = "binding_groove", hla_het_resolution = 8,
-  hla_dictionary = NULL, kir_dictionary = NULL)
+  hla_divergence_aa_selection = "binding_groove",
+  hla_het_resolution = 8, hla_dictionary = NULL,
+  kir_dictionary = NULL)
 }
 \arguments{
 \item{hla_calls}{HLA calls data frame, as returned by
 \code{\link{readHlaCalls}} function.}
 
 \item{kir_calls}{KIR calls data frame, as returned by
-\code{\link{readKIRCalls}} function.}
+\code{\link{readKirCalls}} function.}
 
 \item{colData}{Data frame holding additional variables like phenotypic
 observations or covariates. It have to contain \code{'ID'} column holding
@@ -38,11 +39,11 @@ See details for further explanations.}
 model used by \code{\link{runMiDAS}}.}
 
 \item{lower_frequency_cutoff}{Number giving lower frequency threshold.
-Numbers greater than 1 are interpreted as number of feature occurrences,
+Numbers greater than 1 are interpreted as the number of feature occurrences,
 numbers between 0 and 1 as fractions.}
 
 \item{upper_frequency_cutoff}{Number giving upper frequency threshold.
-Numbers greater than 1 are interpreted as number of feature occurrences,
+Numbers greater than 1 are interpreted as the number of feature occurrences,
 numbers between 0 and 1 as fractions.}
 
 \item{indels}{Logical indicating whether indels should be considered when
@@ -51,6 +52,11 @@ checking amino acid variability in \code{'hla_aa'} experiment.}
 \item{unkchar}{Logical indicating whether unknown characters in the alignment
 should be considered when checking amino acid variability in
 \code{'hla_aa'} experiment.}
+
+\item{hla_divergence_aa_selection}{String specifying variable region in peptide binding
+groove which should be considered for Grantham distance calculation. Valid
+choices includes: \code{"binding_groove"}, \code{"B_pocket"},
+\code{"F_pocket"}. See details for more information.}
 
 \item{hla_het_resolution}{Number specifying HLA alleles resolution used to
 calculate heterogeneity in \code{"hla_het"} experiment.}

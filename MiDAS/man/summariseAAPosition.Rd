@@ -25,7 +25,7 @@ Data frame containing HLA alleles, their corresponding amino acid
   residues and frequencies at requested position.
 }
 \description{
-List HLA alleles and amino acid residues at a given position
+List HLA alleles and amino acid residues at a given position.
 }
 \examples{
 summariseAAPosition(MiDAS_tut_HLA, "A_9")

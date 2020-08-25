@@ -8,7 +8,7 @@ prepareMiDAS_kir_custom(kir_calls, kir_dictionary, ...)
 }
 \arguments{
 \item{kir_calls}{KIR calls data frame, as returned by
-\code{\link{readKIRCalls}} function.}
+\code{\link{readKirCalls}} function.}
 
 \item{kir_dictionary}{Data frame giving KIR genes dictionary. See
 \code{\link{countsToVariables}} for more details.}

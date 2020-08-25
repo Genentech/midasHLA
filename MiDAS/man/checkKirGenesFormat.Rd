@@ -10,7 +10,7 @@ checkKirGenesFormat(genes)
 \item{genes}{Character vector with KIR gene names.}
 }
 \value{
-Logical vector specifying if \code{genes} elements follows KIR genes
+Logical vector specifying if \code{genes} elements follow KIR genes
   naming conventions.
 }
 \description{

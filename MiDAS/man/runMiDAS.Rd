@@ -36,11 +36,11 @@ performed.}
 use.}
 
 \item{lower_frequency_cutoff}{Number giving lower frequency threshold.
-Numbers greater than 1 are interpreted as number of feature occurrences,
+Numbers greater than 1 are interpreted as the number of feature occurrences,
 numbers between 0 and 1 as fractions.}
 
 \item{upper_frequency_cutoff}{Number giving upper frequency threshold.
-Numbers greater than 1 are interpreted as number of feature occurrences,
+Numbers greater than 1 are interpreted as the number of feature occurrences,
 numbers between 0 and 1 as fractions.}
 
 \item{correction}{String specifying multiple testing correction method. See
