@@ -137,7 +137,6 @@ analyzeAssociations <- function(object,
 #'
 #' @importFrom assertthat assert_that is.number is.string
 #' @importFrom dplyr bind_rows tibble
-#' @importFrom purrr map_dfr
 #' @importFrom rlang warn
 #' @importFrom stats formula resid
 #' @export

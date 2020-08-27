@@ -272,7 +272,6 @@ backquote <- function(x) {
 #' @importFrom assertthat assert_that is.string
 #' @importFrom magrittr %>%
 #' @importFrom stats update
-#' @importFrom purrr is_formula
 #'
 updateModel <- function(object,
                         x,

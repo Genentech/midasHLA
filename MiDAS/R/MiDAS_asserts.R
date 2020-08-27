@@ -126,6 +126,7 @@ isExperimentCountsOrZeros <- function(x, na.rm = TRUE) {
 #' its data attribute. Otherwise raise an error.
 #'
 #' @importFrom assertthat assert_that see_if
+#' @importFrom rlang is_formula
 #' @importFrom stats getCall
 #'
 checkStatisticalModel <- function(object) {
