@@ -177,6 +177,9 @@ analyzeConditionalAssociations <- function(object,
     isTRUEorFALSE(exponentiate)
   )
 
+  # select optimization criteria
+  crit <- ifelse(th_adj, "p.adjusted", "p.value")
+
   prev_formula <- object_formula
   first_variables <- all.vars(object_formula)
   prev_variables <- first_variables
@@ -184,8 +187,18 @@ analyzeConditionalAssociations <- function(object,
 
   best <- list()
   i <- 1
-
   while (length(new_variables) > 0) {
+    # reorder object formula such that 'term' is at the end, otherwise TL;DR
+    # when the new covariates are added to the model formula start to look like
+    # this: resp ~ term + A + B + C
+    # as a result if any of the new variables have the same effect
+    # as any old one (say X = c(0, 0, 1, 1), Z = c(0, 0, 1, 1)),
+    # it won't be corrected for and we will get multiple vars with same estimate
+    # instead formula should look like resp ~ A + B + C + term
+    new_form <- paste0(". ~ . - ", placeholder, " + ", placeholder)
+    object <- update(object, new_form, evaluate = FALSE)
+    object <- eval(object, envir = object_env)
+
     results <- iterativeModel(object, placeholder, new_variables, exponentiate)
 
     nc <- ifelse(is.null(n_correction), length(results$p.value), n_correction)
@@ -203,9 +216,6 @@ analyzeConditionalAssociations <- function(object,
 
     mask <- ! prev_variables %in% first_variables
     results$covariates <- paste(prev_variables[mask], collapse = " + ")
-
-    # select optimization criteria
-    crit <- ifelse(th_adj, "p.adjusted", "p.value")
 
     i_min <- which.min(results[[crit]])
     if (length(i_min) == 0) break
@@ -724,16 +734,16 @@ runMiDAS_linear_omnibus <- function(call,
 
 #
 runMiDAS_conditional_omnibus <- function(call,
-                                    midas,
-                                    experiment,
-                                    test_covar,
-                                    correction = "bonferroni",
-                                    n_correction = NULL,
-                                    keep = FALSE,
-                                    th,
-                                    rss_th = 1e-07,
-                                    exponentiate = FALSE,
-                                    ...) {
+                                         midas,
+                                         experiment,
+                                         test_covar,
+                                         correction = "bonferroni",
+                                         n_correction = NULL,
+                                         keep = FALSE,
+                                         th,
+                                         rss_th = 1e-07,
+                                         exponentiate = FALSE,
+                                         ...) {
   omnibus_groups <- getOmnibusGroups(midas, experiment)
   assert_that(
     is.flag(keep),
@@ -759,6 +769,16 @@ runMiDAS_conditional_omnibus <- function(call,
   best <- list()
   i <- 1
   while (length(new_omnibus_groups) > 0) {
+    # reorder object formula such that 'term' is at the end, otherwise TL;DR
+    # when the new covariates are added to the model formula start to look like
+    # this: resp ~ term + A + B + C
+    # as a result if any of the new variables have the same effect
+    # as any old one (say X = c(0, 0, 1, 1), Z = c(0, 0, 1, 1)),
+    # it won't be corrected for and we will get multiple vars with same estimate
+    # instead formula should look like resp ~ A + B + C + term
+    new_form <- paste0(". ~ . - ", placeholder, " + ", placeholder)
+    object <- update(object, new_form)
+
     results <- omnibusTest(
       object = object,
       omnibus_groups = new_omnibus_groups,
