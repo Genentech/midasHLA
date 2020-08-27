@@ -820,25 +820,23 @@ runMiDAS_conditional_omnibus <- function(call,
     i <- i + 1
   }
 
+  if (length(best) == 0) {
+    warn("No significant variables found. Returning empty table.") # Tibble to be more precise?
+  }
+
+  if (keep) {
+    results <- best
+  } else {
     if (length(best) == 0) {
-      warn("No significant variables found. Returning empty table.") # Tibble to be more precise?
-    }
-
-    if (keep) {
-      results <- best
+      results <- results[0,]
     } else {
-      if (length(best) == 0) {
-        results <- results[0, ]
-      } else {
-        results <- lapply(best, function(res) {
-          i_min <- which.min(res[["p.value"]])
-          res[i_min, ]
-        })
-        results <- bind_rows(results)
-      }
+      results <- lapply(best, function(res) {
+        i_min <- which.min(res[["p.value"]])
+        res[i_min,]
+      })
+      results <- bind_rows(results)
     }
-
-    return(results)
+  }
 
   # format linear omnibus results
   group_name <- switch (experiment,
@@ -864,11 +862,12 @@ runMiDAS_conditional_omnibus <- function(call,
         .data$dof,
         .data$statistic,
         .data$p.value,
-        .data$p.adjusted
+        .data$p.adjusted,
+        .data$covariates
       ) %>%
       arrange(.data$p.value)
   }
-  if (is.list(results)) {
+  if (keep) {
     results <- lapply(results, .formatResults)
   } else {
     results <- .formatResults(results)
@@ -929,6 +928,7 @@ HWETest <-
            as.MiDAS = FALSE) {
     experiment_choice <- eval(formals()[["experiment"]])
     assert_that(
+      isClass(object, "MiDAS"),
       validObject(object),
       is.string(experiment),
       stringMatches(experiment, experiment_choice),
@@ -986,7 +986,7 @@ HWETest <-
     if (! is.null(HWE_cutoff)) {
       # get p-value mask over columns ie. p.value or optional grouping columns
       mask <- lapply(1:(ncol(HWE.result) - 1), function(i) {
-        m <- HWE.result[, i + 1] < HWE_cutoff
+        m <- HWE.result[, i + 1] > HWE_cutoff
         m[is.na(m)] <- TRUE
         m
       })
@@ -996,7 +996,7 @@ HWETest <-
 
     if(as.MiDAS) {
       vars <- rownames(object[[experiment]])
-      vars <- vars[! vars %in% HWE.result$var]
+      vars <- vars[vars %in% HWE.result$var]
       HWE.result <- filterByVariables(object, experiment, vars)
     }
 

@@ -441,8 +441,109 @@ test_that("runMiDAS", {
     test_res <- dplyr::arrange(test_res, p.value)
     test_res <- test_res[, colnames(res)] # order columns
 
-    expect_equal(lapply(res, as.data.frame), lapply(test_res, as.data.frame))
+    expect_equal(as.data.frame(res), as.data.frame(test_res))
   }
+
+  # linear omnibus
+  conditional <- FALSE
+  omnibus <- TRUE
+  experiment <- "hla_aa"
+  object <- lm(disease ~ term, data = midas)
+  res <- runMiDAS(
+    object,
+    conditional = conditional,
+    omnibus = omnibus,
+    omnibus_groups_filter = c("A_6", "A_12"),
+    experiment = experiment,
+    exponentiate = FALSE
+  )
+  test_res <- dplyr::tibble(
+    aa_pos = c("A_6", "A_12"),
+    residue = c("R, G", "V, M"),
+    dof = c(1, 1),
+    statistic = c(1.00150233709155, 0.43786032955245),
+    p.value = c(0.316947259129448, 0.508156995160654),
+    p.adjusted = c(0.633894518258896, 1)
+  )
+
+  expect_equal(as.data.frame(res), as.data.frame(test_res))
+
+  expect_error(
+    runMiDAS(
+      object,
+      conditional = FALSE,
+      omnibus = TRUE,
+      experiment = "hla_alleles",
+      exponentiate = FALSE
+    ),
+    "Omnibus test does not support experiment hla_alleles"
+  )
+
+  # conditional omnibus
+  conditional <- TRUE
+  omnibus <- TRUE
+  experiment <- "hla_aa"
+  object <- lm(disease ~ term, data = midas)
+  res <- runMiDAS(
+    object,
+    conditional = conditional,
+    omnibus = omnibus,
+    omnibus_groups_filter = c("B_178", "DRA_217", "DQA1_34"),
+    experiment = experiment,
+    exponentiate = FALSE
+  )
+  test_res <- dplyr::tibble(
+    aa_pos = c("B_178", "DQA1_34", "DRA_217"),
+    residue = c("K, T", "Q, E", "V, L"),
+    dof = c(1, 1, 1),
+    statistic = c(14.5367224623581, 8.23228307063391, 7.66064122323155),
+    p.value = c(0.00013745391512862, 0.00411517297832788, 0.00564384425764467),
+    p.adjusted = c(0.000412361745385859, 0.00411517297832788, 0.0112876885152893),
+    covariates = c("", "B_178 + DRA_217", "B_178")
+  )
+  expect_equal(as.data.frame(res), as.data.frame(test_res))
+
+  res <- runMiDAS(
+    object,
+    conditional = conditional,
+    omnibus = omnibus,
+    omnibus_groups_filter = c("B_178", "DRA_217"),
+    experiment = experiment,
+    exponentiate = FALSE,
+    keep = TRUE
+  )
+  test_res <- list(
+    dplyr::tibble(
+      aa_pos = c("B_178", "DRA_217"),
+      residue = c("K, T", "V, L"),
+      dof = c(1, 1),
+      statistic = c(14.5367224623581, 11.7515320865903),
+      p.value = c(0.00013745391512862, 0.000607931755127229),
+      p.adjusted = c(0.000274907830257239, 0.00121586351025446),
+      covariates = c("", "")
+    ),
+    dplyr::tibble(
+      aa_pos = "DRA_217",
+      residue = "V, L",
+      dof = 1,
+      statistic = 7.66064122323155,
+      p.value = 0.00564384425764467,
+      p.adjusted = 0.00564384425764467,
+      covariates = "B_178"
+    )
+  )
+  expect_equal(lapply(res, as.data.frame), lapply(test_res, as.data.frame))
+
+  expect_error(
+    runMiDAS(
+      object,
+      conditional = FALSE,
+      omnibus = TRUE,
+      experiment = "hla_alleles",
+      exponentiate = FALSE
+    ),
+    "Omnibus test does not support experiment hla_alleles"
+  )
 
   #
   object <- lm(disease ~ term, data = midas)
@@ -557,4 +658,38 @@ test_that("runMiDAS", {
     ),
     "No variables available for analysis, please revisit your filtration criteria."
   )
+})
+
+test_that("HWETest", {
+  midas <- prepareMiDAS(hla_calls = MiDAS_tut_HLA,
+                        colData = MiDAS_tut_pheno,
+                        experiment = "hla_alleles")
+  res <- HWETest(midas, experiment = "hla_alleles", HWE_cutoff = 0.988)
+  rownames(res) <- NULL
+  test_res <- data.frame(
+    var = c("A*02:01", "DRB1*13:02"),
+    p.value = c(0.993279078042026, 0.988280722372832),
+    stringsAsFactors = FALSE
+  )
+  expect_equal(as.data.frame(res), as.data.frame(test_res))
+
+  res <-
+    HWETest(
+      midas,
+      experiment = "hla_alleles",
+      HWE_cutoff = 0.988,
+      as.MiDAS = TRUE
+    )
+  test_res <- filterByVariables(midas, "hla_alleles", c("A*02:01", "DRB1*13:02"))
+  expect_equal(res, test_res)
+
+  expect_error(HWETest("foo"), "object must be an instance of \"MiDAS\".")
+
+  expect_error(HWETest(midas, experiment = 1), "experiment is not a string \\(a length one character vector\\).")
+
+  expect_error(HWETest(midas, experiment = "foo"), "experiment should be one of \"hla_alleles\", \"hla_aa\", \"hla_g_groups\", \"hla_supertypes\", \"hla_NK_ligands\".")
+
+  expect_error(HWETest(midas, experiment = "hla_alleles", HWE_cutoff = "foo"), "HWE_cutoff is not a number \\(a length one numeric vector\\) or NULL.")
+
+  expect_error(HWETest(midas, experiment = "hla_alleles", as.MiDAS = "foo"), "as.MiDAS is not a flag \\(a length one logical vector\\).")
 })

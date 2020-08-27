@@ -149,14 +149,29 @@ test_that("updateModel", {
 test_that("listMiDASDictionaries", {
   expect_equal(
     listMiDASDictionaries(pattern = ".*"),
-    c(
+    # sort order of list.dir changes in devtools::check compared to devtools::test
+    # devtools::check compatible
+    # c(
+    #   "allele_HLA-A_expression",
+    #   "allele_HLA-Bw_only_B",
+    #   "allele_HLA-C_C1-2",
+    #   "allele_HLA-C_expression",
+    #   "allele_HLA_Bw",
+    #   "allele_HLA_Ggroup",
+    #   "allele_HLA_supertype",
+    #   "counts_hla_kir_interactions",
+    #   "counts_kir_haplotypes",
+    #   "kir_haplotype_gene",
+    #   "kir_nomenclature_gene"
+    # )
+    # devtools::test compatible
+    c("allele_HLA_Bw",
+      "allele_HLA_Ggroup",
+      "allele_HLA_supertype",
       "allele_HLA-A_expression",
       "allele_HLA-Bw_only_B",
       "allele_HLA-C_C1-2",
       "allele_HLA-C_expression",
-      "allele_HLA_Bw",
-      "allele_HLA_Ggroup",
-      "allele_HLA_supertype",
       "counts_hla_kir_interactions",
       "counts_kir_haplotypes",
       "kir_haplotype_gene",
