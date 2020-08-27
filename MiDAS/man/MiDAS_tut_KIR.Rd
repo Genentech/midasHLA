@@ -6,7 +6,26 @@
 \title{MiDAS tutorial KIR data}
 \format{Data frame with 1000 rows and 17 columns. First column holds samples
   ID's, following columns holds presence/absence indicators for different
-  KIR genes.}
+  KIR genes.
+  \describe{
+    \item{ID}{Character sample ID}
+    \item{KIR3DL3}{Integer}
+    \item{KIR2DS2}{Integer}
+    \item{KIR2DL2}{Integer}
+    \item{KIR2DL3}{Integer}
+    \item{KIR2DP1}{Integer}
+    \item{KIR2DL1}{Integer}
+    \item{KIR3DP1}{Integer}
+    \item{KIR2DL4}{Integer}
+    \item{KIR3DL1}{Integer}
+    \item{KIR3DS1}{Integer}
+    \item{KIR2DL5}{Integer}
+    \item{KIR2DS3}{Integer}
+    \item{KIR2DS5}{Integer}
+    \item{KIR2DS4}{Integer}
+    \item{KIR2DS1}{Integer}
+    \item{KIR3DL2}{Integer}
+  }}
 \usage{
 MiDAS_tut_KIR
 }

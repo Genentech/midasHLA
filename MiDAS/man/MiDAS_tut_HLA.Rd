@@ -5,7 +5,28 @@
 \alias{MiDAS_tut_HLA}
 \title{MiDAS tutorial HLA data}
 \format{Data frame with 1000 rows and 19 columns. First column holds samples
-  ID's, following columns holds HLA alleles calls for different genes.}
+  ID's, following columns holds HLA alleles calls for different genes.
+  \describe{
+    \item{ID}{Character sample ID}
+    \item{A_1}{Character}
+    \item{A_2}{Character}
+    \item{B_1}{Character}
+    \item{B_2}{Character}
+    \item{C_1}{Character}
+    \item{C_2}{Character}
+    \item{DPA1_1}{Character}
+    \item{DPA1_2}{Character}
+    \item{DPB1_1}{Character}
+    \item{DPB1_2}{Character}
+    \item{DQA1_1}{Character}
+    \item{DQA1_2}{Character}
+    \item{DQB1_1}{Character}
+    \item{DQB1_2}{Character}
+    \item{DRA_1}{Character}
+    \item{DRA_2}{Character}
+    \item{DRB1_1}{Character}
+    \item{DRB1_2}{Character}
+  }}
 \usage{
 MiDAS_tut_HLA
 }

@@ -4,11 +4,12 @@
 \name{dict_dist_grantham}
 \alias{dict_dist_grantham}
 \title{Grantham distance}
-\format{An object of class \code{integer} of length 400.}
+\format{Named integer vector of length 400.}
 \usage{
 dict_dist_grantham
 }
 \description{
-Grantham distance
+Integer vector giving Grantham distance values between pairs of amino acid
+residues.
 }
 \keyword{datasets}

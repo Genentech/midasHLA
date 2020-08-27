@@ -3,7 +3,7 @@
 \docType{data}
 \name{allele_frequencies}
 \alias{allele_frequencies}
-\title{Alleles frequencies scraped from allelefrequencies.net in wide format}
+\title{Alleles frequencies scraped from allelefrequencies.net}
 \format{A data frame with 2096 rows and 8 variables:
 \describe{
   \item{var}{allele number, character}
@@ -21,11 +21,7 @@ Accessed on 28.07.20
 }
 \details{
 A dataset containing allele frequencies across 5697 alleles
-For quick yet more details I recommend the search results page in the
-allelefrequencies.net database website. Data are gathered in wide format.
-The general reference populations are defined based on different sources. For exampe
-in case of HLA-A for Hispanic population frequencies from USA NMDP Hispanic South
-or Central American are used, however in case of HLA-DQA1 it is Chile Santiago pop 2.
-See \code{allele_frequencies_reference_populations}.
+For details visit the search results page in the allelefrequencies.net
+database website.
 }
 \keyword{datasets}
