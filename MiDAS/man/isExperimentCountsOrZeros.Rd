@@ -19,10 +19,3 @@ Logical indicating if \code{x} contains only positive integers or
 \code{isExperimentCountsOrZeros} checks if experiment contains only positive
 integers or zeros.
 }
-\seealso{
-Other assert functions: \code{\link{checkColDataFormat}},
-  \code{\link{hasTidyMethod}}, \code{\link{isClassOrNULL}},
-  \code{\link{isCountOrNULL}}, \code{\link{isTRUEorFALSE}},
-  \code{\link{objectHasPlaceholder}}
-}
-\concept{assert functions}

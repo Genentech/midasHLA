@@ -17,11 +17,3 @@ Logical indicating if \code{data_frame} is properly formatted.
 \description{
 \code{checkColDataFormat} asserts if the colData data frame has proper format.
 }
-\seealso{
-Other assert functions: \code{\link{hasTidyMethod}},
-  \code{\link{isClassOrNULL}}, \code{\link{isCountOrNULL}},
-  \code{\link{isExperimentCountsOrZeros}},
-  \code{\link{isTRUEorFALSE}},
-  \code{\link{objectHasPlaceholder}}
-}
-\concept{assert functions}

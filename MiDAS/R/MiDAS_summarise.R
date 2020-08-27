@@ -24,7 +24,6 @@
 #' @importFrom magrittr %>%
 #' @importFrom stats na.omit
 #' @importFrom rlang .data
-#'
 #' @export
 summariseAAPosition <- function(hla_calls,
                                 aa_pos,

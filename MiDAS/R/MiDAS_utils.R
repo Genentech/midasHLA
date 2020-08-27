@@ -245,7 +245,7 @@ convertAlleleToVariable <- function(allele,
 #' @return Character vector with its elements backticked.
 #'
 #' @importFrom assertthat assert_that
-#' @export
+#'
 backquote <- function(x) {
   assert_that(is.character(x))
   x <- gsub("`", "", x)
@@ -547,14 +547,13 @@ distGrantham <- function(aa1, aa2) {
 #'   for each specified HLA gene. First column (\code{ID}) is the same as in
 #'   \code{hla_calls}, further columns are named as given by \code{genes}.
 #'
+#' @examples
+#' hlaCallsGranthamDistance(MiDAS_tut_HLA, genes = "A")
+#'
 #' @importFrom assertthat assert_that is.string noNA see_if
 #' @importFrom magrittr %>%
 #' @importFrom rlang warn
 #' @importFrom stats na.omit
-#'
-#' @examples
-#' hlaCallsGranthamDistance(MiDAS_tut_HLA, genes = "A")
-#'
 #' @export
 hlaCallsGranthamDistance <- function(hla_calls,
                                      genes = c("A", "B", "C"),

@@ -18,11 +18,3 @@ Logical indicating if \code{x} is an instance of \code{class}.
 \code{isClassOrNULL} checks if object is an instance of a specified class or
 is null.
 }
-\seealso{
-Other assert functions: \code{\link{checkColDataFormat}},
-  \code{\link{hasTidyMethod}}, \code{\link{isCountOrNULL}},
-  \code{\link{isExperimentCountsOrZeros}},
-  \code{\link{isTRUEorFALSE}},
-  \code{\link{objectHasPlaceholder}}
-}
-\concept{assert functions}

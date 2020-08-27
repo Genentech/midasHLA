@@ -99,8 +99,6 @@ checkKirCallsFormat <- function(kir_calls) {
 #' @return Logical indicating if \code{x} contains only positive integers or
 #'   zeros.
 #'
-#' @family assert functions
-#'
 isExperimentCountsOrZeros <- function(x, na.rm = TRUE) {
   test <- if (is.matrix(x)) {
     isCountsOrZeros(x)
@@ -169,8 +167,6 @@ checkStatisticalModel <- function(object) {
 #' @param class String giving object class.
 #'
 #' @return Logical indicating if there is a tidy method for a given class.
-#'
-#' @family assert functions
 #'
 #' @importFrom utils methods
 #'
@@ -366,10 +362,9 @@ assertthat::on_failure(characterMatches) <- function(call, env) {
 #'
 #' @return Logical indicating if \code{x} is an instance of \code{class}.
 #'
-#' @family assert functions
-#'
 #' @importFrom assertthat assert_that
 #' @importFrom methods is
+#'
 isClassOrNULL <- function(x, class) {
   test <- is(x, class) | is.null(x)
 
@@ -436,8 +431,6 @@ assertthat::on_failure(colnamesMatches) <- function(call, env) {
 #'
 #' @return Logical indicating if object is count or NULL
 #'
-#' @family assert functions
-#'
 #' @importFrom assertthat is.count
 #'
 isCountOrNULL <- function(x) {
@@ -460,8 +453,6 @@ assertthat::on_failure(isCountOrNULL) <- function(call, env) {
 #' @param x object to test.
 #'
 #' @return Logical indicating if object is TRUE or FALSE flag
-#'
-#' @family assert functions
 #'
 #' @importFrom assertthat is.flag
 #'
@@ -486,8 +477,6 @@ assertthat::on_failure(isTRUEorFALSE) <- function(call, env) {
 #' @param placeholder string specifying name of placeholder.
 #'
 #' @return Logical indicating if placeholder is present in object formula.
-#'
-#' @family assert functions
 #'
 objectHasPlaceholder <- function(object, placeholder) {
   object_env <- attr(object$terms, ".Environment")
@@ -515,8 +504,6 @@ assertthat::on_failure(objectHasPlaceholder) <- function(call, env) {
 #'
 #' @return Logical indicating if \code{data_frame} is properly formatted.
 #'   Otherwise raise an error.
-#'
-#' @family assert functions
 #'
 #' @importFrom assertthat assert_that see_if
 #'

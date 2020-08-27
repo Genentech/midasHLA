@@ -15,11 +15,3 @@ Logical indicating if there is a tidy method for a given class.
 \description{
 \code{hasTidyMethod} check if there is a tidy method available for a given class.
 }
-\seealso{
-Other assert functions: \code{\link{checkColDataFormat}},
-  \code{\link{isClassOrNULL}}, \code{\link{isCountOrNULL}},
-  \code{\link{isExperimentCountsOrZeros}},
-  \code{\link{isTRUEorFALSE}},
-  \code{\link{objectHasPlaceholder}}
-}
-\concept{assert functions}

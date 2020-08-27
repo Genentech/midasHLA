@@ -16,11 +16,3 @@ Logical indicating if object is TRUE or FALSE flag
 \code{isTRUEorFALSE} check if object is a flag (a length one logical vector)
 except NA.
 }
-\seealso{
-Other assert functions: \code{\link{checkColDataFormat}},
-  \code{\link{hasTidyMethod}}, \code{\link{isClassOrNULL}},
-  \code{\link{isCountOrNULL}},
-  \code{\link{isExperimentCountsOrZeros}},
-  \code{\link{objectHasPlaceholder}}
-}
-\concept{assert functions}

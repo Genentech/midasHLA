@@ -604,7 +604,7 @@ getAAFrequencies <- function(aa_variation) {
 #' @importFrom magrittr %>% %<>%
 #' @importFrom stats setNames
 #' @importFrom rlang parse_exprs .data
-#' @export
+#'
 formatResults <- function(results,
                           filter_by = "p.value <= 0.05",
                           arrange_by = "p.value",
@@ -849,7 +849,7 @@ countsToVariables <- function(counts,
 #' columns. First column should be named \code{"Name"} and hold interactions
 #' names, second should be named \code{"Expression"} and hold expression used to
 #' identify interaction (eg. \code{"C2 & KIR2DL1"} will match all samples
-#' with \code{C2} and \code{KIR2DL1}). The package is shipped with interactions
+#' with \code{C2} and \code{KIR2DL1}). The package is shipped with an interactions
 #' file based on \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6558367/}{Pende et al., 2019.}
 #'
 #' @inheritParams checkHlaCallsFormat
@@ -864,7 +864,7 @@ countsToVariables <- function(counts,
 #' @importFrom magrittr %>%
 #' @importFrom rlang warn
 #' @importFrom stringi stri_detect_regex
-#'
+#' @export
 getHlaKirInteractions <- function(hla_calls,
                                   kir_calls,
                                   interactions_dict = system.file("extdata", "Match_counts_hla_kir_interactions.txt", package = "MiDAS")) {

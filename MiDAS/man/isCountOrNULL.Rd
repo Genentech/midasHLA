@@ -16,11 +16,3 @@ Logical indicating if object is count or NULL
 \code{isCountOrNULL} check if object is a count (a single positive integer)
 or NULL.
 }
-\seealso{
-Other assert functions: \code{\link{checkColDataFormat}},
-  \code{\link{hasTidyMethod}}, \code{\link{isClassOrNULL}},
-  \code{\link{isExperimentCountsOrZeros}},
-  \code{\link{isTRUEorFALSE}},
-  \code{\link{objectHasPlaceholder}}
-}
-\concept{assert functions}

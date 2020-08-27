@@ -17,7 +17,6 @@ NULL
 #'
 #' @importFrom methods setClass new
 #' @importClassesFrom MultiAssayExperiment MultiAssayExperiment
-#'
 #' @export
 MiDAS <- setClass(
   Class = "MiDAS",
@@ -723,7 +722,6 @@ as.data.frame.MiDAS <- function(x, ...) {
 #' @importFrom rlang is_empty
 #' @importFrom stats runif
 #' @importFrom S4Vectors DataFrame
-#'
 #' @export
 prepareMiDAS <- function(hla_calls = NULL,
                          kir_calls = NULL,
