@@ -22,9 +22,12 @@ tests.}
 details for further information.}
 
 \item{n_correction}{Integer specifying number of comparisons to consider
-during multiple testing correction calculations, must be at least equal to
-number of comparisons being made; only set this (to non-default) when you
-know what you are doing!}
+during multiple testing correction calculations. For Bonferroni correction
+it is possible to specify a number lower than the number of comparisons
+being made. This is useful in cases when knowledge about the biology or
+redundance of alleles reduces the need for correction. For other methods it
+must be at least equal to the number of comparisons being made; only set
+this (to non-default) when you know what you are doing!}
 
 \item{th}{Number specifying threshold for a variable to be considered
 significant.}

@@ -15,9 +15,12 @@
 #' @param correction String specifying multiple testing correction method. See
 #'   details for further information.
 #' @param n_correction Integer specifying number of comparisons to consider
-#'   during multiple testing correction calculations, must be at least equal to
-#'   number of comparisons being made; only set this (to non-default) when you
-#'   know what you are doing!
+#'   during multiple testing correction calculations. For Bonferroni correction
+#'   it is possible to specify a number lower than the number of comparisons
+#'   being made. This is useful in cases when knowledge about the biology or
+#'   redundance of alleles reduces the need for correction. For other methods it
+#'   must be at least equal to the number of comparisons being made; only set
+#'   this (to non-default) when you know what you are doing!
 #' @param exponentiate Logical flag indicating whether or not to exponentiate
 #'   the coefficient estimates. Internally this is passed to
 #'   \code{\link[broom]{tidy}}. This is typical for logistic and multinomial
@@ -44,7 +47,6 @@
 #' @importFrom assertthat assert_that see_if is.string
 #' @importFrom broom tidy
 #' @importFrom dplyr bind_rows
-#' @importFrom stats p.adjust
 #' @export
 analyzeAssociations <- function(object,
                                 variables,
@@ -80,10 +82,10 @@ analyzeAssociations <- function(object,
 
   nc <- ifelse(is.null(n_correction), length(results$p.value), n_correction)
   assert_that(
-    nc >= length(results$p.value),
+    nc >= length(results$p.value) || correction == "bonferroni",
     msg = sprintf("n_correction must be at least %i.", length(results$p.value))
   )
-  results$p.adjusted <- p.adjust(
+  results$p.adjusted <- adjustPValues(
     p = results$p.value,
     method = correction,
     n = nc
@@ -203,10 +205,10 @@ analyzeConditionalAssociations <- function(object,
 
     nc <- ifelse(is.null(n_correction), length(results$p.value), n_correction)
     assert_that(
-      nc >= length(results$p.value),
+      nc >= length(results$p.value) || correction == "bonferroni",
       msg = sprintf("n_correction must be at least %i.", length(results$p.value))
     )
-    results$p.adjusted <- p.adjust(
+    results$p.adjusted <- adjustPValues(
       p = results$p.value,
       method = correction,
       n = nc
@@ -290,7 +292,6 @@ analyzeConditionalAssociations <- function(object,
 #'             ))
 #'
 #' @importFrom dplyr bind_cols
-#' @importFrom stats p.adjust
 #' @export
 omnibusTest <- function(object,
                         omnibus_groups,
@@ -301,10 +302,10 @@ omnibusTest <- function(object,
 
   nc <- ifelse(is.null(n_correction), length(results$p.value), n_correction)
   assert_that(
-    nc >= length(results$p.value),
+    nc >= length(results$p.value) || correction == "bonferroni",
     msg = sprintf("n_correction must be at least %i.", length(results$p.value))
   )
-  results$p.adjusted <- p.adjust(
+  results$p.adjusted <- adjustPValues(
     p = results$p.value,
     method = correction,
     n = nc
@@ -917,7 +918,6 @@ runMiDAS_conditional_omnibus <- function(call,
 #' @importFrom HardyWeinberg HWChisqStats
 #' @importFrom assertthat assert_that is.string
 #' @importFrom methods validObject
-#' @importFrom stats p.adjust
 #' @importFrom SummarizedExperiment assay
 #' @importFrom MultiAssayExperiment colData
 #' @export

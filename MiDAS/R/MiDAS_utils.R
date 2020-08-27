@@ -952,3 +952,48 @@ getReferenceFrequencies <- function(ref, pop, carrier_frequency = FALSE) {
 
   return(ref)
 }
+
+#' Adjust P-values for Multiple Comparisons
+#'
+#' Given a set of p-values, returns p-values adjusted using one of several
+#' methods.
+#'
+#' This function modifies \code{stats::p.adjust} method such that for Bonferroni
+#' correction it is possible to specify \code{n} lower than \code{length(p)}.
+#' This feature is useful in cases when knowledge about the biology or
+#' redundance of alleles reduces the need for correction.
+#'
+#' See \code{\link[stats]{p.adjust}} for more details.
+#'
+#' @inheritParams stats::p.adjust
+#' @param n number of comparisons, must be at least \code{length(p)}; only set
+#'   this (to non-default) when you know what you are doing! Note that for
+#'   Bonferroni correction it is possible to specify number lower than
+#'   \code{length(p)}.
+#'
+#' @return A numeric vector of corrected p-values (of the same length as p, with
+#'   names copied from p).
+#'
+#' @importFrom assertthat assert_that is.number is.string
+#' @importFrom stats p.adjust
+#'
+adjustPValues <- function(p, method, n = length(p)) {
+  assert_that(
+    is.numeric(p),
+    is.string(method),
+    is.number(n)
+  )
+
+  if (method == "bonferroni") {
+    assert_that(
+      n >= 1,
+      msg = "n must be >= 1"
+    )
+    p_adj <- p * n
+    p_adj <- ifelse(p_adj > 1, 1, p_adj)
+  } else {
+    p_adj <- p.adjust(p, method, n)
+  }
+
+  return(p_adj)
+}

@@ -25,8 +25,6 @@ test_that("analyzeAssociations", {
 
   expect_equal(as.data.frame(res), as.data.frame(test_res)) # Tibble doesn't respect tollerance https://github.com/tidyverse/tibble/issues/287 or something related mby
 
-  # Tests for checkStatisticalModel errors are ommitted here
-
   expect_error(analyzeAssociations(object, variables = 1),
                "variables is not a character vector"
   )
@@ -64,6 +62,7 @@ test_that("analyzeAssociations", {
     analyzeAssociations(
       object,
       variables = c("A*01:01", "A*02:01"),
+      correction = "BH",
       n_correction = 1
     ),
     "n_correction must be at least 2."
@@ -188,6 +187,7 @@ test_that("analyzeConditionalAssociations", {
       object,
       variables =  c("B*14:02", "DRB1*11:01"),
       th = 1,
+      correction = "BH",
       n_correction = 1
     ),
     "n_correction must be at least 2."

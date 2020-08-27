@@ -442,3 +442,15 @@ test_that("getReferenceFrequencies", {
   )
   expect_equal(freq, freq_test)
 })
+
+test_that("adjustPValues", {
+  p_val <- c(0.1, 0.001, 0.01)
+  p_adj <- adjustPValues(p = p_val, method = "bonferroni", n = 3)
+  expect_equal(p_adj, p_val * 3)
+
+  p_adj <- adjustPValues(p = p_val, method = "bonferroni", n = 1)
+  expect_equal(p_adj, p_val)
+
+  expect_error(adjustPValues(p = p_val, method = "bonferroni", n = 0),
+               "n must be >= 1")
+})
