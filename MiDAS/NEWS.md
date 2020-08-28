@@ -1,3 +1,12 @@
+## 1.0.0 - 28/08/20
++ reference frequencies for KIR genes has been added
++ n_correction argument to runMiDAS has been modified such that for Bonferroni correction it is
+  possible to specify n_correction lower than number of comparisons
++ added option to specify amino acid selection used for Grantham distance calculations
++ custom HLA and KIR experiments has been added to prepareMiDAS function
++ kableResults function has been fixed
++ HLA heterozygosity experiment has been added
+
 ## 0.0.9048 - 7/08/20
 + HWE test has been implemented
 + midasToWide function has been optimized lowering significantly run times
