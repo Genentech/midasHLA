@@ -4,8 +4,9 @@
 \alias{analyzeAssociations}
 \title{Association analysis}
 \usage{
-analyzeAssociations(object, variables, correction = "bonferroni",
-  n_correction = NULL, exponentiate = FALSE)
+analyzeAssociations(object, variables, placeholder = "term",
+  correction = "bonferroni", n_correction = NULL,
+  exponentiate = FALSE)
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many
@@ -14,13 +15,19 @@ others.}
 \item{variables}{Character vector specifying variables to use in association
 tests.}
 
+\item{placeholder}{String specifying term in \code{object}'s formula which
+should be substituted with variables during analysis.}
+
 \item{correction}{String specifying multiple testing correction method. See
 details for further information.}
 
 \item{n_correction}{Integer specifying number of comparisons to consider
-during multiple testing correction calculations, must be at least equal to
-number of comparisons being made; only set this (to non-default) when you
-know what you are doing!}
+during multiple testing correction calculations. For Bonferroni correction
+it is possible to specify a number lower than the number of comparisons
+being made. This is useful in cases when knowledge about the biology or
+redundance of alleles reduces the need for correction. For other methods it
+must be at least equal to the number of comparisons being made; only set
+this (to non-default) when you know what you are doing!}
 
 \item{exponentiate}{Logical flag indicating whether or not to exponentiate
 the coefficient estimates. Internally this is passed to
@@ -29,12 +36,11 @@ regressions, but a bad idea if there is no log or logit link. Defaults to
 FALSE.}
 }
 \value{
-Tibble containing combined results for all alleles in
-  \code{hla_calls}.
+Tibble containing combined results for all \code{variables}.
 }
 \description{
-\code{analyzeAssociations} perform association analysis on single variable
-level using statistical model of choice.
+\code{analyzeAssociations} perform association analysis on a single variable
+level using a statistical model of choice.
 }
 \details{
 \code{correction} specifies p-value adjustment method to use, common choice
@@ -42,34 +48,18 @@ is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
 \link[stats]{p.adjust}.
 }
 \examples{
-library("survival")
-hla_calls_file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-hla_calls <- readHlaCalls(hla_calls_file)
-pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-pheno <- read.table(pheno_file, header = TRUE)
-covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-covar <- read.table(covar_file, header = TRUE)
-midas_data <- prepareMiDAS(hla_calls = hla_calls,
-                               pheno = pheno,
-                               covar = covar,
-                               analysis_type = "hla_allele",
-                               inheritance_model = "additive"
-)
+midas <- prepareMiDAS(hla_calls = MiDAS_tut_HLA,
+                      colData = MiDAS_tut_pheno,
+                      experiment = "hla_alleles")
 
-# Cox proportional hazards regression model
-## define base model with response and covariates
-object <- coxph(Surv(OS, OS_DIED) ~ AGE + SEX, data = midas_data)
+# analyzeAssociations expects model data to be a data.frame
+midas_data <- as.data.frame(midas)
 
-## test for alleles associations
+# define base model
+object <- lm(disease ~ term, data = midas_data)
+
+# test for alleles associations
 analyzeAssociations(object = object,
-                    variables = c("B*14:02", "DRB1*11:01")
-)
+                    variables = c("B*14:02", "DRB1*11:01"))
 
 }
-\seealso{
-\code{\link[stats]{p.adjust}}, \code{\link[broom]{tidy}}
-
-Other MiDAS statistical functions: \code{\link{analyzeConditionalAssociations}},
-  \code{\link{prepareMiDAS}}, \code{\link{runMiDAS}}
-}
-\concept{MiDAS statistical functions}

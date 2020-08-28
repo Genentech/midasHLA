@@ -2,12 +2,13 @@
 % Please edit documentation in R/MiDAS_utils.R
 \name{getVariableAAPos}
 \alias{getVariableAAPos}
-\title{Returns positions of variable amino acids in the alignment}
+\title{Find variable positions in sequence alignment}
 \usage{
 getVariableAAPos(alignment, varchar = "[A-Z]")
 }
 \arguments{
-\item{alignment}{Matrix containing amino acid level alignment.}
+\item{alignment}{Matrix containing amino acid level alignment, as returned by
+\code{\link{readHlaAlignments}},}
 
 \item{varchar}{Regex matching characters that should be considered when
 looking for variable amino acid positions. See details for further
@@ -17,14 +18,14 @@ explanations.}
 Integer vector specifying which alignment columns are variable.
 }
 \description{
-\code{getVariableAAPos} finds variable amino acid positions in the
-alignment.
+\code{getVariableAAPos} finds variable amino acid positions in protein
+sequence alignment.
 }
 \details{
 The variable amino acid positions in the alignment are those at which
 different amino acids can be found. As the alignments can also contain indels
 and unknown characters, the user choice might be to consider those positions
-also as variable. This can be achieved by passing appropriate regular
+as variable or not. This can be achieved by passing appropriate regular
 expression in \code{varchar}. Eg. when \code{varchar = "[A-Z]"} occurence of
 deletion/insertion (".") will not be treated as variability. In order to
 detect this kind of variability \code{varchar = "[A-Z\\\\.]"} should be used.

@@ -1,3 +1,4 @@
+^data-raw$
 ^\.lintr$
 ^MiDAS\.Rproj$
 ^\.Rproj\.user$

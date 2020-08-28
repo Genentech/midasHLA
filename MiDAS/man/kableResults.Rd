@@ -2,36 +2,39 @@
 % Please edit documentation in R/MiDAS_transformationFunctions.R
 \name{kableResults}
 \alias{kableResults}
-\title{Pretty format association analysis results}
+\title{Create association analysis results table in HTML or LaTeX}
 \usage{
-kableResults(results, cols = c("estimate", "std.error", "p.value",
-  "p.adjusted", "Ntotal", `Ntotal (\%)` = "Ntotal.frequency", Npositive =
-  "N R=1", Npositive.frequency = "N R=1 (\%\%)", Nnegative = "N R=0",
-  Nnegative.frequency = "N R=0 (\%\%)"),
+kableResults(results, colnames = NULL,
   header = "MiDAS analysis results", pvalue_cutoff = NULL,
   format = getOption("knitr.table.format"))
 }
 \arguments{
-\item{results}{Tibble as returned by \code{\link{analyzeAssociations}}.}
+\item{results}{Tibble as returned by \code{\link{runMiDAS}}.}
 
-\item{cols}{Character vector specifying columns to kable. Names can be used
-to rename columns.}
+\item{colnames}{Character vector of form \code{c("new_name" = "old_name")},
+used to rename \code{results} colnames.}
 
 \item{header}{String specifying results table header.}
 
 \item{pvalue_cutoff}{Number specifying p-value cutoff for results to be
 included in output. If \code{NULL} no filtering is done.}
 
-\item{format}{String with possible values \code{"latex"} and \code{"html"}.}
+\item{format}{String \code{"latex"} or \code{"html"}.}
 }
 \value{
-A character vector with pretty formatted \code{results} table.
+Association analysis results table in HTML or LaTeX.
 }
 \description{
-\code{kableResults} formats results table to specified format. It uses
-\code{\link{formatResults}} with pre specified arguments to return pretty
-formatted table depending on the type of analysis and model type.
+\code{kableResults} convert results table (\code{\link{runMiDAS}} output) to
+HTML or LaTeX format.
 }
-\seealso{
-\code{\link{formatResults}}, \code{\link{runMiDAS}}
+\examples{
+midas <- prepareMiDAS(hla_calls = MiDAS_tut_HLA,
+                      colData = MiDAS_tut_pheno,
+                      experiment = "hla_alleles")
+object <- lm(disease ~ term, data = midas)
+res <- runMiDAS(object, experiment = "hla_alleles")
+kableResults(results = res,
+             colnames = c("HLA allele" = "allele"))
+
 }

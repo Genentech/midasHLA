@@ -1,14 +1,15 @@
-#' Read HLA allele calls data
+#' Read HLA allele calls
 #'
 #' \code{readHlaCalls} read HLA allele calls from file
 #'
-#' Input file have to be a tsv formatted table with header. First column should
-#' contain sample IDs, further columns should hold corresponding HLA allele
-#' numbers.
+#' Input file has to be a tsv formatted table with a header. First column should
+#' contain sample IDs, further columns hold HLA allele numbers. See
+#' \code{system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")}
+#' for an example.
 #'
 #' \code{resolution} parameter can be used to reduce HLA allele numbers. If
 #' reduction is not needed \code{resolution} can be set to 8. \code{resolution}
-#' parameter can take following values: 2, 4, 6, 8. For more details
+#' parameter can take the following values: 2, 4, 6, 8. For more details
 #' about HLA allele numbers resolution see
 #' \url{http://hla.alleles.org/nomenclature/naming.html}.
 #'
@@ -16,10 +17,10 @@
 #' @inheritParams utils::read.table
 #' @param file Path to input file.
 #'
-#' @return Data frame containing HLA allele calls.
+#' @return HLA calls data frame.
 #'
 #' @examples
-#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+#' file <- system.file("extdata", "MiDAS_tut_HLA.txt", package = "MiDAS")
 #' hla_calls <- readHlaCalls(file)
 #'
 #' @importFrom assertthat assert_that is.readable see_if
@@ -84,11 +85,11 @@ readHlaCalls <- function(file,
 #' see
 #' \url{ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/alignments/README.md}.
 #'
-#' All protein alignment files from EBI database are shipped with the package.
+#' All protein alignment files from the EBI database are shipped with the package.
 #' They can be easily accessed using \code{gene} parameter. If \code{gene} is
-#' set to \code{NULL} file parameter is used instead and alignment is read from
-#' the provided file. In EBI database alignments for DRB1, DRB3, DRB4 and DRB5
-#' genes are provided as a single file, here they are separated.
+#' set to \code{NULL}, \code{file} parameter is used instead and alignment is
+#' read from the provided file. In EBI database alignments for DRB1, DRB3, DRB4
+#' and DRB5 genes are provided as a single file, here they are separated.
 #'
 #' @inheritParams readHlaCalls
 #' @inheritParams reduceAlleleResolution
@@ -101,7 +102,7 @@ readHlaCalls <- function(file,
 #'
 #' @return Matrix containing HLA allele alignments.
 #'
-#'   Rownames corresponds to allele numbers and columns to positions in the
+#'   Rownames correspond to allele numbers and columns to positions in the
 #'   alignment. Sequences following the termination codon are marked as empty
 #'   character (\code{""}). Unknown sequences are marked with a character of
 #'   choice, by default \code{""}. Stop codons are represented by a hash (X).
@@ -116,7 +117,7 @@ readHlaCalls <- function(file,
 #' @export
 readHlaAlignments <- function(file,
                               gene = NULL,
-                              trim = TRUE,
+                              trim = FALSE,
                               unkchar = "",
                               resolution = 8) {
   assert_that(
@@ -189,22 +190,32 @@ readHlaAlignments <- function(file,
                    )
     )
 
+    # find AA positions numbers
+    aln_raw <- aln_raw[nonempty_lines]
+    raw_first_codon_idx <- nchar(stri_subset_fixed(aln_raw, "Prot")[1])
+    raw_alignment_line <- stri_sub(aln_raw[allele_lines][1],
+                                   1,
+                                   raw_first_codon_idx
+    )
+    raw_alignment_seq <- stri_split_regex(raw_alignment_line, "\\s+")
+    raw_alignment_seq <- unlist(raw_alignment_seq)[-c(1, 2)]
+    first_codon_idx <- nchar(stri_flatten(raw_alignment_seq))
+    assert_that(
+      see_if(is.count(first_codon_idx),
+             msg = "start codon is not marked properly in the input file"
+      )
+    )
+    if (first_codon_idx > 1) {
+      aln_colnames <- c(seq(1 - first_codon_idx, -1, 1),
+                        seq(1, ncol(aln) + 1 - first_codon_idx, 1)
+                      )
+    } else {
+      aln_colnames <- seq(1, ncol(aln) + 1 - first_codon_idx, 1)
+    }
+    colnames(aln) <- aln_colnames
+
     # discard aa '5 to start codon of mature protein
     if (trim) {
-      aln_raw <- aln_raw[nonempty_lines]
-      raw_first_codon_idx <- nchar(stri_subset_fixed(aln_raw, "Prot")[1])
-      raw_alignment_line <- stri_sub(aln_raw[allele_lines][1],
-                                     1,
-                                     raw_first_codon_idx
-      )
-      raw_alignment_seq <- stri_split_regex(raw_alignment_line, "\\s+")
-      raw_alignment_seq <- unlist(raw_alignment_seq)[-c(1, 2)]
-      first_codon_idx <- nchar(stri_flatten(raw_alignment_seq))
-      assert_that(
-        see_if(is.count(first_codon_idx),
-               msg = "start codon is not marked properly in the input file"
-        )
-      )
       aln <- aln[, first_codon_idx:ncol(aln)]
     }
   } else {
@@ -244,97 +255,50 @@ readHlaAlignments <- function(file,
                                            resolution = resolution
   )
   unique_numbers <- ! duplicated(allele_numbers)
-  aln <- aln[unique_numbers, ]
+  aln <- aln[unique_numbers, , drop = FALSE]
   rownames(aln) <- allele_numbers[unique_numbers]
-
-
 
   return(aln)
 }
 
-#' Reads data table with KIR haplotypes calls
+#' Read KIR calls
 #'
-#' \code{readKirCalls} reads table with KIR haplotypes calls from file.
+#' \code{readKirCalls} read KIR calls from file.
 #'
-#' Input file have to be a tsv formatted table with two columns and header.
-#' First column should contain samples IDs, second column should hold
-#' corresponding KIR haplotypes.
+#' Input file has to be a tsv formatted table. First column should be named
+#' "ID" and contain samples IDs, further columns should hold KIR genes presence
+#' / absence indicators. See
+#' \code{system.file("extdata", "MiDAS_tut_KIR", package = "MiDAS")} for an
+#' example.
 #'
-#' @inheritParams kirHaplotypeToCounts
 #' @inheritParams utils::read.table
 #' @param file Path to input file.
-#' @param counts Logical flag indicating if KIR haplotypes should be converted
-#'   to gene counts.
 #'
-#' @return Data frame containing KIR haplotypes calls or corresponding gene
-#'   counts.
+#' @return Data frame containing KIR gene's counts.
 #'
 #' @examples
-#' file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
+#' file <- system.file("extdata", "MiDAS_tut_KIR.txt", package = "MiDAS")
 #' readKirCalls(file)
 #'
 #' @importFrom assertthat assert_that is.readable see_if
 #' @importFrom dplyr left_join select
 #' @importFrom stats na.omit setNames
-#'
 #' @export
 readKirCalls <- function(file,
-                         hap_dict = system.file("extdata", "Match_kir_haplotype_gene.txt", package = "MiDAS"),
-                         counts = TRUE,
-                         binary = TRUE,
-                         na.strings = c("", "NA")) {
+                         na.strings = c("", "NA", "uninterpretable")) {
   assert_that(
     is.readable(file),
-    is.readable(hap_dict),
-    isTRUEorFALSE(counts),
-    isTRUEorFALSE(binary),
     is.character(na.strings)
   )
 
-  kir_calls <- read.table(file = file,
-                          header = TRUE,
-                          sep = "\t",
-                          stringsAsFactors = FALSE,
-                          na.strings = na.strings
+  kir_calls <- read.table(
+    file = file,
+    header = TRUE,
+    sep = "\t",
+    stringsAsFactors = FALSE,
+    na.strings = na.strings
   )
-  assert_that(
-    see_if(ncol(kir_calls) == 2,
-           msg = sprintf(
-             fmt = "KIR haplotypes calls table should have 2 columns, not %i",
-             ncol(kir_calls)
-           )
-    ),
-    see_if(
-      all(is_hap <- grepl("^[0-9+|/]+$", na.omit(kir_calls[, 2, drop = TRUE]))),
-      msg = sprintf(
-        fmt = "rows %s of input file contains unexpected characters",
-        paste(which(! is_hap), collapse = ", ")
-      )
-    )
-  )
-
-  if (counts) {
-    haplotypes <- kir_calls[, 2, drop = TRUE]
-    kir_counts <- kirHaplotypeToCounts(
-      x = haplotypes,
-      hap_dict = hap_dict,
-      binary = binary
-    )
-
-    kir_calls <- left_join(
-      x = kir_calls,
-      y = kir_counts,
-      by = setNames(colnames(kir_counts)[1], colnames(kir_calls)[2]),
-      na_matches = "never"
-    )
-
-    # If there are multiple matches between x and y, all combinations of the matches are returned.
-    kir_calls <- kir_calls[! duplicated(kir_calls[, 1, drop = TRUE]), ]
-    rownames(kir_calls) <- NULL
-
-    # discard haplotype designation from final table
-    kir_calls <- select(kir_calls, - !!colnames(kir_calls)[2])
-  }
+  checkKirCallsFormat(kir_calls)
 
   return(kir_calls)
 }

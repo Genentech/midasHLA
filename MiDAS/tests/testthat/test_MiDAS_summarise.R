@@ -1,15 +1,15 @@
 context("Summarising MiDAS results")
 
 test_that("summarize amino acid position", {
-  file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
+  file <- system.file("extdata", "MiDAS_tut_HLA.txt", package = "MiDAS")
   hla_calls <- readHlaCalls(file)
-  aa_sum <- summariseAAPosition(hla_calls, "DMA_100")
+  aa_sum <- summariseAAPosition(hla_calls, "DRA_2")
 
   aa_sum_test <- data.frame(
-    `HLA-DMA (100)` = c("F"),
-    `HLA-DMA alleles` = "*01:01, *01:02, *01:03",
-    count = 40,
-    frequency = formattable::percent(1),
+    `HLA-DRA (2)` = c("*", "A"),
+    `HLA-DRA alleles` = c("*01:02", "*01:01"),
+    count = c(711L, 1289L),
+    frequency = formattable::percent(c(0.3555, 0.6445)),
     stringsAsFactors = FALSE,
     check.names = FALSE
   )
@@ -50,6 +50,6 @@ test_that("summarize amino acid position", {
   hla_calls[1, "DRB1_1"] <- "DRB1*00:00"
   expect_error(
     summariseAAPosition(hla_calls, "DRB1_100"),
-    "allele DRB1\\*00:00 could not be found in the nucleotide alignment file."
+    "allele DRB1\\*00:00 could not be found in the alignment file."
   )
 })

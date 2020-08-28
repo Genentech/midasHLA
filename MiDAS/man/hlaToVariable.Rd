@@ -2,94 +2,76 @@
 % Please edit documentation in R/MiDAS_transformationFunctions.R
 \name{hlaToVariable}
 \alias{hlaToVariable}
-\title{Convert HLA calls data frame according to match table}
+\title{Convert HLA calls to variables}
 \usage{
 hlaToVariable(hla_calls, dictionary, reduce = TRUE, na.value = 0,
   nacols.rm = TRUE)
 }
 \arguments{
-\item{hla_calls}{Data frame containing HLA allele calls, as return by
+\item{hla_calls}{HLA calls data frame, as returned by
 \code{\link{readHlaCalls}} function.}
 
-\item{dictionary}{Path to the file containing HLA allele numbers matchings or
-data frame providing this information. See details for further
-explanations.}
+\item{dictionary}{Path to file containing HLA allele dictionary or a
+data frame.}
 
-\item{reduce}{logical indicating if function should try to reduce alleles
-resolution when no matching is found. See details for more details.}
+\item{reduce}{Logical indicating if function should try to reduce allele
+resolution when no matching entry  in the dictionary is found. See details.}
 
 \item{na.value}{Vector of length one speciyfing value for alleles with
- no values in dictionary. Default behaviour is to mark such instances with
-\code{0}, however in some cases \code{NA} might be more appropriate.}
+no matching entry in \code{dictionary}. Default is to use \code{0}.}
 
-\item{nacols.rm}{logical indicating if result columns that contain only
+\item{nacols.rm}{Logical indicating if result columns that contain only
 \code{NA} should be removed.}
 }
 \value{
-Data frame of HLA numbers converted to additional variables according
-  to match table.
+Data frame of HLA variables.
 }
 \description{
-\code{hlaToVariable} convert HLA calls data frame to additional variables
-based on match table (dictionary).
+\code{hlaToVariable} converts HLA calls data frame to additional variables.
 }
 \details{
-\code{reduce} control if conversion should happen in a greedy way, such that
-if some hla numbers cannot be converted, their resolution is reduced by 2 and
-another attempt is taken. This iterative process stops when alleles cannot be
-further reduced or all have been successfully converted.
-
 \code{dictionary} file should be a tsv format with header and two columns.
 First column should hold allele numbers and second corresponding additional
 variables. Optionally a data frame formatted in the same manner can be passed
 instead.
 
-\code{dictionary} can be also used to access matching files shipped with the
-package. They can be referred to by using one of the following strings (to
-list available dictionaries use \code{\link{listMiDASDictionaries}}):
+\code{dictionary} can be also used to access dictionaries shipped with the
+package. They can be referred to by using one of the following strings:
 \describe{
-  \item{\code{allele_HLA-A_expression}}{
-    Reference data to impute expression levels for HLA-A alleles.
+  \item{\code{"allele_HLA_Bw"}}{
+    Translates HLA-B alleles together with A*23, A*24 and A*32 into Bw4 and
+    Bw6 allele groups. In some cases HLA alleles containing Bw4 epitope, on
+    nucleotide level actually carries a premature stop codon. Meaning that
+    although on nucleotide level the allele would encode a Bw4 epitope it's
+    not really there and it is assigned to Bw6 group. However in 4-digit
+    resolution these alleles can not be distinguished from other Bw4 groups.
+    Since alleles with premature stop codons are rare, Bw4 group is assigned.
   }
-  \item{\code{allele_HLA-B_Bw}}{
-    B alleles can be grouped in allele groups Bw4 and Bw6. In some cases HLA
-    alleles containing Bw4 epitope, on nucleotide level actually carries a
-    premature stop codon. Meaning that although on nucleotide level the
-    allele would encode a Bw4 epitope it's not really there and it is
-    assigned to Bw6 group. However in 4-digit resolution these alleles can
-    not be distinguished from other Bw4 groups. Since alleles with premature
-    stop codons are rare in those ambiguous cases those are assigned to Bw4
-    group.
+  \item{\code{"allele_HLA-B_only_Bw"}}{
+    Translates HLA-B alleles (without A*23, A*24 and A*32) into Bw4 and Bw6
+    allele groups.
   }
-  \item{allele_HLA_Bw4+A23+A24+A32}{
-    Extends \code{allele_HLA-B_Bw} dictionary by inclusion of A*23, A*24 and
-    A*32 HLA alleles.
+  \item{\code{"allele_HLA-C_C1-2"}}{
+    Translates HLA-C alleles into C1 and C2 allele groups.
   }
-  \item{\code{allele_HLA-C_C1-2}}{
-    C alleles can be grouped in allele groups C1 and C2.
+  \item{\code{"allele_HLA_supertype"}}{
+   Translates HLA-A and HLA-B alleles into supertypes, a classification that
+   group HLA alleles based on peptide binding specificities.
   }
-  \item{\code{allele_HLA-C_expression}}{
-    Reference data to impute expression levels for HLA-C alleles.
-  }
-  \item{\code{allele_HLA_supertype}}{
-    A and B alleles can be assigned to so-called supertypes, a
-    classification that group HLA alleles based on peptide binding
-    specificities.
-  }
-  \item{\code{allele_HLA_Ggroup}}{
-    HLA alleles can be re-coded in G groups, which defines amino acid
-    identity only in the exons relevant for peptide binding. Note that
-    alleles "DRB1*01:01:01" and "DRB1*01:16" were matched with more than one
-    G group, this ambiguity was removed by deleting matching with
-    "DRB5*01:01:01G" group. Moreover in the original match file there were
-    alleles named "DPA*...", here they are renamed to "DPA1*..." to adhere
-    with HLA nomenclature.
+  \item{\code{"allele_HLA_Ggroup"}}{
+    Translates HLA alleles into G groups, which defines amino acid identity
+    only in the exons relevant for peptide binding. Note that alleles
+    DRB1*01:01:01 and DRB1*01:16 match more than one G group, here this
+    ambiguity was removed by deleting matching with DRB5*01:01:01G group.
   }
 }
+
+\code{reduce} control if conversion should happen in a greedy way, such that
+if some HLA number cannot be converted, it's resolution is reduced by 2 and
+another attempt is taken. This process stops when alleles cannot be further
+reduced or all have been successfully converted.
 }
 \examples{
-file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-hla_calls <- readHlaCalls(file)
-hlaToVariable(hla_calls, dictionary = "allele_HLA_supertype")
+hlaToVariable(MiDAS_tut_HLA, dictionary = "allele_HLA_supertype")
 
 }

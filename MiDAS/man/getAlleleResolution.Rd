@@ -2,25 +2,25 @@
 % Please edit documentation in R/MiDAS_utils.R
 \name{getAlleleResolution}
 \alias{getAlleleResolution}
-\title{Infers HLA allele resolution}
+\title{Infer HLA allele resolution}
 \usage{
 getAlleleResolution(allele)
 }
 \arguments{
-\item{allele}{Character vector containing HLA allele numbers.}
+\item{allele}{Character vector with HLA allele numbers.}
 }
 \value{
-Integer vector specifying alleles resolutions.
-
-  \code{NA} values are accepted and returned as \code{NA}.
+Integer vector specifying allele resolutions.
 }
 \description{
 \code{getAlleleResolution} returns the resolution of input HLA allele
 numbers.
 }
 \details{
-HLA allele resolution can take the following values: 2, 4, 6, 8.See
+HLA allele resolution can take the following values: 2, 4, 6, 8. See
 \url{http://hla.alleles.org/nomenclature/naming.html} for more details.
+
+\code{NA} values are accepted and returned as \code{NA}.
 }
 \examples{
 allele <- c("A*01:01", "A*01:02")

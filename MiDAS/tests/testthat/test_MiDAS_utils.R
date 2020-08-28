@@ -1,6 +1,6 @@
-context("HLA allele numbers")
+context("UTILS")
 
-test_that("HLA allele numbers have proper format", {
+test_that("checkAlleleFormat", {
   expect_equal(checkAlleleFormat(c("A*01", "A*01:24", "B*01:25:22",
                                    "C*050:24:55:54")
                ),
@@ -15,20 +15,24 @@ test_that("HLA allele numbers have proper format", {
                ),
                c(FALSE, FALSE, FALSE)
   )
+  expect_equal(checkAlleleFormat(c("*01", "A*:22", NA)
+               ),
+               c(FALSE, FALSE, NA)
+  )
 })
 
-test_that("HLA allele resolution is number of sets of digits * 2", {
+test_that("getAlleleResolution", {
   expect_equal(getAlleleResolution(c("A*01", "A*01:24", "B*01:25:22",
-                                     "C*05:24:55:54")
+                                     "C*05:24:55:54", NA)
                ),
-               c(2, 4, 6, 8)
+               c(2, 4, 6, 8, NA)
   )
   expect_error(getAlleleResolution("word"),
                "allele have to be a valid HLA allele number"
   )
 })
 
-test_that("Reduced HLA allele have desired resoulution", {
+test_that("reduceAlleleResolution", {
   expect_equal(reduceAlleleResolution(c("A*01", "A*01:24", "B*01:25:22",
                                         "C*05:24:55:54", "C*05:24:55:54N"), 2
                ),
@@ -42,7 +46,18 @@ test_that("Reduced HLA allele have desired resoulution", {
   )
 })
 
-test_that("HLA allels are converted to additional variables", {
+test_that("getVariableAAPos", {
+  allele <- c("TAP1*01:01:01:01", "TAP1*02:01:02")
+  aln <- readHlaAlignments(system.file("extdata",
+                                       "TAP1_prot.txt",
+                                       package = "MiDAS"))
+  aln <- aln[allele, ]
+  expect_equal(getVariableAAPos(aln), c(`333` = 333, `637` = 637))
+
+  expect_error(getVariableAAPos(c()), "alignment is not a matrix")
+})
+
+test_that("convertAlleleToVariable", {
   path <- system.file("extdata", "Match_allele_HLA_supertype.txt", package = "MiDAS")
   addvar <- convertAlleleToVariable(c("A*01:01", "A*02:01", "B*01", NA), dictionary = path)
   expect_equal(addvar, c("A01", "A02", NA, NA))
@@ -50,14 +65,14 @@ test_that("HLA allels are converted to additional variables", {
   addvar <- convertAlleleToVariable(c("A*01:01", "A*02:01", "B*01", NA), dictionary = dictionary)
   expect_equal(addvar, c("A01", "A02", NA, NA))
 
-  expect_error(convertAlleleToVariable(c("a", "b", "c"), dictionary = path,
-                                       "allele have to be a valid HLA allele number"
-  )
+  expect_error(
+    convertAlleleToVariable(c("a", "b", "c"), dictionary = path),
+    "allele have to be a valid HLA allele number"
   )
 
-  expect_error(convertAlleleToVariable(c("A*01", "A*02", "A*03"), dictionary = c("foo", "bar"),
-                                       "dictionary have to be either path or data.frame"
-  )
+  expect_error(
+    convertAlleleToVariable(c("A*01", "A*02", "A*03"), dictionary = c("foo", "bar")),
+    "dictionary have to be either a path or a data.frame"
   )
 
   expect_error(
@@ -68,325 +83,104 @@ test_that("HLA allels are converted to additional variables", {
     sprintf("Path '%s' does not exist", file.path("foo", "bar"))
   )
 
-  expect_error(convertAlleleToVariable(c("A*01", "A*02", "A*03"), dictionary = dictionary[, 1],
-                                       "match table have to consist out of two columns"
-  )
-  )
-
-  expect_error(convertAlleleToVariable(c("A*01", "A*02", "A*03"), dictionary = dictionary[, c(2, 2)],
-                                       "first column of match table must contain valid HLA allele numbers"
-  )
+  expect_error(
+    convertAlleleToVariable(c("A*01", "A*02", "A*03"), dictionary = dictionary[, 1, drop=FALSE]),
+    "dictionary must have two columns"
   )
 
-  expect_error(convertAlleleToVariable(c("A*01", "A*02", "A*03"), dictionary = dictionary[c(1, 1), ],
-                                       "match table contains duplicated allele numbers"
+  expect_error(
+    convertAlleleToVariable(c("A*01", "A*02", "A*03"), dictionary = dictionary[, c(2, 2)]),
+    "first column in dictionary must contain valid HLA allele numbers"
   )
+
+  expect_error(
+    convertAlleleToVariable(c("A*01", "A*02", "A*03"), dictionary = dictionary[c(1, 1),]),
+    "dictionary contains duplicated allele numbers"
   )
 })
 
-test_that("HLA calls data frame have proper format", {
-  file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-  hla_calls <- readHlaCalls(file)
-  expect_equal(checkHlaCallsFormat(hla_calls), TRUE)
-
-  expect_error(checkHlaCallsFormat("A"), "hla_calls is not a data frame")
-  expect_error(checkHlaCallsFormat(data.frame()),
-               "hla_calls have to have at least 1 rows and 2 columns"
-  )
-  hla_calls[, 1] <- as.factor(hla_calls[, 1])
-  expect_error(checkHlaCallsFormat(hla_calls),
-               "hla_calls can't contain factors"
-  )
-  fake_calls <- data.frame(ID = c("Sample1", "Sample2", "Sample3"),
-                           A_1 = c("A*01", "A*02", "A*03"),
-                           A_2 = c("A*01", "B*02", "C*03"),
-                           stringsAsFactors = FALSE
-  )
-  expect_error(checkHlaCallsFormat(fake_calls[, c(2, 1, 3)]),
-               "first column of hla_calls should specify samples id"
-  )
-
-  expect_error(checkHlaCallsFormat(fake_calls[, c(1, 1, 3)]),
-               "values: Sample1, Sample2, Sample3 in hla_calls doesn't follow HLA numbers specification"
-  )
-})
-
-test_that("HLA allele are backquoted properly", {
+test_that("backquote", {
   expect_equal(backquote(c("A:01:01", "A:02:01")), c("`A:01:01`", "`A:02:01`"))
   expect_error(backquote(1), "x is not a character vector")
 })
 
-context("HLA allele alignments")
-
-test_that("Variable amino acids positions are detected properly", {
-  hlaa_calls <- c("TAP1*01:01", "TAP1*02:01")
-  hlaa_res <- 4
-  hlaa_aln <- readHlaAlignments(system.file("extdata",
-                                            "TAP1_prot.txt",
-                                            package = "MiDAS")
-  )
-  four_dig_numbers <- reduceAlleleResolution(rownames(hlaa_aln), resolution = 4)
-  hlaa_aln <- hlaa_aln[!duplicated(four_dig_numbers), ]
-  rownames(hlaa_aln) <- four_dig_numbers[!duplicated(four_dig_numbers)]
-  hlaa_aln <- hlaa_aln[hlaa_calls, ]
-
-  expect_equal(getVariableAAPos(hlaa_aln), c(333,637))
-
-  expect_error(getVariableAAPos(hlaa_calls), "alignment is not a matrix")
-})
-
-context("HLA statistical models handling")
-
-test_that("HLA statistical models are updated properly", {
-  library("survival")
-  hla_calls_file <- system.file("extdata",
-                                "HLAHD_output_example.txt",
-                                package = "MiDAS"
-  )
-  hla_calls <- readHlaCalls(hla_calls_file)
-  pheno_file <- system.file("extdata", "pheno_example.txt", package = "MiDAS")
-  pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
-  covar_file <- system.file("extdata", "covar_example.txt", package = "MiDAS")
-  covar <- read.table(covar_file, header = TRUE, stringsAsFactors = FALSE)
-  midas_data <-
-    prepareMiDAS(hla_calls,
-                     pheno,
-                     covar,
-                     analysis_type = "hla_allele",
-                     inheritance_model = "additive")
-  coxmod <- coxph(Surv(OS, OS_DIED) ~ 1, data = midas_data)
-  coxmod$call$data <- midas_data
-  coxmod_test <- coxph(Surv(OS, OS_DIED) ~ `A*01:01`, data = midas_data)
-  coxmod_test$call$data <- midas_data
-  expect_equal(updateModel(coxmod, "A*01:01"),
-               coxmod_test
+test_that("updateModel", {
+  midas <-
+    prepareMiDAS(
+      hla_calls = MiDAS_tut_HLA,
+      colData = MiDAS_tut_pheno,
+      experiment = "hla_alleles"
+    )
+  midas_data <- midasToWide(midas, experiment = "hla_alleles")
+  mod <- lm(disease ~ 1, data = midas_data)
+  mod$call$data <- midas_data
+  mod_test <- lm(disease ~ `A*01:01`, data = midas_data)
+  mod_test$call$data <- midas_data
+  expect_equal(updateModel(mod, "A*01:01"),
+               mod_test
   )
 
-  expect_error(updateModel(coxmod, 1),
-               "x is not a character vector or formula"
+  expect_error(updateModel(mod, 1),
+               "x is not a character vector"
   )
 
-  expect_error(updateModel(coxmod, x = "A*01:01", backquote = 1),
+  expect_error(updateModel(mod, x = "A*01:01", placeholder = 1),
+               "placeholder is not a string \\(a length one character vector\\)."
+  )
+
+  expect_error(updateModel(mod, x = "A*01:01", backquote = 1),
                "backquote is not a flag \\(a length one logical vector\\)."
   )
 
-  expect_error(updateModel(coxmod, x = "A*01:01", collapse = 1),
+  expect_error(updateModel(mod, x = "A*01:01", collapse = 1),
                "collapse is not a string \\(a length one character vector\\)."
   )
-})
-
-
-test_that("statistical models are statistical model", {
-  object <- lm(speed ~ dist, data = cars)
-  expect_equal(checkStatisticalModel(object), TRUE)
-
-  expect_error(checkStatisticalModel(list(1)),
-               "object is required to have the internal OBJECT bit set"
-  )
-
-  expect_error(updateModel(speed ~ cars),
-               "object have to have an attribute 'call'"
-  )
-
-  fake_model <- list(call = list(formula = "foo"))
-  class(fake_model) <- "fake"
-  expect_error(updateModel(fake_model),
-               "object have to be a model with defined formula"
-  )
-
-  fake_model <- list(call = list(formula = 1 ~ 1))
-  class(fake_model) <- "fake"
-  expect_error(updateModel(fake_model),
-               "object need to have data attribute defined"
-  )
-
-  fake_model <- list(call = list(formula = 1 ~ 1, data = "bigData"))
-  class(fake_model) <- "fake"
-  expect_error(updateModel(fake_model),
-               "object need to have data attribute defined"
-  )
-})
-
-test_that("is counts or zeros", {
-  expect_equal(isCountsOrZeros(c(1, 0, 2, NA)), TRUE)
 
   expect_error(
-    assertthat::assert_that(isCountsOrZeros(c(1, 0, 2, NA, 1.5))),
-    "values in c\\(1, 0, 2, NA, 1.5\\) are not counts \\(a positive integers\\) or zeros."
+    updateModel(
+      mod,
+      x = "A*01:01",
+      placeholder = "foo"
+    ),
+    "placeholder 'foo' could not be found in object's formula"
   )
 })
 
-test_that("is character or null", {
-  expect_equal(isCharacterOrNULL(LETTERS), TRUE)
-  expect_equal(isCharacterOrNULL(NULL), TRUE)
-
-  expect_error(
-    assertthat::assert_that(isCharacterOrNULL(1)),
-    "1 is not a character vector or NULL."
+test_that("listMiDASDictionaries", {
+  expect_equal(
+    listMiDASDictionaries(pattern = ".*"),
+    # sort order of list.dir changes in devtools::check compared to devtools::test
+    # devtools::check compatible
+    c(
+      "allele_HLA-A_expression",
+      "allele_HLA-Bw_only_B",
+      "allele_HLA-C_C1-2",
+      "allele_HLA-C_expression",
+      "allele_HLA_Bw",
+      "allele_HLA_Ggroup",
+      "allele_HLA_supertype",
+      "counts_hla_kir_interactions",
+      "counts_kir_haplotypes",
+      "kir_haplotype_gene",
+      "kir_nomenclature_gene"
+    )
+    # devtools::test compatible
+    # c("allele_HLA_Bw",
+    #   "allele_HLA_Ggroup",
+    #   "allele_HLA_supertype",
+    #   "allele_HLA-A_expression",
+    #   "allele_HLA-Bw_only_B",
+    #   "allele_HLA-C_C1-2",
+    #   "allele_HLA-C_expression",
+    #   "counts_hla_kir_interactions",
+    #   "counts_kir_haplotypes",
+    #   "kir_haplotype_gene",
+    #   "kir_nomenclature_gene"
+    # )
   )
 })
 
-test_that("is number or null", {
-  expect_equal(isNumberOrNULL(1), TRUE)
-  expect_equal(isNumberOrNULL(NULL), TRUE)
-
-  expect_error(
-    assertthat::assert_that(isNumberOrNULL("a")),
-    "\"a\" is not a number \\(a length one numeric vector\\) or NULL."
-  )
-})
-
-test_that("is string or null", {
-  expect_equal(isStringOrNULL("foo"), TRUE)
-  expect_equal(isStringOrNULL(NULL), TRUE)
-
-  expect_error(
-    assertthat::assert_that(isStringOrNULL(1)),
-    "1 is not a string \\(a length one character vector\\) or NULL."
-  )
-})
-
-test_that("string matches", {
-  expect_equal(stringMatches("foo", c("foo", "bar")), TRUE)
-
-  expect_error(
-    assertthat::assert_that(stringMatches("foo", c("bar", "Foo"))),
-    "\"foo\" should be one of \"bar\", \"Foo\"."
-  )
-})
-
-test_that("is flag or null", {
-  expect_equal(isFlagOrNULL(TRUE), TRUE)
-  expect_equal(isFlagOrNULL(NULL), TRUE)
-  expect_equal(isFlagOrNULL(NA), FALSE)
-
-  expect_error(
-    assertthat::assert_that(isFlagOrNULL(1)),
-    "1 is not a flag \\(a length one logical vector\\) or NULL."
-  )
-})
-
-test_that("character maches choices", {
-  expect_equal(characterMatches("foo", c("foo", "bar")), TRUE)
-
-  expect_error(
-    assertthat::assert_that(characterMatches("foo", "bar")),
-    '"foo" should match values "bar".'
-  )
-})
-
-test_that("is class or null", {
-  expect_equal(isClassOrNULL("foo", "character"), TRUE)
-  expect_equal(isClassOrNULL(NULL, "character"), TRUE)
-
-  expect_error(
-    assertthat::assert_that(isClassOrNULL("foo", "bar")),
-    "\"foo\" must be an instance of \"bar\" or NULL."
-  )
-})
-
-test_that("KIR haplotypes are converted to gene counts", {
-  x <- c("1+3|16+3", "1+1")
-  kir_hap <- kirHaplotypeToCounts(x)
-
-  hap_dict <- system.file("extdata", "Match_kir_haplotype_gene.txt", package = "MiDAS")
-  hap_dict <- read.table(hap_dict)
-  hap1 <- colSums(hap_dict[c("1", "3"), ])
-  hap1 <- ifelse(hap1 > 1, 1, hap1)
-  hap2 <- colSums(hap_dict[c("1", "1"), ])
-  hap2 <- ifelse(hap2 > 1, 1, hap2)
-  test_kir_hap <- rbind(hap1, hap2)
-  test_kir_hap <-
-    as.data.frame(test_kir_hap,
-                  optional = TRUE,
-                  stringsAsFactors = FALSE)
-  test_kir_hap <- cbind(haplotypes = x, test_kir_hap, stringsAsFactors = FALSE)
-  rownames(test_kir_hap) <- NULL
-
-  expect_equal(kir_hap, test_kir_hap)
-
-  expect_error(kirHaplotypeToCounts(1), "x is not a character vector")
-  expect_error(kirHaplotypeToCounts(x, hap_dict = "foo"),
-               "Path 'foo' does not exist")
-  expect_error(kirHaplotypeToCounts(x, binary = "yes"),
-               "binary is not a flag \\(a length one logical vector\\).")
-})
-
-test_that("column names matches", {
-  df <- data.frame(a = 1:5, b = 1:5)
-  expect_equal(colnamesMatches(df, c("a", "b")), TRUE)
-
-  expect_error(colnamesMatches(1:2, c("foo", "bar")), "x is not a data frame")
-
-  expect_error(colnamesMatches(data.frame(one = 1:2), c("foo", "bar")),
-               "Number of columns in data.frame\\(one = 1:2\\) must equal 2."
-  )
-
-  expect_error(
-    assertthat::assert_that(colnamesMatches(df, c("foo", "bar"))),
-    "Columns a, b in df should be named foo, bar"
-  )
-})
-
-test_that("KIR counts have proper format", {
-  file <- system.file("extdata", "KIP_output_example.txt", package = "MiDAS")
-  kir_counts <- readKirCalls(file)
-  expect_equal(checkKirCountsFormat(kir_counts), TRUE)
-
-  expect_equal(checkKirCountsFormat(NULL, accept.null = TRUE), TRUE)
-
-  expect_error(
-    checkKirCountsFormat(kir_counts[, 1, drop = FALSE]),
-    "kir_counts\\[, 1, drop = FALSE\\] have to have at least 1 rows and 2 columns"
-  )
-
-  fake_kir_counts <- kir_counts
-  fake_kir_counts[, 1] <- as.factor(fake_kir_counts[, 1, drop = TRUE])
-  expect_error(
-    checkKirCountsFormat(fake_kir_counts),
-    "fake_kir_counts can't contain factors"
-  )
-
-  fake_kir_counts <- kir_counts
-  colnames(fake_kir_counts) <- c("FOO", colnames(fake_kir_counts)[-1])
-  expect_error(
-    checkKirCountsFormat(fake_kir_counts),
-    "Columns FOO in kir_counts should be named ID"
-  )
-})
-
-test_that("is count or null", {
-  expect_equal(isCountOrNULL(1), TRUE)
-  expect_equal(isCountOrNULL(NULL), TRUE)
-
-  expect_error(
-    assertthat::assert_that(isCountOrNULL(1.5)),
-    "1.5 is not a count \\(a single positive integer\\) or NULL."
-  )
-})
-
-test_that("is true or false", {
-  expect_equal(isTRUEorFALSE(TRUE), TRUE)
-  expect_equal(isTRUEorFALSE(FALSE), TRUE)
-  expect_equal(isTRUEorFALSE(NA), FALSE)
-
-  expect_error(
-    assertthat::assert_that(isTRUEorFALSE(1.5)),
-    "1.5 is not a flag \\(a length one logical vector\\)."
-  )
-})
-
-test_that("tidy method exists", {
-  expect_equal(hasTidyMethod("lm"), TRUE)
-  expect_equal(hasTidyMethod("foo"), FALSE)
-
-  expect_error(
-    assertthat::assert_that(hasTidyMethod("bar")),
-    "tidy function for object of class \"bar\" could not be found."
-  )
-})
-
-test_that("likelihood ratio test", {
+test_that("LRTest", {
   df <- data.frame(OS = c(20, 30, 40), AGE = c(50, 60, 70))
   mod0 <- lm(OS ~ 1, data = df)
   mod1 <- lm(OS ~ AGE, data = df)
@@ -404,4 +198,274 @@ test_that("likelihood ratio test", {
   )
 
   expect_error(LRTest(mod1, mod0), "variables AGE were not found in mod1")
+})
+
+test_that("getObjectDetails", {
+  midas <- prepareMiDAS(
+    kir_calls = MiDAS_tut_KIR,
+    colData = MiDAS_tut_pheno,
+    experiment = c("kir_genes"))
+  obj <- lm(disease ~ term, data = midas)
+  obj_det <- getObjectDetails(obj)
+  expect_equal(
+    obj_det,
+    list(
+      call = quote(lm(formula = disease ~ term, data = midas)),
+      formula_vars = c("disease", "term"),
+      data = midas
+    )
+  )
+})
+
+test_that("runMiDASGetVarsFreq", {
+  midas <- prepareMiDAS(
+    kir_calls = MiDAS_tut_KIR,
+    colData = MiDAS_tut_pheno,
+    experiment = c("kir_genes"))
+  freq <- runMiDASGetVarsFreq(midas, "kir_genes", "disease")[1, ]
+  freq_test <- data.frame(
+    term = "KIR3DL3",
+    Ntotal = 935,
+    Ntotal.percent = formattable::percent(0.935),
+    `N(disease=0)` = 467,
+    `N(disease=0).percent` = formattable::percent(0.934),
+    `N(disease=1)` = 468,
+    `N(disease=1).percent` = formattable::percent(0.936),
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
+  expect_equal(freq, freq_test)
+})
+
+test_that("distGrantham", {
+  aa1 <- c("A", "S", "W")
+  aa2 <- c("A", "S", "V")
+  d <- distGrantham(aa1, aa2)
+  d_test <- sum(dict_dist_grantham[paste0(aa1, aa2)]) / length(aa1)
+  expect_equal(d, d_test)
+
+  expect_error(distGrantham(1, aa2), "aa1 is not a character vector")
+
+  expect_error(distGrantham(aa1, 1), "aa2 is not a character vector")
+
+  expect_error(distGrantham(aa1, aa2[-3]),
+               "aa1 and aa2 must have equal lengths.")
+
+  expect_error(distGrantham(aa1, c("F", "O", "O")),
+               "SO, WO are not valid amino acids pairs")
+})
+
+test_that("hlaCallsGranthamDistance", {
+  gdist <- hlaCallsGranthamDistance(MiDAS_tut_HLA[1:5, ], genes = c("A", "B", "C"))
+  gdist_test <- structure(list(
+    ID = c("P001", "P002", "P003", "P004", "P005"),
+    A = c(10.9447513812155, 0, 8.10497237569061, 10.6629834254144, 10.6574585635359),
+    B = c(10.3480662983425, 9.20441988950276, 8.4475138121547, 2.88950276243094, 9.01104972375691),
+    C = c(5.37569060773481, 4.98895027624309, 6.70718232044199, 5.87292817679558, 6.70718232044199)
+  ),
+  class = "data.frame",
+  row.names = c(NA,-5L))
+  expect_equal(gdist, gdist_test)
+
+  gdist <-
+    hlaCallsGranthamDistance(MiDAS_tut_HLA[1:5,],
+                             genes = c("A", "B", "C"),
+                             aa_selection = "B_pocket")
+  gdist_test <- structure(list(
+    ID = c("P001", "P002", "P003", "P004", "P005"),
+    A = c(25.8181818181818, 0, 12.7272727272727, 15.8181818181818, 16.0909090909091),
+    B = c(21.0909090909091, 31.3636363636364, 21.0909090909091, 0, 21.0909090909091),
+    C = c(29, 28.6363636363636, 29, 15.0909090909091, 29)
+  ),
+  class = "data.frame",
+  row.names = c(NA,-5L))
+  expect_equal(gdist, gdist_test)
+
+  # checkHlaCallsFormat test is ommitted here
+
+  expect_error(hlaCallsGranthamDistance(MiDAS_tut_HLA, genes = 1),
+               "genes is not a character vector")
+
+  expect_error(hlaCallsGranthamDistance(MiDAS_tut_HLA, genes = c("A", NA)),
+               "genes contains 1 missing values")
+
+  hla_calls_bad <- MiDAS_tut_HLA
+  hla_calls_bad[2, 2] <- "A*01"
+  expect_error(
+    hlaCallsGranthamDistance(hla_calls_bad, genes = "A"),
+    "Allele resolutions for gene A are not equal"
+  )
+
+  expect_error(hlaCallsGranthamDistance(MiDAS_tut_HLA, genes = "A", aa_selection = "Z"),
+               "aa_selection should be one of \"binding_groove\", \"B_pocket\", \"F_pocket\".")
+})
+
+test_that("hlaAlignmentGrantham", {
+  aln <- hlaAlignmentGrantham("TAP1", 2, 2:182)
+  aln_test <- readHlaAlignments(gene = "TAP1", resolution = 2)
+  aln_test <- aln_test[, 2:182]
+  mask <- apply(aln_test, 1, function(x) any(x == "" | x == "X" | x == "."))
+  aln_test <- aln_test[! mask, ]
+  expect_equal(aln, aln_test)
+})
+
+test_that("getHlaCallsGenes", {
+  genes <- getHlaCallsGenes(MiDAS_tut_HLA)
+  expect_equal(genes, c("A", "B", "C", "DPA1", "DPB1", "DQA1", "DQB1", "DRA", "DRB1"))
+})
+
+test_that("dfToExperimentMat", {
+  mat <- dfToExperimentMat(MiDAS_tut_HLA)
+  ids <- MiDAS_tut_HLA[["ID"]]
+  test_mat <- MiDAS_tut_HLA[, -1]
+  test_mat <- t(test_mat)
+  colnames(test_mat) <- ids
+  expect_equal(mat, test_mat)
+})
+
+test_that("experimentMatToDf", {
+  ids <- MiDAS_tut_HLA[["ID"]]
+  mat <- MiDAS_tut_HLA[, -1]
+  mat <- t(mat)
+  colnames(mat) <- ids
+  expect_equal(experimentMatToDf(mat), MiDAS_tut_HLA)
+})
+
+test_that("midasToWide", {
+  set.seed(3)
+  midas <- prepareMiDAS(
+    hla_calls = MiDAS_tut_HLA[1:2, 1:2],
+    colData = MiDAS_tut_pheno[1:2, ],
+    experiment = "hla_alleles"
+  )
+
+  wide <- midasToWide(midas, "hla_alleles")
+  test_wide <- data.frame(
+    ID = c("P001", "P002"),
+    `A*11:88` = 1:0,
+    `A*02:01` = 0:1,
+    disease = c(1L, 1L),
+    lab_value = c(-0.85, -1.6),
+    outcome = c(1L, 1L),
+    term = c(0.168041526339948, 0.807516399072483),
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
+  expect_equal(wide, test_wide)
+
+  expect_error(midasToWide(midas, 1), "experiment is not a character vector")
+
+  expect_error(
+    midasToWide(midas, "foo"),
+    "experiment should match values \"hla_alleles\"."
+  )
+})
+
+test_that("checkKirGenesFormat", {
+  genes <- c("KIR3DL3", "KIR2DS4")
+  expect_equal(checkKirGenesFormat(genes), c(TRUE, TRUE))
+  expect_equal(checkKirGenesFormat(LETTERS), rep(FALSE, length(LETTERS)))
+})
+
+test_that("iterativeLRT", {
+  MiDASdat <-
+    prepareMiDAS(
+      hla_calls = MiDAS_tut_HLA[, 1:3],
+      colData = MiDAS_tut_pheno,
+      experiment = "hla_aa"
+    )
+  MiDASdat <- filterByOmnibusGroups(MiDASdat, "hla_aa", c("A_29", "A_44", "A_65"))
+  omnibus_groups <- getOmnibusGroups(MiDASdat, "hla_aa")
+  placeholder <- getPlaceholder(MiDASdat)
+  MiDASdat <- as.data.frame(MiDASdat)
+  object <- lm(disease ~ outcome + term, data = MiDASdat)
+
+  res <- iterativeLRT(object, placeholder, omnibus_groups)
+  test_res <- data.frame(
+    group = c("A_29", "A_44", "A_65"),
+    term = c("A_29_D, A_29_A", "A_44_R, A_44_K", "A_65_R, A_65_G"),
+    dof = c(0, 1, 1),
+    logLik = c(0, 0.140455460270459, 1.10951823960204),
+    statistic = c(0, 0.280910920540919, 2.21903647920408),
+    p.value = c(1, 0.596104787861628, 0.136318110662154),
+    stringsAsFactors = FALSE
+  )
+  expect_equal(res, test_res)
+
+  MiDASdat$A_29_D <- NA
+  MiDASdat$A_29_A <- NA
+  res <- iterativeLRT(object, placeholder, omnibus_groups)
+  test_res <- data.frame(
+    group = c("A_29", "A_44", "A_65"),
+    term = c("A_29_D, A_29_A", "A_44_R, A_44_K", "A_65_R, A_65_G"),
+    dof = c(NA, 1, 1),
+    logLik = c(NA, 0.140455460270459, 1.10951823960204),
+    statistic = c(NA, 0.280910920540919, 2.21903647920408),
+    p.value = c(NA, 0.596104787861628, 0.136318110662154),
+    stringsAsFactors = FALSE
+  )
+  expect_equal(res, test_res)
+})
+
+test_that("iterativeModel", {
+  MiDASdat <-
+    prepareMiDAS(
+      hla_calls = MiDAS_tut_HLA[, 1:3],
+      colData = MiDAS_tut_pheno,
+      experiment = "hla_alleles"
+    )
+  placeholder <- getPlaceholder(MiDASdat)
+  variables <- rownames(MiDASdat)[["hla_alleles"]][1:3]
+  MiDASdat <- as.data.frame(MiDASdat)
+  object <- lm(disease ~ outcome + term, data = MiDASdat)
+
+  res <- iterativeModel(object, placeholder, variables)
+  res_test <- dplyr::tibble(
+    term = c("A*11:88", "A*24:50", "A*02:01"),
+    estimate = c(4.96506830649457e-14, 3.30483848402117e-14, -2.49329069444073e-16),
+    std.error = c(2.23663494529691e-15, 2.10564948334218e-15, 3.20260022462908e-16),
+    statistic = c(22.1988318519966, 15.6951026757577, -0.778520739262579),
+    p.value = c(2.27209273588754e-76, 2.22149857779886e-45, 0.436632572287762),
+    conf.low = c(4.52562576569574e-14, 2.89113129370057e-14, -8.78559504582024e-16),
+    conf.high = c(5.40451084729341e-14, 3.71854567434176e-14, 3.79901365693878e-16)
+  )
+  expect_equal(as.data.frame(res), as.data.frame(res_test))
+})
+
+test_that("getReferenceFrequencies", {
+  freq <-
+    getReferenceFrequencies(ref = allele_frequencies, pop = "USA NMDP Chinese")[1:3,]
+  attr(freq, "reshapeWide") <- NULL
+  freq_test <- data.frame(
+    var = c("A*01:01", "A*01:03", "A*02:01"),
+    `USA NMDP Chinese` = c(0.0145, 7e-05, 0.0946),
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
+  expect_equal(freq, freq_test)
+
+  freq <-
+    getReferenceFrequencies(ref = allele_frequencies,
+                            pop = "USA NMDP Chinese",
+                            carrier_frequency = TRUE)[1:3,]
+  attr(freq, "reshapeWide") <- NULL
+  freq_test <- data.frame(
+    var = c("A*01:01", "A*01:03", "A*02:01"),
+    `USA NMDP Chinese` = c(0.02878975, 0.0001399951, 0.18025084),
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
+  expect_equal(freq, freq_test)
+})
+
+test_that("adjustPValues", {
+  p_val <- c(0.1, 0.001, 0.01)
+  p_adj <- adjustPValues(p = p_val, method = "bonferroni", n = 3)
+  expect_equal(p_adj, p_val * 3)
+
+  p_adj <- adjustPValues(p = p_val, method = "bonferroni", n = 1)
+  expect_equal(p_adj, p_val)
+
+  expect_error(adjustPValues(p = p_val, method = "bonferroni", n = 0),
+               "n must be >= 1")
 })

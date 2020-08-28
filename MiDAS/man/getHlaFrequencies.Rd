@@ -2,29 +2,45 @@
 % Please edit documentation in R/MiDAS_transformationFunctions.R
 \name{getHlaFrequencies}
 \alias{getHlaFrequencies}
-\title{Calculate alleles frequencies}
+\title{Calculate HLA allele frequencies}
 \usage{
-getHlaFrequencies(hla_calls)
+getHlaFrequencies(hla_calls, carrier_frequency = FALSE,
+  compare = FALSE, ref_pop = c("USA NMDP African American pop 2",
+  "USA NMDP Chinese", "USA NMDP European Caucasian",
+  "USA NMDP Hispanic South or Central American", "USA NMDP Japanese",
+  "USA NMDP North American Amerindian", "USA NMDP South Asian Indian"),
+  ref = allele_frequencies)
 }
 \arguments{
-\item{hla_calls}{Data frame containing HLA allele calls, as return by
+\item{hla_calls}{HLA calls data frame, as returned by
 \code{\link{readHlaCalls}} function.}
+
+\item{carrier_frequency}{Logical flag indicating if carrier frequency should
+be returned.}
+
+\item{compare}{Logical flag indicating if \code{hla_calls} frequencies
+should be compared to reference frequencies given in \code{ref}.}
+
+\item{ref_pop}{Character vector giving names of reference populations in
+\code{ref} to compare with. Optionally vector can be named, then those
+names will be used as population names.}
+
+\item{ref}{Data frame giving reference allele frequencies. See
+\code{\link{allele_frequencies}} for an example.}
 }
 \value{
-Data frame containing alleles and thier corresponding frequencies.
+Data frame containing HLA alleles and their corresponding frequencies.
 }
 \description{
-\code{getHlaFrequencies} calculates alleles frequencies in HLA calls data
+\code{getHlaFrequencies} calculates allele frequencies in HLA calls data
 frame.
 }
 \details{
-Allele frequencies are counted in reference to sample taking both gene copies
-into consideration. `n / (2 * j)` where `n` is the number of allele
-occurrences and `j` is the sample size.
+Both gene copies are taken into consideration for frequencies calculation,
+\code{frequency = n / (2 * j)} where \code{n} is the number of allele
+occurrences and \code{j} is the number of samples in \code{hla_calls}.
 }
 \examples{
-file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-hla_calls <- readHlaCalls(file)
-getHlaFrequencies(hla_calls)
+getHlaFrequencies(MiDAS_tut_HLA)
 
 }

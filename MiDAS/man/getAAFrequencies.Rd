@@ -2,34 +2,29 @@
 % Please edit documentation in R/MiDAS_transformationFunctions.R
 \name{getAAFrequencies}
 \alias{getAAFrequencies}
-\title{Calculate amino acid's frequencies}
+\title{Calculate amino acid frequencies}
 \usage{
 getAAFrequencies(aa_variation)
 }
 \arguments{
-\item{aa_variation}{Data frame holding amino acid variation data as returned
-by \link{hlaToAAVariation}.}
+\item{aa_variation}{Amino acid variation data frame as returned by
+\link{hlaToAAVariation}.}
 }
 \value{
-Data frame containing the amino acid's positions and their
-  corresponding frequencies.
+Data frame containing amino acid positions and their corresponding
+  frequencies.
 }
 \description{
-\code{getAAFrequencies} calculates amino acid's frequencies in amino acid
-variations data frame.
+\code{getAAFrequencies} calculates amino acid frequencies in amino acid
+data frame.
 }
 \details{
-Amino acid's frequencies are counted in reference to sample taking both gene
-copies into consideration. `n / (2 * j)` where `n` is the number of amino
-acid occurrences and `j` is the sample size.
+Both gene copies are taken into consideration for frequencies calculation,
+\code{frequency = n / (2 * j)} where \code{n} is the number of amino acid
+occurrences and \code{j} is the number of samples in \code{aa_variation}.
 }
 \examples{
-file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-hla_calls <- readHlaCalls(file)
-aa_variation <- hlaToAAVariation(hla_calls)
+aa_variation <- hlaToAAVariation(MiDAS_tut_HLA)
 getAAFrequencies(aa_variation)
 
-}
-\seealso{
-\code{\link{hlaToAAVariation}}
 }

@@ -1,10 +1,10 @@
 #' Summarize amino acid position
 #'
-#' List HLA alleles and amino acid residues at a given position
+#' List HLA alleles and amino acid residues at a given position.
 #'
 #' @inheritParams checkHlaCallsFormat
 #' @inheritParams hlaToAAVariation
-#' @param aa_pos String specifying gene and amio acid position, example
+#' @param aa_pos String specifying gene and amino acid position, example
 #'   \code{"A_9"}.
 #' @param aln Matrix containing amino acid sequence alignments as returned by
 #'   \code{\link{readHlaAlignments}} function. By default function will use
@@ -16,9 +16,7 @@
 #'   residues and frequencies at requested position.
 #'
 #' @examples
-#' file <- system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")
-#' hla_calls <- readHlaCalls(file)
-#' summariseAAPosition(hla_calls, "A_9")
+#' summariseAAPosition(MiDAS_tut_HLA, "A_9")
 #'
 #' @importFrom assertthat assert_that
 #' @importFrom dplyr group_by n select starts_with summarise
@@ -26,7 +24,6 @@
 #' @importFrom magrittr %>%
 #' @importFrom stats na.omit
 #' @importFrom rlang .data
-#'
 #' @export
 summariseAAPosition <- function(hla_calls,
                                 aa_pos,
@@ -50,7 +47,7 @@ summariseAAPosition <- function(hla_calls,
 
   alleles <- select(hla_calls, starts_with(gene)) %>%
     unlist()
-  alleles_wo_na <- na.omit(alleles)
+  alleles_wo_na <- alleles[! is.na(alleles)]
   assert_that(length(alleles_wo_na) != 0,
               msg = "hla_calls for given gene contains only NA."
   )
@@ -60,6 +57,7 @@ summariseAAPosition <- function(hla_calls,
   }
 
   hla_resolution <- min(getAlleleResolution(alleles_wo_na))
+  alleles_wo_na <- reduceAlleleResolution(alleles_wo_na, hla_resolution)
   aln <- readHlaAlignments(
     gene = gsub("_", "", gene),
     resolution = hla_resolution,
@@ -74,14 +72,14 @@ summariseAAPosition <- function(hla_calls,
     see_if(
       all(i <- alleles_wo_na %in% rownames(aln)),
       msg = sprintf(
-        fmt = "allele %s could not be found in the nucleotide alignment file.",
+        fmt = "allele %s could not be found in the alignment file.",
         paste(unique(alleles_wo_na[! i]), collapse = ", ")
       )
     )
   )
 
   aa <- data.frame(
-    allele = gsub("[A-Z]+[0-9]*", "", alleles),
+    allele = gsub("[A-Z]+[0-9]*", "", alleles_wo_na),
     residue = aln[alleles_wo_na, aa_pos],
     stringsAsFactors = FALSE
   ) %>%
