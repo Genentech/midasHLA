@@ -79,7 +79,7 @@
 #' For details visit the search results page in the allelefrequencies.net
 #' database website.
 #'
-#' @format A data frame with 2096 rows and 8 variables:
+#' @format A data frame with 2096 rows and 3 variables:
 #' \describe{
 #'   \item{var}{allele number, character}
 #'   \item{population}{reference population name, character}
@@ -97,3 +97,21 @@
 #' @format Named integer vector of length 400.
 #'
 "dict_dist_grantham"
+
+#' KIR genes frequencies scraped from allelefrequencies.net
+#'
+#' Accessed on 28.08.20
+#'
+#' A dataset containing KIR genes frequencies across 16 genes.
+#' For details visit the search results page in the allelefrequencies.net
+#' database website.
+#'
+#' @format A data frame with 3744 rows and 3 variables:
+#' \describe{
+#'   \item{var}{allele number, character}
+#'   \item{population}{reference population name, character}
+#'   \item{frequency}{KIR genes carrier frequency in reference population, float}
+#' }
+#'
+#' @source \url{www.allelefrequencies.net}
+"kir_frequencies"

@@ -245,16 +245,18 @@ setMethod(
   }
 )
 
-#' Calculate features frequencies for given a experiment in MiDAS object.
+#' Calculate features frequencies for a given experiment in MiDAS object.
 #'
 #' @inheritParams getExperimentFrequencies
 #' @param object \code{\link{MiDAS}} object.
 #' @param compare Logical flag indicating if \code{hla_calls} frequencies
 #'   should be compared to reference frequencies given in \code{ref}.
-#' @param ref_pop Character vector giving names of reference populations in
-#'   \code{ref} to compare with. Optionally vector can be named, then those
-#'   names will be used as population names.
-#' @param ref Named list of reference frequencies data frames. See
+#' @param ref_pop Named list of character vectors giving names of reference
+#'   populations in \code{ref} to compare with. Optionally vectors can be named,
+#'   then those names will be used as population names. Each vector should
+#'   correspond to a specific experiment.
+#' @param ref Named list of reference frequencies data frames. Each element
+#'   should give reference for a specific experiment. See
 #'   \code{\link{allele_frequencies}} for an example on how reference
 #'   frequency data frame should be formatted.
 #'
@@ -273,16 +275,25 @@ setGeneric(
                  experiment,
                  carrier_frequency = FALSE,
                  compare = FALSE,
-                 ref_pop = c(
-                   "USA NMDP African American pop 2",
-                   "USA NMDP Chinese",
-                   "USA NMDP European Caucasian",
-                   "USA NMDP Hispanic South or Central American",
-                   "USA NMDP Japanese",
-                   "USA NMDP North American Amerindian",
-                   "USA NMDP South Asian Indian"
+                 ref_pop = list(
+                   hla_alleles = c(
+                     "USA NMDP African American pop 2",
+                     "USA NMDP Chinese",
+                     "USA NMDP European Caucasian",
+                     "USA NMDP Hispanic South or Central American",
+                     "USA NMDP Japanese",
+                     "USA NMDP North American Amerindian",
+                     "USA NMDP South Asian Indian"
+                   ),
+                   kir_genes = c(
+                     "USA California African American KIR",
+                     "USA California Asian American KIR",
+                     "USA California Caucasians KIR",
+                     "USA California Hispanic KIR"
+                   )
                  ),
-                 ref = list(hla_alleles = allele_frequencies)
+                 ref = list(hla_alleles = allele_frequencies,
+                            kir_genes = kir_frequencies)
   ) {
     standardGeneric("getFrequencies")
   }
@@ -295,10 +306,12 @@ setGeneric(
 #' @inheritParams getExperimentFrequencies
 #' @param compare Logical flag indicating if \code{hla_calls} frequencies
 #'   should be compared to reference frequencies given in \code{ref}.
-#' @param ref_pop Character vector giving names of reference populations in
-#'   \code{ref} to compare with. Optionally vector can be named, then those
-#'   names will be used as population names.
-#' @param ref Named list of reference frequencies data frames. See
+#' @param ref_pop Named list of character vectors giving names of reference
+#'   populations in \code{ref} to compare with. Optionally vectors can be named,
+#'   then those names will be used as population names. Each vector should
+#'   correspond to a specific experiment.
+#' @param ref Named list of reference frequencies data frames. Each element
+#'   should give reference for a specific experiment. See
 #'   \code{\link{allele_frequencies}} for an example on how reference
 #'   frequency data frame should be formatted.
 #'
@@ -315,14 +328,32 @@ setMethod(
                          experiment,
                          carrier_frequency = FALSE,
                          compare = FALSE,
-                         ref_pop = c("USA NMDP African American pop 2", "USA NMDP Chinese", "USA NMDP European Caucasian"),
-                         ref = list(hla_alleles = allele_frequencies)) {
+                         ref_pop = list(
+                           hla_alleles = c(
+                             "USA NMDP African American pop 2",
+                             "USA NMDP Chinese",
+                             "USA NMDP European Caucasian",
+                             "USA NMDP Hispanic South or Central American",
+                             "USA NMDP Japanese",
+                             "USA NMDP North American Amerindian",
+                             "USA NMDP South Asian Indian"
+                           ),
+                           kir_genes = c(
+                             "USA California African American KIR",
+                             "USA California Asian American KIR",
+                             "USA California Caucasians KIR",
+                             "USA California Hispanic KIR"
+                           )
+                         ),
+                         ref = list(hla_alleles = allele_frequencies,
+                                    kir_genes = kir_frequencies)
+  ) {
     assert_that(
       is.string(experiment),
       stringMatches(experiment, getExperiments(object)),
       isTRUEorFALSE(carrier_frequency),
       isTRUEorFALSE(compare),
-      is.character(ref_pop),
+      is.list(ref_pop),
       is.list(ref)
     )
     ex <- object[[experiment]]
@@ -333,6 +364,7 @@ setMethod(
             )
     )
 
+    ref_pop <- ref_pop[[experiment]]
     ref <- ref[[experiment]]
     if (compare && ! is.null(ref)) {
       assert_that(

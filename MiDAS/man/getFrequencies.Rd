@@ -2,14 +2,18 @@
 % Please edit documentation in R/MiDAS_class.R
 \name{getFrequencies}
 \alias{getFrequencies}
-\title{Calculate features frequencies for given a experiment in MiDAS object.}
+\title{Calculate features frequencies for a given experiment in MiDAS object.}
 \usage{
 getFrequencies(object, experiment, carrier_frequency = FALSE,
-  compare = FALSE, ref_pop = c("USA NMDP African American pop 2",
-  "USA NMDP Chinese", "USA NMDP European Caucasian",
+  compare = FALSE, ref_pop = list(hla_alleles =
+  c("USA NMDP African American pop 2", "USA NMDP Chinese",
+  "USA NMDP European Caucasian",
   "USA NMDP Hispanic South or Central American", "USA NMDP Japanese",
   "USA NMDP North American Amerindian", "USA NMDP South Asian Indian"),
-  ref = list(hla_alleles = allele_frequencies))
+  kir_genes = c("USA California African American KIR",
+  "USA California Asian American KIR", "USA California Caucasians KIR",
+  "USA California Hispanic KIR")), ref = list(hla_alleles =
+  allele_frequencies, kir_genes = kir_frequencies))
 }
 \arguments{
 \item{object}{\code{\link{MiDAS}} object.}
@@ -22,11 +26,13 @@ be returned.}
 \item{compare}{Logical flag indicating if \code{hla_calls} frequencies
 should be compared to reference frequencies given in \code{ref}.}
 
-\item{ref_pop}{Character vector giving names of reference populations in
-\code{ref} to compare with. Optionally vector can be named, then those
-names will be used as population names.}
+\item{ref_pop}{Named list of character vectors giving names of reference
+populations in \code{ref} to compare with. Optionally vectors can be named,
+then those names will be used as population names. Each vector should
+correspond to a specific experiment.}
 
-\item{ref}{Named list of reference frequencies data frames. See
+\item{ref}{Named list of reference frequencies data frames. Each element
+should give reference for a specific experiment. See
 \code{\link{allele_frequencies}} for an example on how reference
 frequency data frame should be formatted.}
 }
@@ -35,5 +41,5 @@ Data frame with features from selected experiment and their
   corresponding frequencies.
 }
 \description{
-Calculate features frequencies for given a experiment in MiDAS object.
+Calculate features frequencies for a given experiment in MiDAS object.
 }
