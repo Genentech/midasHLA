@@ -43,7 +43,7 @@ summariseAAPosition <- function(hla_calls,
   )
 
   gene <- gsub("[0-9]+$", "", aa_pos)
-  aa_pos <- as.integer(gsub(".*_([0-9]+)$", "\\1", aa_pos))
+  aa_pos <- gsub(".*_([0-9]+)$", "\\1", aa_pos)
 
   alleles <- select(hla_calls, starts_with(gene)) %>%
     unlist()
@@ -66,8 +66,8 @@ summariseAAPosition <- function(hla_calls,
 
   assert_that(
     see_if(
-      aa_pos <= ncol(aln),
-      msg = sprintf("amino acid position %i is higher than amino acid sequence length.", aa_pos)
+      aa_pos %in% colnames(aln),
+      msg = sprintf("amino acid position %s was not found in amino acid sequence.", aa_pos)
     ),
     see_if(
       all(i <- alleles_wo_na %in% rownames(aln)),
@@ -90,7 +90,7 @@ summariseAAPosition <- function(hla_calls,
       frequency = percent(.data$count / length(alleles))
     ) %>%
     dplyr::select(
-      !! sprintf("HLA-%s (%i)", gsub("_", "", gene), aa_pos) := .data$residue,
+      !! sprintf("HLA-%s (%s)", gsub("_", "", gene), aa_pos) := .data$residue,
       !! sprintf("HLA-%s alleles", gsub("_", "", gene)) := .data$allele,
       .data$count,
       .data$frequency
