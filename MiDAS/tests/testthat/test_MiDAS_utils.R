@@ -190,9 +190,9 @@ test_that("LRTest", {
     data.frame(
       term = "AGE",
       dof = 1,
-      logLik = 109.8401115921340078785,
-      statistic = 219.680223184268015757,
-      p.value = 1.062026e-49,
+      logLik = 109.723706571279,
+      statistic = 219.447413142558,
+      p.value = 1.19376144614571e-49,
       stringsAsFactors = FALSE
     )
   )
