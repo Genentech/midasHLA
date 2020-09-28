@@ -121,9 +121,7 @@ test_that("getFrequencies", {
   test_freq <- data.frame(
     term = alleles_subset,
     Counts = c(236, 486, 22, 90, 179, 151, 66, 86, 59, 58, 44),
-    Freq = formattable::percent(
-      c(0.118, 0.243, 0.011, 0.045, 0.0895, 0.0755, 0.033, 0.043, 0.0295, 0.029, 0.022)
-    ),
+    Freq = c(0.118, 0.243, 0.011, 0.045, 0.0895, 0.0755, 0.033, 0.043, 0.0295, 0.029, 0.022),
     stringsAsFactors = FALSE
   )
   rownames(test_freq) <- alleles_subset

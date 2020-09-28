@@ -587,7 +587,7 @@ test_that("getExperimentFrequencies", {
   experiment_freq_test <- data.frame(
     term = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
     Counts = c(2, 5, 1, 0, 0),
-    Freq = formattable::percent(c(0.2, 0.5, 0.1, 0, 0), 2L),
+    Freq = c(0.2, 0.5, 0.1, 0, 0),
     row.names = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
     stringsAsFactors = FALSE
   )
@@ -606,7 +606,7 @@ test_that("getExperimentFrequencies", {
   experiment_freq_test <- data.frame(
     term = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
     Counts = c(1, 3, 1, 0, 0),
-    Freq = formattable::percent(c(0.2, 0.6, 0.2, 0, 0), 2L),
+    Freq = c(0.2, 0.6, 0.2, 0, 0),
     row.names = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
     stringsAsFactors = FALSE
   )

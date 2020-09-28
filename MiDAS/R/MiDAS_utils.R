@@ -435,13 +435,15 @@ getObjectDetails <- function(object) {
 #'
 #' @return Data frame
 #'
-#' @importFrom dplyr filter left_join rename select
+#' @importFrom dplyr filter left_join mutate rename select
+#' @importFrom formattable percent
 #' @importFrom magrittr %>%
 #' @importFrom rlang !! :=
 #'
 runMiDASGetVarsFreq <- function(midas, experiment, test_covar) {
   variables_freq <- midas[[experiment]] %>%
     getExperimentFrequencies() %>%
+    mutate(Freq = percent(.data$Freq)) %>%
     rename(Ntotal = .data$Counts, Ntotal.percent = .data$Freq)
 
   test_covar_vals <- factor(colData(midas)[[test_covar]])
@@ -452,6 +454,7 @@ runMiDASGetVarsFreq <- function(midas, experiment, test_covar) {
     lvl1_freq <- midas[, lvl1_ids] %>%
       `[[`(experiment) %>%
       getExperimentFrequencies() %>%
+      mutate(Freq = percent(.data$Freq)) %>%
       rename(
         !!sprintf("N(%s=%s)", test_covar, levels(test_covar_vals)[1]) := .data$Counts,
         !!sprintf("N(%s=%s).percent", test_covar, levels(test_covar_vals)[1]) := .data$Freq
@@ -462,6 +465,7 @@ runMiDASGetVarsFreq <- function(midas, experiment, test_covar) {
     lvl2_freq <- midas[, lvl2_ids] %>%
       `[[`(experiment) %>%
       getExperimentFrequencies() %>%
+      mutate(Freq = percent(.data$Freq)) %>%
       rename(
         !!sprintf("N(%s=%s)", test_covar, levels(test_covar_vals)[2]) := .data$Counts,
         !!sprintf("N(%s=%s).percent", test_covar, levels(test_covar_vals)[2]) := .data$Freq

@@ -976,7 +976,6 @@ filterExperimentByFrequency <- function(experiment,
 #' @return Data frame containing variables and their corresponding frequencies.
 #'
 #' @importFrom assertthat assert_that is.string see_if
-#' @importFrom formattable percent
 #' @importFrom SummarizedExperiment assay
 #'
 getExperimentFrequencies <-
@@ -1024,13 +1023,13 @@ getExperimentFrequencies.matrix <-
         left_join(counts_df, ref, by = c("term" = "var"))
     }
 
-    # format frequencies as percent
-    counts_df[, -c(1, 2)] <-
-      rapply(
-        object = counts_df[, -c(1, 2), drop = FALSE],
-        f = function(col) percent(col),
-        how = "replace"
-      )
+#     # format frequencies as percent
+#     counts_df[, -c(1, 2)] <-
+#       rapply(
+#         object = counts_df[, -c(1, 2), drop = FALSE],
+#         f = function(col) percent(col),
+#         how = "replace"
+#       )
 
     return(counts_df)
   }
