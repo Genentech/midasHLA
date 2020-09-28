@@ -587,19 +587,33 @@ test_that("prepareMiDAS_hla_het", {
   )
 
   experiment <- do.call(prepareMiDAS_hla_het, list(hla_calls))
-  experiment_test <- matrix(
-    c(0L, 1L, 1L, 0L),
-    ncol = 4,
-    dimnames = list("A_het", c("SAM1", "SAM2", "SAM3", "SAM4"))
+  experiment_test <- SummarizedExperiment::SummarizedExperiment(
+    assay = matrix(c(0L, 1L, 1L, 0L),
+                   ncol = 4,
+                   dimnames = list("A_het", c("SAM1", "SAM2", "SAM3", "SAM4"))
+    ),
+    metadata = list(
+      inheritance_model_applicable = FALSE,
+      pop_mul = 1,
+      omnibus_groups = NULL
     )
+  ) 
+  
   expect_equal(experiment, experiment_test)
 
   experiment <- do.call(prepareMiDAS_hla_het, list(hla_calls, hla_het_resolution = 4))
-  experiment_test <- matrix(
-    c(0L, 0L, 0L, 0L),
-    ncol = 4,
-    dimnames = list("A_het", c("SAM1", "SAM2", "SAM3", "SAM4"))
+  experiment_test <- SummarizedExperiment::SummarizedExperiment(
+    assay = matrix(c(0L, 0L, 0L, 0L), 
+                   ncol = 4, 
+                   dimnames = list("A_het", c("SAM1", "SAM2", "SAM3", "SAM4"))
+    ),
+    metadata = list(
+      inheritance_model_applicable = FALSE,
+      pop_mul = 1,
+      omnibus_groups = NULL
+    )
   )
+
   expect_equal(experiment, experiment_test)
 
   expect_error(

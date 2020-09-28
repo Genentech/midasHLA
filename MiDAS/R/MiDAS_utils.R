@@ -439,6 +439,7 @@ getObjectDetails <- function(object) {
 #' @importFrom formattable percent
 #' @importFrom magrittr %>%
 #' @importFrom rlang !! :=
+#' @importFrom stats na.omit
 #'
 runMiDASGetVarsFreq <- function(midas, experiment, test_covar) {
   variables_freq <- midas[[experiment]] %>%
@@ -450,7 +451,8 @@ runMiDASGetVarsFreq <- function(midas, experiment, test_covar) {
   if (nlevels(test_covar_vals) == 2) {
     ids <- rownames(colData(midas))
 
-    lvl1_ids <- ids[test_covar_vals == levels(test_covar_vals)[1]]
+    lvl1_ids <- ids[test_covar_vals == levels(test_covar_vals)[1]] %>% 
+      na.omit()
     lvl1_freq <- midas[, lvl1_ids] %>%
       `[[`(experiment) %>%
       getExperimentFrequencies() %>%
@@ -461,7 +463,8 @@ runMiDASGetVarsFreq <- function(midas, experiment, test_covar) {
       )
     variables_freq <- left_join(variables_freq, lvl1_freq, by = "term")
 
-    lvl2_ids <- ids[test_covar_vals == levels(test_covar_vals)[2]]
+    lvl2_ids <- ids[test_covar_vals == levels(test_covar_vals)[2]] %>%
+      na.omit()
     lvl2_freq <- midas[, lvl2_ids] %>%
       `[[`(experiment) %>%
       getExperimentFrequencies() %>%
