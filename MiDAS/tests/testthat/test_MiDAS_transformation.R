@@ -212,7 +212,7 @@ test_that("formatResults", {
   correct_tab <-
     dplyr::select(correct_tab, "allele" = .data[["term"]], .data[["p.value"]])
   correct_tab <-
-    knitr::kable(correct_tab, format = "html", format.args = list(digits = 4, scientific = -5))
+    knitr::kable(correct_tab, format = "html", format.args = list(digits = 4, scientific = -3))
   correct_tab <-
     kableExtra::add_header_above(correct_tab, header = c("informative header" = 2))
   correct_tab <-

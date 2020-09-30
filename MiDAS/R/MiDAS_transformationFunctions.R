@@ -649,7 +649,7 @@ formatResults <- function(results,
   }
 
   results %<>%
-    kable(format = format, format.args = list(digits = 4, scientific = -5)) %>%
+    kable(format = format, format.args = list(digits = 4, scientific = -3)) %>%
     add_header_above(header = header)
 
   if (format == "html") {
