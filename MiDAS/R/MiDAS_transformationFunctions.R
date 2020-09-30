@@ -612,7 +612,8 @@ formatResults <- function(results,
                           arrange_by = "p.value",
                           select_cols = c("term", "estimate", "std.error", "p.value", "p.adjusted"),
                           format = c("html", "latex"),
-                          header = NULL
+                          header = NULL,
+                          scroll_box_height = "400px"
                           ) {
   assert_that(
     is.character(filter_by),
@@ -654,7 +655,7 @@ formatResults <- function(results,
   if (format == "html") {
     results %<>%
       kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
-      scroll_box(width = "100%", height = "200px")
+      scroll_box(width = "100%", height = scroll_box_height)
   }
 
   return(results)
@@ -692,7 +693,8 @@ kableResults <- function(results,
                          colnames = NULL,
                          header = "MiDAS analysis results",
                          pvalue_cutoff = NULL,
-                         format = getOption("knitr.table.format")) {
+                         format = getOption("knitr.table.format"),
+                         scroll_box_height = "400px") {
   assert_that(
     is.data.frame(results),
     isCharacterOrNULL(colnames),
@@ -727,7 +729,8 @@ kableResults <- function(results,
       arrange_by = "p.value",
       select_cols = select_cols,
       format = format,
-      header = header
+      header = header,
+      scroll_box_height = scroll_box_height
     )
 
   return(results)

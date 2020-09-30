@@ -4,9 +4,14 @@
 \alias{kableResults}
 \title{Create association analysis results table in HTML or LaTeX}
 \usage{
-kableResults(results, colnames = NULL,
-  header = "MiDAS analysis results", pvalue_cutoff = NULL,
-  format = getOption("knitr.table.format"))
+kableResults(
+  results,
+  colnames = NULL,
+  header = "MiDAS analysis results",
+  pvalue_cutoff = NULL,
+  format = getOption("knitr.table.format"),
+  scroll_box_height = "400px"
+)
 }
 \arguments{
 \item{results}{Tibble as returned by \code{\link{runMiDAS}}.}

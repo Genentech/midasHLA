@@ -219,7 +219,7 @@ test_that("formatResults", {
     kableExtra::kable_styling(correct_tab,
                               bootstrap_options = c("striped", "hover", "condensed"))
   correct_tab <-
-    kableExtra::scroll_box(correct_tab, width = "100%", height = "200px")
+    kableExtra::scroll_box(correct_tab, width = "100%", height = "400px")
 
   expect_equal(restab, correct_tab)
 

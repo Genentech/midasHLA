@@ -4,10 +4,15 @@
 \alias{formatResults}
 \title{Pretty format statistical analysis results helper}
 \usage{
-formatResults(results, filter_by = "p.value <= 0.05",
-  arrange_by = "p.value", select_cols = c("term", "estimate",
-  "std.error", "p.value", "p.adjusted"), format = c("html", "latex"),
-  header = NULL)
+formatResults(
+  results,
+  filter_by = "p.value <= 0.05",
+  arrange_by = "p.value",
+  select_cols = c("term", "estimate", "std.error", "p.value", "p.adjusted"),
+  format = c("html", "latex"),
+  header = NULL,
+  scroll_box_height = "400px"
+)
 }
 \arguments{
 \item{results}{Tibble as returned by \code{\link{runMiDAS}}.}
