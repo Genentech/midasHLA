@@ -4,8 +4,13 @@
 \alias{hlaToVariable}
 \title{Convert HLA calls to variables}
 \usage{
-hlaToVariable(hla_calls, dictionary, reduce = TRUE, na.value = 0,
-  nacols.rm = TRUE)
+hlaToVariable(
+  hla_calls,
+  dictionary,
+  reduce = TRUE,
+  na.value = 0,
+  nacols.rm = TRUE
+)
 }
 \arguments{
 \item{hla_calls}{HLA calls data frame, as returned by

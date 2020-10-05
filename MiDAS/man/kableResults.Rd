@@ -25,6 +25,9 @@ used to rename \code{results} colnames.}
 included in output. If \code{NULL} no filtering is done.}
 
 \item{format}{String \code{"latex"} or \code{"html"}.}
+
+\item{scroll_box_height}{A character string indicating the height of the table.
+no header is added.}
 }
 \value{
 Association analysis results table in HTML or LaTeX.

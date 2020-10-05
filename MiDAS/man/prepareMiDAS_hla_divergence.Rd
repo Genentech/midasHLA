@@ -4,8 +4,11 @@
 \alias{prepareMiDAS_hla_divergence}
 \title{Prepare MiDAS data on HLA divergence level}
 \usage{
-prepareMiDAS_hla_divergence(hla_calls,
-  hla_divergence_aa_selection = "binding_groove", ...)
+prepareMiDAS_hla_divergence(
+  hla_calls,
+  hla_divergence_aa_selection = "binding_groove",
+  ...
+)
 }
 \arguments{
 \item{hla_calls}{HLA calls data frame, as returned by

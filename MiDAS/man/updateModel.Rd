@@ -4,8 +4,7 @@
 \alias{updateModel}
 \title{Extend and Re-fit a Model Call}
 \usage{
-updateModel(object, x, placeholder = NULL, backquote = TRUE,
-  collapse = " + ")
+updateModel(object, x, placeholder = NULL, backquote = TRUE, collapse = " + ")
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many

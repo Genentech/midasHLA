@@ -4,12 +4,14 @@
 \name{allele_frequencies}
 \alias{allele_frequencies}
 \title{Alleles frequencies scraped from allelefrequencies.net}
-\format{A data frame with 2096 rows and 3 variables:
+\format{
+A data frame with 2096 rows and 3 variables:
 \describe{
   \item{var}{allele number, character}
   \item{population}{reference population name, character}
   \item{frequency}{allele frequency in reference population, float}
-}}
+}
+}
 \source{
 \url{www.allelefrequencies.net}
 }

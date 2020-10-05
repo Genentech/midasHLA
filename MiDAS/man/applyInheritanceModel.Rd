@@ -6,14 +6,20 @@
 \alias{applyInheritanceModel.SummarizedExperiment}
 \title{Apply inheritance model}
 \usage{
-applyInheritanceModel(experiment, inheritance_model = c("dominant",
-  "recessive", "additive"))
+applyInheritanceModel(
+  experiment,
+  inheritance_model = c("dominant", "recessive", "additive")
+)
 
-\method{applyInheritanceModel}{matrix}(experiment,
-  inheritance_model = c("dominant", "recessive", "additive"))
+\method{applyInheritanceModel}{matrix}(
+  experiment,
+  inheritance_model = c("dominant", "recessive", "additive")
+)
 
-\method{applyInheritanceModel}{SummarizedExperiment}(experiment,
-  inheritance_model = c("dominant", "recessive", "additive"))
+\method{applyInheritanceModel}{SummarizedExperiment}(
+  experiment,
+  inheritance_model = c("dominant", "recessive", "additive")
+)
 }
 \arguments{
 \item{experiment}{Matrix or SummarizedExperiment object.}

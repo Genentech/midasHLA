@@ -4,8 +4,11 @@
 \alias{getFrequencyMask}
 \title{Helper function for filtering frequency data frame}
 \usage{
-getFrequencyMask(df, lower_frequency_cutoff = NULL,
-  upper_frequency_cutoff = NULL)
+getFrequencyMask(
+  df,
+  lower_frequency_cutoff = NULL,
+  upper_frequency_cutoff = NULL
+)
 }
 \arguments{
 \item{df}{Data frame as returned by \code{getExperimentFrequencies}.}

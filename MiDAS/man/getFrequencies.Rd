@@ -4,16 +4,19 @@
 \alias{getFrequencies}
 \title{Calculate features frequencies for a given experiment in MiDAS object.}
 \usage{
-getFrequencies(object, experiment, carrier_frequency = FALSE,
-  compare = FALSE, ref_pop = list(hla_alleles =
-  c("USA NMDP African American pop 2", "USA NMDP Chinese",
-  "USA NMDP European Caucasian",
-  "USA NMDP Hispanic South or Central American", "USA NMDP Japanese",
-  "USA NMDP North American Amerindian", "USA NMDP South Asian Indian"),
-  kir_genes = c("USA California African American KIR",
-  "USA California Asian American KIR", "USA California Caucasians KIR",
-  "USA California Hispanic KIR")), ref = list(hla_alleles =
-  allele_frequencies, kir_genes = kir_frequencies))
+getFrequencies(
+  object,
+  experiment,
+  carrier_frequency = FALSE,
+  compare = FALSE,
+  ref_pop = list(hla_alleles = c("USA NMDP African American pop 2", "USA NMDP Chinese",
+    "USA NMDP European Caucasian", "USA NMDP Hispanic South or Central American",
+    "USA NMDP Japanese", "USA NMDP North American Amerindian",
+    "USA NMDP South Asian Indian"), kir_genes = c("USA California African American KIR",
+    "USA California Asian American KIR", "USA California Caucasians KIR",
+    "USA California Hispanic KIR")),
+  ref = list(hla_alleles = allele_frequencies, kir_genes = kir_frequencies)
+)
 }
 \arguments{
 \item{object}{\code{\link{MiDAS}} object.}

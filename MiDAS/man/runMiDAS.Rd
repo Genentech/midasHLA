@@ -4,12 +4,23 @@
 \alias{runMiDAS}
 \title{Run MiDAS statistical analysis}
 \usage{
-runMiDAS(object, experiment, inheritance_model = NULL,
-  conditional = FALSE, omnibus = FALSE, omnibus_groups_filter = NULL,
-  lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL,
-  correction = "bonferroni", n_correction = NULL,
-  exponentiate = FALSE, th = 0.05, th_adj = TRUE, keep = FALSE,
-  rss_th = 1e-07)
+runMiDAS(
+  object,
+  experiment,
+  inheritance_model = NULL,
+  conditional = FALSE,
+  omnibus = FALSE,
+  omnibus_groups_filter = NULL,
+  lower_frequency_cutoff = NULL,
+  upper_frequency_cutoff = NULL,
+  correction = "bonferroni",
+  n_correction = NULL,
+  exponentiate = FALSE,
+  th = 0.05,
+  th_adj = TRUE,
+  keep = FALSE,
+  rss_th = 1e-07
+)
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many

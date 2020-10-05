@@ -4,7 +4,9 @@
 \name{dict_dist_grantham}
 \alias{dict_dist_grantham}
 \title{Grantham distance}
-\format{Named integer vector of length 400.}
+\format{
+Named integer vector of length 400.
+}
 \usage{
 dict_dist_grantham
 }
