@@ -353,7 +353,7 @@ listMiDASDictionaries <- function(pattern = "allele", file.names = FALSE) {
 #'   models.
 #'
 #'   Column \code{term} holds new variables appearing in \code{mod1},
-#'   \code{dof} difference in degrees of freedom between models, \code{logLik}
+#'   \code{df} difference in degrees of freedom between models, \code{logLik}
 #'   difference in log likelihoods, \code{statistic} \code{Chisq} statistic and
 #'   \code{p.value} corresponding p-value.
 #'
@@ -374,14 +374,14 @@ LRTest <- function(mod0, mod1) {
 
   ll0 <- logLik(mod0)
   ll1 <- logLik(mod1)
-  dof <- attr(ll1, "df") - attr(ll0, "df")
+  df <- attr(ll1, "df") - attr(ll0, "df")
   statistic <- 2 * (as.numeric(ll1) - as.numeric(ll0))
-  p.value <- pchisq(statistic, df = dof, lower.tail=FALSE)
+  p.value <- pchisq(statistic, df = df, lower.tail=FALSE)
 
   new_vars <- paste(vars1[! vars1 %in% vars0], collapse = ", ")
   res <- data.frame(
     term = new_vars,
-    dof = dof,
+    df = df,
     logLik = ll1 - ll0,
     statistic = statistic,
     p.value = p.value,
@@ -834,7 +834,7 @@ iterativeLRT <- function(object, placeholder, omnibus_groups) {
         warn(msg)
         failed_result <- data.frame(
           term = toString(x),
-          dof = NA,
+          df = NA,
           logLik = NA,
           statistic = NA,
           p.value = NA,

@@ -713,7 +713,7 @@ runMiDAS_linear_omnibus <- function(call,
                          ""
   )
   term_name <- switch (experiment,
-                       "hla_aa" = "residue",
+                       "hla_aa" = "residues",
                        "term"
   )
   results <- results %>%
@@ -722,7 +722,7 @@ runMiDAS_linear_omnibus <- function(call,
     select(
       !! group_name := .data$group,
       !! term_name := .data$term,
-      .data$dof,
+      .data$df,
       .data$statistic,
       .data$p.value,
       .data$p.adjusted
@@ -847,7 +847,7 @@ runMiDAS_conditional_omnibus <- function(call,
                          ""
   )
   term_name <- switch (experiment,
-                       "hla_aa" = "residue",
+                       "hla_aa" = "residues",
                        "term"
   )
 
@@ -858,7 +858,7 @@ runMiDAS_conditional_omnibus <- function(call,
       select(
         !! group_name := .data$group,
         !! term_name := .data$term,
-        .data$dof,
+        .data$df,
         .data$statistic,
         .data$p.value,
         .data$p.adjusted,
