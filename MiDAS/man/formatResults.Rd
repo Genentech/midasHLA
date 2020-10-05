@@ -31,7 +31,9 @@ variables, see examples.}
 
 \item{format}{String \code{"latex"} or \code{"html"}.}
 
-\item{header}{String specifying header for result table. If \code{NULL}
+\item{header}{String specifying header for result table. If \code{NULL}}
+
+\item{scroll_box_height}{A character string indicating the height of the table.
 no header is added.}
 }
 \value{

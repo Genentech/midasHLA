@@ -580,6 +580,7 @@ getAAFrequencies <- function(aa_variation) {
 #'   variables, see examples.
 #' @param format String \code{"latex"} or \code{"html"}.
 #' @param header String specifying header for result table. If \code{NULL}
+#' @param scroll_box_height A character string indicating the height of the table.
 #'   no header is added.
 #'
 #' @return Character vector of formatted table source code.
@@ -621,7 +622,8 @@ formatResults <- function(results,
     is.character(select_cols),
     is.string(format),
     stringMatches(format, choice = c("html", "latex")),
-    isStringOrNULL(header)
+    isStringOrNULL(header),
+    is.string(scroll_box_height)
   )
 
   filter_by <- parse_exprs(filter_by)
@@ -700,7 +702,8 @@ kableResults <- function(results,
     isCharacterOrNULL(colnames),
     isNumberOrNULL(pvalue_cutoff),
     is.string(format),
-    stringMatches(format, choice = c("html", "latex"))
+    stringMatches(format, choice = c("html", "latex")),
+    is.string(scroll_box_height)
   )
   if (! is.null(colnames)) {
     assert_that(

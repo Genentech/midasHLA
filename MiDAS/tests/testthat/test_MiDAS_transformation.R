@@ -240,6 +240,9 @@ test_that("formatResults", {
 
   expect_error(formatResults(res, format ="html", header = 1),
                "header is not a string \\(a length one character vector\\) or NULL.")
+
+  expect_error(formatResults(res, format ="html", scroll_box_height = 1),
+               "scroll_box_height is not a string \\(a length one character vector\\).")
 })
 
 test_that("kableResults", {
@@ -294,6 +297,10 @@ test_that("kableResults", {
   expect_error(
     kableResults(res, c("foo", "bar")),
     "colnames should match values \"allele\", \"p.value\", \"p.adjusted\", \"estimate\", \"std.error\", \"conf.low\", \"conf.high\", \"statistic\", \"Ntotal\", \"Ntotal.percent\", \"N\\(disease=0\\)\", \"N\\(disease=0\\).percent\", \"N\\(disease=1\\)\", \"N\\(disease=1\\).percent\"."
+  )
+
+  expect_error(kableResults(res, scroll_box_height = 1),
+               "scroll_box_height is not a string \\(a length one character vector\\)."
   )
 })
 
