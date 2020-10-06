@@ -579,9 +579,8 @@ getAAFrequencies <- function(aa_variation) {
 #'   included in the output table. Can be also used to rename selected
 #'   variables, see examples.
 #' @param format String \code{"latex"} or \code{"html"}.
-#' @param header String specifying header for result table. If \code{NULL}
+#' @param header String specifying header for result table. If \code{NULL} no header is added.
 #' @param scroll_box_height A character string indicating the height of the table.
-#'   no header is added.
 #'
 #' @return Character vector of formatted table source code.
 #'
