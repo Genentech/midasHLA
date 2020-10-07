@@ -652,6 +652,11 @@ test_that("applyInheritanceModel", {
   test_recessive <- matrix(c(1, 0, 0, 0, 1, 0, 0, 1, 1), nrow = 3)
   expect_equal(recessive, test_recessive)
 
+  inheritance_model <- "overdominance"
+  recessive <- applyInheritanceModel(experiment, inheritance_model)
+  test_recessive <- matrix(c(0, 0, 1, 1, 0, 1, 0, 0, 0), nrow = 3)
+  expect_equal(recessive, test_recessive)
+
   se <- SummarizedExperiment(
     assays = list(matrix(c(2, 0, 1, 1, 2, 1, 0, 2, 2), nrow = 3)),
     colData = data.frame(foo = 1:3, row.names = 1:3)

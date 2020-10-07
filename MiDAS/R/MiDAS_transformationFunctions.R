@@ -1072,7 +1072,8 @@ getExperimentFrequencies.SummarizedExperiment <-
 #' Under \code{"dominant"} model homozygotes and heterozygotes are coded as
 #' \code{1}. In \code{"recessive"} model homozygotes are coded as \code{1} and
 #' other as \code{0}. In \code{"additive"} model homozygotes are coded as
-#' \code{2} and heterozygotes as \code{1}.
+#' \code{2} and heterozygotes as \code{1}. In \code{"overdominance"} homozygotes
+#' (both \code{0} and \code{2}) are coded as \code{0} and heterozygotes as \code{1}.
 #'
 #' @param experiment Matrix or SummarizedExperiment object.
 #' @param inheritance_model String specifying inheritance model to use.
@@ -1083,7 +1084,7 @@ getExperimentFrequencies.SummarizedExperiment <-
 #'
 applyInheritanceModel <-
   function(experiment,
-           inheritance_model = c("dominant", "recessive", "additive")) {
+           inheritance_model = c("dominant", "recessive", "additive", "overdominance")) {
     UseMethod("applyInheritanceModel", experiment)
   }
 
@@ -1091,17 +1092,27 @@ applyInheritanceModel <-
 #' @method applyInheritanceModel matrix
 #'
 applyInheritanceModel.matrix <- function(experiment,
-                                         inheritance_model =  c("dominant", "recessive", "additive")) {
-  .classify <- function(x, val) {
+                                         inheritance_model =  c("dominant", "recessive", "additive", "overdominance")) {
+  .classifyGte <- function(x, val) {
+  # classifies vector as being greater than number
+  # specificly for 1 we classify as dominat, and 2 as recessive
     x <- x >= val
+    mode(x) <- "integer"
+    x
+  }
+  .classifyEq <- function(x, val) {
+  # classify vector as being equal to number
+  # specificly for 1 we classify as overdominance
+    x <- x == val
     mode(x) <- "integer"
     x
   }
   switch (
     inheritance_model,
     "additive" = experiment,
-    "dominant" = .classify(experiment, 1), # ifelse(x >= 1, 1, 0)
-    "recessive" = .classify(experiment, 2) # ifelse(x >= 2, 1, 0)
+    "dominant" = .classifyGte(experiment, 1), # ifelse(x >= 1, 1, 0)
+    "recessive" = .classifyGte(experiment, 2), # ifelse(x >= 2, 1, 0)
+    "overdominance" = .classifyEq(experiment, 1) # ifelse(x == 1, 1, 0)
   )
 }
 
@@ -1109,7 +1120,7 @@ applyInheritanceModel.matrix <- function(experiment,
 #' @method applyInheritanceModel SummarizedExperiment
 #'
 applyInheritanceModel.SummarizedExperiment <- function(experiment,
-                                                       inheritance_model =  c("dominant", "recessive", "additive")) {
+                                                       inheritance_model =  c("dominant", "recessive", "additive", "overdominance")) {
   SummarizedExperiment::assay(experiment) <-
     applyInheritanceModel(SummarizedExperiment::assay(experiment), inheritance_model)
 

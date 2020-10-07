@@ -112,6 +112,29 @@ Setting \code{omnibus} argument to \code{TRUE} will cause the statistical
 analysis to be performed iteratively on groups of variables (like residues at
 particular amino acid position) using likelihood ratio test.
 
+Argument \code{inheritance_model} specifies the inheritance model that should
+be applyed to experiment's data. Following choices are available: 
+\itemize{
+  \item{"dominant"}{
+    carrier status is sufficient for expression of the phenotype (non-carrier: 
+    0, heterozygous & homozygous carrier: 1).
+  }
+  \item{"recessive"}{
+    two copies are required for expression of the phenotype (non-carrier & 
+    heterozygous carrier: 0, homozygous carrier: 1).
+  }
+  \item{"additive"}{
+    allele dosage matters, homozygous carriers show stronger phenotype 
+    expression or higher risk than heterozygous carriers (non-carrier = 0, 
+    heterozygous carrier = 1, homozygous carrier = 2).
+  }
+  \item{"overdominant"}{
+    heterozygous carriers are at higher risk compared to non-carriers or 
+    homozygous carriers (non-carrier & homozygous carrier = 0, heterozygous 
+    carrier = 1).
+  }
+}  
+ 
 \code{correction} specifies p-value adjustment method to use, common choice
 is Benjamini & Hochberg (1995) (\code{"BH"}). Internally this is passed to
 \link[stats]{p.adjust}.
