@@ -4,9 +4,14 @@
 \alias{HWETest}
 \title{Test for Hardy Weinberg equilibrium}
 \usage{
-HWETest(object, experiment = c("hla_alleles", "hla_aa", "hla_g_groups",
-  "hla_supertypes", "hla_NK_ligands"), HWE_group = NULL,
-  HWE_cutoff = NULL, as.MiDAS = FALSE)
+HWETest(
+  object,
+  experiment = c("hla_alleles", "hla_aa", "hla_g_groups", "hla_supertypes",
+    "hla_NK_ligands"),
+  HWE_group = NULL,
+  HWE_cutoff = NULL,
+  as.MiDAS = FALSE
+)
 }
 \arguments{
 \item{object}{\code{\link{MiDAS}} object.}

@@ -1262,7 +1262,14 @@ prepareMiDAS_hla_het <- function(hla_calls, hla_het_resolution = 8, ...) {
     nm <- paste0(g, "_het")
     hla_het[[nm]] <- as.integer(het)
   }
-  hla_het <- dfToExperimentMat(hla_het)
+
+  hla_het <- SummarizedExperiment(
+    assays = dfToExperimentMat(hla_het),
+    metadata = list(
+      inheritance_model_applicable = FALSE,
+      pop_mul = 1,
+      omnibus_groups = NULL)
+  )
 
   return(hla_het)
 }

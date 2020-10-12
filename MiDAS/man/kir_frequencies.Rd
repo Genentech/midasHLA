@@ -4,12 +4,14 @@
 \name{kir_frequencies}
 \alias{kir_frequencies}
 \title{KIR genes frequencies scraped from allelefrequencies.net}
-\format{A data frame with 3744 rows and 3 variables:
+\format{
+A data frame with 3744 rows and 3 variables:
 \describe{
   \item{var}{allele number, character}
   \item{population}{reference population name, character}
   \item{frequency}{KIR genes carrier frequency in reference population, float}
-}}
+}
+}
 \source{
 \url{www.allelefrequencies.net}
 }

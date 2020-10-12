@@ -4,9 +4,14 @@
 \alias{analyzeAssociations}
 \title{Association analysis}
 \usage{
-analyzeAssociations(object, variables, placeholder = "term",
-  correction = "bonferroni", n_correction = NULL,
-  exponentiate = FALSE)
+analyzeAssociations(
+  object,
+  variables,
+  placeholder = "term",
+  correction = "bonferroni",
+  n_correction = NULL,
+  exponentiate = FALSE
+)
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many

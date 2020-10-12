@@ -1,10 +1,10 @@
 Package: MiDAS
 Title: R package for immunogenomics data handling and association analysis
-Version: 1.0.0
+Version: 1.0.1
 Authors@R: c(
   person("Christian", "Hammer", email = "hammerc6@gene.com", role = "aut"),
   person("Maciej", "Migdał", email = "mcjmigdal@gmail.com", role = c("aut", "cre")))
-Description: What the package does (one paragraph).
+Description: MiDAS is a R package for immunogenetics data transformation and statistical analysis. MiDAS accepts input data in the form of HLA alleles and KIR types, and can transform it into biologically meaningful variables, enabling HLA amino acid fine mapping, analyses of HLA evolutionary divergence, KIR gene presence, as well as validated HLA-KIR interactions. Further, it allows comprehensive statistical association analysis workflows with phenotypes of diverse measurement scales. MiDAS closes a gap between the inference of immunogenetic variation and its efficient utilization to make relevant discoveries related to T cell, Natural Killer cell, and disease biology.
 License: MIT + file LICENCE
 Encoding: UTF-8
 LazyData: true
@@ -20,7 +20,7 @@ Suggests:
     devtools (>= 2.0.1), testthat (>= 2.0.1), seqinr (>= 3.4-5), survival (>= 2.43-3),
     broom.mixed (>= 0.2.4), rmarkdown, ggplot2 (>= 3.1.0), ggpubr (>= 0.2.5), 
     cowplot (>= 1.0.0)
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.1
 VignetteBuilder: knitr
 Collate: 
     'MiDAS.R'

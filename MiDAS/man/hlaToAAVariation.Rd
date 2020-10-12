@@ -4,8 +4,7 @@
 \alias{hlaToAAVariation}
 \title{Generate amino acid variation matrix}
 \usage{
-hlaToAAVariation(hla_calls, indels = TRUE, unkchar = FALSE,
-  as_df = TRUE)
+hlaToAAVariation(hla_calls, indels = TRUE, unkchar = FALSE, as_df = TRUE)
 }
 \arguments{
 \item{hla_calls}{HLA calls data frame, as returned by

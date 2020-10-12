@@ -4,8 +4,12 @@
 \alias{filterExperimentByFrequency}
 \title{Filter experiment by frequency}
 \usage{
-filterExperimentByFrequency(experiment, carrier_frequency = FALSE,
-  lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL)
+filterExperimentByFrequency(
+  experiment,
+  carrier_frequency = FALSE,
+  lower_frequency_cutoff = NULL,
+  upper_frequency_cutoff = NULL
+)
 }
 \arguments{
 \item{experiment}{Matrix or SummarizedExperiment object.}

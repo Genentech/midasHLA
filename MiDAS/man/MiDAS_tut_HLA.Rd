@@ -4,7 +4,8 @@
 \name{MiDAS_tut_HLA}
 \alias{MiDAS_tut_HLA}
 \title{MiDAS tutorial HLA data}
-\format{Data frame with 1000 rows and 19 columns. First column holds samples
+\format{
+Data frame with 1000 rows and 19 columns. First column holds samples
   ID's, following columns holds HLA alleles calls for different genes.
   \describe{
     \item{ID}{Character sample ID}
@@ -26,7 +27,8 @@
     \item{DRA_2}{Character}
     \item{DRB1_1}{Character}
     \item{DRB1_2}{Character}
-  }}
+  }
+}
 \usage{
 MiDAS_tut_HLA
 }

@@ -18,7 +18,7 @@ Data frame with the results of likelihood ratio test of the supplied
   models.
 
   Column \code{term} holds new variables appearing in \code{mod1},
-  \code{dof} difference in degrees of freedom between models, \code{logLik}
+  \code{df} difference in degrees of freedom between models, \code{logLik}
   difference in log likelihoods, \code{statistic} \code{Chisq} statistic and
   \code{p.value} corresponding p-value.
 }

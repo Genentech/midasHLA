@@ -10,8 +10,7 @@ filterExperimentByVariables(experiment, variables)
 
 \method{filterExperimentByVariables}{matrix}(experiment, variables)
 
-\method{filterExperimentByVariables}{SummarizedExperiment}(experiment,
-  variables)
+\method{filterExperimentByVariables}{SummarizedExperiment}(experiment, variables)
 }
 \arguments{
 \item{experiment}{Matrix or SummarizedExperiment object.}

@@ -10,8 +10,7 @@ isExperimentInheritanceModelApplicable(experiment)
 
 \method{isExperimentInheritanceModelApplicable}{matrix}(experiment)
 
-
-  \method{isExperimentInheritanceModelApplicable}{SummarizedExperiment}(experiment)
+\method{isExperimentInheritanceModelApplicable}{SummarizedExperiment}(experiment)
 }
 \arguments{
 \item{experiment}{Matrix or SummarizedExperiment object.}

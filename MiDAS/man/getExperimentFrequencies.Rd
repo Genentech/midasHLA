@@ -6,14 +6,26 @@
 \alias{getExperimentFrequencies.SummarizedExperiment}
 \title{Calculate experiment's features frequencies}
 \usage{
-getExperimentFrequencies(experiment, pop_mul = NULL,
-  carrier_frequency = FALSE, ref = NULL)
+getExperimentFrequencies(
+  experiment,
+  pop_mul = NULL,
+  carrier_frequency = FALSE,
+  ref = NULL
+)
 
-\method{getExperimentFrequencies}{matrix}(experiment, pop_mul = NULL,
-  carrier_frequency = FALSE, ref = NULL)
+\method{getExperimentFrequencies}{matrix}(
+  experiment,
+  pop_mul = NULL,
+  carrier_frequency = FALSE,
+  ref = NULL
+)
 
-\method{getExperimentFrequencies}{SummarizedExperiment}(experiment,
-  pop_mul = NULL, carrier_frequency = FALSE, ref = NULL)
+\method{getExperimentFrequencies}{SummarizedExperiment}(
+  experiment,
+  pop_mul = NULL,
+  carrier_frequency = FALSE,
+  ref = NULL
+)
 }
 \arguments{
 \item{experiment}{Matrix or SummarizedExperiment object.}

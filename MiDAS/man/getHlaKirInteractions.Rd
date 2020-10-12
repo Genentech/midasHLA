@@ -4,9 +4,12 @@
 \alias{getHlaKirInteractions}
 \title{Get HLA - KIR interactions}
 \usage{
-getHlaKirInteractions(hla_calls, kir_calls,
-  interactions_dict = system.file("extdata",
-  "Match_counts_hla_kir_interactions.txt", package = "MiDAS"))
+getHlaKirInteractions(
+  hla_calls,
+  kir_calls,
+  interactions_dict = system.file("extdata", "Match_counts_hla_kir_interactions.txt",
+    package = "MiDAS")
+)
 }
 \arguments{
 \item{hla_calls}{HLA calls data frame, as returned by
