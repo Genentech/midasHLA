@@ -1,3 +1,6 @@
+## 1.0.2 - 12/10/20
++ fixed problem vignettes index entry values, preventing vignettes from being build
+
 ## 1.0.0 - 28/08/20
 + reference frequencies for KIR genes has been added
 + n_correction argument to runMiDAS has been modified such that for Bonferroni correction it is
