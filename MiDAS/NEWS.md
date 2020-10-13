@@ -1,3 +1,6 @@
+## 1.0.2 - 12/10/20
++ fixed problem vignettes index entry values, preventing vignettes from being build
+
 ## 1.0.1 - 7/10/20
 + fixed bug in summariseAAPos, where argument specifying AA position didn't consider
   AA position numbering starting from negative positions
