@@ -212,14 +212,14 @@ test_that("formatResults", {
   correct_tab <-
     dplyr::select(correct_tab, "allele" = .data[["term"]], .data[["p.value"]])
   correct_tab <-
-    knitr::kable(correct_tab, format = "html", format.args = list(digits = 4, scientific = -5))
+    knitr::kable(correct_tab, format = "html", format.args = list(digits = 4, scientific = -3))
   correct_tab <-
     kableExtra::add_header_above(correct_tab, header = c("informative header" = 2))
   correct_tab <-
     kableExtra::kable_styling(correct_tab,
                               bootstrap_options = c("striped", "hover", "condensed"))
   correct_tab <-
-    kableExtra::scroll_box(correct_tab, width = "100%", height = "200px")
+    kableExtra::scroll_box(correct_tab, width = "100%", height = "400px")
 
   expect_equal(restab, correct_tab)
 
@@ -240,6 +240,9 @@ test_that("formatResults", {
 
   expect_error(formatResults(res, format ="html", header = 1),
                "header is not a string \\(a length one character vector\\) or NULL.")
+
+  expect_error(formatResults(res, format ="html", scroll_box_height = 1),
+               "scroll_box_height is not a string \\(a length one character vector\\).")
 })
 
 test_that("kableResults", {
@@ -294,6 +297,10 @@ test_that("kableResults", {
   expect_error(
     kableResults(res, c("foo", "bar")),
     "colnames should match values \"allele\", \"p.value\", \"p.adjusted\", \"estimate\", \"std.error\", \"conf.low\", \"conf.high\", \"statistic\", \"Ntotal\", \"Ntotal.percent\", \"N\\(disease=0\\)\", \"N\\(disease=0\\).percent\", \"N\\(disease=1\\)\", \"N\\(disease=1\\).percent\"."
+  )
+
+  expect_error(kableResults(res, scroll_box_height = 1),
+               "scroll_box_height is not a string \\(a length one character vector\\)."
   )
 })
 
@@ -587,7 +594,7 @@ test_that("getExperimentFrequencies", {
   experiment_freq_test <- data.frame(
     term = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
     Counts = c(2, 5, 1, 0, 0),
-    Freq = formattable::percent(c(0.2, 0.5, 0.1, 0, 0), 2L),
+    Freq = c(0.2, 0.5, 0.1, 0, 0),
     row.names = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
     stringsAsFactors = FALSE
   )
@@ -606,7 +613,7 @@ test_that("getExperimentFrequencies", {
   experiment_freq_test <- data.frame(
     term = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
     Counts = c(1, 3, 1, 0, 0),
-    Freq = formattable::percent(c(0.2, 0.6, 0.2, 0, 0), 2L),
+    Freq = c(0.2, 0.6, 0.2, 0, 0),
     row.names = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
     stringsAsFactors = FALSE
   )
@@ -643,6 +650,11 @@ test_that("applyInheritanceModel", {
   inheritance_model <- "recessive"
   recessive <- applyInheritanceModel(experiment, inheritance_model)
   test_recessive <- matrix(c(1, 0, 0, 0, 1, 0, 0, 1, 1), nrow = 3)
+  expect_equal(recessive, test_recessive)
+
+  inheritance_model <- "overdominance"
+  recessive <- applyInheritanceModel(experiment, inheritance_model)
+  test_recessive <- matrix(c(0, 0, 1, 1, 0, 1, 0, 0, 0), nrow = 3)
   expect_equal(recessive, test_recessive)
 
   se <- SummarizedExperiment(

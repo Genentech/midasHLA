@@ -23,20 +23,27 @@
 
 \S4method{getPlaceholder}{MiDAS}(object)
 
-\S4method{getFrequencies}{MiDAS}(object, experiment,
-  carrier_frequency = FALSE, compare = FALSE,
-  ref_pop = list(hla_alleles = c("USA NMDP African American pop 2",
-  "USA NMDP Chinese", "USA NMDP European Caucasian",
-  "USA NMDP Hispanic South or Central American", "USA NMDP Japanese",
-  "USA NMDP North American Amerindian", "USA NMDP South Asian Indian"),
-  kir_genes = c("USA California African American KIR",
-  "USA California Asian American KIR", "USA California Caucasians KIR",
-  "USA California Hispanic KIR")), ref = list(hla_alleles =
-  allele_frequencies, kir_genes = kir_frequencies))
+\S4method{getFrequencies}{MiDAS}(
+  object,
+  experiment,
+  carrier_frequency = FALSE,
+  compare = FALSE,
+  ref_pop = list(hla_alleles = c("USA NMDP African American pop 2", "USA NMDP Chinese",
+    "USA NMDP European Caucasian", "USA NMDP Hispanic South or Central American",
+    "USA NMDP Japanese", "USA NMDP North American Amerindian",
+    "USA NMDP South Asian Indian"), kir_genes = c("USA California African American KIR",
+    "USA California Asian American KIR", "USA California Caucasians KIR",
+    "USA California Hispanic KIR")),
+  ref = list(hla_alleles = allele_frequencies, kir_genes = kir_frequencies)
+)
 
-\S4method{filterByFrequency}{MiDAS}(object, experiment,
-  lower_frequency_cutoff = NULL, upper_frequency_cutoff = NULL,
-  carrier_frequency = FALSE)
+\S4method{filterByFrequency}{MiDAS}(
+  object,
+  experiment,
+  lower_frequency_cutoff = NULL,
+  upper_frequency_cutoff = NULL,
+  carrier_frequency = FALSE
+)
 
 \S4method{filterByOmnibusGroups}{MiDAS}(object, experiment, groups)
 

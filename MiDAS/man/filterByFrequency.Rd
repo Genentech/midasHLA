@@ -4,8 +4,13 @@
 \alias{filterByFrequency}
 \title{Filter MiDAS object by frequency}
 \usage{
-filterByFrequency(object, experiment, lower_frequency_cutoff = NULL,
-  upper_frequency_cutoff = NULL, carrier_frequency = FALSE)
+filterByFrequency(
+  object,
+  experiment,
+  lower_frequency_cutoff = NULL,
+  upper_frequency_cutoff = NULL,
+  carrier_frequency = FALSE
+)
 }
 \arguments{
 \item{object}{\code{\link{MiDAS}} object.}

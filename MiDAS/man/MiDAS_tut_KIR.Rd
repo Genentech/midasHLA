@@ -4,7 +4,8 @@
 \name{MiDAS_tut_KIR}
 \alias{MiDAS_tut_KIR}
 \title{MiDAS tutorial KIR data}
-\format{Data frame with 1000 rows and 17 columns. First column holds samples
+\format{
+Data frame with 1000 rows and 17 columns. First column holds samples
   ID's, following columns holds presence/absence indicators for different
   KIR genes.
   \describe{
@@ -25,7 +26,8 @@
     \item{KIR2DS4}{Integer}
     \item{KIR2DS1}{Integer}
     \item{KIR3DL2}{Integer}
-  }}
+  }
+}
 \usage{
 MiDAS_tut_KIR
 }

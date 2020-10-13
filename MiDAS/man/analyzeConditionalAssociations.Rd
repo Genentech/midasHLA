@@ -4,9 +4,18 @@
 \alias{analyzeConditionalAssociations}
 \title{Stepwise conditional association analysis}
 \usage{
-analyzeConditionalAssociations(object, variables, placeholder = "term",
-  correction = "bonferroni", n_correction = NULL, th, th_adj = TRUE,
-  keep = FALSE, rss_th = 1e-07, exponentiate = FALSE)
+analyzeConditionalAssociations(
+  object,
+  variables,
+  placeholder = "term",
+  correction = "bonferroni",
+  n_correction = NULL,
+  th,
+  th_adj = TRUE,
+  keep = FALSE,
+  rss_th = 1e-07,
+  exponentiate = FALSE
+)
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many

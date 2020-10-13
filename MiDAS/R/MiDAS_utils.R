@@ -353,7 +353,7 @@ listMiDASDictionaries <- function(pattern = "allele", file.names = FALSE) {
 #'   models.
 #'
 #'   Column \code{term} holds new variables appearing in \code{mod1},
-#'   \code{dof} difference in degrees of freedom between models, \code{logLik}
+#'   \code{df} difference in degrees of freedom between models, \code{logLik}
 #'   difference in log likelihoods, \code{statistic} \code{Chisq} statistic and
 #'   \code{p.value} corresponding p-value.
 #'
@@ -374,14 +374,14 @@ LRTest <- function(mod0, mod1) {
 
   ll0 <- logLik(mod0)
   ll1 <- logLik(mod1)
-  dof <- attr(ll1, "df") - attr(ll0, "df")
+  df <- attr(ll1, "df") - attr(ll0, "df")
   statistic <- 2 * (as.numeric(ll1) - as.numeric(ll0))
-  p.value <- pchisq(statistic, df = dof, lower.tail=FALSE)
+  p.value <- pchisq(statistic, df = df, lower.tail=FALSE)
 
   new_vars <- paste(vars1[! vars1 %in% vars0], collapse = ", ")
   res <- data.frame(
     term = new_vars,
-    dof = dof,
+    df = df,
     logLik = ll1 - ll0,
     statistic = statistic,
     p.value = p.value,
@@ -435,33 +435,40 @@ getObjectDetails <- function(object) {
 #'
 #' @return Data frame
 #'
-#' @importFrom dplyr filter left_join rename select
+#' @importFrom dplyr filter left_join mutate rename select
+#' @importFrom formattable percent
 #' @importFrom magrittr %>%
 #' @importFrom rlang !! :=
+#' @importFrom stats na.omit
 #'
 runMiDASGetVarsFreq <- function(midas, experiment, test_covar) {
   variables_freq <- midas[[experiment]] %>%
     getExperimentFrequencies() %>%
+    mutate(Freq = percent(.data$Freq)) %>%
     rename(Ntotal = .data$Counts, Ntotal.percent = .data$Freq)
 
   test_covar_vals <- factor(colData(midas)[[test_covar]])
   if (nlevels(test_covar_vals) == 2) {
     ids <- rownames(colData(midas))
 
-    lvl1_ids <- ids[test_covar_vals == levels(test_covar_vals)[1]]
+    lvl1_ids <- ids[test_covar_vals == levels(test_covar_vals)[1]] %>% 
+      na.omit()
     lvl1_freq <- midas[, lvl1_ids] %>%
       `[[`(experiment) %>%
       getExperimentFrequencies() %>%
+      mutate(Freq = percent(.data$Freq)) %>%
       rename(
         !!sprintf("N(%s=%s)", test_covar, levels(test_covar_vals)[1]) := .data$Counts,
         !!sprintf("N(%s=%s).percent", test_covar, levels(test_covar_vals)[1]) := .data$Freq
       )
     variables_freq <- left_join(variables_freq, lvl1_freq, by = "term")
 
-    lvl2_ids <- ids[test_covar_vals == levels(test_covar_vals)[2]]
+    lvl2_ids <- ids[test_covar_vals == levels(test_covar_vals)[2]] %>%
+      na.omit()
     lvl2_freq <- midas[, lvl2_ids] %>%
       `[[`(experiment) %>%
       getExperimentFrequencies() %>%
+      mutate(Freq = percent(.data$Freq)) %>%
       rename(
         !!sprintf("N(%s=%s)", test_covar, levels(test_covar_vals)[2]) := .data$Counts,
         !!sprintf("N(%s=%s).percent", test_covar, levels(test_covar_vals)[2]) := .data$Freq
@@ -827,7 +834,7 @@ iterativeLRT <- function(object, placeholder, omnibus_groups) {
         warn(msg)
         failed_result <- data.frame(
           term = toString(x),
-          dof = NA,
+          df = NA,
           logLik = NA,
           statistic = NA,
           p.value = NA,

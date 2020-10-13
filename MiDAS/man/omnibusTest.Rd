@@ -4,8 +4,13 @@
 \alias{omnibusTest}
 \title{Omnibus test}
 \usage{
-omnibusTest(object, omnibus_groups, placeholder = "term",
-  correction = "bonferroni", n_correction = NULL)
+omnibusTest(
+  object,
+  omnibus_groups,
+  placeholder = "term",
+  correction = "bonferroni",
+  n_correction = NULL
+)
 }
 \arguments{
 \item{object}{An existing fit from a model function such as lm, glm and many

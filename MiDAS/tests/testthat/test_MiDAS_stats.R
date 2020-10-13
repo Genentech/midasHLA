@@ -218,7 +218,7 @@ test_that("omnibusTest", {
   omnibus_res_test <- data.frame(
     group = c("A_77", "A_79"),
     term = c("A_77_D, A_77_N, A_77_S", "A_79_G, A_79_R"),
-    dof = sapply(LRT, `[[`, "dof"),
+    df = sapply(LRT, `[[`, "df"),
     logLik = sapply(LRT, `[[`, "logLik"),
     statistic = sapply(LRT, `[[`, "statistic"),
     p.value = sapply(LRT, `[[`, "p.value"),
@@ -459,8 +459,8 @@ test_that("runMiDAS", {
   )
   test_res <- dplyr::tibble(
     aa_pos = c("A_6", "A_12"),
-    residue = c("R, G", "V, M"),
-    dof = c(1, 1),
+    residues = c("R, G", "V, M"),
+    df = c(1, 1),
     statistic = c(1.00150233709155, 0.43786032955245),
     p.value = c(0.316947259129448, 0.508156995160654),
     p.adjusted = c(0.633894518258896, 1)
@@ -494,8 +494,8 @@ test_that("runMiDAS", {
   )
   test_res <- dplyr::tibble(
     aa_pos = c("B_178", "DQA1_34", "DRA_217"),
-    residue = c("K, T", "Q, E", "V, L"),
-    dof = c(1, 1, 1),
+    residues = c("K, T", "Q, E", "V, L"),
+    df = c(1, 1, 1),
     statistic = c(14.5367224623581, 8.23228307063391, 7.66064122323155),
     p.value = c(0.00013745391512862, 0.00411517297832788, 0.00564384425764467),
     p.adjusted = c(0.000412361745385859, 0.00411517297832788, 0.0112876885152893),
@@ -515,8 +515,8 @@ test_that("runMiDAS", {
   test_res <- list(
     dplyr::tibble(
       aa_pos = c("B_178", "DRA_217"),
-      residue = c("K, T", "V, L"),
-      dof = c(1, 1),
+      residues = c("K, T", "V, L"),
+      df = c(1, 1),
       statistic = c(14.5367224623581, 11.7515320865903),
       p.value = c(0.00013745391512862, 0.000607931755127229),
       p.adjusted = c(0.000274907830257239, 0.00121586351025446),
@@ -524,8 +524,8 @@ test_that("runMiDAS", {
     ),
     dplyr::tibble(
       aa_pos = "DRA_217",
-      residue = "V, L",
-      dof = 1,
+      residues = "V, L",
+      df = 1,
       statistic = 7.66064122323155,
       p.value = 0.00564384425764467,
       p.adjusted = 0.00564384425764467,
@@ -586,7 +586,7 @@ test_that("runMiDAS", {
   )
 
   expect_error(runMiDAS(object, experiment = "hla_alleles", inheritance_model = "foo"),
-               "inheritance_model should match values \"dominant\", \"recessive\", \"additive\"."
+               "inheritance_model should match values \"dominant\", \"recessive\", \"additive\", \"overdominance\"."
   )
 
   expect_error(runMiDAS(object, experiment = "hla_alleles", conditional = 1),

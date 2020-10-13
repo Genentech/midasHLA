@@ -1,6 +1,15 @@
 ## 1.0.2 - 12/10/20
 + fixed problem vignettes index entry values, preventing vignettes from being build
 
+## 1.0.1 - 7/10/20
++ fixed bug in summariseAAPos, where argument specifying AA position didn't consider
+  AA position numbering starting from negative positions
++ frequencies in getFrequencies output are no longer formatted as percentages
++ kableResults scroll box height can now be adjusted
++ omnibus result columns: dof, residue were renamed to df, residues
++ missing Bw6 references were added to allele_HLA_Bw dictionary
++ new inheritance model has been added the overdominance
+
 ## 1.0.0 - 28/08/20
 + reference frequencies for KIR genes has been added
 + n_correction argument to runMiDAS has been modified such that for Bonferroni correction it is

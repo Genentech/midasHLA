@@ -189,10 +189,10 @@ test_that("LRTest", {
     lrt_res,
     data.frame(
       term = "AGE",
-      dof = 1,
-      logLik = 109.8401115921340078785,
-      statistic = 219.680223184268015757,
-      p.value = 1.062026e-49,
+      df = 1,
+      logLik = 109.723706571279,
+      statistic = 219.447413142558,
+      p.value = 1.19376144614571e-49,
       stringsAsFactors = FALSE
     )
   )
@@ -384,7 +384,7 @@ test_that("iterativeLRT", {
   test_res <- data.frame(
     group = c("A_29", "A_44", "A_65"),
     term = c("A_29_D, A_29_A", "A_44_R, A_44_K", "A_65_R, A_65_G"),
-    dof = c(0, 1, 1),
+    df = c(0, 1, 1),
     logLik = c(0, 0.140455460270459, 1.10951823960204),
     statistic = c(0, 0.280910920540919, 2.21903647920408),
     p.value = c(1, 0.596104787861628, 0.136318110662154),
@@ -398,7 +398,7 @@ test_that("iterativeLRT", {
   test_res <- data.frame(
     group = c("A_29", "A_44", "A_65"),
     term = c("A_29_D, A_29_A", "A_44_R, A_44_K", "A_65_R, A_65_G"),
-    dof = c(NA, 1, 1),
+    df = c(NA, 1, 1),
     logLik = c(NA, 0.140455460270459, 1.10951823960204),
     statistic = c(NA, 0.280910920540919, 2.21903647920408),
     p.value = c(NA, 0.596104787861628, 0.136318110662154),

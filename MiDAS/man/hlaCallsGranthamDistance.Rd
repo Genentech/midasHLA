@@ -4,8 +4,11 @@
 \alias{hlaCallsGranthamDistance}
 \title{Calculate Grantham distance between HLA alleles}
 \usage{
-hlaCallsGranthamDistance(hla_calls, genes = c("A", "B", "C"),
-  aa_selection = "binding_groove")
+hlaCallsGranthamDistance(
+  hla_calls,
+  genes = c("A", "B", "C"),
+  aa_selection = "binding_groove"
+)
 }
 \arguments{
 \item{hla_calls}{HLA calls data frame, as returned by

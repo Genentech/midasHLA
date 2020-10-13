@@ -4,13 +4,15 @@
 \name{MiDAS_tut_pheno}
 \alias{MiDAS_tut_pheno}
 \title{MiDAS tutorial phenotype data}
-\format{Data frame with 1000 rows and 4 columns.
+\format{
+Data frame with 1000 rows and 4 columns.
   \describe{
     \item{ID}{Character sample ID}
     \item{disease}{Integer}
     \item{lab_value}{Numeric}
     \item{outcome}{Integer}
-  }}
+  }
+}
 \usage{
 MiDAS_tut_pheno
 }

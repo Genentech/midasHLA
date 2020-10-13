@@ -190,7 +190,7 @@ test_that("readKirCalls", {
     col.names = TRUE
   )
   kir_calls <- readKirCalls(file)
-  test_kir_calls <- kpi_output[, drop = FALSE]
+  test_kir_calls <- kpi_output
   expect_equal(kir_calls, test_kir_calls)
 
   colnames(kpi_output)[1] <- "SAMID"

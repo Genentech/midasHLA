@@ -10,8 +10,7 @@ getExperimentPopulationMultiplicator(experiment)
 
 \method{getExperimentPopulationMultiplicator}{matrix}(experiment)
 
-
-  \method{getExperimentPopulationMultiplicator}{SummarizedExperiment}(experiment)
+\method{getExperimentPopulationMultiplicator}{SummarizedExperiment}(experiment)
 }
 \arguments{
 \item{experiment}{Matrix or SummarizedExperiment object.}
