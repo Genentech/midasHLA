@@ -1,0 +1,340 @@
+---
+title: "MiDAS tutorial"
+author: "Maciej Migdał & Christian Hammer"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{MiDAS tutorial}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+![logo](MiDAS_logo.png)
+
+```{r setup, echo=FALSE, warning=FALSE, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align="center")
+devtools::load_all()
+library(ggplot2)
+library(ggpubr)
+library(cowplot)
+```
+
+## Introduction
+
+Welcome to MiDAS. This tutorial is supposed to help you get started with your analyses of immunogenetic associations. We will work with a simulated data set of 500 patients and 500 controls with a binary disease diagnosism, some lab results as well as outcome data for the patient group.
+
+We also have high resolution HLA alleles (4 - 6 digit), and presence/absence calls for KIR genes.
+
+## Data import and sanity check
+
+First, let's import the phenotype data and HLA calls using MiDAS import functions. MiDAS will check for correct nomenclature of HLA. We can also define 4-digit resolution for HLA alleles as import format, which means that alleles with higher resolution will be reduced.
+
+```{r get_data, echo=TRUE, warning=FALSE, include=TRUE}
+dat_pheno <-
+  read.table(
+  file = system.file("extdata", "MiDAS_tut_pheno.txt", package = "MiDAS"),
+  header = TRUE
+  )
+dat_HLA <-
+  readHlaCalls(
+  file = system.file("extdata", "MiDAS_tut_HLA.txt", package = "MiDAS"),
+  resolution = 4
+  )
+```
+
+Let's take a look at the imported HLA data tables:
+
+```{r show_imported_data , echo=FALSE, warning=FALSE, include=FALSE}
+kable(dat_HLA, caption = "HLA data as imported by MiDAS") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  scroll_box(width = "100%", height = "200px")
+```
+
+Next, we want to check our HLA allele frequencies, and compare them to known frequencies from major populations. Here, we only include alleles with an allele frequency of 5% or higher in our study cohort. By default, MiDAS will output comparisons including the following populations, based on published data from [allelefrequencies.net](www.allelefrequencies.net):
+
+MiDAS comes with some pre-defined reference populations, but it is possible to customize these comparisons (see documentation).
+
+```{r get_frequencies, echo=TRUE, warning=FALSE}
+freq_HLA <-
+  getHlaFrequencies(dat_HLA,
+  compare = TRUE
+) %>% 
+  filter(Freq > 0.05)
+
+freq_KIR <- getKIRFrequencies(MiDAS_tut_KIR)
+```
+
+```{r show_frequencies, echo=FALSE, warning=FALSE}
+kable(freq_HLA, caption = "HLA frequencies, compared to published references") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  scroll_box(width = "100%", height = "200px")
+
+kable(freq_KIR, caption = "KIR frequencies") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  scroll_box(width = "100%", height = "200px")
+```
+
+Let's assume our cohort is of predominantly European ancestry. We can plot the following comparison to see if allele frequencies in our data are distributed as expected: 
+
+```{r plot_frequencies, echo=FALSE, warning=FALSE}
+plot_HLAfreq <- ggdotchart(freq_HLA, x = "allele", y = "Freq",
+           add = "segments",
+           sorting = "descending",
+           add.params = list(color = "lightgray", size = 1.5),
+           rotate = TRUE,
+           color = "#0073C2FF",
+           palette = "jco",
+           dot.size = 2,
+           ggtheme = theme_pubr(),
+           ylab = "Allele Frequency (%)",
+           position = position_dodge(0.9)) + 
+    theme_pubclean() +  
+    scale_y_continuous(limits = c(0, 1), labels = formattable::percent, breaks = seq(0, 1, by = .2))
+
+plot_HLAfreq
+```
+
+## HLA association analysis
+
+### Are classical HLA alleles associated with disease status?
+
+The following function prepares our data for analysis, combining HLA and phenotypic data into one object. Here, we are interested in analyzing our data on the level of **classical HLA alleles**, as well as grouping them into categories defining their interactions with KIRs (**Bw4 vs. Bw6, C1 vs. C2**).
+
+```{r prep_HLA, echo=TRUE, warning=FALSE}
+HLA <- prepareMiDAS(
+  hla_calls = dat_HLA,
+  colData = dat_pheno,
+  experiment = c("hla_alleles", "hla_NK_ligands")
+)
+```
+
+Now, we define our statistical model and run the analysis. Since we want to test for association with disease status, we use a logistic regression approach. The `term` is necessary as placeholder for the tested HLA alleles.
+In the `runMiDAS` function, we then refer to this model, choose our analysis type and define a inheritance model. Here we use dominant model, meaning that individuals will be defined as non-carriers (0) vs. carriers (1) for a given allele. Alternatively, it is also possible to choose recessive (0 = non-carrier or heterozygous carrier, 1 = homozygous carrier) or additive (N of alleles) inheritance models. Moreover, we define allele inclusion criteria, such that we only consider alleles frequencies above 2% and below 98%. We also apply the *Bonferroni* method to not only get nominal P values, but also such adjusted for multiple testing. For alternative multiple testing correction methods, as well as the option to choose a custom number of tests, please refer to the documentation.  `exponentiate = TRUE` means that the effect estimate will already be shown as odds ratio, since we use a logistic regression model.
+
+```{r run_HLA_allelic, echo=TRUE, warning=FALSE}
+HLA_model <- glm(disease ~ term, data = HLA, family = binomial())
+HLA_results <- runMiDAS(
+  object = HLA_model, 
+  experiment = "hla_alleles", 
+  inheritance_model = "dominant",
+  lower_frequency_cutoff = 0.02, 
+  upper_frequency_cutoff = 0.98, 
+  correction = "bonferroni", 
+  exponentiate = TRUE
+)
+```
+
+```{r show_HLA_allelic, echo=FALSE, warning=FALSE}
+kableResults(HLA_results) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  scroll_box(width = "100%", height = "200px")
+```
+
+Three HLA alleles show significant association with the disease after multiple testing adjustment. Due to the complex linkage disequilibrium structure in the MHC, it is likely that associations are not statistically independent. The two alleles *HLA-DRB1\*15:01* and *HLA-DQB1\*06:02* are a common class II haplotype. We can therefore test if there are associations that are statistically independent of our top-associated allele, by setting the `conditional` flag to `TRUE`. MiDAS will now perform stepwise conditional testing until the top associated allele does not reach a defined significance threshold (here `th = 0.05`, based on adjusted p value).
+
+```{r run_HLA_allelic_cond, echo=TRUE, warning=FALSE}
+HLA_results_cond <- runMiDAS(
+  object = HLA_model, 
+  experiment = "hla_alleles", 
+  conditional = TRUE,
+  lower_frequency_cutoff = 0.02, 
+  upper_frequency_cutoff = 0.98, 
+  correction = "bonferroni", 
+  exponentiate = TRUE)
+```
+
+The results for conditional testing are displayed in a way that for each step the top associated allele is shown, along with a list of alleles conditioned on.
+
+```{r show_HLA_allelic_cond, echo=FALSE, warning=FALSE}
+kableResults(HLA_results_cond) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  scroll_box(width = "100%", height = "200px")
+```
+
+As we can see, *HLA-DRB1\*15:01* was not independently associated with the disease when correcting for our top-associated allele *HLA-DQB1\*06:02*. However, *HLA-B\*57:01* can be considered an independent association signal.
+
+### Can we find evidence for a role of HLA variation related to NK cell interactions?
+
+Let's assume outcome differences in our disease of interest have been shown to be related to NK cell biology. HLA class I alleles can be grouped according to how they interact with KIR, expressed on NK cells. In our `prepareMiDAS` function above, we already added `KIR_ligand` as analysis type. Now we test these variables for association with disease outcome:
+
+```{r run_KIR_ligand, echo=TRUE, warning=FALSE}
+KIRlig_model <- glm(disease ~ term, data = HLA, family = binomial())
+KIRlig_results <- runMiDAS(
+  KIRlig_model,
+  experiment = "hla_NK_ligands",
+  lower_frequency_cutoff = 0.02,
+  upper_frequency_cutoff = 0.98,
+  correction = "bonferroni",
+  exponentiate = TRUE
+  )
+```
+
+```{r show_KIR_ligand_results, echo=FALSE, warning=FALSE}
+kableResults(KIRlig_results)
+```
+
+We find that *HLA-Bw4* allles (both grouped by HLA-B alleles only or including HLA-A alleles belonging to this ligand group) are associated with higher disease risk. Conversely, *HLA-Bw6* status is associated with decreased risk. However, it could be that this association is merely reflecting the *HLA-B\*57:01* association shown before, a common *HLA-B* allele belonging to the Bw4 allele group. Let's repeat the analysis, but conditioning on this independent risk allele.
+
+```{r run_KIR_ligand_cond, echo=TRUE, warning=FALSE}
+KIRlig_cond_results <- runMiDAS(
+  KIRlig_model,
+  experiment = "hla_NK_ligands",
+  lower_frequency_cutoff = 0.02,
+  upper_frequency_cutoff = 0.98,
+  correction = "bonferroni",
+  exponentiate = TRUE,
+  conditional = TRUE
+  )
+```
+
+```{r show_KIR_ligand_cond_results, echo=FALSE, warning=FALSE}
+kableResults(KIRlig_cond_results) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  scroll_box(width = "100%", height = "200px")
+```
+
+Our results suggest that it is not only the associated *HLA-B* allele, which contributes to the *HLA-Bw4* association. Of course, this is interesting enough for us to invest in some KIR typing efforts.
+
+## HLA association fine-mapping on amino acid level
+
+```{r run_HLA_AA, echo=TRUE, warning=FALSE}
+HLA_AA <- prepareMiDAS(
+  hla_calls = dat_HLA,
+  colData = dat_pheno,
+  experiment = "hla_aa"
+  )
+
+HLA_AA_model <- glm(disease ~ term, data = HLA_AA, family = binomial())
+HLA_AA_results <- runMiDAS(
+  HLA_AA_model,
+  experiment = "hla_aa",
+  lower_frequency_cutoff = 0.02,
+  upper_frequency_cutoff = 0.98,
+  correction = "bonferroni",
+  exponentiate = TRUE
+  )
+```
+
+```{r show_HLA_AA, echo=FALSE, warning=FALSE}
+kableResults(HLA_AA_results) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  scroll_box(width = "100%", height = "200px")
+```
+
+## KIR associations and HLA-KIR interactions
+
+### Do we see association on the level of KIR genes, and when considering defined HLA-KIR interactions?
+
+Now that we have performed KIR genotyping, or e.g. inferred KIR types from available whole-genome sequencing data, we can import this information, and check the gene frequencies.
+
+```{r get_KIR, echo=TRUE, warning=FALSE}
+dat_KIR <- readKirCalls(file = system.file("extdata", "MiDAS_tut_KIR.txt", package = "MiDAS"))
+```
+
+```{r show_KIR, echo=FALSE, warning=FALSE}
+kable(dat_KIR, caption = "KIR data as imported by MiDAS") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  scroll_box(width = "100%", height = "200px")
+```
+
+Next, we want to check our KIR genes frequencies.
+```{r KIR_frequency, echo=TRUE, warning=FALSE}
+kir_freq <- getKIRFrequencies(dat_KIR) %>% 
+  filter(Freq > 0.05)
+```
+
+```{r show_KIR_frequency, echo=FALSE, warning=FALSE}
+kable(kir_freq , caption = "KIR data as imported by MiDAS") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  scroll_box(width = "100%", height = "200px")
+```
+
+Next, we rerun our `prepareMiDAS` function, this time including the KIR data. We prepare the data to test for both KIR gene associations, as well as HLA-KIR interactions.
+But first let's `runMiDAS` on the level of KIR genes.
+
+```{r run_KIR_gene, echo=TRUE, warning=FALSE}
+HLAKIR <- prepareMiDAS(
+  hla_calls = dat_HLA,
+  kir_calls = dat_KIR,
+  colData = dat_pheno,
+  experiment = c("kir_genes", "hla_kir_interactions")
+  )
+HLAKIR_model <- glm(disease ~ term, data = HLAKIR, family = binomial())
+KIR_results <- runMiDAS(
+  HLAKIR_model,
+  experiment = "kir_genes",
+  lower_frequency_cutoff = 0.02,
+  upper_frequency_cutoff = 0.98,
+  exponentiate = TRUE
+  )
+```
+
+```{r show_KIR_results, echo=FALSE, warning=FALSE}
+kableResults(KIR_results) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  scroll_box(width = "100%", height = "200px")
+```
+
+We found an association of KIR2DL3 with disease status...
+
+## HLA-KIR interactions
+
+### Do known biological interactions between KIR receptors and their HLA ligands show stronger assocation?
+
+If both HLA alleles and KIR gene presence / absence information is available, MiDAS can encode biologically relevant receptor-ligand interactions, defined according to [Pende et al](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6558367/). Please note that there is extensive allelic variation in KIR genes, as well as evidence that their interaction with HLA does not only depend on the presence of the KIR gene, but also allele status. Currently, MiDAS does not include a map of these interactions, but a custom map can be provided by the user. Also, MiDAS allows input of KIR with allelic information (see documentation).
+
+First let's explore HLA-KIR interactions frequencies
+```{r HLA-KIR_interactions_frequency}
+kir_freq <- getFrequencies(HLAKIR, experiment = "hla_kir_interactions")
+```
+
+```{r show_HLA-KIR_interactions_frequency, echo=FALSE, warning=FALSE}
+kable(kir_freq, caption = "HLA-KIR interactions frequencies") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  scroll_box(width = "100%", height = "200px")
+```
+
+```{r run_HLA-KIR_interactions, echo=TRUE, warning=FALSE}
+HLA_KIR_results <- runMiDAS(
+  HLAKIR_model,
+  experiment = "hla_kir_interactions",
+  lower_frequency_cutoff = 0.02,
+  upper_frequency_cutoff = 0.98,
+  exponentiate = TRUE
+  )
+```
+
+```{r show_HLA-KIR_results, echo=FALSE, warning=FALSE}
+kableResults(HLA_KIR_results) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  scroll_box(width = "100%", height = "200px")
+```
+
+Add results summary and interpretation here.
+
+Let's now take a look at some additional ways to analyze immunogenetics data within MiDAS.
+
+## HLA heterozygosity and evolutionary divergence
+
+*It should be relatively straightforward to add a more simple analysis type named hla_het, right? This would be just a variable that defines whether an individual is heterozygous for each of the genes (e.g. HLA-A_het = 0/1,...). This has been looked into a lot, is quite trivial and a bit different from evolutionary divergence. It also allows to do something with class II genes regarding divergence.*
+
+Instead of focusing on single HLA alleles or their interactions, we might be interested in HLA diversity instead. For example, it has been shown that [MHC heterozygosity confers a selective advantage](https://www.pnas.org/content/99/17/11260) against infections with multiple *Salmonella* strains. On the amino acid sequence level, it is possible to perform more refined analyses, calculating the level of evolutionary divergence between pairs of HLA alleles of different genes. [Pierini and Lenz](https://academic.oup.com/mbe/article/35/9/2145/5034935) have found Grantham's distance score to be a good proxy for HLA functional divergence. It has been demonstrated that *HLA-C* allelic divergence was associated with [HIV viral load](https://academic.oup.com/mbe/article/37/3/639/5607306). In addition, there is evidence for a role of HLA class I divergence in the [efficacy of cancer immunotherapy](https://www.nature.com/articles/s41591-019-0639-4).<br />
+
+So, let's have a look into this:
+
+```{r run_HLAhet, echo=TRUE, warning=FALSE}
+### Add heterozygosity as analysis_type, once possible. Ideally, one could analyze both at the same time: analysis_type = c("hla_het","hla_divergence").
+
+HLAdiv <- prepareMiDAS(hla_calls = dat_HLA, colData = dat_pheno, experiment = c("hla_divergence"))
+HLAdiv_model <- glm(outcome ~ term, data=HLAdiv, family=binomial())
+HLAdiv_results <-
+  runMiDAS(HLAdiv_model, experiment = "hla_divergence", exponentiate = TRUE)
+```
+
+```{r show_HLAhet, echo=FALSE, warning=FALSE}
+kableResults(HLAdiv_results) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  scroll_box(width = "100%", height = "200px")
+```
+
+Our results show that there is no significant association of HLA heterozygosity or evolutionary divergence with our disease phenotype of interest.
