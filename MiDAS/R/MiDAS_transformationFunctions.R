@@ -386,8 +386,7 @@ hlaCallsToCounts <- function(hla_calls,
 #' getHlaFrequencies(MiDAS_tut_HLA)
 #'
 #' @importFrom assertthat assert_that
-#' @importFrom dplyr left_join
-#' @importFrom formattable percent
+#' @importFrom dplyr left_join rename
 #' @export
 getHlaFrequencies <- function(hla_calls,
                               carrier_frequency = FALSE,
@@ -411,29 +410,22 @@ getHlaFrequencies <- function(hla_calls,
     characterMatches(ref_pop, unique(ref$population))
   )
 
-  allele <- unlist(hla_calls[, -1])
-  allele_counts <- table(allele, useNA = "no")
-  allele_freq <- allele_counts / (2 * nrow(hla_calls))
-
-  allele_freq <- data.frame(
-    allele = names(allele_counts),
-    Counts = as.vector(allele_counts),
-    Freq = as.vector(allele_freq),
-    stringsAsFactors = FALSE
-  )
-
   if (compare) {
     ref <- getReferenceFrequencies(ref, ref_pop, carrier_frequency)
-    allele_freq <- left_join(allele_freq, ref, by = c("allele" = "var"))
+  } else {
+    ref <- NULL
   }
-
-  # format frequencies as percent
-  allele_freq[, -c(1, 2)] <-
-    rapply(
-      object = allele_freq[, -c(1, 2), drop = FALSE],
-      f = function(col) percent(col),
-      how = "replace"
+  
+  hla_counts <- hlaCallsToCounts(hla_calls, check_hla_format = FALSE)
+  counts_mat <- dfToExperimentMat(hla_counts)
+  allele_freq <-
+    getExperimentFrequencies(
+      experiment = counts_mat,
+      pop_mul = 2,
+      carrier_frequency = carrier_frequency, 
+      ref = ref
     )
+  allele_freq <- rename(allele_freq, "allele" = "term")
 
   return(allele_freq)
 }
@@ -452,22 +444,21 @@ getHlaFrequencies <- function(hla_calls,
 #'
 #' @importFrom assertthat assert_that
 #' @importFrom dplyr left_join
-#' @importFrom formattable percent
 #' @export
 getKIRFrequencies <- function(kir_calls) {
   assert_that(
     checkKirCallsFormat(kir_calls)
   )
-
-  kir_sums <- colSums(kir_calls[, -1, drop = FALSE], na.rm = TRUE)
-  kir_freq <- kir_sums / nrow(kir_calls)
-
-  kir_freq <- data.frame(
-    gene = names(kir_sums),
-    Counts = kir_sums,
-    Freq = percent(kir_freq),
-    stringsAsFactors = FALSE
-  )
+  
+  counts_mat <- dfToExperimentMat(kir_calls)
+  kir_freq <-
+    getExperimentFrequencies(
+      experiment = counts_mat,
+      pop_mul = 1,
+      carrier_frequency = FALSE, 
+      ref = NULL
+    )
+  kir_freq <- rename(kir_freq, "gene" = "term")
 
   return(kir_freq)
 }
@@ -545,20 +536,17 @@ getAAFrequencies <- function(aa_variation) {
            msg = "first column of aa_variation must be named ID"
     )
   )
-
-  aa_pos <- aa_variation[, -1]
-  aa_ids <- colnames(aa_variation[, -1])
-  aa_ids <- gsub("_[12]_AA", "", aa_ids)
-  aa_pos <- lapply(1:(ncol(aa_pos)),
-                   function(i) {
-                     paste(aa_ids[i], aa_pos[, i], sep = "_")
-                   }
-  )
-  aa_pos <- unlist(aa_pos)
-
-  aa_freq <- table(aa_pos, useNA = "no") / (2 * nrow(aa_variation))
-  aa_freq <- as.data.frame(aa_freq, stringsAsFactors = FALSE)
-
+  
+  var_counts <- aaVariationToCounts(aa_variation)
+  counts_mat <- dfToExperimentMat(var_counts)
+  aa_freq <-
+    getExperimentFrequencies(
+      experiment = counts_mat,
+      pop_mul = 2,
+      carrier_frequency = FALSE, 
+      ref = NULL
+    )
+  aa_freq <- rename(aa_freq, "aa_pos" = "term")
 
   return(aa_freq)
 }
@@ -1014,7 +1002,8 @@ getExperimentFrequencies.matrix <-
     }
 
     counts_sums <- rowSums(experiment, na.rm = TRUE)
-    allele_freq <- counts_sums / (pop_mul * ncol(experiment)) # remove NA's patients, vectorize the denominator to allow differing number of patients
+    denom <- apply(experiment, 1, function(row) sum(!is.na(row)))
+    allele_freq <- counts_sums / (pop_mul * denom) # remove NA's patients, vectorize the denominator to allow differing number of patients
 
     counts_df <- data.frame(
       term = rownames(experiment),

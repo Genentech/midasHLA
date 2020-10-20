@@ -131,10 +131,27 @@ test_that("getHlaFrequencies", {
   test_hla_freq <- data.frame(
     allele = c("A*01:01", "A*02:01"),
     Counts = c(2, 2),
-    Freq = formattable::percent(c(0.5, 0.5)),
+    Freq = c(0.5, 0.5), 
+    row.names = c("A*01:01", "A*02:01"),
     stringsAsFactors = FALSE
   )
   expect_equal(hla_freq, test_hla_freq)
+})
+
+test_that("getKIRFrequencies", {
+  kir_freq <- getKIRFrequencies(MiDAS_tut_KIR)
+  test_kir_freq <- data.frame(
+    gene = c("KIR3DL3", "KIR2DS2", "KIR2DL2", "KIR2DL3", "KIR2DP1", "KIR2DL1", "KIR3DP1", "KIR2DL4", 
+             "KIR3DL1", "KIR3DS1", "KIR2DL5", "KIR2DS3", "KIR2DS5", "KIR2DS4", "KIR2DS1", "KIR3DL2"),
+    Counts = c(935, 438, 432, 854, 925, 920, 935, 935, 891, 340, 463, 276, 260, 891, 346, 935),
+    Freq = c(1, 0.468449197860963, 0.462032085561497, 0.913368983957219, 0.989304812834225, 0.983957219251337, 
+             1, 1, 0.952941176470588, 0.363636363636364, 0.495187165775401, 0.295187165775401, 0.27807486631016, 
+             0.952941176470588, 0.370053475935829, 1),
+    row.names = c("KIR3DL3", "KIR2DS2", "KIR2DL2", "KIR2DL3", "KIR2DP1", "KIR2DL1", "KIR3DP1", "KIR2DL4",
+                  "KIR3DL1", "KIR3DS1", "KIR2DL5", "KIR2DS3", "KIR2DS5", "KIR2DS4", "KIR2DS1", "KIR3DL2"),
+    stringsAsFactors = FALSE
+  )
+  expect_equal(kir_freq, test_kir_freq)
 })
 
 test_that("hlaToAAVariation", {
@@ -168,7 +185,7 @@ test_that("hlaToAAVariation", {
   )
 })
 
-test_that("hlaToAAVariation", {
+test_that("getAAFrequencies", {
   minimal_hla_calls <- data.frame(
     ID = c("P1", "P2"),
     A_1 = c("A*01:01", "A*02:01"),
@@ -179,7 +196,9 @@ test_that("hlaToAAVariation", {
   aa_freq <- getAAFrequencies(aa_var)
   test_aa_freq <- data.frame(
     aa_pos = c("A_-15_L", "A_-15_V", "A_44_K", "A_44_R"),
+    Counts = c(2, 2, 2, 2),
     Freq = c(0.5, 0.5, 0.5, 0.5),
+    row.names = c("A_-15_L", "A_-15_V", "A_44_K", "A_44_R"),
     stringsAsFactors = FALSE
   )
   expect_equal(aa_freq, test_aa_freq)

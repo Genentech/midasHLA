@@ -1,3 +1,7 @@
+## 1.0.4 - 20/10/20
++ In frequency calculations the "NA"s were counted as non-carriers, this has been
+  changed such that "NA" samples are now omitted.
+
 ## 1.0.3 - 19/10/20
 + warnings and errors occuring upon model evaluation are now summarized into more
   readable form
