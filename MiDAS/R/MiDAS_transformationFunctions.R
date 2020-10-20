@@ -1002,7 +1002,8 @@ getExperimentFrequencies.matrix <-
     }
 
     counts_sums <- rowSums(experiment, na.rm = TRUE)
-    allele_freq <- counts_sums / (pop_mul * ncol(experiment)) # remove NA's patients, vectorize the denominator to allow differing number of patients
+    denom <- apply(experiment, 1, function(row) sum(!is.na(row)))
+    allele_freq <- counts_sums / (pop_mul * denom) # remove NA's patients, vectorize the denominator to allow differing number of patients
 
     counts_df <- data.frame(
       term = rownames(experiment),
