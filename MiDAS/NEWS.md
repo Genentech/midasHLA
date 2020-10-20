@@ -1,3 +1,7 @@
+## 1.0.3 - 19/10/20
++ warnings and errors occuring upon model evaluation are now summarized into more
+  readable form
+
 ## 1.0.2 - 12/10/20
 + fixed problem vignettes index entry values, preventing vignettes from being build
 
