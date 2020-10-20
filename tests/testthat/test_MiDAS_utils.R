@@ -226,11 +226,11 @@ test_that("runMiDASGetVarsFreq", {
   freq_test <- data.frame(
     term = "KIR3DL3",
     Ntotal = 935,
-    Ntotal.percent = formattable::percent(0.935),
+    Ntotal.percent = formattable::percent(1),
     `N(disease=0)` = 467,
-    `N(disease=0).percent` = formattable::percent(0.934),
+    `N(disease=0).percent` = formattable::percent(1),
     `N(disease=1)` = 468,
-    `N(disease=1).percent` = formattable::percent(0.936),
+    `N(disease=1).percent` = formattable::percent(1),
     stringsAsFactors = FALSE,
     check.names = FALSE
   )
