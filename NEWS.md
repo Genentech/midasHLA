@@ -1,3 +1,6 @@
+## 1.0.6 - 23/10/20
++ removed unused expression dictionaries
+
 ## 1.0.4 - 20/10/20
 + In frequency calculations the "NA"s were counted as non-carriers, this has been
   changed such that "NA" samples are now omitted.
