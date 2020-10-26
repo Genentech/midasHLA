@@ -806,6 +806,10 @@ checkKirGenesFormat <- function(genes) {
 #' @importFrom dplyr bind_rows
 #'
 iterativeLRT <- function(object, placeholder, omnibus_groups) {
+  conditional_msgs <- environment()
+  conditional_msgs$error <- character()
+  conditional_msgs$warning <- character()
+  
   mod0 <- updateModel(
     object = object,
     x = "1",
@@ -814,24 +818,26 @@ iterativeLRT <- function(object, placeholder, omnibus_groups) {
   )
   results <- lapply(
     X = omnibus_groups,
-    FUN = function(x) tryCatch(
-      expr = LRTest(
-        mod0,
-        updateModel(
-          object = object,
-          x = x,
-          placeholder = placeholder,
-          collapse = " + ",
-          backquote = TRUE
+    FUN = function(x) suppressWarnings(tryCatch(
+      expr = {
+        res <- LRTest(
+          mod0,
+          updateModel(
+            object = object,
+            x = x,
+            placeholder = placeholder,
+            collapse = " + ",
+            backquote = TRUE
+         )
         )
-      ),
+      },
       error = function(e) {
-        msg <- sprintf(
-          "Error occurred while processing variables %s:\n\t%s",
-          toString(x), # output aa_pos in err message
-          conditionMessage(e)
-        )
-        warn(msg)
+        err <- get(x = "error", envir = conditional_msgs)
+        err <- c(err, conditionMessage(e))
+        
+        names(err)[length(err)] <- x[1] # take first variable, len(x) >= 1 
+        assign(x = "error", value = err, envir = conditional_msgs)
+        
         failed_result <- data.frame(
           term = toString(x),
           df = NA,
@@ -840,13 +846,70 @@ iterativeLRT <- function(object, placeholder, omnibus_groups) {
           p.value = NA,
           stringsAsFactors = FALSE
         )
-
+        
         return(failed_result)
+      },
+      warning = function(w) {
+        wrr <- get(x = "warning", envir = conditional_msgs)
+        wrr <- c(wrr, conditionMessage(w))
+        names(wrr)[length(wrr)] <- x[1] # take first variable, len(x) >= 1 
+        assign(x = "warning", value = wrr, envir = conditional_msgs)
+        
+        res
       }
-    )
+    ))
   )
   results <- bind_rows(results, .id = "group")
-
+  
+  # communicate errors and warnings <--------------------------------------------------------------
+  had_error <- length(conditional_msgs$error)
+  had_warning <- length(conditional_msgs$warning)
+  if (had_error || had_warning) {
+    msg <- "While evaluating the model problems occured:\n"
+    if (had_error) {
+      msg <- c(msg, "Errors:\n")
+      err <- table(conditional_msgs$error)
+      for (i in 1:length(err)) {
+        n <- err[i]
+        val <- names(err)[i]
+        vars <- conditional_msgs$error[conditional_msgs$error == val]
+        vars <-
+          ifelse(
+            test = length(vars) <= 5,
+            yes = paste(names(vars), collapse = ", "),
+            no = paste(c(names(vars)[1:5], "..."), collapse = ", ")
+          )
+        msg <- c(
+          msg,
+          sprintf("%s; occured %i times, including variables: %s", val, n, vars)
+        )
+      }
+      msg <- c(msg, "") # spacer
+    }
+    
+    if (had_warning) {
+      msg <- c(msg, "Warnings:")
+      wrr <- table(conditional_msgs$warning)
+      for (i in 1:length(wrr)) {
+        n <- wrr[i]
+        val <- names(wrr)[i]
+        vars <- conditional_msgs$warning[conditional_msgs$warning == val]
+        vars <-
+          ifelse(
+            test = length(vars) <= 5,
+            yes = paste(names(vars), collapse = ", "),
+            no = paste(c(names(vars)[1:5], "..."), collapse = ", ")
+          )
+        msg <- c(
+          msg,
+          sprintf("%s; occured %i times, including variables: %s", val, n, vars)
+        )
+      }
+    }
+    
+    warn(msg)
+  }
+  
   return(results)
 }
 
@@ -920,8 +983,8 @@ iterativeModel <- function(object,
         vars <-
           ifelse(
             test = length(vars) <= 5,
-            yes = paste(vars, collapse = ", "),
-            no = paste(c(vars[1:5], "..."), collapse = ", ")
+            yes = paste(names(vars), collapse = ", "),
+            no = paste(c(names(vars[1:5]), "..."), collapse = ", ")
           )
         msg <- c(
           msg,
