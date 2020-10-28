@@ -1,4 +1,7 @@
 ## 1.0.6 - 23/10/20
++ fixed bug causing HWETest filtration to strip omnibus groups from target experiment
+
+## 1.0.6 - 23/10/20
 + removed unused expression dictionaries
 
 ## 1.0.4 - 20/10/20

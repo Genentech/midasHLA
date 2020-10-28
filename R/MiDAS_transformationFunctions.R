@@ -1172,9 +1172,28 @@ filterExperimentByVariables.matrix <- function(experiment, variables) {
 #' @method filterExperimentByVariables SummarizedExperiment
 #'
 filterExperimentByVariables.SummarizedExperiment <- function(experiment, variables) {
+  og <- S4Vectors::metadata(experiment)$omnibus_groups
   experiment <- experiment[variables, ]
-  S4Vectors::metadata(experiment)$omnibus_groups <-
-    S4Vectors::metadata(experiment)$omnibus_groups[variables]
+  ## check if og is not null
+  if (! is.null(og)) {
+    og_names <- names(og)
+    filter_og <- setNames(
+      object = unlist(x = og, recursive = TRUE), 
+      nm = rep(x = og_names, times = vapply(X = og, FUN = length, FUN.VALUE = integer(1L)))
+    )
+    filter_og <- filter_og[filter_og %in% variables]
+    og <- lapply(
+      X = og_names, 
+      FUN = function(x) {
+        vec <- filter_og[names(filter_og) == x]
+        names(vec) <- NULL
+        vec
+      }
+    )
+    names(og) <- og_names
+    og <- og[vapply(X = og, FUN = function(x) length(x) != 0, FUN.VALUE = logical(1L))]
+    S4Vectors::metadata(experiment)$omnibus_groups <- og
+  }
 
   return(experiment)
 }
