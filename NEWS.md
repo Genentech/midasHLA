@@ -1,4 +1,7 @@
-## 1.0.6 - 23/10/20
+## 1.0.8 - 31/10/20
++ fixed bug causing filterByVariables and filterByFrequency to strip omnibus groups from target experiment.
+
+## 1.0.7 - 23/10/20
 + fixed bug causing HWETest filtration to strip omnibus groups from target experiment
 
 ## 1.0.6 - 23/10/20

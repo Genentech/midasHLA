@@ -930,6 +930,16 @@ filterExperimentByFrequency <- function(experiment,
                                         carrier_frequency = FALSE,
                                         lower_frequency_cutoff = NULL,
                                         upper_frequency_cutoff = NULL) {
+  UseMethod("filterExperimentByFrequency", experiment)
+}
+
+#' @rdname filterExperimentByFrequency
+#' @method filterExperimentByFrequency matrix
+#'  
+filterExperimentByFrequency.matrix <-  function(experiment,
+                                                carrier_frequency = FALSE,
+                                                lower_frequency_cutoff = NULL,
+                                                upper_frequency_cutoff = NULL) {
   inheritance_model_choice <- eval(formals()[["inheritance_model"]])
   assert_that(
     see_if(
@@ -950,6 +960,43 @@ filterExperimentByFrequency <- function(experiment,
   experiment <- experiment[mask, , drop = FALSE]
 
   return(experiment)
+}
+
+#' @rdname filterExperimentByFrequency
+#' @method filterExperimentByFrequency SummarizedExperiment
+#'  
+filterExperimentByFrequency.SummarizedExperiment <-
+  function(experiment,
+           carrier_frequency = FALSE,
+           lower_frequency_cutoff = NULL,
+           upper_frequency_cutoff = NULL) {
+  inheritance_model_choice <- eval(formals()[["inheritance_model"]])
+  assert_that(
+    see_if(
+      ! is.null(getExperimentPopulationMultiplicator(experiment)), # if pop_mul is not set frequency cannot be calculated
+      msg = "Frequency filtration does not support provided experiment."
+    ),
+    isTRUEorFALSE(carrier_frequency),
+    validateFrequencyCutoffs(lower_frequency_cutoff, upper_frequency_cutoff)
+  )
+  
+  filtered_vars <- getExperimentFrequencies(
+    experiment = experiment,
+    carrier_frequency = carrier_frequency
+  ) %>%
+    getFrequencyMask(lower_frequency_cutoff = lower_frequency_cutoff,
+                     upper_frequency_cutoff = upper_frequency_cutoff)
+  
+  mask <- rownames(experiment) %in% filtered_vars
+  new_experiment <- experiment[mask, , drop = FALSE]
+  
+  og <- S4Vectors::metadata(experiment)$omnibus_groups
+  if (! is.null(og)) {
+    new_og <- filterListByElements(list = og, elements = filtered_vars)
+    metadata(new_experiment)$omnibus_groups <- new_og
+  }
+  
+  return(new_experiment)
 }
 
 #' Calculate experiment's features frequencies
@@ -1176,22 +1223,7 @@ filterExperimentByVariables.SummarizedExperiment <- function(experiment, variabl
   experiment <- experiment[variables, ]
   ## check if og is not null
   if (! is.null(og)) {
-    og_names <- names(og)
-    filter_og <- setNames(
-      object = unlist(x = og, recursive = TRUE), 
-      nm = rep(x = og_names, times = vapply(X = og, FUN = length, FUN.VALUE = integer(1L)))
-    )
-    filter_og <- filter_og[filter_og %in% variables]
-    og <- lapply(
-      X = og_names, 
-      FUN = function(x) {
-        vec <- filter_og[names(filter_og) == x]
-        names(vec) <- NULL
-        vec
-      }
-    )
-    names(og) <- og_names
-    og <- og[vapply(X = og, FUN = function(x) length(x) != 0, FUN.VALUE = logical(1L))]
+    og <- filterListByElements(list = og, elements = variables)
     S4Vectors::metadata(experiment)$omnibus_groups <- og
   }
 
@@ -1224,7 +1256,7 @@ getExperimentPopulationMultiplicator.matrix <- function(experiment) return(NULL)
 #'
 getExperimentPopulationMultiplicator.SummarizedExperiment <-
   function(experiment) {
-      pop_mul <- metadata(experiment)[["pop_mul"]]
+      pop_mul <- S4Vectors::metadata(experiment)[["pop_mul"]]
       return(pop_mul)
   }
 

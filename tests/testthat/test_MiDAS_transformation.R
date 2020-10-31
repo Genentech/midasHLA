@@ -408,7 +408,7 @@ test_that("filterExperimentByFrequency", {
     hla_calls = MiDAS_tut_HLA,
     kir_calls = MiDAS_tut_KIR,
     colData = MiDAS_tut_pheno,
-    experiment = c("hla_alleles", "hla_supertypes", "kir_genes", "hla_divergence")
+    experiment = c("hla_alleles", "hla_aa")
   )
 
   # filtering works as expected for fractions
@@ -477,6 +477,26 @@ test_that("filterExperimentByFrequency", {
   )
   expected_vars <- character(0L)
   expect_equal(experiment_filtered, experiment[expected_vars, ])
+  
+  # omnibus groups are filtred correctly
+  experiment <- midas[["hla_aa"]]
+  lower_frequency_cutoff <- 0.81
+  upper_frequency_cutoff <- 0.82
+  experiment_filtered <- filterExperimentByFrequency(
+    experiment = experiment,
+    lower_frequency_cutoff = lower_frequency_cutoff,
+    upper_frequency_cutoff = upper_frequency_cutoff
+  )
+  test_experiment <- experiment[c("C_11_A", "C_21_R", "DQB1_-27_A", "DQB1_-9_M", "DQB1_224_Q"), ]
+  metadata(test_experiment)$omnibus_groups <-
+    list(
+      C_11 = "C_11_A",
+      C_21 = "C_21_R",
+      `DQB1_-27` = "DQB1_-27_A",
+      `DQB1_-9` = "DQB1_-9_M",
+      `DQB1_224` = "DQB1_224_Q"
+    )
+  expect_equal(experiment_filtered, test_experiment)
 
   # experiment must be of type integer
   experiment <- matrix(LETTERS)
@@ -491,7 +511,7 @@ test_that("filterExperimentByFrequency", {
     "Frequency filtration does not support provided experiment."
   )
 
-  # inheritance_model must be a string
+  # carrier_frequency must be a string
   experiment <- midas[["hla_alleles"]]
   inheritance_model <- 1
   lower_frequency_cutoff <- "foo"
@@ -740,8 +760,12 @@ test_that("filterExperimentByVariables", {
   expect_equal(experiment_filtered, experiment[1:2, ])
 
   experiment <- SummarizedExperiment::SummarizedExperiment(experiment)
+  metadata(experiment)$omnibus_groups <-
+    list(A = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"))
   experiment_filtered <- filterExperimentByVariables(experiment, c("A*01:01", "A*02:01"))
-  expect_equal(experiment_filtered, experiment[1:2, ])
+  test_experiment <- experiment[c("A*01:01", "A*02:01"), ]
+  metadata(test_experiment)$omnibus_groups <- list(A = c("A*01:01", "A*02:01"))
+  expect_equal(experiment_filtered, test_experiment)
 })
 
 test_that("getExperimentPopulationMultiplicator", {

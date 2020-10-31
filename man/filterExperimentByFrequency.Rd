@@ -2,9 +2,25 @@
 % Please edit documentation in R/MiDAS_transformationFunctions.R
 \name{filterExperimentByFrequency}
 \alias{filterExperimentByFrequency}
+\alias{filterExperimentByFrequency.matrix}
+\alias{filterExperimentByFrequency.SummarizedExperiment}
 \title{Filter experiment by frequency}
 \usage{
 filterExperimentByFrequency(
+  experiment,
+  carrier_frequency = FALSE,
+  lower_frequency_cutoff = NULL,
+  upper_frequency_cutoff = NULL
+)
+
+\method{filterExperimentByFrequency}{matrix}(
+  experiment,
+  carrier_frequency = FALSE,
+  lower_frequency_cutoff = NULL,
+  upper_frequency_cutoff = NULL
+)
+
+\method{filterExperimentByFrequency}{SummarizedExperiment}(
   experiment,
   carrier_frequency = FALSE,
   lower_frequency_cutoff = NULL,
