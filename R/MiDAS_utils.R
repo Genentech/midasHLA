@@ -697,7 +697,7 @@ dfToExperimentMat <- function(df) {
   colnames(mat) <- cols
 
   # convert to apropiate type
-  mat <- type.convert(mat, as.is = TRUE)
+  # mat <- type.convert(mat, as.is = TRUE)
 
   return(mat)
 }
@@ -1125,4 +1125,36 @@ adjustPValues <- function(p, method, n = length(p)) {
   }
 
   return(p_adj)
+}
+
+#' Filter list by elements
+#'
+#' Filter two level list by its secondary elements and remove empty items
+#'
+#' @param list A list.
+#' @param elements Character vector of elements to keep.
+#'
+#' @return List filtered according to \code{elements} argument.
+#'
+#' @importFrom stats setNames
+#'
+filterListByElements <- function(list, elements) {
+  list_names <- names(list)
+  list_vec <- setNames(
+    object = unlist(x = list, recursive = TRUE),
+    nm = rep(x = list_names, times = vapply(X = list, FUN = length, FUN.VALUE = integer(1L)))
+  )
+  list_vec <- list_vec[list_vec %in% elements]
+  new_list <- lapply(
+    X = list_names,
+    FUN = function(x) {
+      vec <- list_vec[names(list_vec) == x]
+      names(vec) <- NULL
+      vec
+    }
+  )
+  names(new_list) <- list_names
+  new_list <- new_list[vapply(X = new_list, FUN = function(x) length(x) != 0, FUN.VALUE = logical(1L))]
+  
+  return(new_list)
 }

@@ -467,3 +467,24 @@ test_that("adjustPValues", {
   expect_error(adjustPValues(p = p_val, method = "bonferroni", n = 0),
                "n must be >= 1")
 })
+
+test_that("filterListByElements", {
+  A <- list(
+    A = c("A", "B"),
+    B = c("B", "C")
+  )
+  
+  a <- filterListByElements(list = A, elements = c("B"))
+  test_a <- list(
+    A = c("B"),
+    B = c("B")
+  )
+  expect_equal(a, test_a)
+  
+  a <- filterListByElements(list = A, elements = c("C"))
+  test_a <- list(B = c("C"))
+  expect_equal(a, test_a)
+  
+  a <- filterListByElements(list = A, elements = c())
+  expect_equal(a, structure(list(), .Names = character(0)))
+})
