@@ -1,3 +1,6 @@
+## 1.0.9 - 3/11/20
++ fix bug causing runMiDAS errors when statistical model evaluated with a warrning.
+
 ## 1.0.8 - 31/10/20
 + fixed bug causing filterByVariables and filterByFrequency to strip omnibus groups from target experiment.
 

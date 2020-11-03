@@ -820,7 +820,7 @@ iterativeLRT <- function(object, placeholder, omnibus_groups) {
     X = omnibus_groups,
     FUN = function(x) suppressWarnings(tryCatch(
       expr = {
-        res <- LRTest(
+        LRTest(
           mod0,
           updateModel(
             object = object,
@@ -855,7 +855,16 @@ iterativeLRT <- function(object, placeholder, omnibus_groups) {
         names(wrr)[length(wrr)] <- x[1] # take first variable, len(x) >= 1 
         assign(x = "warning", value = wrr, envir = conditional_msgs)
         
-        res
+        suppressWarnings(LRTest(
+          mod0,
+          updateModel(
+            object = object,
+            x = x,
+            placeholder = placeholder,
+            collapse = " + ",
+            backquote = TRUE
+          )
+        ))
       }
     ))
   )
@@ -962,6 +971,13 @@ iterativeModel <- function(object,
         names(wrr)[length(wrr)] <- x
         assign(x = "warning", value = wrr, envir = conditional_msgs)
         
+        obj <- suppressWarnings(updateModel(
+          object = object,
+          x = x,
+          placeholder = placeholder,
+          backquote = TRUE,
+          collapse = " + "
+        ))
         tidy(x = obj, conf.int = TRUE, exponentiate = exponentiate)
       }
     ))
