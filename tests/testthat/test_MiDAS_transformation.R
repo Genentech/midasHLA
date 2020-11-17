@@ -132,7 +132,7 @@ test_that("getHlaFrequencies", {
     allele = c("A*01:01", "A*02:01"),
     Counts = c(2, 2),
     Freq = c(0.5, 0.5), 
-    row.names = c("A*01:01", "A*02:01"),
+    row.names = NULL,
     stringsAsFactors = FALSE
   )
   expect_equal(hla_freq, test_hla_freq)
@@ -143,12 +143,11 @@ test_that("getKIRFrequencies", {
   test_kir_freq <- data.frame(
     gene = c("KIR3DL3", "KIR2DS2", "KIR2DL2", "KIR2DL3", "KIR2DP1", "KIR2DL1", "KIR3DP1", "KIR2DL4", 
              "KIR3DL1", "KIR3DS1", "KIR2DL5", "KIR2DS3", "KIR2DS5", "KIR2DS4", "KIR2DS1", "KIR3DL2"),
-    Counts = c(935, 438, 432, 854, 925, 920, 935, 935, 891, 340, 463, 276, 260, 891, 346, 935),
-    Freq = c(1, 0.468449197860963, 0.462032085561497, 0.913368983957219, 0.989304812834225, 0.983957219251337, 
-             1, 1, 0.952941176470588, 0.363636363636364, 0.495187165775401, 0.295187165775401, 0.27807486631016, 
-             0.952941176470588, 0.370053475935829, 1),
-    row.names = c("KIR3DL3", "KIR2DS2", "KIR2DL2", "KIR2DL3", "KIR2DP1", "KIR2DL1", "KIR3DP1", "KIR2DL4",
-                  "KIR3DL1", "KIR3DS1", "KIR2DL5", "KIR2DS3", "KIR2DS5", "KIR2DS4", "KIR2DS1", "KIR3DL2"),
+    Counts = c(935, 455, 449, 849, 925, 918, 935, 935, 853, 365, 485, 294, 288, 853, 371, 935),
+    Freq = c(1, 0.486631016042781, 0.480213903743316, 0.908021390374332, 0.989304812834225, 0.981818181818182,
+             1, 1, 0.912299465240642, 0.390374331550802, 0.518716577540107, 0.314438502673797, 
+             0.308021390374332, 0.912299465240642, 0.396791443850267, 1),
+    row.names = NULL,
     stringsAsFactors = FALSE
   )
   expect_equal(kir_freq, test_kir_freq)
@@ -198,7 +197,7 @@ test_that("getAAFrequencies", {
     aa_pos = c("A_-15_L", "A_-15_V", "A_44_K", "A_44_R"),
     Counts = c(2, 2, 2, 2),
     Freq = c(0.5, 0.5, 0.5, 0.5),
-    row.names = c("A_-15_L", "A_-15_V", "A_44_K", "A_44_R"),
+    row.names = NULL,
     stringsAsFactors = FALSE
   )
   expect_equal(aa_freq, test_aa_freq)
@@ -326,10 +325,10 @@ test_that("kableResults", {
 test_that("countsToVariables", {
   kir_haplotypes <- countsToVariables(MiDAS_tut_KIR[1:2, ], "kir_haplotypes")
   kir_haplotypes_test <- data.frame(
-    ID = c("P001", "P002"),
-    cenAA = c(0, 0),
+    ID = c("C001", "C002"),
+    cenAA = c(1, 1),
     cenBB = c(0, 0),
-    cenAB = c(1, 1),
+    cenAB = c(0, 0),
     telAA = c(1, 1),
     telBB = c(0, 0),
     telAB = c(0, 0),
@@ -381,7 +380,7 @@ test_that("countsToVariables", {
 test_that("getHlaKirInteractions", {
   hla_kir <- getHlaKirInteractions(MiDAS_tut_HLA, MiDAS_tut_KIR)
   load(system.file("extdata", "test_hla_kir_interactions.Rdata", package = "MiDAS"))
-  expect_equal(hla_kir, test_hla_kir)
+  expect_equal(hla_kir, test_hla_kir_interactions)
 
   expect_error(
     getHlaKirInteractions(MiDAS_tut_HLA, MiDAS_tut_KIR, interactions_dict = 1),
@@ -433,13 +432,13 @@ test_that("filterExperimentByFrequency", {
     upper_frequency_cutoff = upper_frequency_cutoff
   )
   expected_vars <-
-    c("DRB1*01:03",
-      "B*41:01",
+    c("B*27:02",
       "C*08:03",
       "DRB1*08:04",
-      "B*27:02",
       "B*41:02",
-      "DPA1*02:06")
+      "B*41:01",
+      "DPA1*02:06",
+      "DRB1*01:03")
   expect_equal(experiment_filtered, experiment[expected_vars, ])
 
   # filtering works as expected for boundry conditions NULL, NULL
@@ -480,22 +479,17 @@ test_that("filterExperimentByFrequency", {
   
   # omnibus groups are filtred correctly
   experiment <- midas[["hla_aa"]]
-  lower_frequency_cutoff <- 0.81
-  upper_frequency_cutoff <- 0.82
+  lower_frequency_cutoff <- 0.86
+  upper_frequency_cutoff <- 0.87
   experiment_filtered <- filterExperimentByFrequency(
     experiment = experiment,
     lower_frequency_cutoff = lower_frequency_cutoff,
     upper_frequency_cutoff = upper_frequency_cutoff
   )
-  test_experiment <- experiment[c("C_11_A", "C_21_R", "DQB1_-27_A", "DQB1_-9_M", "DQB1_224_Q"), ]
+  test_experiment <- experiment[c("C_35_R", "C_309_V"), ]
   metadata(test_experiment)$omnibus_groups <-
-    list(
-      C_11 = "C_11_A",
-      C_21 = "C_21_R",
-      `DQB1_-27` = "DQB1_-27_A",
-      `DQB1_-9` = "DQB1_-9_M",
-      `DQB1_224` = "DQB1_224_Q"
-    )
+    list(C_35 = "C_35_R",
+         C_309 = "C_309_V")
   expect_equal(experiment_filtered, test_experiment)
 
   # experiment must be of type integer
@@ -634,7 +628,7 @@ test_that("getExperimentFrequencies", {
     term = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
     Counts = c(2, 5, 1, 0, 0),
     Freq = c(0.2, 0.5, 0.1, 0, 0),
-    row.names = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
+    row.names = NULL,
     stringsAsFactors = FALSE
   )
 
@@ -653,7 +647,7 @@ test_that("getExperimentFrequencies", {
     term = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
     Counts = c(1, 3, 1, 0, 0),
     Freq = c(0.2, 0.6, 0.2, 0, 0),
-    row.names = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"),
+    row.names = NULL,
     stringsAsFactors = FALSE
   )
   expect_equal(experiment_freq, experiment_freq_test)
@@ -701,11 +695,11 @@ test_that("applyInheritanceModel", {
     colData = data.frame(foo = 1:3, row.names = 1:3)
   )
   se_dominant <- applyInheritanceModel(se, "dominant")
-  test_se <- SummarizedExperiment(
-    assays = list(matrix(c(1, 0, 1, 1, 1, 1, 0, 1, 1), nrow = 3)),
+  test_dominant <- SummarizedExperiment(
+    assays = list(matrix(c(1L, 0L, 1L, 1L, 1L, 1L, 0L, 1L, 1L), nrow = 3, dimnames = list(NULL, NULL))),
     colData = data.frame(foo = 1:3, row.names = 1:3)
   )
-  expect_equal(se, se_dominant)
+  expect_equal(se_dominant, test_dominant)
 })
 
 test_that("getFrequencyMask", {

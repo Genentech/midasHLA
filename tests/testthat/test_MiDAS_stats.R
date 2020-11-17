@@ -80,50 +80,50 @@ test_that("analyzeConditionalAssociations", {
 
   # keep = FALSE
   res <- analyzeConditionalAssociations(object,
-                                        variables = c("B*14:02", "DRB1*11:01"),
+                                        variables = c("DQB1*06:02", "B*57:01"),
                                         th = 0.05,
                                         keep = FALSE)
   res <- rapply(res, classes = "numeric", how = "replace", round, digits = 3)
 
-  test_res <- tibble(term = c("B*14:02", "DRB1*11:01"),
-                     estimate = c(0.196, -0.092),
-                     std.error = c(0.072, 0.044),
-                     statistic = c(2.739, -2.099),
-                     p.value = c(0.006, 0.036),
-                     conf.low = c(0.056, -0.177),
-                     conf.high = c(0.337, -0.006),
-                     p.adjusted = c(0.013, 0.036),
-                     covariates = c("", "B*14:02")
+  test_res <- tibble(term = c("DQB1*06:02", "B*57:01"),
+                     estimate = c(0.15, 0.235),
+                     std.error = c(0.035, 0.056),
+                     statistic = c(4.319, 4.228),
+                     p.value = c(0, 0),
+                     conf.low = c(0.082, 0.126),
+                     conf.high = c(0.219, 0.344),
+                     p.adjusted = c(0, 0),
+                     covariates = c("", "DQB1*06:02")
   )
 
   expect_equal(res, test_res)
 
   # keep = TRUE
   res <- analyzeConditionalAssociations(object,
-                                        variables = c("B*14:02", "DRB1*11:01"),
+                                        variables = c("DQB1*06:02", "B*57:01"),
                                         th = 0.05,
                                         keep = TRUE)
   res <- rapply(res, classes = "numeric", how = "replace", round, digits = 3)
   test_res <- list(
-    tibble(term = c("B*14:02", "DRB1*11:01"),
-           estimate = c(0.196, -0.096),
-           std.error = c(0.072, 0.044),
-           statistic = c(2.739, -2.194),
-           p.value =  c(0.006, 0.028),
-           conf.low = c(0.056, -0.182),
-           conf.high = c(0.337, -0.01),
-           p.adjusted = c(0.013, 0.057),
+    tibble(term = c("DQB1*06:02", "B*57:01"),
+           estimate = c(0.15, 0.236),
+           std.error = c(0.035, 0.056),
+           statistic = c(4.319, 4.21),
+           p.value =  c(0, 0),
+           conf.low = c(0.082, 0.126),
+           conf.high = c(0.219, 0.346),
+           p.adjusted = c(0, 0),
            covariates = c("", "")
     ),
-    tibble(term = "DRB1*11:01",
-           estimate = -0.092,
-           std.error = 0.044,
-           statistic = -2.099,
-           p.value = 0.036,
-           conf.low = -0.177,
-           conf.high = -0.006,
-           p.adjusted = 0.036,
-           covariates = "B*14:02"
+    tibble(term = "B*57:01",
+           estimate = 0.235,
+           std.error = 0.056,
+           statistic = 4.228,
+           p.value = 0,
+           conf.low = 0.126,
+           conf.high = 0.344,
+           p.adjusted = 0,
+           covariates = "DQB1*06:02"
     )
   )
   expect_equal(res, test_res)
@@ -488,18 +488,18 @@ test_that("runMiDAS", {
     object,
     conditional = conditional,
     omnibus = omnibus,
-    omnibus_groups_filter = c("B_178", "DRA_217", "DQA1_34"),
+    omnibus_groups_filter = c("DRA_217", "DQA1_34"),
     experiment = experiment,
     exponentiate = FALSE
   )
   test_res <- dplyr::tibble(
-    aa_pos = c("B_178", "DQA1_34", "DRA_217"),
-    residues = c("K, T", "Q, E", "V, L"),
-    df = c(1, 1, 1),
-    statistic = c(14.5367224623581, 8.23228307063391, 7.66064122323155),
-    p.value = c(0.00013745391512862, 0.00411517297832788, 0.00564384425764467),
-    p.adjusted = c(0.000412361745385859, 0.00411517297832788, 0.0112876885152893),
-    covariates = c("", "B_178 + DRA_217", "B_178")
+    aa_pos = c("DRA_217", "DQA1_34"),
+    residues = c("L, V", "Q, E"),
+    df = c(1, 1),
+    statistic = c(11.7515320865891, 8.92028215923278),
+    p.value = c(0.000607931755127601, 0.00282020937328977),
+    p.adjusted = c(0.00121586351025461, 0.00282020937329118),
+    covariates = c("", "DRA_217")
   )
   expect_equal(as.data.frame(res), as.data.frame(test_res))
 
@@ -514,22 +514,13 @@ test_that("runMiDAS", {
   )
   test_res <- list(
     dplyr::tibble(
-      aa_pos = c("B_178", "DRA_217"),
-      residues = c("K, T", "V, L"),
+      aa_pos = c("DRA_217", "B_178"),
+      residues = c("L, V", "K, T"),
       df = c(1, 1),
-      statistic = c(14.5367224623581, 11.7515320865903),
-      p.value = c(0.00013745391512862, 0.000607931755127229),
-      p.adjusted = c(0.000274907830257239, 0.00121586351025446),
+      statistic = c(11.7515320865891, 5.63638399577462),
+      p.value = c(0.000607931755127601, 0.0175914523736528),
+      p.adjusted = c(0.0012158635102552, 0.0351829047473056),
       covariates = c("", "")
-    ),
-    dplyr::tibble(
-      aa_pos = "DRA_217",
-      residues = "V, L",
-      df = 1,
-      statistic = 7.66064122323155,
-      p.value = 0.00564384425764467,
-      p.adjusted = 0.00564384425764467,
-      covariates = "B_178"
     )
   )
   expect_equal(lapply(res, as.data.frame), lapply(test_res, as.data.frame))

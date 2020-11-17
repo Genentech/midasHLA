@@ -96,9 +96,9 @@ test_that("getOmnibusGroups", {
 
   expect_equal(getOmnibusGroups(midas, "hla_aa")[1:3],
                list(
-                 `A_-22` = c("A_-22_*", "A_-22_V", "A_-22_I"),
-                 `A_-21` = c("A_-21_*", "A_-21_M", "A_-21_V"),
-                 `A_-18` = c("A_-18_*", "A_-18_R", "A_-18_P")
+                 `A_-22` = c("A_-22_V", "A_-22_*", "A_-22_I"),
+                 `A_-21` = c("A_-21_M", "A_-21_V", "A_-21_*"),
+                 `A_-18` = c("A_-18_R", "A_-18_*", "A_-18_P")
                ))
 
   expect_error(
@@ -120,11 +120,10 @@ test_that("getFrequencies", {
   freq <- getFrequencies(midas_sub, "hla_alleles")
   test_freq <- data.frame(
     term = alleles_subset,
-    Counts = c(236, 486, 22, 90, 179, 151, 66, 86, 59, 58, 44),
-    Freq = c(0.118, 0.243, 0.011, 0.045, 0.0895, 0.0755, 0.033, 0.043, 0.0295, 0.029, 0.022),
+    Counts = c(236, 486, 22, 90, 152, 128, 74, 86, 59, 58, 81),
+    Freq = c(0.118, 0.243, 0.011, 0.045, 0.076, 0.064, 0.037, 0.043, 0.0295, 0.029, 0.0405),
     stringsAsFactors = FALSE
   )
-  rownames(test_freq) <- alleles_subset
 
   expect_equal(freq, test_freq)
 
@@ -308,7 +307,7 @@ test_that("filterByOmnibusGroups", {
       groups = mask
     )
   test_filtered_midas <- midas
-  vars <- c("A_83_G", "A_83_R",  "A_90_D", "A_90_A")
+  vars <- c("A_83_R", "A_83_G", "A_90_D", "A_90_A")
   test_filtered_midas[[experiment]] <- test_filtered_midas[[experiment]][vars, ]
   metadata(test_filtered_midas[[experiment]])$omnibus_groups <-
     metadata(test_filtered_midas[[experiment]])$omnibus_groups[mask]

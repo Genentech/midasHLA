@@ -188,9 +188,9 @@ test_that("LRTest", {
     data.frame(
       term = "AGE",
       df = 1,
-      logLik = 109.723706571279,
-      statistic = 219.447413142558,
-      p.value = 1.19376144614571e-49,
+      logLik = 109.840111592134,
+      statistic = 219.680223184268,
+      p.value = 1.06202635429558e-49,
       stringsAsFactors = FALSE
     )
   )
@@ -256,13 +256,14 @@ test_that("distGrantham", {
 test_that("hlaCallsGranthamDistance", {
   gdist <- hlaCallsGranthamDistance(MiDAS_tut_HLA[1:5, ], genes = c("A", "B", "C"))
   gdist_test <- structure(list(
-    ID = c("P001", "P002", "P003", "P004", "P005"),
-    A = c(10.9447513812155, 0, 8.10497237569061, 10.6629834254144, 10.6574585635359),
-    B = c(10.3480662983425, 9.20441988950276, 8.4475138121547, 2.88950276243094, 9.01104972375691),
-    C = c(5.37569060773481, 4.98895027624309, 6.70718232044199, 5.87292817679558, 6.70718232044199)
-  ),
-  class = "data.frame",
-  row.names = c(NA,-5L))
+    ID = c("C001", "C002", "C003", "C004", "C005"),
+    A = c(3.8121546961326, 0.87292817679558, 3.55801104972376, 10.6077348066298, 9.17127071823204),
+    B = c(8.8121546961326, 6.64640883977901, 11.4088397790055, 9.41436464088398, 7.68508287292818),
+    C = c(4.74585635359116, 2.90055248618785, 6.23204419889503, 7.05524861878453, 4.46961325966851)
+    ),
+    class = "data.frame",
+    row.names = c(NA,-5L)
+  )
   expect_equal(gdist, gdist_test)
 
   gdist <-
@@ -270,13 +271,14 @@ test_that("hlaCallsGranthamDistance", {
                              genes = c("A", "B", "C"),
                              aa_selection = "B_pocket")
   gdist_test <- structure(list(
-    ID = c("P001", "P002", "P003", "P004", "P005"),
-    A = c(25.8181818181818, 0, 12.7272727272727, 15.8181818181818, 16.0909090909091),
-    B = c(21.0909090909091, 31.3636363636364, 21.0909090909091, 0, 21.0909090909091),
-    C = c(29, 28.6363636363636, 29, 15.0909090909091, 29)
-  ),
-  class = "data.frame",
-  row.names = c(NA,-5L))
+    ID = c("C001", "C002", "C003", "C004", "C005"),
+    A = c(0, 2, 0, 26.5454545454545, 7.72727272727273),
+    B = c(30.7272727272727, 16.1818181818182, 48, 52.9090909090909, 27.3636363636364),
+    C = c(36.6363636363636, 23.5454545454545, 37.1818181818182, 32.0909090909091, 32.0909090909091)
+    ),
+    class = "data.frame",
+    row.names = c(NA,-5L)
+  )
   expect_equal(gdist, gdist_test)
 
   # checkHlaCallsFormat test is ommitted here
@@ -330,10 +332,9 @@ test_that("experimentMatToDf", {
 })
 
 test_that("midasToWide", {
-  set.seed(3)
   midas <- prepareMiDAS(
-    hla_calls = MiDAS_tut_HLA[1:2, 1:2],
-    colData = MiDAS_tut_pheno[1:2, ],
+    hla_calls = MiDAS_tut_HLA[MiDAS_tut_HLA$ID %in% c("P001", "P002"), 1:2],
+    colData = MiDAS_tut_pheno[MiDAS_tut_pheno$ID %in% c("P001", "P002"), ],
     experiment = "hla_alleles"
   )
 
@@ -345,7 +346,7 @@ test_that("midasToWide", {
     disease = c(1L, 1L),
     lab_value = c(-0.85, -1.6),
     outcome = c(1L, 1L),
-    term = c(0.168041526339948, 0.807516399072483),
+    term = colData(midas)$term,
     stringsAsFactors = FALSE,
     check.names = FALSE
   )
@@ -383,9 +384,9 @@ test_that("iterativeLRT", {
     group = c("A_29", "A_44", "A_65"),
     term = c("A_29_D, A_29_A", "A_44_R, A_44_K", "A_65_R, A_65_G"),
     df = c(0, 1, 1),
-    logLik = c(0, 0.140455460270459, 1.10951823960204),
-    statistic = c(0, 0.280910920540919, 2.21903647920408),
-    p.value = c(1, 0.596104787861628, 0.136318110662154),
+    logLik = c(0, 0.194256249636965, 1.09904435383942),
+    statistic = c(0, 0.388512499273929, 2.19808870767883),
+    p.value = c(1, 0.533082333293122, 0.13818197701459),
     stringsAsFactors = FALSE
   )
   expect_equal(res, test_res)
@@ -397,9 +398,9 @@ test_that("iterativeLRT", {
     group = c("A_29", "A_44", "A_65"),
     term = c("A_29_D, A_29_A", "A_44_R, A_44_K", "A_65_R, A_65_G"),
     df = c(NA, 1, 1),
-    logLik = c(NA, 0.140455460270459, 1.10951823960204),
-    statistic = c(NA, 0.280910920540919, 2.21903647920408),
-    p.value = c(NA, 0.596104787861628, 0.136318110662154),
+    logLik = c(NA, 0.194256249636965, 1.09904435383942),
+    statistic = c(NA, 0.388512499273929, 2.19808870767883),
+    p.value = c(NA, 0.533082333293122, 0.13818197701459),
     stringsAsFactors = FALSE
   )
   expect_equal(res, test_res)
@@ -419,13 +420,13 @@ test_that("iterativeModel", {
 
   res <- iterativeModel(object, placeholder, variables)
   res_test <- dplyr::tibble(
-    term = c("A*11:88", "A*24:50", "A*02:01"),
-    estimate = c(4.96506830649457e-14, 3.30483848402117e-14, -2.49329069444073e-16),
-    std.error = c(2.23663494529691e-15, 2.10564948334218e-15, 3.20260022462908e-16),
-    statistic = c(22.1988318519966, 15.6951026757577, -0.778520739262579),
-    p.value = c(2.27209273588754e-76, 2.22149857779886e-45, 0.436632572287762),
-    conf.low = c(4.52562576569574e-14, 2.89113129370057e-14, -8.78559504582024e-16),
-    conf.high = c(5.40451084729341e-14, 3.71854567434176e-14, 3.79901365693878e-16)
+    term = c("A*25:01", "A*26:01", "A*02:01"),
+    estimate = c(-2.1324948816686e-18, -2.16213612157323e-18, -2.4507940696552e-18),
+    std.error = c(1.17038946172415e-17, 8.46322952045087e-18, 3.85985182525956e-18),
+    statistic = c(-0.182203869003326, -0.25547412088359, -0.63494511722361),
+    p.value = c(0.85549702911168, 0.798462620998302, 0.525756401123048),
+    conf.low = c(-2.51277056050692e-17, -1.87902545887866e-17, -1.00344325921854e-17),
+    conf.high = c(2.0862715841732e-17, 1.44659823456402e-17, 5.132844452875e-18)
   )
   expect_equal(as.data.frame(res), as.data.frame(res_test))
 })
