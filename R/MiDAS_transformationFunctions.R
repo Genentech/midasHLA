@@ -459,6 +459,7 @@ getKIRFrequencies <- function(kir_calls) {
       ref = NULL
     )
   kir_freq <- rename(kir_freq, "gene" = "term")
+  rownames(kir_freq) <- NULL
 
   return(kir_freq)
 }
@@ -1056,6 +1057,7 @@ getExperimentFrequencies.matrix <-
       term = rownames(experiment),
       Counts = counts_sums,
       Freq = allele_freq,
+      row.names = NULL,
       stringsAsFactors = FALSE
     )
 
