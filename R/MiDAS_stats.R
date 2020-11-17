@@ -488,7 +488,7 @@ runMiDAS <- function(object,
   }
 
   assert_that(
-    length(object_details$data[, , experiment]) != 0,
+    length(suppressMessages(object_details$data[, , experiment])) != 0,
     msg = "No variables available for analysis, please revisit your filtration criteria."
   )
 
