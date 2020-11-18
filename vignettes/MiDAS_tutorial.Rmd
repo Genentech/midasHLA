@@ -3,31 +3,32 @@ title: "MiDAS tutorial"
 author: "Maciej Migdał & Christian Hammer"
 date: "`r Sys.Date()`"
 output: 
-  rmarkdown::html_vignette:
+  html_vignette:
     toc: true
     toc_depth: 2
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{MiDAS tutorial}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r logo, echo=FALSE}
-htmltools::img(src = knitr::image_uri("MiDAS_logo.png"), 
-               alt = 'logo', 
-               style = 'position:absolute; top:0; right:0; padding:10px; width:250px')
-```
-
 ```{r setup, echo=FALSE, warning=FALSE, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, fig.align="center")
-library(MiDAS)
+library(cowplot)
+library(dplyr)
 library(ggplot2)
 library(ggpubr)
-library(cowplot)
 library(kableExtra)
-library(tidyverse)
+library(MiDAS)
 library(tidyr)
-library(scales)
+```
+
+```{r logo, echo=FALSE, warning=FALSE}
+htmltools::img(
+  src = knitr::image_uri("MiDAS_logo.png"),
+  alt = 'logo',
+  style = 'position:absolute; top:0; right:0; padding:10px; width:250px'
+  )
 ```
 
 ## Introduction
@@ -40,7 +41,7 @@ We also have high resolution HLA alleles (4 - 6 digit), and presence/absence cal
 
 First, let's import the phenotype data and HLA calls using MiDAS import functions. MiDAS will check for correct nomenclature of HLA. We can also define 4-digit resolution for HLA alleles as import format, which means that alleles with higher resolution will be reduced.
 
-```{r get_data, echo=TRUE, warning=FALSE, include=TRUE}
+```{r get_data, echo=TRUE, warning=FALSE}
 dat_pheno <-
   read.table(
   file = system.file("extdata", "MiDAS_tut_pheno.txt", package = "MiDAS"),
@@ -55,10 +56,12 @@ dat_HLA <-
 
 Let's take a look at the imported HLA data tables:
 
-```{r show_imported_data , echo=FALSE, warning=FALSE, include=TRUE}
-kable(dat_HLA, caption = "HLA data as imported by MiDAS") %>%
+```{r show_imported_data, echo=FALSE, warning=FALSE}
+dat_HLA %>%
+  head(20) %>%
+  kable(caption = "HLA data as imported by MiDAS") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
-  scroll_box(width = "100%", height = "400px")
+  scroll_box(width = "100%", height = "300px")
 ```
 
 Next, we want to check our HLA allele frequencies, and compare them to known frequencies from major populations. Here, we only include alleles with an allele frequency of 5% or higher in our study cohort. By default, MiDAS will output comparisons including the following populations, based on published data from [allelefrequencies.net](www.allelefrequencies.net):
@@ -66,26 +69,42 @@ Next, we want to check our HLA allele frequencies, and compare them to known fre
 MiDAS comes with some pre-defined reference populations, but it is possible to customize these comparisons (see documentation).
 
 ```{r get_frequencies, echo=TRUE, warning=FALSE}
-freq_HLA <-
-  getHlaFrequencies(dat_HLA,
-  compare = TRUE
-) %>% 
+freq_HLA <- getHlaFrequencies(hla_calls = dat_HLA, compare = TRUE) %>%
   filter(Freq > 0.01)
 ```
 
 ```{r show_frequencies, echo=FALSE, warning=FALSE}
-kable(freq_HLA, caption = "HLA frequencies, compared to published references") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
-  scroll_box(height = "400px")
+freq_HLA %>%
+  head() %>%
+  kable(caption = "HLA frequencies, compared to published references") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 ```
 
 Let's assume our cohort is of predominantly European ancestry. We can plot the following comparison to see if allele frequencies in our data are distributed as expected, for example by visualizing common HLA-A allele frequencies in comparison with European, Chinese, and African American reference populations: 
 
-```{r plot_frequencies, echo=TRUE, warning=FALSE, fig.width=7, fig.height=7}
+```{r plot_frequencies, echo=TRUE, warning=FALSE, fig.height=7, fig.width=7}
+freq_HLA_long <- gather(
+  data = freq_HLA,
+  key = "population",
+  value = "freq",
+  "Freq",
+  "USA NMDP European Caucasian",
+  "USA NMDP Chinese",
+  "USA NMDP African American pop 2",
+  factor_key = TRUE
+) %>% 
+  filter(grepl("^A", allele))
 
-freq_HLA_long <- gather(freq_HLA, population, freq, Freq, "USA NMDP European Caucasian", "USA NMDP Chinese", "USA NMDP African American pop 2", factor_key=TRUE) %>% filter(grepl("^A", allele))
-
-plot_HLAfreq <- ggplot(data=freq_HLA_long, aes(x=allele, y=freq, fill=population)) + geom_bar(stat="identity", position=position_dodge(0.7), width=0.7, colour="black") + coord_flip() + scale_y_continuous(labels = percent)
+plot_HLAfreq <-
+  ggplot(data = freq_HLA_long, aes(x = allele, y = freq, fill = population)) +
+  geom_bar(
+    stat = "identity",
+    position = position_dodge(0.7),
+    width = 0.7,
+    colour = "black"
+  ) +
+  coord_flip() +
+  scale_y_continuous(labels = formattable::percent)
 
 plot_HLAfreq
 ```
@@ -104,10 +123,15 @@ HLA <- prepareMiDAS(
 )
 ```
 
-We can know test our HLA data for deviations from Hardy-Weinberg-Equilibrium (HWE) to filter out alleles that strongly deviate from HWE expectations (imputation or genotyping errors,...). Here, let's remove alleles with a HWE P value below 0.05 divided by the number of alleles tested / present in our data (N=447). We can create a filtered MiDAS object right away (`as.MiDAS = TRUE`), as done in this example, or output actual HWE test results.
+We can now test our HLA data for deviations from Hardy-Weinberg-Equilibrium (HWE) to filter out alleles that strongly deviate from HWE expectations (imputation or genotyping errors, ...). Here, let's remove alleles with a HWE p-value below 0.05 divided by the number of alleles tested / present in our data (N=447). We can create a filtered MiDAS object right away (`as.MiDAS = TRUE`), as done in this example, or output actual HWE test results.
 
 ```{r HWE_filtering, echo=TRUE, warning=FALSE}
-HLA <- HWETest(HLA, experiment="hla_alleles", HWE_cutoff = 0.05/447, as.MiDAS = TRUE)
+HLA <- HWETest(
+  object = HLA,
+  experiment = "hla_alleles",
+  HWE_cutoff = 0.05 / 447,
+  as.MiDAS = TRUE
+)
 ```
 
 Now, we define our statistical model and run the analysis. Since we want to test for association with disease status, we use a logistic regression approach. The `term` is necessary as placeholder for the tested HLA alleles and needs to be included. It will become handy when for example defining more complex interaction models.
@@ -125,6 +149,7 @@ HLA_results <- runMiDAS(
   correction = "bonferroni", 
   exponentiate = TRUE
 )
+
 kableResults(HLA_results)
 ```
 
@@ -134,12 +159,15 @@ Three HLA alleles show significant association with the disease after multiple t
 HLA_results_cond <- runMiDAS(
   object = HLA_model, 
   experiment = "hla_alleles", 
+  inheritance_model = "dominant", 
   conditional = TRUE,
   lower_frequency_cutoff = 0.02, 
   upper_frequency_cutoff = 0.98, 
   correction = "bonferroni", 
-  exponentiate = TRUE)
-kableResults(HLA_results_cond, scroll_box_height = "250px")
+  exponentiate = TRUE
+)
+
+kableResults(HLA_results_cond, scroll_box_height = "200px")
 ```
 
 The results for conditional testing are displayed in a way that for each step the top associated allele is shown, along with a list of alleles conditioned on.
@@ -155,24 +183,28 @@ HLA_AA <- prepareMiDAS(
   hla_calls = dat_HLA,
   colData = dat_pheno,
   experiment = "hla_aa"
-  )
+)
 ```
 
 Amino acid data will be stored in a MiDAS object, but we can extract it to a data frame and select a couple of variables to display how this looks like:
 
-```{r HLA_AA_to_df , echo=TRUE, warning=FALSE, include=TRUE}
-dat_HLA_AA <- as.data.frame(t(HLA_AA@ExperimentList@listData[["hla_aa"]]@assays@data@listData[[1]])) %>% select(starts_with("DRB1_1"))
+```{r HLA_AA_to_df, echo=TRUE, warning=FALSE}
+dat_HLA_AA <- HLA_AA[["hla_aa"]] %>% 
+  assay() %>% 
+  t() %>% 
+  as.data.frame() %>% 
+  select(starts_with("B_97_")) %>% 
+  head()
 ```
 
-```{r show_HLA_AA , echo=FALSE, warning=FALSE, include=TRUE}
+```{r show_HLA_AA, echo=FALSE, warning=FALSE}
 kable(dat_HLA_AA, caption = "HLA amino acid data as inferred by MiDAS") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
-  scroll_box(height = "400px")
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 ```
 
 Now, we run the association test based on amino acid variation. To first identify the most relevant associated amino acid positions, we run a likelihood ratio (omnibus) test, which groups all residues at each amino acid position.
 
-```{r run_HLA_AA_omnibus, echo=TRUE, warning=FALSE}
+```{r run_HLA_AA_omnibus, echo=TRUE, warning=FALSE, message=FALSE}
 HLA_AA_model <- glm(disease ~ term, data = HLA_AA, family = binomial())
 HLA_AA_omnibus_results <- runMiDAS(
   HLA_AA_model,
@@ -182,7 +214,8 @@ HLA_AA_omnibus_results <- runMiDAS(
   lower_frequency_cutoff = 0.02,
   upper_frequency_cutoff = 0.98,
   correction = "bonferroni"
-  )
+)
+
 kableResults(HLA_AA_omnibus_results)
 ```
 
@@ -197,8 +230,9 @@ HLA_AA_DQB1_9_results <- runMiDAS(
   upper_frequency_cutoff = 0.98,
   correction = "bonferroni",
   exponentiate = TRUE
-  )
-kableResults(HLA_AA_DQB1_9_results, scroll_box_height = "300px")
+)
+
+kableResults(HLA_AA_DQB1_9_results, scroll_box_height = "250px")
 ```
 
 This shows us that individuals carrying a Phenylalanine (F) at position 9 of DQB1 have a significantly increased risk, whereas individuals carrying a Tyrosine (Y) at the same amino acid position have a decreased risk.
@@ -210,8 +244,8 @@ HLA_AA_DQB1_9_alleles <- getAllelesForAA(HLA_AA,"DQB1_9")
 ```
 
 ```{r get_HLA_AA_DQB1_9_alleles, echo=FALSE, warning=FALSE}
-kable(HLA_AA_DQB1_9_alleles) %>% kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
-  scroll_box(height = "250px")
+kable(HLA_AA_DQB1_9_alleles, escape = FALSE) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 ```
 
 Finally, it is also interesting to note that there are several amino acid positions coming up that determine the Bw4 binding motif (e.g. B_81), which is a determinant for interactions of HLA class I alleles with KIR on Natural Killer cells.
@@ -237,7 +271,8 @@ NKlig_results <- runMiDAS(
   inheritance_model = "dominant",
   correction = "bonferroni",
   exponentiate = TRUE
-  )
+)
+
 kableResults(NKlig_results)
 ```
 
@@ -251,7 +286,9 @@ Of course, this is interesting enough for us to invest in some KIR typing effort
 Now that we have performed KIR genotyping, or e.g. inferred KIR types from available whole-genome sequencing data, we can import this information, and check the gene frequencies. In our example, we could successfully infer KIR gene presence status for 935 out of the 1,000 individuals in our data set. 
 
 ```{r get_KIR, echo=TRUE, warning=FALSE}
-dat_KIR <- readKirCalls(file = system.file("extdata", "MiDAS_tut_KIR.txt", package = "MiDAS"))
+dat_KIR <- readKirCalls(
+  file = system.file("extdata", "MiDAS_tut_KIR.txt", package = "MiDAS")
+)
 ```
 
 ```{r show_KIR, echo=FALSE, warning=FALSE}
@@ -280,7 +317,7 @@ HLAKIR <- prepareMiDAS(
   kir_calls = dat_KIR,
   colData = dat_pheno,
   experiment = c("hla_NK_ligands","kir_genes", "hla_kir_interactions")
-  )
+)
 KIR_model <- glm(disease ~ term, data = HLAKIR, family = binomial())
 KIR_results <- runMiDAS(
   KIR_model,
@@ -288,7 +325,8 @@ KIR_results <- runMiDAS(
   lower_frequency_cutoff = 0.02,
   upper_frequency_cutoff = 0.98,
   exponentiate = TRUE
-  )
+)
+
 kableResults(KIR_results)
 ```
 
@@ -319,7 +357,8 @@ HLA_KIR_results <- runMiDAS(
   lower_frequency_cutoff = 0.02,
   upper_frequency_cutoff = 0.98,
   exponentiate = TRUE
-  )
+)
+
 kableResults(HLA_KIR_results)
 ```
 
@@ -336,7 +375,11 @@ MiDAS provides experiment types `hla_het` to analyze heterozygosity of class I a
 
 ```{r run_HLAhet, echo=TRUE, warning=FALSE, message=FALSE}
 
-HLA_het <- prepareMiDAS(hla_calls = dat_HLA, colData = dat_pheno, experiment = c("hla_het","hla_divergence"))
+HLA_het <- prepareMiDAS(
+  hla_calls = dat_HLA, 
+  colData = dat_pheno, 
+  experiment = c("hla_het","hla_divergence")
+)
 
 HLA_het_model <- glm(outcome ~ term, data=HLA_het, family=binomial())
 
@@ -344,12 +387,14 @@ HLA_het_results <- runMiDAS(HLA_het_model,
   experiment = "hla_het", 
   exponentiate = TRUE
 )
+
 kableResults(HLA_het_results)
 
 HLA_div_results <- runMiDAS(HLA_het_model, 
   experiment = "hla_divergence", 
   exponentiate = TRUE
 )
+
 kableResults(HLA_div_results, scroll_box_height = "250px")
 ```
 
