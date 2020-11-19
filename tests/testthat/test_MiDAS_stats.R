@@ -577,7 +577,7 @@ test_that("runMiDAS", {
   )
 
   expect_error(runMiDAS(object, experiment = "hla_alleles", inheritance_model = "foo"),
-               "inheritance_model should match values \"dominant\", \"recessive\", \"additive\", \"overdominance\"."
+               "inheritance_model should match values \"dominant\", \"recessive\", \"additive\", \"overdominant\"."
   )
 
   expect_error(runMiDAS(object, experiment = "hla_alleles", conditional = 1),

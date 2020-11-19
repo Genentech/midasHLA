@@ -457,7 +457,7 @@ runMiDAS <- function(object,
   if (! is.null(inheritance_model)) {
     if (isExperimentInheritanceModelApplicable(object_details$data[[experiment]])) {
       assert_that(
-        characterMatches(inheritance_model, c("dominant", "recessive", "additive", "overdominance"))
+        characterMatches(inheritance_model, c("dominant", "recessive", "additive", "overdominant"))
       )
       object_details$data[[experiment]] <- applyInheritanceModel(
         experiment = object_details$data[[experiment]],
