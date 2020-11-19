@@ -1,3 +1,6 @@
+## 1.0.10 - 19/11/20
++ update vignettes
+
 ## 1.0.9 - 3/11/20
 + fix bug causing runMiDAS errors when statistical model evaluated with a warrning.
 
