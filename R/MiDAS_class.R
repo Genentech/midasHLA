@@ -601,7 +601,7 @@ setMethod(
     assert_that(
       validObject(object),
       is.string(aa_pos),
-      see_if(grepl("^[A-Z]+[0-9]*_[0-9]+$", aa_pos),
+      see_if(grepl("^[A-Z]+[0-9]*_-*[0-9]+$", aa_pos),
              msg = "amino acid position should be formatted like: A_9."
       )
     )
