@@ -1,4 +1,4 @@
-allele	Bw
+allele	group
 B*07:02	Bw6
 B*07:03	Bw6
 B*07:04	Bw6

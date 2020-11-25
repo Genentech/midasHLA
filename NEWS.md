@@ -1,3 +1,6 @@
+## 1.0.10 - 25/11/20
++ fix bug causing Bw6 groups to be counted twice in hla_NK_lingads experiment.
+
 ## 1.0.9 - 3/11/20
 + fix bug causing runMiDAS errors when statistical model evaluated with a warrning.
 
