@@ -1056,11 +1056,20 @@ prepareMiDAS_hla_NK_ligands <- function(hla_calls, ...) {
     checkHlaCallsFormat(hla_calls)
   )
 
-  lib <- c(
-    "allele_HLA_Bw",
-    "allele_HLA-Bw_only_B",
-    "allele_HLA-C_C1-2"
-  )
+  # Bw6 is defined both in Bw and Bw HLA-B only dictionaries, here this unambiguity is removed
+  bw_with_A <-
+    system.file("extdata", "Match_allele_HLA_Bw.txt", package = "MiDAS")
+  bw_with_A <-
+    read.table(
+      file = bw_with_A,
+      header = TRUE,
+      sep = "\t",
+      stringsAsFactors = FALSE
+    )
+  mask <- bw_with_A$group != "Bw6"
+  bw_with_A <- bw_with_A[mask, ]
+  
+  lib <- list(bw_with_A, "allele_HLA-Bw_only_B", "allele_HLA-C_C1-2")
   hla_NK_ligands <- Reduce(
     f = function(...) left_join(..., by = "ID"),
     x = lapply(lib, hlaToVariable, hla_calls = hla_calls, na.value = 0)
