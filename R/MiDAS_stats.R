@@ -454,18 +454,17 @@ runMiDAS <- function(object,
   )
 
   # convert experiment to specifed inheritance model
-  if (! is.null(inheritance_model)) {
-    if (isExperimentInheritanceModelApplicable(object_details$data[[experiment]])) {
-      assert_that(
-        characterMatches(inheritance_model, c("dominant", "recessive", "additive", "overdominant"))
-      )
-      object_details$data[[experiment]] <- applyInheritanceModel(
-        experiment = object_details$data[[experiment]],
-        inheritance_model = inheritance_model
-      )
-    } else {
-      warn(sprintf("Inheritance model can not be applied to experiment %s. Continuing without it.", experiment))
-    }
+  if (isExperimentInheritanceModelApplicable(object_details$data[[experiment]])) {
+    assert_that(
+      is.string(inheritance_model),
+      characterMatches(inheritance_model, c("dominant", "recessive", "additive", "overdominant"))
+    )
+    object_details$data[[experiment]] <- applyInheritanceModel(
+      experiment = object_details$data[[experiment]],
+      inheritance_model = inheritance_model
+    )
+  } else if (is.string(inheritance_model)) {
+    warn(sprintf("Inheritance model can not be applied to experiment %s. Continuing without it.", experiment))
   }
 
   if (! is.null(omnibus_groups_filter)) {

@@ -270,7 +270,7 @@ test_that("kableResults", {
     experiment = "hla_alleles"
   )
   object <- lm(disease ~ term, data = midas)
-  res <- runMiDAS(object, experiment = "hla_alleles")
+  res <- runMiDAS(object, inheritance_model = "additive", experiment = "hla_alleles")
   res_kable <- kableResults(res)
   res_kable_test <- formatResults(res,
                                   filter_by = "p.value <= 1",

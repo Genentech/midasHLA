@@ -1,6 +1,6 @@
 Package: MiDAS
 Title: R package for immunogenomics data handling and association analysis
-Version: 1.0.10
+Version: 1.0.11
 Authors@R: c(
   person("Christian", "Hammer", email = "hammerc6@gene.com", role = "aut"),
   person("Maciej", "Migdał", email = "mcjmigdal@gmail.com", role = c("aut", "cre")))
