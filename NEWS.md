@@ -1,3 +1,6 @@
+## 1.0.12 - 20/12/20
++ fixes bug causing MiDAS subsetting to break omnibus testing.
+
 ## 1.0.11 - 14/12/20
 + runMiDAS inheritance_model argument is no longer by defaut 'additive'. Now it is
   required to specify desired inheritance model, when appplicable.

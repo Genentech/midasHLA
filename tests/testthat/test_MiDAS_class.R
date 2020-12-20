@@ -309,8 +309,7 @@ test_that("filterByOmnibusGroups", {
   test_filtered_midas <- midas
   vars <- c("A_83_R", "A_83_G", "A_90_D", "A_90_A")
   test_filtered_midas[[experiment]] <- test_filtered_midas[[experiment]][vars, ]
-  metadata(test_filtered_midas[[experiment]])$omnibus_groups <-
-    metadata(test_filtered_midas[[experiment]])$omnibus_groups[mask]
+
   expect_equal(filtered_midas, test_filtered_midas)
 
   # unsported experiments raise error

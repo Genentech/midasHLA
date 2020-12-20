@@ -472,18 +472,6 @@ test_that("runMiDAS", {
 
   expect_equal(as.data.frame(res), as.data.frame(test_res))
 
-  expect_error(
-    runMiDAS(
-      object,
-      inheritance_model = "additive",
-      conditional = FALSE,
-      omnibus = TRUE,
-      experiment = "hla_alleles",
-      exponentiate = FALSE
-    ),
-    "Omnibus test does not support experiment hla_alleles"
-  )
-
   # conditional omnibus
   conditional <- TRUE
   omnibus <- TRUE

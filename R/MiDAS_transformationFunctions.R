@@ -991,11 +991,12 @@ filterExperimentByFrequency.SummarizedExperiment <-
   mask <- rownames(experiment) %in% filtered_vars
   new_experiment <- experiment[mask, , drop = FALSE]
   
-  og <- S4Vectors::metadata(experiment)$omnibus_groups
-  if (! is.null(og)) {
-    new_og <- filterListByElements(list = og, elements = filtered_vars)
-    metadata(new_experiment)$omnibus_groups <- new_og
-  }
+  # omnibus groubs are static the proper filtering takes place in getOmnibusGroups
+  # og <- S4Vectors::metadata(experiment)$omnibus_groups
+  # if (! is.null(og)) {
+  #   new_og <- filterListByElements(list = og, elements = filtered_vars)
+  #   metadata(new_experiment)$omnibus_groups <- new_og
+  # }
   
   return(new_experiment)
 }
@@ -1223,11 +1224,12 @@ filterExperimentByVariables.matrix <- function(experiment, variables) {
 filterExperimentByVariables.SummarizedExperiment <- function(experiment, variables) {
   og <- S4Vectors::metadata(experiment)$omnibus_groups
   experiment <- experiment[variables, ]
-  ## check if og is not null
-  if (! is.null(og)) {
-    og <- filterListByElements(list = og, elements = variables)
-    S4Vectors::metadata(experiment)$omnibus_groups <- og
-  }
+  
+  # omnibus groubs are static the proper filtering takes place in getOmnibusGroups
+  # if (! is.null(og)) {
+  #   og <- filterListByElements(list = og, elements = variables)
+  #   S4Vectors::metadata(experiment)$omnibus_groups <- og
+  # }
 
   return(experiment)
 }

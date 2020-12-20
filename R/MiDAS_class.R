@@ -236,7 +236,13 @@ setMethod(
     assert_that(is.string(experiment))
     experiment <- object[[experiment]]
     omnibus_groups <- if (isClass(experiment, "SummarizedExperiment")) {
-      metadata(experiment)$omnibus_groups
+      og <- metadata(experiment)$omnibus_groups
+      if (is.null(og)) {
+        NULL
+      } else {
+        el <- rownames(experiment)
+        filterListByElements(og, el)
+      }
     } else {
       NULL
     }
@@ -525,7 +531,6 @@ setMethod(
 
     mask <- unlist(omnibus_groups[groups]) # TODO what if some groups are missing due to smth
     object[[experiment]] <- se[mask, ]
-    S4Vectors::metadata(object[[experiment]])$omnibus_groups <- omnibus_groups[groups]
 
     return(object)
   })

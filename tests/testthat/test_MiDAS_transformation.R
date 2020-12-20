@@ -487,9 +487,7 @@ test_that("filterExperimentByFrequency", {
     upper_frequency_cutoff = upper_frequency_cutoff
   )
   test_experiment <- experiment[c("C_35_R", "C_309_V"), ]
-  metadata(test_experiment)$omnibus_groups <-
-    list(C_35 = "C_35_R",
-         C_309 = "C_309_V")
+
   expect_equal(experiment_filtered, test_experiment)
 
   # experiment must be of type integer
@@ -758,7 +756,7 @@ test_that("filterExperimentByVariables", {
     list(A = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"))
   experiment_filtered <- filterExperimentByVariables(experiment, c("A*01:01", "A*02:01"))
   test_experiment <- experiment[c("A*01:01", "A*02:01"), ]
-  metadata(test_experiment)$omnibus_groups <- list(A = c("A*01:01", "A*02:01"))
+
   expect_equal(experiment_filtered, test_experiment)
 })
 
