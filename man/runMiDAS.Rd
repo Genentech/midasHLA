@@ -88,7 +88,40 @@ attempts at variable selection nonsense. This behavior can be controlled
 using \code{rss_th}.}
 }
 \value{
-Tibble containing analysis results.
+Analysis results, depending on the parameters:
+  \describe{
+    \item{\code{conditional=FALSE, omnibus=FALSE}}{
+      Tibble with first column \code{"term"} holding names of tested 
+      variables (eg. alleles). Further columns depends on the used 
+      model and are determined by associated \code{tidy} function. Generally 
+      they will include \code{"estimate"}, \code{"std.error"}, 
+      \code{"statistic"}, \code{"p.value"}, \code{"conf.low"}, 
+      \code{"conf.high"}, \code{"p.adjusted"}.
+    }
+    \item{\code{conditional=TRUE, omnibus=FALSE}}{
+      Tibble or a list of tibbles, see \code{keep} argument. The first column 
+      \code{"term"} hold names of tested variables. Further 
+      columns depends on the used model and are determined by associated 
+      \code{tidy} function. Generally they will include \code{"estimate"}, 
+      \code{"std.error"}, \code{"statistic"}, \code{"p.value"}, 
+      \code{"conf.low"}, \code{"conf.high"}, \code{"p.adjusted"}.
+    }
+    \item{\code{conditional=FALSE, omnibus=TRUE}}{
+      Tibble with first column holding names of tested omnibus groups 
+      (eg. amino acid positions) and second names of variables in the group
+      (eg. residues). Further columns are: \code{"df"} giving difference in 
+      degrees of freedom between base and extended model, \code{"statistic"}
+      giving Chisq statistic, \code{"p.value"} and \code{"p.adjusted"}.
+    }
+    \item{\code{conditional=TRUE, omnibus=TRUE}}{
+      Tibble or a list of tibbles, see \code{keep} argument. The first column 
+      hold names of tested omnibus groups (eg. amino acid positions), second 
+      column hold names of variables in the group (eg. residues). Further 
+      columns are: \code{"df"} giving difference in degrees of freedom 
+      between base and extended model, \code{"statistic"} giving Chisq 
+      statistic, \code{"p.value"} and \code{"p.adjusted"}.
+    }
+  }
 }
 \description{
 \code{runMiDAS} perform association analysis on MiDAS data using statistical

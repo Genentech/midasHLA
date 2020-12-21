@@ -11,7 +11,8 @@ getKIRFrequencies(kir_calls)
 \code{\link{readKirCalls}} function.}
 }
 \value{
-Data frame containing KIR genes and their corresponding frequencies.
+Data frame with each row holding KIR gene, it's count and 
+  frequency.
 }
 \description{
 \code{getKIRFrequencies} calculates KIR genes frequencies in KIR calls data

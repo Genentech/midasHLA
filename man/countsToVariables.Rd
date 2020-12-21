@@ -22,8 +22,10 @@ matching entry in \code{dictionary}. Default is to use \code{0}.}
 \code{NA} should be removed.}
 }
 \value{
-Data frame of indicators for new variables, with \code{1} and
-  \code{0} signaling presence and  absence of a variable respectively.
+Data frame with variable number of columns. First column named 
+  \code{"ID"} corresponds to \code{"ID"} column in \code{counts}, further
+  columns hold indicators for converted variables. \code{1} and \code{0} 
+  code presence and absence of a variable respectively.
 }
 \description{
 \code{countsToVariables} converts counts table to additional variables.

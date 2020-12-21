@@ -34,7 +34,16 @@ must be at least equal to the number of comparisons being made; only set
 this (to non-default) when you know what you are doing!}
 }
 \value{
-Data frame containing omnibus test results for specified variables.
+Data frame with columns:
+  \itemize{
+    \item{"group"}{ Omnibus group name}
+    \item{"term"}{ Elements of omnibus group added to base model}
+    \item{"df"}{ Difference in degrees of freedom between base and extended model}
+    \item{"logLik"}{ Difference in log likelihoods between base and extended model}
+    \item{"statistic"}{ Chisq statistic}
+    \item{"p.value"}{ P-value}
+    \item{"p.adjusted"}{ Adjusted p-value}
+  }
 }
 \description{
 \code{OmnibusTest} calculates overall p-value for linear combination of

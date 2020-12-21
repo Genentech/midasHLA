@@ -14,7 +14,7 @@ codings. Each element must correspond to single amino acid.}
 codings. Each element must correspond to single amino acid.}
 }
 \value{
-Integer normalized Grantham distance between \code{aa1} and
+Numeric vector of normalized Grantham distance between \code{aa1} and
   \code{aa2}.
 }
 \description{

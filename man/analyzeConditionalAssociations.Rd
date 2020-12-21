@@ -61,7 +61,12 @@ regressions, but a bad idea if there is no log or logit link. Defaults to
 FALSE.}
 }
 \value{
-Tibble with stepwise conditional testing results.
+Tibble with stepwise conditional testing results or a list of tibbles,
+ see \code{keep} argument. The first column \code{"term"} hold the names of 
+ \code{variables}. Further columns depends on the used model and are 
+ determined by associated \code{tidy} function. Generally they will include 
+ \code{"estimate"}, \code{"std.error"}, \code{"statistic"}, \code{"p.value"}, 
+ \code{"conf.low"}, \code{"conf.high"}, \code{"p.adjusted"}.
 }
 \description{
 \code{analyzeConditionalAssociations} perform stepwise conditional testing

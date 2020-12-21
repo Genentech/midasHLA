@@ -195,7 +195,7 @@ setMethod(
 #' Get omnibus groups from MiDAS object.
 #'
 #' @details For some experiments features can be naturally divided into groups
-#' (here called omnibus groups). For example, in \code{'hla_aa'} experiment
+#' (here called omnibus groups). For example, in \code{"hla_aa"} experiment
 #' features can be grouped by amino acid position (\code{"B_46_E"},
 #' \code{"B_46_A"}) can be grouped into \code{B_46} group). Such groups can be
 #' then used to perform omnibus test, see \code{\link{runMiDAS}} for more
@@ -267,7 +267,31 @@ setMethod(
 #'   frequency data frame should be formatted.
 #'
 #' @return Data frame with features from selected experiment and their
-#'   corresponding frequencies.
+#'   corresponding frequencies. Column \code{"term"} hold features names, 
+#'   \code{"Counts"} hold number of feature occurrences, \code{"Freq"} hold 
+#'   feature frequencies. If argument \code{compare} is set to \code{TRUE}, 
+#'   further columns will hold frequencies in reference populations.
+#'   
+#' @examples 
+#' midas <- prepareMiDAS(
+#'   hla_calls = MiDAS_tut_HLA,
+#'   colData = MiDAS_tut_pheno,
+#'   experiment = "hla_alleles"
+#' )
+#' 
+#' # using default reference populations
+#' getFrequencies(midas, experiment = "hla_alleles", compare = TRUE)
+#' 
+#' # using customized set of reference populations
+#' getFrequencies(
+#'   object = midas, 
+#'   experiment = "hla_alleles", 
+#'   compare = TRUE,
+#'   ref_pop = list(
+#'     hla_alleles = c("USA NMDP Chinese", "USA NMDP European Caucasian")
+#'   ),
+#'   ref = list(hla_alleles = allele_frequencies)
+#' )
 #'
 #' @importFrom assertthat assert_that is.string
 #' @importFrom dplyr select
@@ -635,6 +659,10 @@ setMethod(
 #' Coerce MiDAS to Data Frame
 #'
 #' @method as.data.frame MiDAS
+#' 
+#' @return Data frame representation of MiDAS object. Consecutive columns hold
+#'   values of variables from MiDAS's experiments and colData. The metadata
+#'   associated with experiments is not preserved.
 #'
 #' @inheritParams base::as.data.frame
 #' @export

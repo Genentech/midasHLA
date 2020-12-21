@@ -14,7 +14,7 @@ expression. By default all names are matched.}
 returned. If TRUE their paths are returned.}
 }
 \value{
-Character vector with names of HLA alleles dictionaries.
+Character vector giving names of available HLA alleles dictionaries.
 }
 \description{
 \code{listMiDASDictionaries} lists dictionaries shipped with the MiDAS package.

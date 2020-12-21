@@ -11,7 +11,9 @@ aaVariationToCounts(aa_variation)
 \link{hlaToAAVariation}.}
 }
 \value{
-Amino acid counts data frame.
+Amino acid counts data frame. First column holds samples ID's, 
+  further columns, corresponding to specific amino acid positions, give 
+  information on the number of their occurrences in each sample.
 }
 \description{
 \code{aaVariationToCounts} convert amino acid variation data frame into

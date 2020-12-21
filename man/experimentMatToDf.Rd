@@ -10,7 +10,7 @@ experimentMatToDf(mat)
 \item{mat}{Matrix}
 }
 \value{
-Data frame
+Data frame representation of \code{mat}.
 }
 \description{
 Function transpose \code{mat} and inserts column names of input \code{mat} as

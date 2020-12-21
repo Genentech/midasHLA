@@ -321,7 +321,7 @@ updateModel <- function(object,
 #' @param pattern String used to match dictionary names, it can be a regular
 #'   expression. By default all names are matched.
 #'
-#' @return Character vector with names of HLA alleles dictionaries.
+#' @return Character vector giving names of available HLA alleles dictionaries.
 #'
 listMiDASDictionaries <- function(pattern = "allele", file.names = FALSE) {
   pattern <- paste0("^Match.*", pattern, ".*.txt$")
@@ -424,16 +424,19 @@ getObjectDetails <- function(object) {
   return(object_details)
 }
 
-#' Add variables frequencies to runMiDAS results
+#' Get variables frequencies from MiDAS
 #'
-#' Helper adding variables frequencies to statistical results. Additionally for
-#' binary test covariate frequencies per phenotype are added.
+#' Helper getting variables frequencies from MiDAS object. Additionally for
+#' binary test covariate frequencies per phenotype are added. Used in scope of 
+#' \code{runMiDAS}.
 #'
 #' @param midas MiDAS object.
 #' @param experiment String specifying experiment from \code{midas}.
 #' @param test_covar String giving name of test covariate.
 #'
-#' @return Data frame
+#' @return Data frame with variable number of columns. First column,
+#'   \code{"term"} holds experiment's variables, further columns hold number of
+#'   variable occurrence and their frequencies.
 #'
 #' @importFrom dplyr filter left_join mutate rename select
 #' @importFrom formattable percent
@@ -495,7 +498,7 @@ runMiDASGetVarsFreq <- function(midas, experiment, test_covar) {
 #' @param aa2 Character vector giving amino acid sequence using one letter
 #'   codings. Each element must correspond to single amino acid.
 #'
-#' @return Integer normalized Grantham distance between \code{aa1} and
+#' @return Numeric vector of normalized Grantham distance between \code{aa1} and
 #'   \code{aa2}.
 #'
 #' @importFrom assertthat assert_that see_if
@@ -639,9 +642,9 @@ hlaCallsGranthamDistance <- function(hla_calls,
 #' @param resolution Number giving allele resolution.
 #' @param aa_sel Numeric vector specifying amino acids that should be extracted.
 #'
-#' @return HLA alignment processed for grantham distance between alleles can be
-#'   calculated. Processing includes extracting specific amino acids, masking
-#'   indels, gaps and stop codons.
+#' @return HLA alignment processed for grantham distance calculation. Processing 
+#'   includes extracting specific amino acids, masking indels, gaps and stop 
+#'   codons.
 #'
 hlaAlignmentGrantham <- function(gene, resolution, aa_sel = 2:182) {
   alignment <- readHlaAlignments(
@@ -687,7 +690,7 @@ getHlaCallsGenes <- function(hla_calls) {
 #'
 #' @param df Data frame
 #'
-#' @return Matrix
+#' @return Matrix representation of \code{df}.
 #'
 #' @importFrom utils type.convert
 #'
@@ -709,7 +712,7 @@ dfToExperimentMat <- function(df) {
 #'
 #' @param mat Matrix
 #'
-#' @return Data frame
+#' @return Data frame representation of \code{mat}.
 #'
 experimentMatToDf <- function(mat) {
   ID <- colnames(mat)
@@ -730,7 +733,9 @@ experimentMatToDf <- function(mat) {
 #' @param object Object of class MiDAS
 #' @param experiment Character specifying experiments to include
 #'
-#' @return Data frame
+#' @return Data frame representation of MiDAS object. Consecutive columns holds
+#'   values of variables from MiDAS's experiments and colData. The metadata
+#'   associated with experiments is not preserved.
 #'
 #' @importFrom assertthat assert_that
 #' @importFrom dplyr left_join
@@ -801,7 +806,7 @@ checkKirGenesFormat <- function(genes) {
 #' @inheritParams updateModel
 #' @inheritParams omnibusTest
 #'
-#' @return Data.frame containing summarised likelihood ratio test results.
+#' @return Data frame containing summarised likelihood ratio test results.
 #'
 #' @importFrom dplyr bind_rows
 #'
@@ -923,12 +928,17 @@ iterativeLRT <- function(object, placeholder, omnibus_groups) {
 }
 
 #' Iteratively evaluate model for different variables
+#' 
+#' Information about variable statistic from each model is extracted using 
+#' \code{tidy} function.
 #'
 #' @inheritParams updateModel
 #' @inheritParams analyzeAssociations
 #'
-#' @return Tibble containing per variable summarised statistics.
-#'
+#' @return Tibble containing per variable summarised model statistics. The exact
+#'   output format is model dependent and controlled by model's dedicated 
+#'   \code{tidy} function.
+#'   
 #' @importFrom dplyr bind_rows tibble
 #' @importFrom broom tidy
 #'

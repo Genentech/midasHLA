@@ -21,8 +21,10 @@ getHlaKirInteractions(
 \item{interactions_dict}{Path to HLA - KIR interactions dictionary.}
 }
 \value{
-Data frame with presence-absence indicators for HLA - KIR
-  interactions.
+Data frame with variable number of columns. First column named 
+  \code{"ID"} corresponds to \code{"ID"} column in \code{counts}, further
+  columns hold indicators for HLA - KIR interactions. \code{1} and \code{0} 
+  code presence and absence of a variable respectively.
 }
 \description{
 \code{getHlaKirInteractions} calculate presence-absence matrix of HLA - KIR
@@ -39,4 +41,12 @@ names, second should be named \code{"Expression"} and hold expression used to
 identify interaction (eg. \code{"C2 & KIR2DL1"} will match all samples
 with \code{C2} and \code{KIR2DL1}). The package is shipped with an interactions
 file based on \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6558367/}{Pende et al., 2019.}
+}
+\examples{
+getHlaKirInteractions(
+  hla_calls = MiDAS_tut_HLA, 
+  kir_calls = MiDAS_tut_KIR, 
+  interactions_dict = system.file("extdata", "Match_counts_hla_kir_interactions.txt", package = "MiDAS")
+)
+
 }

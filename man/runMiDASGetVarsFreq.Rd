@@ -2,7 +2,7 @@
 % Please edit documentation in R/MiDAS_utils.R
 \name{runMiDASGetVarsFreq}
 \alias{runMiDASGetVarsFreq}
-\title{Add variables frequencies to runMiDAS results}
+\title{Get variables frequencies from MiDAS}
 \usage{
 runMiDASGetVarsFreq(midas, experiment, test_covar)
 }
@@ -14,9 +14,12 @@ runMiDASGetVarsFreq(midas, experiment, test_covar)
 \item{test_covar}{String giving name of test covariate.}
 }
 \value{
-Data frame
+Data frame with variable number of columns. First column,
+  \code{"term"} holds experiment's variables, further columns hold number of
+  variable occurrence and their frequencies.
 }
 \description{
-Helper adding variables frequencies to statistical results. Additionally for
-binary test covariate frequencies per phenotype are added.
+Helper getting variables frequencies from MiDAS object. Additionally for
+binary test covariate frequencies per phenotype are added. Used in scope of 
+\code{runMiDAS}.
 }

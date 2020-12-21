@@ -15,7 +15,9 @@ be checked. This is useful if one wants to use \code{hlaCallsToCounts} with
 input not adhering to HLA nomenclature standards. See examples.}
 }
 \value{
-HLA allele counts data frame.
+HLA allele counts data frame. First column holds samples ID's, further 
+  columns, corresponding to specific alleles, give information on the number 
+  of their occurrences in each sample.
 }
 \description{
 \code{hlaCallsToCounts} converts HLA calls data frame into a counts table.

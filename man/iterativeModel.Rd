@@ -23,8 +23,11 @@ regressions, but a bad idea if there is no log or logit link. Defaults to
 FALSE.}
 }
 \value{
-Tibble containing per variable summarised statistics.
+Tibble containing per variable summarised model statistics. The exact
+  output format is model dependent and controlled by model's dedicated 
+  \code{tidy} function.
 }
 \description{
-Iteratively evaluate model for different variables
+Information about variable statistic from each model is extracted using 
+\code{tidy} function.
 }

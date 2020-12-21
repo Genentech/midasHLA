@@ -33,7 +33,8 @@ names will be used as population names.}
 \code{\link{allele_frequencies}} for an example.}
 }
 \value{
-Data frame containing HLA alleles and their corresponding frequencies.
+Data frame with each row holding HLA allele, it's count and 
+  frequency.
 }
 \description{
 \code{getHlaFrequencies} calculates allele frequencies in HLA calls data

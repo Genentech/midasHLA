@@ -220,7 +220,9 @@ hlaToAAVariation <- function(hla_calls,
 #' @param nacols.rm Logical indicating if result columns that contain only
 #'   \code{NA} should be removed.
 #'
-#' @return Data frame of HLA variables.
+#' @return Data frame with variable number of columns. First column named 
+#'   \code{"ID"} corresponds to \code{"ID"} column in \code{hla_calls}, further
+#'   columns holds converted HLA variables.
 #'
 #' @examples
 #' hlaToVariable(MiDAS_tut_HLA, dictionary = "allele_HLA_supertype")
@@ -308,7 +310,7 @@ hlaToVariable <- function(hla_calls,
 #' @inheritParams checkHlaCallsFormat
 #' @inheritParams reduceAlleleResolution
 #'
-#' @return HLA calls reduced to specified resolution.
+#' @return HLA calls data frame reduced to specified resolution.
 #'
 #' @examples
 #' reduceHlaCalls(MiDAS_tut_HLA, resolution = 2)
@@ -333,7 +335,9 @@ reduceHlaCalls <- function(hla_calls, resolution = 4) {
 #'   be checked. This is useful if one wants to use \code{hlaCallsToCounts} with
 #'   input not adhering to HLA nomenclature standards. See examples.
 #'
-#' @return HLA allele counts data frame.
+#' @return HLA allele counts data frame. First column holds samples ID's, further 
+#'   columns, corresponding to specific alleles, give information on the number 
+#'   of their occurrences in each sample.
 #'
 #' @importFrom assertthat assert_that is.string
 #' @importFrom qdapTools mtabulate
@@ -380,7 +384,8 @@ hlaCallsToCounts <- function(hla_calls,
 #' @param ref Data frame giving reference allele frequencies. See
 #'   \code{\link{allele_frequencies}} for an example.
 #'
-#' @return Data frame containing HLA alleles and their corresponding frequencies.
+#' @return Data frame with each row holding HLA allele, it's count and 
+#'   frequency.
 #'
 #' @examples
 #' getHlaFrequencies(MiDAS_tut_HLA)
@@ -437,7 +442,8 @@ getHlaFrequencies <- function(hla_calls,
 #'
 #' @inheritParams checkKirCallsFormat
 #'
-#' @return Data frame containing KIR genes and their corresponding frequencies.
+#' @return Data frame with each row holding KIR gene, it's count and 
+#'   frequency.
 #'
 #' @examples
 #' getKIRFrequencies(MiDAS_tut_KIR)
@@ -472,7 +478,9 @@ getKIRFrequencies <- function(kir_calls) {
 #' @param aa_variation Amino acid variation data frame as returned by
 #'   \link{hlaToAAVariation}.
 #'
-#' @return Amino acid counts data frame.
+#' @return Amino acid counts data frame. First column holds samples ID's, 
+#'   further columns, corresponding to specific amino acid positions, give 
+#'   information on the number of their occurrences in each sample.
 #'
 #' @importFrom assertthat assert_that is.string
 #' @importFrom qdapTools mtabulate
@@ -521,8 +529,8 @@ aaVariationToCounts <- function(aa_variation) {
 #'
 #' @inheritParams aaVariationToCounts
 #'
-#' @return Data frame containing amino acid positions and their corresponding
-#'   frequencies.
+#' @return Data frame with each row holding specific amino acid position, it's 
+#'   count and frequency.
 #'
 #' @examples
 #' aa_variation <- hlaToAAVariation(MiDAS_tut_HLA)
@@ -755,8 +763,10 @@ kableResults <- function(results,
 #' @param na.value Vector of length one speciyfing value for variables with no
 #'   matching entry in \code{dictionary}. Default is to use \code{0}.
 #'
-#' @return Data frame of indicators for new variables, with \code{1} and
-#'   \code{0} signaling presence and  absence of a variable respectively.
+#' @return Data frame with variable number of columns. First column named 
+#'   \code{"ID"} corresponds to \code{"ID"} column in \code{counts}, further
+#'   columns hold indicators for converted variables. \code{1} and \code{0} 
+#'   code presence and absence of a variable respectively.
 #'
 #' @examples
 #' countsToVariables(MiDAS_tut_KIR, "kir_haplotypes")
@@ -852,8 +862,17 @@ countsToVariables <- function(counts,
 #' @inheritParams checkKirCallsFormat
 #' @param interactions_dict Path to HLA - KIR interactions dictionary.
 #'
-#' @return Data frame with presence-absence indicators for HLA - KIR
-#'   interactions.
+#' @return Data frame with variable number of columns. First column named 
+#'   \code{"ID"} corresponds to \code{"ID"} column in \code{counts}, further
+#'   columns hold indicators for HLA - KIR interactions. \code{1} and \code{0} 
+#'   code presence and absence of a variable respectively.
+#'   
+#' @examples
+#' getHlaKirInteractions(
+#'   hla_calls = MiDAS_tut_HLA, 
+#'   kir_calls = MiDAS_tut_KIR, 
+#'   interactions_dict = system.file("extdata", "Match_counts_hla_kir_interactions.txt", package = "MiDAS")
+#' )
 #'
 #' @importFrom assertthat assert_that is.string
 #' @importFrom dplyr left_join
@@ -1015,7 +1034,8 @@ filterExperimentByFrequency.SummarizedExperiment <-
 #'   following columns. See \code{\link{getReferenceFrequencies}} for more
 #'   details.
 #'
-#' @return Data frame containing variables and their corresponding frequencies.
+#' @return Data frame with each row holding specific variable, it's count and 
+#'   frequency.
 #'
 #' @importFrom assertthat assert_that is.string see_if
 #' @importFrom SummarizedExperiment assay
