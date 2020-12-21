@@ -27,7 +27,12 @@
 #'   regressions, but a bad idea if there is no log or logit link. Defaults to
 #'   FALSE.
 #'
-#' @return Tibble containing combined results for all \code{variables}.
+#' @return Tibble containing combined results for all \code{variables}. The 
+#'   first column \code{"term"} hold the names of \code{variables}. Further
+#'   columns depends on the used model and are determined by associated 
+#'   \code{tidy} function. Generally they will include \code{"estimate"}, 
+#'   \code{"std.error"}, \code{"statistic"}, \code{"p.value"}, \code{"conf.low"},
+#'   \code{"conf.high"}, \code{"p.adjusted"}.
 #'
 #' @examples
 #' midas <- prepareMiDAS(hla_calls = MiDAS_tut_HLA,
@@ -119,7 +124,12 @@ analyzeAssociations <- function(object,
 #'   attempts at variable selection nonsense. This behavior can be controlled
 #'   using \code{rss_th}.
 #'
-#' @return Tibble with stepwise conditional testing results.
+#' @return Tibble with stepwise conditional testing results or a list of tibbles,
+#'  see \code{keep} argument. The first column \code{"term"} hold the names of 
+#'  \code{variables}. Further columns depends on the used model and are 
+#'  determined by associated \code{tidy} function. Generally they will include 
+#'  \code{"estimate"}, \code{"std.error"}, \code{"statistic"}, \code{"p.value"}, 
+#'  \code{"conf.low"}, \code{"conf.high"}, \code{"p.adjusted"}.
 #'
 #' @examples
 #' midas <- prepareMiDAS(hla_calls = MiDAS_tut_HLA,
@@ -275,7 +285,16 @@ analyzeConditionalAssociations <- function(object,
 #' @param omnibus_groups List of character vectors giving sets of variables for
 #'  which omnibus test should be applied.
 #'
-#' @return Data frame containing omnibus test results for specified variables.
+#' @return Data frame with columns:
+#'   \itemize{
+#'     \item{"group"}{ Omnibus group name}
+#'     \item{"term"}{ Elements of omnibus group added to base model}
+#'     \item{"df"}{ Difference in degrees of freedom between base and extended model}
+#'     \item{"logLik"}{ Difference in log likelihoods between base and extended model}
+#'     \item{"statistic"}{ Chisq statistic}
+#'     \item{"p.value"}{ P-value}
+#'     \item{"p.adjusted"}{ Adjusted p-value}
+#'   }
 #'
 #' @examples
 #' midas <- prepareMiDAS(hla_calls = MiDAS_tut_HLA,
@@ -379,8 +398,41 @@ omnibusTest <- function(object,
 #' @param omnibus_groups_filter Character vector specifying omnibus groups to
 #'   use.
 #'
-#' @return Tibble containing analysis results.
-#'
+#' @return Analysis results, depending on the parameters:
+#'   \describe{
+#'     \item{\code{conditional=FALSE, omnibus=FALSE}}{
+#'       Tibble with first column \code{"term"} holding names of tested 
+#'       variables (eg. alleles). Further columns depends on the used 
+#'       model and are determined by associated \code{tidy} function. Generally 
+#'       they will include \code{"estimate"}, \code{"std.error"}, 
+#'       \code{"statistic"}, \code{"p.value"}, \code{"conf.low"}, 
+#'       \code{"conf.high"}, \code{"p.adjusted"}.
+#'     }
+#'     \item{\code{conditional=TRUE, omnibus=FALSE}}{
+#'       Tibble or a list of tibbles, see \code{keep} argument. The first column 
+#'       \code{"term"} hold names of tested variables. Further 
+#'       columns depends on the used model and are determined by associated 
+#'       \code{tidy} function. Generally they will include \code{"estimate"}, 
+#'       \code{"std.error"}, \code{"statistic"}, \code{"p.value"}, 
+#'       \code{"conf.low"}, \code{"conf.high"}, \code{"p.adjusted"}.
+#'     }
+#'     \item{\code{conditional=FALSE, omnibus=TRUE}}{
+#'       Tibble with first column holding names of tested omnibus groups 
+#'       (eg. amino acid positions) and second names of variables in the group
+#'       (eg. residues). Further columns are: \code{"df"} giving difference in 
+#'       degrees of freedom between base and extended model, \code{"statistic"}
+#'       giving Chisq statistic, \code{"p.value"} and \code{"p.adjusted"}.
+#'     }
+#'     \item{\code{conditional=TRUE, omnibus=TRUE}}{
+#'       Tibble or a list of tibbles, see \code{keep} argument. The first column 
+#'       hold names of tested omnibus groups (eg. amino acid positions), second 
+#'       column hold names of variables in the group (eg. residues). Further 
+#'       columns are: \code{"df"} giving difference in degrees of freedom 
+#'       between base and extended model, \code{"statistic"} giving Chisq 
+#'       statistic, \code{"p.value"} and \code{"p.adjusted"}.
+#'     }
+#'   }
+#'   
 #' @examples
 #' # create MiDAS object
 #' midas <- prepareMiDAS(hla_calls = MiDAS_tut_HLA,
@@ -454,18 +506,17 @@ runMiDAS <- function(object,
   )
 
   # convert experiment to specifed inheritance model
-  if (! is.null(inheritance_model)) {
-    if (isExperimentInheritanceModelApplicable(object_details$data[[experiment]])) {
-      assert_that(
-        characterMatches(inheritance_model, c("dominant", "recessive", "additive", "overdominance"))
-      )
-      object_details$data[[experiment]] <- applyInheritanceModel(
-        experiment = object_details$data[[experiment]],
-        inheritance_model = inheritance_model
-      )
-    } else {
-      warn(sprintf("Inheritance model can not be applied to experiment %s. Continuing without it.", experiment))
-    }
+  if (isExperimentInheritanceModelApplicable(object_details$data[[experiment]])) {
+    assert_that(
+      is.string(inheritance_model),
+      characterMatches(inheritance_model, c("dominant", "recessive", "additive", "overdominant"))
+    )
+    object_details$data[[experiment]] <- applyInheritanceModel(
+      experiment = object_details$data[[experiment]],
+      inheritance_model = inheritance_model
+    )
+  } else if (is.string(inheritance_model)) {
+    warn(sprintf("Inheritance model can not be applied to experiment %s. Continuing without it.", experiment))
   }
 
   if (! is.null(omnibus_groups_filter)) {

@@ -11,8 +11,8 @@ getAAFrequencies(aa_variation)
 \link{hlaToAAVariation}.}
 }
 \value{
-Data frame containing amino acid positions and their corresponding
-  frequencies.
+Data frame with each row holding specific amino acid position, it's 
+  count and frequency.
 }
 \description{
 \code{getAAFrequencies} calculates amino acid frequencies in amino acid

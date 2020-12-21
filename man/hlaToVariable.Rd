@@ -29,7 +29,9 @@ no matching entry in \code{dictionary}. Default is to use \code{0}.}
 \code{NA} should be removed.}
 }
 \value{
-Data frame of HLA variables.
+Data frame with variable number of columns. First column named 
+  \code{"ID"} corresponds to \code{"ID"} column in \code{hla_calls}, further
+  columns holds converted HLA variables.
 }
 \description{
 \code{hlaToVariable} converts HLA calls data frame to additional variables.

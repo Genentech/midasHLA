@@ -17,7 +17,8 @@ readKirCalls(file, na.strings = c("", "NA", "uninterpretable"))
     values may need their own white space stripped in advance.}
 }
 \value{
-Data frame containing KIR gene's counts.
+Data frame containing KIR gene's counts. First column hold samples 
+  IDs, further columns hold KIR genes presence / absence indicators.
 }
 \description{
 \code{readKirCalls} read KIR calls from file.

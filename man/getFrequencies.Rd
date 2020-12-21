@@ -41,8 +41,33 @@ frequency data frame should be formatted.}
 }
 \value{
 Data frame with features from selected experiment and their
-  corresponding frequencies.
+  corresponding frequencies. Column \code{"term"} hold features names, 
+  \code{"Counts"} hold number of feature occurrences, \code{"Freq"} hold 
+  feature frequencies. If argument \code{compare} is set to \code{TRUE}, 
+  further columns will hold frequencies in reference populations.
 }
 \description{
 Calculate features frequencies for a given experiment in MiDAS object.
+}
+\examples{
+midas <- prepareMiDAS(
+  hla_calls = MiDAS_tut_HLA,
+  colData = MiDAS_tut_pheno,
+  experiment = "hla_alleles"
+)
+
+# using default reference populations
+getFrequencies(midas, experiment = "hla_alleles", compare = TRUE)
+
+# using customized set of reference populations
+getFrequencies(
+  object = midas, 
+  experiment = "hla_alleles", 
+  compare = TRUE,
+  ref_pop = list(
+    hla_alleles = c("USA NMDP Chinese", "USA NMDP European Caucasian")
+  ),
+  ref = list(hla_alleles = allele_frequencies)
+)
+
 }

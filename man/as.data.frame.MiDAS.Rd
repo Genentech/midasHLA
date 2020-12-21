@@ -11,6 +11,11 @@
 
 \item{...}{additional arguments to be passed to or from methods.}
 }
+\value{
+Data frame representation of MiDAS object. Consecutive columns hold
+  values of variables from MiDAS's experiments and colData. The metadata
+  associated with experiments is not preserved.
+}
 \description{
 Coerce MiDAS to Data Frame
 }

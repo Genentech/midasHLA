@@ -1,5 +1,12 @@
-## 1.0.10 - 19/11/20
-+ update vignettes
+## 1.0.12 - 20/12/20
++ fixes bug causing MiDAS subsetting to break omnibus testing.
+
+## 1.0.11 - 14/12/20
++ runMiDAS inheritance_model argument is no longer by defaut 'additive'. Now it is
+  required to specify desired inheritance model, when appplicable.
+
+## 1.0.10 - 25/11/20
++ fix bug causing Bw6 groups to be counted twice in hla_NK_lingads experiment.
 
 ## 1.0.9 - 3/11/20
 + fix bug causing runMiDAS errors when statistical model evaluated with a warrning.

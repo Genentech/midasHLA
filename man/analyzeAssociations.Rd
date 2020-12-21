@@ -41,7 +41,12 @@ regressions, but a bad idea if there is no log or logit link. Defaults to
 FALSE.}
 }
 \value{
-Tibble containing combined results for all \code{variables}.
+Tibble containing combined results for all \code{variables}. The 
+  first column \code{"term"} hold the names of \code{variables}. Further
+  columns depends on the used model and are determined by associated 
+  \code{tidy} function. Generally they will include \code{"estimate"}, 
+  \code{"std.error"}, \code{"statistic"}, \code{"p.value"}, \code{"conf.low"},
+  \code{"conf.high"}, \code{"p.adjusted"}.
 }
 \description{
 \code{analyzeAssociations} perform association analysis on a single variable

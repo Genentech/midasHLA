@@ -32,7 +32,7 @@ summariseAAPosition <- function(hla_calls,
   assert_that(
     checkHlaCallsFormat(hla_calls),
     is.string(aa_pos),
-    see_if(grepl("^[A-Z]+[0-9]*_[0-9]+$", aa_pos),
+    see_if(grepl("^[A-Z]+[0-9]*_-*[0-9]+$", aa_pos),
            msg = "amino acid position should be formatted like: A_9."
     ),
     see_if(
@@ -42,8 +42,8 @@ summariseAAPosition <- function(hla_calls,
     isTRUEorFALSE(na.rm)
   )
 
-  gene <- gsub("[0-9]+$", "", aa_pos)
-  aa_pos <- gsub(".*_([0-9]+)$", "\\1", aa_pos)
+  gene <- gsub("-*[0-9]+$", "", aa_pos)
+  aa_pos <- gsub(".*_(-*[0-9]+)$", "\\1", aa_pos)
 
   alleles <- select(hla_calls, starts_with(gene)) %>%
     unlist()

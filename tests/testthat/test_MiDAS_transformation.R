@@ -270,7 +270,7 @@ test_that("kableResults", {
     experiment = "hla_alleles"
   )
   object <- lm(disease ~ term, data = midas)
-  res <- runMiDAS(object, experiment = "hla_alleles")
+  res <- runMiDAS(object, inheritance_model = "additive", experiment = "hla_alleles")
   res_kable <- kableResults(res)
   res_kable_test <- formatResults(res,
                                   filter_by = "p.value <= 1",
@@ -487,9 +487,7 @@ test_that("filterExperimentByFrequency", {
     upper_frequency_cutoff = upper_frequency_cutoff
   )
   test_experiment <- experiment[c("C_35_R", "C_309_V"), ]
-  metadata(test_experiment)$omnibus_groups <-
-    list(C_35 = "C_35_R",
-         C_309 = "C_309_V")
+
   expect_equal(experiment_filtered, test_experiment)
 
   # experiment must be of type integer
@@ -685,7 +683,7 @@ test_that("applyInheritanceModel", {
   test_recessive <- matrix(c(1, 0, 0, 0, 1, 0, 0, 1, 1), nrow = 3)
   expect_equal(recessive, test_recessive)
 
-  inheritance_model <- "overdominance"
+  inheritance_model <- "overdominant"
   recessive <- applyInheritanceModel(experiment, inheritance_model)
   test_recessive <- matrix(c(0, 0, 1, 1, 0, 1, 0, 0, 0), nrow = 3)
   expect_equal(recessive, test_recessive)
@@ -758,7 +756,7 @@ test_that("filterExperimentByVariables", {
     list(A = c("A*01:01", "A*02:01", "A*02:06", "A*03:01", "A*23:01"))
   experiment_filtered <- filterExperimentByVariables(experiment, c("A*01:01", "A*02:01"))
   test_experiment <- experiment[c("A*01:01", "A*02:01"), ]
-  metadata(test_experiment)$omnibus_groups <- list(A = c("A*01:01", "A*02:01"))
+
   expect_equal(experiment_filtered, test_experiment)
 })
 

@@ -17,7 +17,8 @@
 #' @inheritParams utils::read.table
 #' @param file Path to input file.
 #'
-#' @return HLA calls data frame.
+#' @return HLA calls data frame. First column hold sample IDs, further columns 
+#'   hold HLA allele numbers.
 #'
 #' @examples
 #' file <- system.file("extdata", "MiDAS_tut_HLA.txt", package = "MiDAS")
@@ -274,7 +275,8 @@ readHlaAlignments <- function(file,
 #' @inheritParams utils::read.table
 #' @param file Path to input file.
 #'
-#' @return Data frame containing KIR gene's counts.
+#' @return Data frame containing KIR gene's counts. First column hold samples 
+#'   IDs, further columns hold KIR genes presence / absence indicators.
 #'
 #' @examples
 #' file <- system.file("extdata", "MiDAS_tut_KIR.txt", package = "MiDAS")

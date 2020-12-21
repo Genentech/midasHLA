@@ -17,7 +17,7 @@ others.}
 which omnibus test should be applied.}
 }
 \value{
-Data.frame containing summarised likelihood ratio test results.
+Data frame containing summarised likelihood ratio test results.
 }
 \description{
 \code{iterativeLRT} performs likelihood ratio test in an iterative manner

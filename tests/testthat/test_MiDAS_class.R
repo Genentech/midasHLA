@@ -309,8 +309,7 @@ test_that("filterByOmnibusGroups", {
   test_filtered_midas <- midas
   vars <- c("A_83_R", "A_83_G", "A_90_D", "A_90_A")
   test_filtered_midas[[experiment]] <- test_filtered_midas[[experiment]][vars, ]
-  metadata(test_filtered_midas[[experiment]])$omnibus_groups <-
-    metadata(test_filtered_midas[[experiment]])$omnibus_groups[mask]
+
   expect_equal(filtered_midas, test_filtered_midas)
 
   # unsported experiments raise error
@@ -471,13 +470,20 @@ test_that("prepareMiDAS_hla_NK_ligands", {
 
   experiment <- do.call(prepareMiDAS_hla_NK_ligands, args)
 
+  allele_HLA_Bw <- read.table(
+    file = system.file("extdata", "Match_allele_HLA_Bw.txt", package = "MiDAS"),
+    header = TRUE,
+    sep = "\t",
+    stringsAsFactors = FALSE
+  )
+  allele_HLA_Bw <- allele_HLA_Bw[allele_HLA_Bw$group != "Bw6", ]
   experiment_test <-
     Reduce(
       f = function(...)
         left_join(..., by = "ID"),
       x = lapply(
-        c(
-          "allele_HLA_Bw",
+        list(
+          allele_HLA_Bw,
           "allele_HLA-Bw_only_B",
           "allele_HLA-C_C1-2"
         ),

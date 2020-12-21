@@ -2,9 +2,19 @@ context("Summarising MiDAS results")
 
 test_that("summarize amino acid position", {
   aa_sum <- summariseAAPosition(MiDAS_tut_HLA, "DRA_2")
-
   aa_sum_test <- data.frame(
     `HLA-DRA (2)` = c("*", "K"),
+    `HLA-DRA alleles` = c("*01:02", "*01:01"),
+    count = c(711L, 1289L),
+    frequency = formattable::percent(c(0.3555, 0.6445)),
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
+  expect_equal(aa_sum, aa_sum_test)
+  
+  aa_sum <- summariseAAPosition(MiDAS_tut_HLA, "DRA_-25")
+  aa_sum_test <- data.frame(
+    `HLA-DRA (-25)` = c("*", "M"),
     `HLA-DRA alleles` = c("*01:02", "*01:01"),
     count = c(711L, 1289L),
     frequency = formattable::percent(c(0.3555, 0.6445)),

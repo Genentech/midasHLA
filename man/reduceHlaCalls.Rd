@@ -13,7 +13,7 @@ reduceHlaCalls(hla_calls, resolution = 4)
 \item{resolution}{Number specifying desired resolution.}
 }
 \value{
-HLA calls reduced to specified resolution.
+HLA calls data frame reduced to specified resolution.
 }
 \description{
 \code{reduceHlaCalls} reduces HLA calls data frame to specified resolution.

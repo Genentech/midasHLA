@@ -8,17 +8,17 @@
 \usage{
 applyInheritanceModel(
   experiment,
-  inheritance_model = c("dominant", "recessive", "additive", "overdominance")
+  inheritance_model = c("dominant", "recessive", "additive", "overdominant")
 )
 
 \method{applyInheritanceModel}{matrix}(
   experiment,
-  inheritance_model = c("dominant", "recessive", "additive", "overdominance")
+  inheritance_model = c("dominant", "recessive", "additive", "overdominant")
 )
 
 \method{applyInheritanceModel}{SummarizedExperiment}(
   experiment,
-  inheritance_model = c("dominant", "recessive", "additive", "overdominance")
+  inheritance_model = c("dominant", "recessive", "additive", "overdominant")
 )
 }
 \arguments{
@@ -39,6 +39,6 @@ Helper function transforming experiment counts to selected
 Under \code{"dominant"} model homozygotes and heterozygotes are coded as
 \code{1}. In \code{"recessive"} model homozygotes are coded as \code{1} and
 other as \code{0}. In \code{"additive"} model homozygotes are coded as
-\code{2} and heterozygotes as \code{1}. In \code{"overdominance"} homozygotes
+\code{2} and heterozygotes as \code{1}. In \code{"overdominant"} homozygotes
 (both \code{0} and \code{2}) are coded as \code{0} and heterozygotes as \code{1}.
 }

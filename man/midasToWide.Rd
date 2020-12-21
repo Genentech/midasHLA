@@ -12,7 +12,9 @@ midasToWide(object, experiment)
 \item{experiment}{Character specifying experiments to include}
 }
 \value{
-Data frame
+Data frame representation of MiDAS object. Consecutive columns holds
+  values of variables from MiDAS's experiments and colData. The metadata
+  associated with experiments is not preserved.
 }
 \description{
 Transform MiDAS to wide format data.frame

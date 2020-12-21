@@ -10,7 +10,7 @@ dfToExperimentMat(df)
 \item{df}{Data frame}
 }
 \value{
-Matrix
+Matrix representation of \code{df}.
 }
 \description{
 Function deletes 'ID' column from a \code{df}, then transpose it and sets

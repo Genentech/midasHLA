@@ -263,6 +263,7 @@ test_that("runMiDAS", {
   for (experiment in experiment_choice) {
     object <- lm(disease ~ term, data = midas)
     res <- runMiDAS(object,
+                    inheritance_model = "additive",
                     conditional = conditional,
                     omnibus = omnibus,
                     experiment = experiment,
@@ -325,6 +326,7 @@ test_that("runMiDAS", {
   for (experiment in experiment_choice) {
     object <- lm(disease ~ term, data = midas)
     res <- runMiDAS(object,
+                    inheritance_model = "additive",
                     conditional = conditional,
                     omnibus = omnibus,
                     experiment = experiment,
@@ -389,6 +391,7 @@ test_that("runMiDAS", {
   for (experiment in experiment_choice) {
     object <- lm(disease ~ term, data = midas)
     res <- runMiDAS(object,
+                    inheritance_model = "additive",
                     conditional = conditional,
                     omnibus = omnibus,
                     experiment = experiment,
@@ -451,6 +454,7 @@ test_that("runMiDAS", {
   object <- lm(disease ~ term, data = midas)
   res <- runMiDAS(
     object,
+    inheritance_model = "additive",
     conditional = conditional,
     omnibus = omnibus,
     omnibus_groups_filter = c("A_6", "A_12"),
@@ -468,17 +472,6 @@ test_that("runMiDAS", {
 
   expect_equal(as.data.frame(res), as.data.frame(test_res))
 
-  expect_error(
-    runMiDAS(
-      object,
-      conditional = FALSE,
-      omnibus = TRUE,
-      experiment = "hla_alleles",
-      exponentiate = FALSE
-    ),
-    "Omnibus test does not support experiment hla_alleles"
-  )
-
   # conditional omnibus
   conditional <- TRUE
   omnibus <- TRUE
@@ -486,6 +479,7 @@ test_that("runMiDAS", {
   object <- lm(disease ~ term, data = midas)
   res <- runMiDAS(
     object,
+    inheritance_model = "additive",
     conditional = conditional,
     omnibus = omnibus,
     omnibus_groups_filter = c("DRA_217", "DQA1_34"),
@@ -505,6 +499,7 @@ test_that("runMiDAS", {
 
   res <- runMiDAS(
     object,
+    inheritance_model = "additive",
     conditional = conditional,
     omnibus = omnibus,
     omnibus_groups_filter = c("B_178", "DRA_217"),
@@ -528,6 +523,7 @@ test_that("runMiDAS", {
   expect_error(
     runMiDAS(
       object,
+      inheritance_model = "additive",
       conditional = FALSE,
       omnibus = TRUE,
       experiment = "hla_alleles",
@@ -577,7 +573,7 @@ test_that("runMiDAS", {
   )
 
   expect_error(runMiDAS(object, experiment = "hla_alleles", inheritance_model = "foo"),
-               "inheritance_model should match values \"dominant\", \"recessive\", \"additive\", \"overdominance\"."
+               "inheritance_model should match values \"dominant\", \"recessive\", \"additive\", \"overdominant\"."
   )
 
   expect_error(runMiDAS(object, experiment = "hla_alleles", conditional = 1),
@@ -643,6 +639,7 @@ test_that("runMiDAS", {
   expect_error(
     runMiDAS(
       object,
+      inheritance_model = "additive",
       experiment = "hla_alleles",
       lower_frequency_cutoff = 0.53,
       upper_frequency_cutoff = 0.56

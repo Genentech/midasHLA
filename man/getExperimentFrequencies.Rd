@@ -42,7 +42,8 @@ following columns. See \code{\link{getReferenceFrequencies}} for more
 details.}
 }
 \value{
-Data frame containing variables and their corresponding frequencies.
+Data frame with each row holding specific variable, it's count and 
+  frequency.
 }
 \description{
 \code{getExperimentFrequencies} calculate features frequencies.

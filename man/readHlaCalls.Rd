@@ -19,7 +19,8 @@ readHlaCalls(file, resolution = 4, na.strings = c("Not typed", "-", "NA"))
     values may need their own white space stripped in advance.}
 }
 \value{
-HLA calls data frame.
+HLA calls data frame. First column hold sample IDs, further columns 
+  hold HLA allele numbers.
 }
 \description{
 \code{readHlaCalls} read HLA allele calls from file
