@@ -34,6 +34,8 @@ jobs:
 
       - name: Install dependencies
         run: |
+          install.packages("BiocManager")
+          BiocManager::install(c("SummarizedExperiment", "S4Vectors", "MultiAssayExperiment"))
           remotes::install_deps(dependencies = TRUE)
           install.packages("pkgdown", type = "binary")
         shell: Rscript {0}

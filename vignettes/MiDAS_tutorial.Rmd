@@ -12,7 +12,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, echo=FALSE, warning=FALSE, include=FALSE}
+```{r my_setup, echo=FALSE, warning=FALSE, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, fig.align="center")
 library(cowplot)
 library(dplyr)
