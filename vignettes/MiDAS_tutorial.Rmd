@@ -209,6 +209,7 @@ HLA_AA_model <- glm(disease ~ term, data = HLA_AA, family = binomial())
 HLA_AA_omnibus_results <- runMiDAS(
   HLA_AA_model,
   experiment = "hla_aa",
+  inheritance_model = "dominant",
   conditional = FALSE,
   omnibus = TRUE,
   lower_frequency_cutoff = 0.02,
@@ -225,6 +226,7 @@ Next, we can investigate how effect estimates are distributed for a given associ
 HLA_AA_DQB1_9_results <- runMiDAS(
   HLA_AA_model,
   experiment = "hla_aa",
+  inheritance_model = "dominant",
   omnibus_groups_filter = "DQB1_9",
   lower_frequency_cutoff = 0.02,
   upper_frequency_cutoff = 0.98,

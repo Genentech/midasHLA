@@ -139,6 +139,7 @@ results <-
   runMiDAS(
     object = object,
     experiment = "hla_alleles",
+    inheritance_model = "dominant",
     conditional = FALSE,
     omnibus = FALSE,
     lower_frequency_cutoff = 0.05
