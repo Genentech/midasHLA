@@ -40,7 +40,7 @@ midas <- prepareMiDAS(hla_calls = MiDAS_tut_HLA,
                       colData = MiDAS_tut_pheno,
                       experiment = "hla_alleles")
 object <- lm(disease ~ term, data = midas)
-res <- runMiDAS(object, experiment = "hla_alleles")
+res <- runMiDAS(object, experiment = "hla_alleles", inheritance_model = "additive")
 kableResults(results = res,
              colnames = c("HLA allele" = "allele"))
 
