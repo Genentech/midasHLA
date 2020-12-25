@@ -1,4 +1,5 @@
-# Meaningful Immunogenetic Data at Scale
+# Meaningful Immunogenetic Data at Scale <img src="vignettes/MiDAS_logo.png" align="right" alt="" width="120" />
+
 Human immunogenetic variation in the form of HLA and KIR 
 types has been shown to be strongly associated with a 
 multitude of immune-related phenotypes. We present MiDAS, 
@@ -9,8 +10,13 @@ divergence as well as HLA-KIR interactions. MiDAS closes the
 gap between inference of immunogenetic variation and its 
 efficient utilization to make meaningful discoveries.
 
-The package can be installed from github using `devtools`
+## Installation
 
-`devtools::install_github("Genentech/MiDAS", build_vignettes = TRUE)`
+``` r
+# Install development version from GitHub
+devtools::install_github("Genentech/MiDAS")
+```
 
-A user tutorial is available here: ...
+## Usage
+
+A user tutorial is available here: [https://genentech.github.io/MiDAS/articles/MiDAS_tutorial.html](https://genentech.github.io/MiDAS/articles/MiDAS_tutorial.html)
