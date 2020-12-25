@@ -1,10 +1,10 @@
 ---
-title: "MiDAS"
+title: "MiDAS quick start"
 author: "Maciej Migdał & Christian Hammer"
 date: "`r Sys.Date()`"
 output: html_vignette
 vignette: >
-  %\VignetteIndexEntry{MiDAS}
+  %\VignetteIndexEntry{MiDAS quick start}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
