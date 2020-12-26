@@ -433,12 +433,13 @@ test_that("filterExperimentByFrequency", {
   )
   expected_vars <-
     c("B*27:02",
-      "C*08:03",
-      "DRB1*08:04",
-      "B*41:02",
       "B*41:01",
+      "B*41:02",
+      "C*08:03",
       "DPA1*02:06",
-      "DRB1*01:03")
+      "DRB1*01:03",
+      "DRB1*08:04")
+
   expect_equal(experiment_filtered, experiment[expected_vars, ])
 
   # filtering works as expected for boundry conditions NULL, NULL
@@ -694,7 +695,7 @@ test_that("applyInheritanceModel", {
   )
   se_dominant <- applyInheritanceModel(se, "dominant")
   test_dominant <- SummarizedExperiment(
-    assays = list(matrix(c(1L, 0L, 1L, 1L, 1L, 1L, 0L, 1L, 1L), nrow = 3, dimnames = list(NULL, NULL))),
+    assays = list(matrix(c(1L, 0L, 1L, 1L, 1L, 1L, 0L, 1L, 1L), nrow = 3)),
     colData = data.frame(foo = 1:3, row.names = 1:3)
   )
   expect_equal(se_dominant, test_dominant)

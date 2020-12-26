@@ -871,7 +871,9 @@ countsToVariables <- function(counts,
 #' getHlaKirInteractions(
 #'   hla_calls = MiDAS_tut_HLA, 
 #'   kir_calls = MiDAS_tut_KIR, 
-#'   interactions_dict = system.file("extdata", "Match_counts_hla_kir_interactions.txt", package = "MiDAS")
+#'   interactions_dict = system.file(
+#'     "extdata", "Match_counts_hla_kir_interactions.txt", 
+#'     package = "MiDAS")
 #' )
 #'
 #' @importFrom assertthat assert_that is.string

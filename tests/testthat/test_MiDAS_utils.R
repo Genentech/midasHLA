@@ -149,32 +149,17 @@ test_that("updateModel", {
 test_that("listMiDASDictionaries", {
   expect_equal(
     listMiDASDictionaries(pattern = ".*"),
-    # sort order of list.dir changes in devtools::check compared to devtools::test
-    # devtools::check compatible
     c(
-      "allele_HLA-Bw_only_B",
-      "allele_HLA-C_C1-2",
       "allele_HLA_Bw",
       "allele_HLA_Ggroup",
       "allele_HLA_supertype",
+      "allele_HLA-Bw_only_B",
+      "allele_HLA-C_C1-2",
       "counts_hla_kir_interactions",
       "counts_kir_haplotypes",
       "kir_haplotype_gene",
       "kir_nomenclature_gene"
     )
-    # devtools::test compatible
-    # c("allele_HLA_Bw",
-    #   "allele_HLA_Ggroup",
-    #   "allele_HLA_supertype",
-    #   "allele_HLA-A_expression",
-    #   "allele_HLA-Bw_only_B",
-    #   "allele_HLA-C_C1-2",
-    #   "allele_HLA-C_expression",
-    #   "counts_hla_kir_interactions",
-    #   "counts_kir_haplotypes",
-    #   "kir_haplotype_gene",
-    #   "kir_nomenclature_gene"
-    # )
   )
 })
 
@@ -341,8 +326,8 @@ test_that("midasToWide", {
   wide <- midasToWide(midas, "hla_alleles")
   test_wide <- data.frame(
     ID = c("P001", "P002"),
-    `A*11:88` = 1:0,
     `A*02:01` = 0:1,
+    `A*11:88` = 1:0,
     disease = c(1L, 1L),
     lab_value = c(-0.85, -1.6),
     outcome = c(1L, 1L),
@@ -384,9 +369,9 @@ test_that("iterativeLRT", {
     group = c("A_29", "A_44", "A_65"),
     term = c("A_29_D, A_29_A", "A_44_R, A_44_K", "A_65_R, A_65_G"),
     df = c(0, 1, 1),
-    logLik = c(0, 0.194256249636965, 1.09904435383942),
-    statistic = c(0, 0.388512499273929, 2.19808870767883),
-    p.value = c(1, 0.533082333293122, 0.13818197701459),
+    logLik = c(0, 0.140455460270459, 0.996167184706792),
+    statistic = c(0, 0.280910920540919, 1.99233436941358),
+    p.value = c(1, 0.596104787861628, 0.158097014398277),
     stringsAsFactors = FALSE
   )
   expect_equal(res, test_res)
@@ -398,9 +383,9 @@ test_that("iterativeLRT", {
     group = c("A_29", "A_44", "A_65"),
     term = c("A_29_D, A_29_A", "A_44_R, A_44_K", "A_65_R, A_65_G"),
     df = c(NA, 1, 1),
-    logLik = c(NA, 0.194256249636965, 1.09904435383942),
-    statistic = c(NA, 0.388512499273929, 2.19808870767883),
-    p.value = c(NA, 0.533082333293122, 0.13818197701459),
+    logLik = c(NA, 0.140455460270459, 0.996167184706792),
+    statistic = c(NA, 0.280910920540919, 1.99233436941358),
+    p.value = c(NA, 0.596104787861628, 0.158097014398277),
     stringsAsFactors = FALSE
   )
   expect_equal(res, test_res)
@@ -414,19 +399,19 @@ test_that("iterativeModel", {
       experiment = "hla_alleles"
     )
   placeholder <- getPlaceholder(MiDASdat)
-  variables <- rownames(MiDASdat)[["hla_alleles"]][1:3]
+  variables <- c("A*01:01", "A*01:02", "A*01:234")
   MiDASdat <- as.data.frame(MiDASdat)
   object <- lm(disease ~ outcome + term, data = MiDASdat)
 
   res <- iterativeModel(object, placeholder, variables)
   res_test <- dplyr::tibble(
-    term = c("A*25:01", "A*26:01", "A*02:01"),
-    estimate = c(-2.1324948816686e-18, -2.16213612157323e-18, -2.4507940696552e-18),
-    std.error = c(1.17038946172415e-17, 8.46322952045087e-18, 3.85985182525956e-18),
-    statistic = c(-0.182203869003326, -0.25547412088359, -0.63494511722361),
-    p.value = c(0.85549702911168, 0.798462620998302, 0.525756401123048),
-    conf.low = c(-2.51277056050692e-17, -1.87902545887866e-17, -1.00344325921854e-17),
-    conf.high = c(2.0862715841732e-17, 1.44659823456402e-17, 5.132844452875e-18)
+    term = variables,
+    estimate = c(-2.19634001504295e-16, -2.11231835645565e-16, NA),
+    std.error = c(4.25235175067943e-16, 3.14927850821845e-15, NA),
+    statistic = c(-0.516500078972071, -0.0670730883579615, NA),
+    p.value = c(0.605734918330554, 0.946550491351323, NA),
+    conf.low = c(-1.05511422218952e-15, -6.39877241863047e-15, NA),
+    conf.high = c(6.15846219180929e-16, 5.97630874733934e-15, NA)
   )
   expect_equal(as.data.frame(res), as.data.frame(res_test))
 })
