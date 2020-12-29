@@ -1,0 +1,150 @@
+---
+title: "MiDAS quick start"
+author: "Maciej Migdał & Christian Hammer"
+date: "`r Sys.Date()`"
+output: html_vignette
+vignette: >
+  %\VignetteIndexEntry{MiDAS quick start}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE)
+
+library("dplyr")
+library("kableExtra")
+library("knitr")
+library("MiDAS")
+```
+
+# Introduction
+MiDAS is a comprehensive R package for immunogenetic data manipulation and statistical analysis. MiDAS recodes input data in the form of HLA alleles and KIR types into biologically meaningful variables, allowing HLA amino acid fine mapping, analyses of HLA evolutionary divergence as well as validated HLA-KIR interactions. Further, it allows comprehensive statistical association analysis workflows with phenotypes of diverse measurement scales. MiDAS thus closes the gap between the inference of immunogenetic variation and its efficient utilization to make relevant discoveries related to T cell, Natural Killer cell, and disease biology.
+
+# Quick start
+
+## Reading input data
+`MiDAS` includes functions to read HLA and KIR typing data, checking for the correct format and adherence to the right nomenclature. HLA calls can be reduced to a desired resolution when importing it, e.g. from 6-digit to 4-digit. Phenotypic observations can be read e.g. using the `read.table` function (make sure to include `stringsAsFactors = FALSE` argument).
+
+```{r load_pheno, echo=TRUE, warning=FALSE}
+pheno_file <- system.file("extdata", "MiDAS_tut_pheno.txt", package = "MiDAS")
+pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
+```
+
+```{r show_pheno, echo=FALSE, warning=FALSE}
+pheno %>%
+  head(10) %>%
+  kable() %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+```
+
+```{r load_hla, echo=TRUE, warning=FALSE}
+# HLA calls can be loaded using the readHlaCalls function with the desired resolution
+hla_calls_file <- system.file("extdata", "MiDAS_tut_HLA.txt", package = "MiDAS")
+hla_calls <- readHlaCalls(hla_calls_file, resolution = 4)
+```
+
+```{r show_hla, echo=FALSE, warning=FALSE}
+hla_calls %>%
+  head(10) %>%
+  kable() %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  scroll_box(width = "100%", height = "200px")
+```
+
+```{r load_kir, echo=TRUE, warning=FALSE}
+# KIR calls (currently presence/absence calls, no allele-level resolution) can be loaded using the readKirCalls function
+kir_calls_file <- system.file("extdata", "MiDAS_tut_KIR.txt", package = "MiDAS")
+kir_calls <- readKirCalls(kir_calls_file)
+```
+
+```{r show_kir, echo=FALSE, warning=FALSE}
+kir_calls %>%
+  head(10) %>%
+  kable() %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  scroll_box(width = "100%", height = "200px")
+```
+
+For convenience, we will here use test data shipped with the package.
+
+```{r test_data, echo=TRUE, warning=FALSE}
+HLA <- reduceHlaCalls(MiDAS_tut_HLA, resolution = 4)
+KIR <- MiDAS_tut_KIR
+pheno <- MiDAS_tut_pheno
+```
+
+## Creating midas objects
+`MiDAS` provides the `prepareMiDAS` function to combine genetic and phenotypic data for subsequent analysis. In this step, it is also possible to infer amino acid level information from HLA calls, encode HLA-KIR interactions, or calculate HLA evolutionary divergence (`experiment` argument).
+
+```{r creating_midas_data_set, echo=TRUE, warning=FALSE}
+midas <- prepareMiDAS(
+  hla_calls = HLA,
+  kir_calls = KIR,
+  colData = pheno,
+  experiment = c("hla_alleles", "hla_aa")
+  )
+```
+
+## MiDAS object
+A MiDAS object contains our input data as well as defined transformations. This is an extension of a `MultiAssayExperiment` and can be handled as
+such. `MiDAS` provides some functions to interact with `MiDAS` objects (check `?MiDAS-class` for a full list).
+
+For example, we can explore the HLA alleles frequencies, compare them with published frequencies from the allelefrequencies.net database, and filter out low frequency alleles.
+
+```{r get_freq, echo=TRUE, warning=FALSE}
+freq <- getFrequencies(
+  object = midas,
+  carrier_frequency = FALSE,
+  experiment = "hla_alleles",
+  compare = TRUE
+)
+```
+
+```{r show_freq, echo=FALSE, warning=FALSE}
+kable(freq) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  scroll_box(width = "100%", height = "200px")
+```
+
+```{r filter_freq, echo=TRUE, warning=FALSE}
+midas <-
+  filterByFrequency(
+    object = midas,
+    experiment = "hla_alleles",
+    lower_frequency_cutoff = 0.01
+    )
+```
+
+## Association analysis
+### Model definition
+Before the actual analysis can be run, we still need to define a statistical model we would like to use. We can use most of the statistical models available in R, such as `lm`, `glm`, `coxme` etc. (technically, they need to have a tidy method available).
+`MiDAS` then provides a wrapper function that will evaluate our model for
+each HLA allele in our data.
+
+Here we will use a very simple formula `disease ~ term`, term being a placeholder for each tested HLA allele. This notation is necessary to also allow interaction tests (e.g. `disease ~ lab_value:term`) and also works with other appropriate operations.
+
+`midas` has to be passed as a `data` argument to our statistical function, here `glm`.
+
+```{r model definition, echo=TRUE, warning=FALSE}
+# Logistic regression
+object <- glm(disease ~ term, data = midas, family = binomial(link = "logit"))
+```
+
+### Running analysis
+To run our analysis, we will use the `runMiDAS` function. This function offers multiple analysis scenarios which can be tuned using `conditional` and `omnibus` arguments. It can also pre-filter input data based on frequency (check `?runMiDAS` to learn more).
+
+```{r association_analysis, echo=TRUE, warning=FALSE}
+results <-
+  runMiDAS(
+    object = object,
+    experiment = "hla_alleles",
+    inheritance_model = "dominant",
+    conditional = FALSE,
+    omnibus = FALSE,
+    lower_frequency_cutoff = 0.05
+    )
+
+kableResults(results)
+```
+ 
