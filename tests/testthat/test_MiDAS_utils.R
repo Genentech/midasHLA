@@ -147,9 +147,10 @@ test_that("updateModel", {
 })
 
 test_that("listMiDASDictionaries", {
+  # NOTE ordering is somehow OS dependent
   expect_equal(
-    listMiDASDictionaries(pattern = ".*"),
-    c(
+    sort(listMiDASDictionaries(pattern = ".*")),
+    sort(c(
       "allele_HLA_Bw",
       "allele_HLA_Ggroup",
       "allele_HLA_supertype",
@@ -159,7 +160,7 @@ test_that("listMiDASDictionaries", {
       "counts_kir_haplotypes",
       "kir_haplotype_gene",
       "kir_nomenclature_gene"
-    )
+    ))
   )
 })
 
@@ -365,29 +366,61 @@ test_that("iterativeLRT", {
   object <- lm(disease ~ outcome + term, data = MiDASdat)
 
   res <- iterativeLRT(object, placeholder, omnibus_groups)
-  test_res <- data.frame(
-    group = c("A_29", "A_44", "A_65"),
-    term = c("A_29_D, A_29_A", "A_44_R, A_44_K", "A_65_R, A_65_G"),
-    df = c(0, 1, 1),
-    logLik = c(0, 0.140455460270459, 0.996167184706792),
-    statistic = c(0, 0.280910920540919, 1.99233436941358),
-    p.value = c(1, 0.596104787861628, 0.158097014398277),
-    stringsAsFactors = FALSE
-  )
+  test_res <- lapply(
+    X = omnibus_groups, 
+    FUN = function (gr) {
+      mod0 <- updateModel(
+        object = object,
+        x = "1",
+        placeholder = placeholder,
+        backquote = FALSE
+      )
+      test <- LRTest(
+        mod0,
+        updateModel(
+          object = object,
+          x = gr,
+          placeholder = placeholder,
+          collapse = " + ",
+          backquote = TRUE
+        )
+      )
+    })
+  test_res <- dplyr::bind_rows(test_res, .id = "group")
   expect_equal(res, test_res)
 
   MiDASdat$A_29_D <- NA
   MiDASdat$A_29_A <- NA
   res <- iterativeLRT(object, placeholder, omnibus_groups)
-  test_res <- data.frame(
-    group = c("A_29", "A_44", "A_65"),
-    term = c("A_29_D, A_29_A", "A_44_R, A_44_K", "A_65_R, A_65_G"),
-    df = c(NA, 1, 1),
-    logLik = c(NA, 0.140455460270459, 0.996167184706792),
-    statistic = c(NA, 0.280910920540919, 1.99233436941358),
-    p.value = c(NA, 0.596104787861628, 0.158097014398277),
-    stringsAsFactors = FALSE
+  test_res <- lapply(
+    X = omnibus_groups[c("A_44", "A_65")], 
+    FUN = function (gr) {
+      mod0 <- updateModel(
+        object = object,
+        x = "1",
+        placeholder = placeholder,
+        backquote = FALSE
+      )
+      test <- LRTest(
+        mod0,
+        updateModel(
+          object = object,
+          x = gr,
+          placeholder = placeholder,
+          collapse = " + ",
+          backquote = TRUE
+        )
+      )
+    })
+  test_res[["A_29"]] <- data.frame(
+    term = "A_29_D, A_29_A",
+    df = NA,
+    logLik = NA,
+    statistic = NA,
+    p.value = NA
   )
+  test_res <- test_res[c("A_29", "A_44", "A_65")]
+  test_res <- dplyr::bind_rows(test_res, .id = "group")
   expect_equal(res, test_res)
 })
 
@@ -404,15 +437,23 @@ test_that("iterativeModel", {
   object <- lm(disease ~ outcome + term, data = MiDASdat)
 
   res <- iterativeModel(object, placeholder, variables)
-  res_test <- dplyr::tibble(
-    term = variables,
-    estimate = c(-2.19634001504295e-16, -2.11231835645565e-16, NA),
-    std.error = c(4.25235175067943e-16, 3.14927850821845e-15, NA),
-    statistic = c(-0.516500078972071, -0.0670730883579615, NA),
-    p.value = c(0.605734918330554, 0.946550491351323, NA),
-    conf.low = c(-1.05511422218952e-15, -6.39877241863047e-15, NA),
-    conf.high = c(6.15846219180929e-16, 5.97630874733934e-15, NA)
+  res_test <- lapply(
+    X = variables,
+    FUN = function(x) {
+        obj <- updateModel(
+          object = object,
+          x = x,
+          placeholder = placeholder,
+          backquote = TRUE,
+          collapse = " + "
+        )
+        r <- tidy(x = obj, conf.int = TRUE, exponentiate = exponentiate)
+        r$term <- gsub("`", "", r$term)
+        r <- r[r$term %in% variables, ]
+    }
   )
+  res_test <- dplyr::bind_rows(res_test)
+
   expect_equal(as.data.frame(res), as.data.frame(res_test))
 })
 
