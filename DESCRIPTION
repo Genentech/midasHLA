@@ -32,3 +32,4 @@ Collate:
     'MiDAS_utils.R'
     'data.R'
     'global.R'
+biocViews: Genetics, StatisticalMethod
