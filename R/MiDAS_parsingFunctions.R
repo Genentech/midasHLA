@@ -152,7 +152,7 @@ readHlaAlignments <- function(file,
     )
 
     tmp_aln_env <- new.env(size = 5000)
-    for (i in 1:length(allele_numbers)) {
+    for (i in seq_along(allele_numbers)) {
       assign(
         x = allele_numbers[i],
         value = append(

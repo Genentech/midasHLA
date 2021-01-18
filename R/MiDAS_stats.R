@@ -1037,7 +1037,7 @@ HWETest <-
       var = rownames(object[[experiment]]),
       stringsAsFactors = FALSE
     )
-    for (i in 1:length(X)) {
+    for (i in seq_along(X)) {
       HWE.pvalue <- apply( # get haplotypes for each variable
         X = X[[i]],
         MARGIN = 1,
@@ -1058,7 +1058,7 @@ HWETest <-
     # filter based on p-value cut-off
     if (! is.null(HWE_cutoff)) {
       # get p-value mask over columns ie. p.value or optional grouping columns
-      mask <- lapply(1:(ncol(HWE.result) - 1), function(i) {
+      mask <- lapply(seq_len(ncol(HWE.result) - 1), function(i) {
         m <- HWE.result[, i + 1] > HWE_cutoff
         m[is.na(m)] <- TRUE
         m

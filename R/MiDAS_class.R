@@ -1289,7 +1289,7 @@ prepareMiDAS_hla_het <- function(hla_calls, hla_het_resolution = 8, ...) {
   )
 
   # filter non-classical genes
-  sel <- c("ID", paste0(rep(classical_genes, each = 2), "_", 1:2))
+  sel <- c("ID", paste0(rep(classical_genes, each = 2), "_", seq_len(2)))
   hla_calls <- hla_calls[, colnames(hla_calls) %in% sel, drop = FALSE]
   genes <- getHlaCallsGenes(hla_calls)
 

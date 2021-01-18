@@ -115,7 +115,7 @@ reduceAlleleResolution <- function(allele,
   allele[to_reduce] <- vapply(
     X = stri_split_fixed(allele[to_reduce], ":"),
     FUN = function(a) {
-      paste(a[1:resolution], collapse = ":")
+      paste(a[seq_len(resolution)], collapse = ":")
     },
     FUN.VALUE = character(length = 1)
   )
@@ -609,7 +609,7 @@ hlaCallsGranthamDistance <- function(hla_calls,
 
     allele_numbers <- rownames(alignment)
     d[[gene]] <- vapply(
-      X = 1:nrow(pairs),
+      X = seq_len(nrow(pairs)),
       FUN = function(i) {
         allele1 <- pairs[i, 1]
         allele2 <- pairs[i, 2]
@@ -883,7 +883,7 @@ iterativeLRT <- function(object, placeholder, omnibus_groups) {
     if (had_error) {
       msg <- c(msg, "Errors:\n")
       err <- table(conditional_msgs$error)
-      for (i in 1:length(err)) {
+      for (i in seq_along(err)) {
         n <- err[i]
         val <- names(err)[i]
         vars <- conditional_msgs$error[conditional_msgs$error == val]
@@ -891,7 +891,7 @@ iterativeLRT <- function(object, placeholder, omnibus_groups) {
           ifelse(
             test = length(vars) <= 5,
             yes = paste(names(vars), collapse = ", "),
-            no = paste(c(names(vars)[1:5], "..."), collapse = ", ")
+            no = paste(c(names(vars)[seq_len(5)], "..."), collapse = ", ")
           )
         msg <- c(
           msg,
@@ -904,7 +904,7 @@ iterativeLRT <- function(object, placeholder, omnibus_groups) {
     if (had_warning) {
       msg <- c(msg, "Warnings:")
       wrr <- table(conditional_msgs$warning)
-      for (i in 1:length(wrr)) {
+      for (i in seq_along(wrr)) {
         n <- wrr[i]
         val <- names(wrr)[i]
         vars <- conditional_msgs$warning[conditional_msgs$warning == val]
@@ -912,7 +912,7 @@ iterativeLRT <- function(object, placeholder, omnibus_groups) {
           ifelse(
             test = length(vars) <= 5,
             yes = paste(names(vars), collapse = ", "),
-            no = paste(c(names(vars)[1:5], "..."), collapse = ", ")
+            no = paste(c(names(vars)[seq_len(5)], "..."), collapse = ", ")
           )
         msg <- c(
           msg,
@@ -1002,7 +1002,7 @@ iterativeModel <- function(object,
     if (had_error) {
       msg <- c(msg, "Errors:\n")
       err <- table(conditional_msgs$error)
-      for (i in 1:length(err)) {
+      for (i in seq_along(err)) {
         n <- err[i]
         val <- names(err)[i]
         vars <- conditional_msgs$error[conditional_msgs$error == val]
@@ -1010,7 +1010,7 @@ iterativeModel <- function(object,
           ifelse(
             test = length(vars) <= 5,
             yes = paste(names(vars), collapse = ", "),
-            no = paste(c(names(vars[1:5]), "..."), collapse = ", ")
+            no = paste(c(names(vars[seq_len(5)]), "..."), collapse = ", ")
           )
         msg <- c(
           msg,
@@ -1023,7 +1023,7 @@ iterativeModel <- function(object,
     if (had_warning) {
       msg <- c(msg, "Warnings:")
       wrr <- table(conditional_msgs$warning)
-      for (i in 1:length(wrr)) {
+      for (i in seq_along(wrr)) {
         n <- wrr[i]
         val <- names(wrr)[i]
         vars <- conditional_msgs$warning[conditional_msgs$warning == val]
@@ -1031,7 +1031,7 @@ iterativeModel <- function(object,
           ifelse(
             test = length(vars) <= 5,
             yes = paste(names(vars), collapse = ", "),
-            no = paste(c(names(vars)[1:5], "..."), collapse = ", ")
+            no = paste(c(names(vars)[seq_len(5)], "..."), collapse = ", ")
           )
         msg <- c(
           msg,
