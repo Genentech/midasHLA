@@ -74,7 +74,7 @@ test_that("readHlaAlignments", {
 
   expect_error(
     readHlaAlignments(system.file("extdata", "A_prot.txt", package = "MiDAS"),
-                      trim = c(T, T),
+                      trim = c(TRUE, TRUE),
                       unkchar = ""
     ),
     "trim is not a flag \\(a length one logical vector\\)."
@@ -82,7 +82,7 @@ test_that("readHlaAlignments", {
 
   expect_error(
     readHlaAlignments(system.file("extdata", "A_prot.txt", package = "MiDAS"),
-                      trim = T,
+                      trim = TRUE,
                       unkchar = c("a", "b", "c")
     ),
     "unkchar is not a string \\(a length one character vector\\)."
