@@ -582,7 +582,7 @@ getAAFrequencies <- function(aa_variation) {
 #' @return Character vector of formatted table source code.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' midas <- prepareMiDAS(hla_calls = MiDAS_tut_HLA,
 #'                       colData = MiDAS_tut_pheno,
 #'                       experiment = "hla_alleles")
