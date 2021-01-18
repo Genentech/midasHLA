@@ -431,6 +431,8 @@ test_that("filterExperimentByFrequency", {
     lower_frequency_cutoff = lower_frequency_cutoff,
     upper_frequency_cutoff = upper_frequency_cutoff
   )
+  
+  # order of rows somehow depends on the R version...
   expected_vars <-
     c("B*27:02",
       "B*41:01",
@@ -439,6 +441,9 @@ test_that("filterExperimentByFrequency", {
       "DPA1*02:06",
       "DRB1*01:03",
       "DRB1*08:04")
+  expected_vars <- expected_vars[order(expected_vars)]
+  experiment_filtered <-
+    experiment_filtered[order(rownames(experiment_filtered)),]
 
   expect_equal(experiment_filtered, experiment[expected_vars, ])
 
@@ -451,8 +456,7 @@ test_that("filterExperimentByFrequency", {
     lower_frequency_cutoff = lower_frequency_cutoff,
     upper_frequency_cutoff = upper_frequency_cutoff
   )
-  expected_vars <- rownames(experiment)
-  expect_equal(experiment_filtered, experiment[expected_vars, ])
+  expect_equal(experiment_filtered, experiment)
 
   # filtering works as expected for boundry conditions 0, 0
   experiment <- midas[["hla_alleles"]]
@@ -689,16 +693,14 @@ test_that("applyInheritanceModel", {
   test_recessive <- matrix(c(0, 0, 1, 1, 0, 1, 0, 0, 0), nrow = 3)
   expect_equal(recessive, test_recessive)
 
+  # works on summarized experiment
   se <- SummarizedExperiment(
     assays = list(matrix(c(2, 0, 1, 1, 2, 1, 0, 2, 2), nrow = 3)),
     colData = data.frame(foo = 1:3, row.names = 1:3)
   )
   se_dominant <- applyInheritanceModel(se, "dominant")
-  test_dominant <- SummarizedExperiment(
-    assays = list(matrix(c(1L, 0L, 1L, 1L, 1L, 1L, 0L, 1L, 1L), nrow = 3)),
-    colData = data.frame(foo = 1:3, row.names = 1:3)
-  )
-  expect_equal(se_dominant, test_dominant)
+  assay(se) <- ifelse(assay(se) == 0, 0, 1)
+  expect_equal(se_dominant, se)
 })
 
 test_that("getFrequencyMask", {

@@ -336,6 +336,7 @@ test_that("midasToWide", {
     stringsAsFactors = FALSE,
     check.names = FALSE
   )
+  test_wide <- test_wide[, colnames(wide)] # somehow order of columns is R version dependent...
   expect_equal(wide, test_wide)
 
   expect_error(midasToWide(midas, 1), "experiment is not a character vector")
