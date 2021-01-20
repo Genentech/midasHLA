@@ -73,7 +73,7 @@ interactions." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">MiDAS</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.13</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.99.13</span>
       </span>
     </div>
 
@@ -180,7 +180,9 @@ file based on <a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6558367/'>Pe
     <pre class="examples"><div class='input'><span class='fu'>getHlaKirInteractions</span><span class='op'>(</span>
   hla_calls <span class='op'>=</span> <span class='va'>MiDAS_tut_HLA</span>, 
   kir_calls <span class='op'>=</span> <span class='va'>MiDAS_tut_KIR</span>, 
-  interactions_dict <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span><span class='op'>(</span><span class='st'>"extdata"</span>, <span class='st'>"Match_counts_hla_kir_interactions.txt"</span>, package <span class='op'>=</span> <span class='st'>"MiDAS"</span><span class='op'>)</span>
+  interactions_dict <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span><span class='op'>(</span>
+    <span class='st'>"extdata"</span>, <span class='st'>"Match_counts_hla_kir_interactions.txt"</span>, 
+    package <span class='op'>=</span> <span class='st'>"MiDAS"</span><span class='op'>)</span>
 <span class='op'>)</span>
 </div><div class='output co'>#&gt; <span class='warning'>Warning: In ambiguous cases Bw4 will be assigned! See 'hlaToVariable' documentation for more details.</span></div><div class='output co'>#&gt;        ID C2_KIR2DL1 C1_KIR2DL2 B*46:01_KIR2DL2 B*73:01_KIR2DL2 C2_KIR2DL2
 #&gt; 1    C001          0          0               0               0          0

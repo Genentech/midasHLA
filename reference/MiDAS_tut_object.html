@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Check if string matches one of possible values — stringMatches • MiDAS</title>
+<title>MiDAS tutorial MiDAS object — MiDAS_tut_object • MiDAS</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,10 @@
 
 
 
-<meta property="og:title" content="Check if string matches one of possible values — stringMatches" />
-<meta property="og:description" content="stringMatches checks if string is equal to one of the choices." />
+<meta property="og:title" content="MiDAS tutorial MiDAS object — MiDAS_tut_object" />
+<meta property="og:description" content="Example MiDAS object created with data used in MiDAS tutorial: 
+MiDAS_tut_HLA, MiDAS_tut_KIR, MiDAS_tut_pheno.
+Used in code examlpes and unit tests." />
 
 
 
@@ -121,34 +123,36 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Check if string matches one of possible values</h1>
+    <h1>MiDAS tutorial MiDAS object</h1>
     
-    <div class="hidden name"><code>stringMatches.Rd</code></div>
+    <div class="hidden name"><code>MiDAS_tut_object.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p><code>stringMatches</code> checks if string is equal to one of the choices.</p>
+    <p>Example MiDAS object created with data used in MiDAS tutorial: 
+<code>MiDAS_tut_HLA</code>, <code>MiDAS_tut_KIR</code>, <code>MiDAS_tut_pheno</code>.
+Used in code examlpes and unit tests.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>stringMatches</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>choice</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='va'>MiDAS_tut_object</span></pre>
 
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>x</th>
-      <td><p>string to test.</p></td>
-    </tr>
-    <tr>
-      <th>choice</th>
-      <td><p>Character vector with possible values for <code>x</code>.</p></td>
-    </tr>
-    </table>
 
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
 
-    <p>Logical indicating if <code>x</code> matches one of the strings in
-  <code>choice</code>.</p>
+    <p>MiDAS object with following experiments defined:</p><dl>
+    <dt>hla_alleles</dt><dd><p>SummarizedExperiment with 447 rows and 1000 columns</p></dd>
+    <dt>hla_aa</dt><dd><p>SummarizedExperiment with 1223 rows and 1000 columns</p></dd>
+    <dt>hla_g_groups</dt><dd><p>SummarizedExperiment with 46 rows and 1000 columns</p></dd>
+    <dt>hla_supertypes</dt><dd><p>SummarizedExperiment with 12 rows and 1000 columns</p></dd>
+    <dt>hla_NK_ligands</dt><dd><p>SummarizedExperiment with 5 rows and 1000 columns</p></dd>
+    <dt>kir_genes</dt><dd><p>SummarizedExperiment with 16 rows and 1000 columns</p></dd>
+    <dt>kir_haplotypes</dt><dd><p>SummarizedExperiment with 6 rows and 1000 columns</p></dd>
+    <dt>hla_kir_interactions</dt><dd><p>SummarizedExperiment with 29 rows and 1000 columns</p></dd>
+    <dt>hla_divergence</dt><dd><p>matrix with 4 rows and 1000 columns</p></dd>
+    <dt>hla_het</dt><dd><p>SummarizedExperiment with 9 rows and 1000 columns</p></dd>
+  
+</dl>
+
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
