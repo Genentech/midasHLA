@@ -8,6 +8,7 @@
 \alias{getHlaCalls,MiDAS-method}
 \alias{getKirCalls,MiDAS-method}
 \alias{getPlaceholder,MiDAS-method}
+\alias{getOmnibusGroups,MiDAS-method}
 \alias{getFrequencies,MiDAS-method}
 \alias{filterByFrequency,MiDAS-method}
 \alias{filterByOmnibusGroups,MiDAS-method}
@@ -22,6 +23,8 @@
 \S4method{getKirCalls}{MiDAS}(object)
 
 \S4method{getPlaceholder}{MiDAS}(object)
+
+\S4method{getOmnibusGroups}{MiDAS}(object, experiment)
 
 \S4method{getFrequencies}{MiDAS}(
   object,
