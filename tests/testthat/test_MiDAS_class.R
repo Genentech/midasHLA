@@ -114,7 +114,7 @@ test_that("getFrequencies", {
   )
 
   expect_error(getFrequencies(MiDAS_tut_object, "foo"),
-               "experiment should be one of \"hla_alleles\", \"hla_divergence\"."
+               "experiment should be one of \"hla_alleles\", \"hla_aa\", \"hla_g_groups\", \"hla_supertypes\", \"hla_NK_ligands\", \"kir_genes\", \"kir_haplotypes\", \"hla_kir_interactions\", \"hla_divergence\", \"hla_het\"."
   )
 
   expect_error(getFrequencies(MiDAS_tut_object, "hla_divergence"),
@@ -242,7 +242,7 @@ test_that("filterByFrequency", {
   test_filtered_midas <- MiDAS_tut_object
   test_filtered_midas[[experiment]] <-
     filterExperimentByFrequency(
-      experiment = midas[[experiment]],
+      experiment = test_filtered_midas[[experiment]],
       lower_frequency_cutoff = lower_frequency_cutoff,
       upper_frequency_cutoff = upper_frequency_cutoff
     )

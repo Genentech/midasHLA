@@ -535,7 +535,7 @@ test_that("runMiDAS", {
   )
 
   expect_error(runMiDAS(object, experiment = "foo"),
-               "experiment should be one of \"hla_alleles\", \"hla_aa\", \"hla_g_groups\", \"hla_supertypes\", \"hla_NK_ligands\", \"kir_genes\", \"hla_kir_interactions\", \"hla_divergence\"."
+               "experiment should be one of \"hla_alleles\", \"hla_aa\", \"hla_g_groups\", \"hla_supertypes\", \"hla_NK_ligands\", \"kir_genes\", \"kir_haplotypes\", \"hla_kir_interactions\", \"hla_divergence\", \"hla_het\"."
   )
 
   expect_error(runMiDAS(object, experiment = "hla_alleles", inheritance_model = 1),

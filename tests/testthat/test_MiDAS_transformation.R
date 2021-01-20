@@ -264,7 +264,9 @@ test_that("formatResults", {
 })
 
 test_that("kableResults", {
-  midas <- midasToWide(MiDAS_tut_object, "hla_alleles")
+  midas <- prepareMiDAS(hla_calls = MiDAS_tut_HLA,
+                        colData = MiDAS_tut_pheno,
+                        experiment = "hla_alleles")
   object <- lm(disease ~ term, data = midas)
   res <- runMiDAS(object, inheritance_model = "additive", experiment = "hla_alleles")
   res_kable <- kableResults(res)
