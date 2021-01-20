@@ -50,15 +50,9 @@ test_that("checkKirCallsFormat", {
 })
 
 test_that("isExperimentCountsOrZeros", {
-  midas <- prepareMiDAS(
-    hla_calls = MiDAS_tut_HLA,
-    colData = MiDAS_tut_pheno,
-    experiment = c("hla_alleles", "hla_aa")
-  )
+  expect_equal(isExperimentCountsOrZeros(MiDAS_tut_object[["hla_alleles"]]), TRUE)
 
-  expect_equal(isExperimentCountsOrZeros(midas[["hla_alleles"]]), TRUE)
-
-  expect_equal(isExperimentCountsOrZeros(midas[["hla_aa"]]), TRUE)
+  expect_equal(isExperimentCountsOrZeros(MiDAS_tut_object[["hla_aa"]]), TRUE)
 
   expect_equal(isExperimentCountsOrZeros(matrix(runif(15), nrow = 3)), FALSE)
 
@@ -66,11 +60,7 @@ test_that("isExperimentCountsOrZeros", {
 })
 
 test_that("checkStatisticalModel", {
-  midas <- prepareMiDAS(
-    kir_calls = MiDAS_tut_KIR,
-    colData = MiDAS_tut_pheno,
-    experiment = "kir_genes"
-  )
+  midas <- midasToWide(MiDAS_tut_object,"kir_genes")
 
   object <- lm(disease ~ term, data = midas)
   expect_equal(checkStatisticalModel(object), TRUE)

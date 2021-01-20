@@ -20,3 +20,9 @@ Filtered \code{\link{MiDAS}} object.
 \description{
 Filter MiDAS object by omnibus groups
 }
+\examples{
+filterByOmnibusGroups(object = MiDAS_tut_object,
+                      experiment = "hla_aa",
+                      groups = c("A_3", "A_6", "C_1"))
+
+}

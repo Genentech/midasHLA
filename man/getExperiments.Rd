@@ -15,3 +15,7 @@ Character vector giving names of experiments in \code{object}.
 \description{
 Get available experiments in MiDAS object.
 }
+\examples{
+getExperiments(object = MiDAS_tut_object)
+
+}

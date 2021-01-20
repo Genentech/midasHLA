@@ -15,3 +15,7 @@ HLA calls data frame.
 \description{
 Get HLA calls from MiDAS object.
 }
+\examples{
+getHlaCalls(object = MiDAS_tut_object)
+
+}

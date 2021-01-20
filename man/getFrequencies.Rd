@@ -50,18 +50,14 @@ Data frame with features from selected experiment and their
 Calculate features frequencies for a given experiment in MiDAS object.
 }
 \examples{
-midas <- prepareMiDAS(
-  hla_calls = MiDAS_tut_HLA,
-  colData = MiDAS_tut_pheno,
-  experiment = "hla_alleles"
-)
-
 # using default reference populations
-getFrequencies(midas, experiment = "hla_alleles", compare = TRUE)
+getFrequencies(object = MiDAS_tut_object, 
+               experiment = "hla_alleles", 
+               compare = TRUE)
 
 # using customized set of reference populations
 getFrequencies(
-  object = midas, 
+  object = MiDAS_tut_object, 
   experiment = "hla_alleles", 
   compare = TRUE,
   ref_pop = list(

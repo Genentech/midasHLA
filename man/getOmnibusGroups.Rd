@@ -25,3 +25,8 @@ features can be grouped by amino acid position (\code{"B_46_E"},
 then used to perform omnibus test, see \code{\link{runMiDAS}} for more
 details.
 }
+\examples{
+getOmnibusGroups(object = MiDAS_tut_object,
+                 experiment = "hla_aa")
+
+}

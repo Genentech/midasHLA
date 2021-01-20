@@ -19,3 +19,9 @@ Filtered \code{\link{MiDAS}} object.
 \description{
 Filter MiDAS object by features
 }
+\examples{
+filterByVariables(object = MiDAS_tut_object,
+                  experiment = "hla_alleles",
+                  variables = c("A*25:01", "A*26:01", "B*07:02"))
+
+}

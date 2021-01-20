@@ -1,12 +1,7 @@
 context("stats")
 
 test_that("analyzeAssociations", {
-  midas <-
-    prepareMiDAS(hla_calls = MiDAS_tut_HLA,
-                 colData = MiDAS_tut_pheno,
-                 experiment = "hla_alleles")
-
-  midas_data <- midasToWide(midas, experiment = "hla_alleles")
+  midas_data <- midasToWide(MiDAS_tut_object, experiment = "hla_alleles")
   object <- lm(disease ~ term, data = midas_data)
 
   res <- analyzeAssociations(object,
@@ -15,8 +10,8 @@ test_that("analyzeAssociations", {
   )
 
   test_res <- list(
-    lm(disease ~ `A*01:01`, data = midas),
-    lm(disease ~ `A*02:01`, data = midas)
+    lm(disease ~ `A*01:01`, data = midas_data),
+    lm(disease ~ `A*02:01`, data = midas_data)
   )
   test_res <- do.call("rbind", lapply(test_res, tidy, conf.int = TRUE))
   test_res$term <- gsub("`", "", test_res$term)
@@ -70,11 +65,7 @@ test_that("analyzeAssociations", {
 })
 
 test_that("analyzeConditionalAssociations", {
-  midas <-
-    prepareMiDAS(hla_calls = MiDAS_tut_HLA,
-                 colData = MiDAS_tut_pheno,
-                 experiment = "hla_alleles")
-  midas_data <- midasToWide(midas, experiment = "hla_alleles")
+  midas_data <- midasToWide(MiDAS_tut_object, experiment = "hla_alleles")
 
   object <- lm(disease ~ term, data = midas_data)
 
@@ -195,13 +186,7 @@ test_that("analyzeConditionalAssociations", {
 })
 
 test_that("omnibusTest", {
-  midas <-
-    prepareMiDAS(
-      hla_calls = MiDAS_tut_HLA,
-      colData = MiDAS_tut_pheno,
-      experiment = "hla_aa"
-    )
-  midas_data <- midasToWide(midas, experiment = "hla_aa")
+  midas_data <- midasToWide(MiDAS_tut_object, experiment = "hla_aa")
   object <- lm(disease ~ term, data = midas_data)
   omnibus_groups <- list(
     A_77 = c("A_77_D", "A_77_N", "A_77_S"),
@@ -229,22 +214,7 @@ test_that("omnibusTest", {
 })
 
 test_that("runMiDAS", {
-  midas <-
-    prepareMiDAS(
-      hla_calls = MiDAS_tut_HLA,
-      kir_call = MiDAS_tut_KIR,
-      colData = MiDAS_tut_pheno,
-      experiment = c(
-        "hla_alleles",
-        "hla_aa",
-        "hla_g_groups",
-        "hla_supertypes",
-        "hla_NK_ligands",
-        "kir_genes",
-        "hla_kir_interactions",
-        "hla_divergence"
-      )
-    )
+  midas <- MiDAS_tut_object
 
   # linear
   conditional = FALSE
@@ -649,9 +619,7 @@ test_that("runMiDAS", {
 })
 
 test_that("HWETest", {
-  midas <- prepareMiDAS(hla_calls = MiDAS_tut_HLA,
-                        colData = MiDAS_tut_pheno,
-                        experiment = "hla_alleles")
+  midas <- MiDAS_tut_object
   res <- HWETest(midas, experiment = "hla_alleles", HWE_cutoff = 0.988)
   rownames(res) <- NULL
   test_res <- data.frame(

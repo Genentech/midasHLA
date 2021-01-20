@@ -71,6 +71,28 @@
 #'
 "MiDAS_tut_HLA"
 
+#' MiDAS tutorial MiDAS object
+#'
+#' Example MiDAS object created with data used in MiDAS tutorial: 
+#' \code{MiDAS_tut_HLA}, \code{MiDAS_tut_KIR}, \code{MiDAS_tut_pheno}.
+#' Used in code examlpes and unit tests.
+#'
+#' @format MiDAS object with following experiments defined:
+#'   \describe{
+#'     \item{hla_alleles}{SummarizedExperiment with 447 rows and 1000 columns}
+#'     \item{hla_aa}{SummarizedExperiment with 1223 rows and 1000 columns}
+#'     \item{hla_g_groups}{SummarizedExperiment with 46 rows and 1000 columns}
+#'     \item{hla_supertypes}{SummarizedExperiment with 12 rows and 1000 columns}
+#'     \item{hla_NK_ligands}{SummarizedExperiment with 5 rows and 1000 columns}
+#'     \item{kir_genes}{SummarizedExperiment with 16 rows and 1000 columns}
+#'     \item{kir_haplotypes}{SummarizedExperiment with 6 rows and 1000 columns}
+#'     \item{hla_kir_interactions}{SummarizedExperiment with 29 rows and 1000 columns}
+#'     \item{hla_divergence}{matrix with 4 rows and 1000 columns}
+#'     \item{hla_het}{SummarizedExperiment with 9 rows and 1000 columns}
+#'   }
+#'  
+"MiDAS_tut_object"
+
 #' Alleles frequencies scraped from allelefrequencies.net
 #'
 #' Accessed on 28.07.20

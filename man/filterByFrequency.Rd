@@ -34,3 +34,11 @@ Filtered \code{\link{MiDAS}} object.
 \description{
 Filter MiDAS object by frequency
 }
+\examples{
+filterByFrequency(object = MiDAS_tut_object, 
+                  experiment = "hla_alleles",
+                  lower_frequency_cutoff = 0.05,
+                  upper_frequency_cutoff = 0.95,
+                  carrier_frequency = TRUE)
+
+}

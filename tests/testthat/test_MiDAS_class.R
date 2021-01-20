@@ -48,53 +48,40 @@ test_that("MiDAS object is valid", {
 })
 
 test_that("getExperiments", {
-  midas <- prepareMiDAS(
-    hla_calls = MiDAS_tut_HLA,
-    colData = MiDAS_tut_pheno,
-    experiment = "hla_alleles"
+  expect_equal(
+    getExperiments(MiDAS_tut_object),
+    c(
+      "hla_alleles",
+      "hla_aa",
+      "hla_g_groups",
+      "hla_supertypes",
+      "hla_NK_ligands",
+      "kir_genes",
+      "kir_haplotypes",
+      "hla_kir_interactions",
+      "hla_divergence",
+      "hla_het"
+    )
   )
-
-  expect_equal(getExperiments(midas), "hla_alleles")
 })
 
 test_that("getHlaCalls", {
-  midas <- prepareMiDAS(
-    hla_calls = MiDAS_tut_HLA,
-    colData = MiDAS_tut_pheno,
-    experiment = "hla_alleles"
-  )
-
-  expect_equal(getHlaCalls(midas), MiDAS_tut_HLA)
+  expect_equal(getHlaCalls(MiDAS_tut_object), MiDAS_tut_HLA)
 })
 
 test_that("getKirCalls", {
-  midas <- prepareMiDAS(
-    kir_calls = MiDAS_tut_KIR,
-    colData = MiDAS_tut_pheno,
-    experiment = "kir_genes"
-  )
-
-  expect_equal(getKirCalls(midas), MiDAS_tut_KIR)
+  expect_equal(getKirCalls(MiDAS_tut_object), MiDAS_tut_KIR)
 })
 
 test_that("getPlaceholder", {
-  midas <- prepareMiDAS(
-    kir_calls = MiDAS_tut_KIR,
-    colData = MiDAS_tut_pheno,
-    experiment = "kir_genes"
-  )
-
-  expect_equal(getPlaceholder(midas), "term")
+  expect_equal(getPlaceholder(MiDAS_tut_object), "term")
 })
 
 test_that("getOmnibusGroups", {
-  midas <- prepareMiDAS(
-    hla_calls = MiDAS_tut_HLA[, 1:3],
-    colData = MiDAS_tut_pheno,
-    experiment = "hla_aa"
-  )
-
-  expect_equal(getOmnibusGroups(midas, "hla_aa")[1:3],
+  midas <-
+    filterByOmnibusGroups(MiDAS_tut_object, "hla_aa", c("A_-22", "A_-21", "A_-18"))
+  
+  expect_equal(getOmnibusGroups(midas, "hla_aa"),
                list(
                  `A_-22` = c("A_-22_V", "A_-22_*", "A_-22_I"),
                  `A_-21` = c("A_-21_M", "A_-21_V", "A_-21_*"),
@@ -108,15 +95,9 @@ test_that("getOmnibusGroups", {
 })
 
 test_that("getFrequencies", {
-  midas <- prepareMiDAS(
-    hla_calls = MiDAS_tut_HLA,
-    colData = MiDAS_tut_pheno,
-    experiment = c("hla_alleles", "hla_divergence")
-  )
-
   alleles_subset <-
     c("A*01:01", "A*02:01", "A*02:06", "A*26:01", "B*07:02", "B*08:01", "B*13:02", "B*15:01", "B*27:05", "B*40:01", "B*57:01")
-  midas_sub <- midas[alleles_subset, ]
+  midas_sub <- MiDAS_tut_object[alleles_subset, ]
   freq <- getFrequencies(midas_sub, "hla_alleles")
   test_freq <- data.frame(
     term = alleles_subset,
@@ -128,15 +109,15 @@ test_that("getFrequencies", {
   expect_equal(freq, test_freq)
 
   expect_error(
-    getFrequencies(midas, 1),
+    getFrequencies(MiDAS_tut_object, 1),
     "experiment is not a string \\(a length one character vector\\)."
   )
 
-  expect_error(getFrequencies(midas, "foo"),
+  expect_error(getFrequencies(MiDAS_tut_object, "foo"),
                "experiment should be one of \"hla_alleles\", \"hla_divergence\"."
   )
 
-  expect_error(getFrequencies(midas, "hla_divergence"),
+  expect_error(getFrequencies(MiDAS_tut_object, "hla_divergence"),
                "Frequencies can not be calculated for experiment 'hla_divergence'"
   )
 })
@@ -247,26 +228,18 @@ test_that("prepareMiDAS", {
 })
 
 test_that("filterByFrequency", {
-  hla_calls <- reduceHlaCalls(MiDAS_tut_HLA, 4)
-  midas <- prepareMiDAS(
-    hla_calls = hla_calls,
-    kir_calls = MiDAS_tut_KIR,
-    colData = MiDAS_tut_pheno,
-    experiment = c("hla_alleles", "hla_supertypes", "kir_genes", "hla_divergence")
-  )
-
   # filtration works as expected
   experiment <- "hla_alleles"
   lower_frequency_cutoff <- 0.53
   upper_frequency_cutoff <- 0.56
   filtered_midas <-
     filterByFrequency(
-      object = midas,
+      object = MiDAS_tut_object,
       experiment = experiment,
       lower_frequency_cutoff = lower_frequency_cutoff,
       upper_frequency_cutoff = upper_frequency_cutoff
     )
-  test_filtered_midas <- midas
+  test_filtered_midas <- MiDAS_tut_object
   test_filtered_midas[[experiment]] <-
     filterExperimentByFrequency(
       experiment = midas[[experiment]],
@@ -281,7 +254,7 @@ test_that("filterByFrequency", {
   upper_frequency_cutoff <- 0.56
   expect_error(
     filterByFrequency(
-      object = midas,
+      object = MiDAS_tut_object,
       experiment = experiment,
       lower_frequency_cutoff = lower_frequency_cutoff,
       upper_frequency_cutoff = upper_frequency_cutoff
@@ -291,22 +264,16 @@ test_that("filterByFrequency", {
 })
 
 test_that("filterByOmnibusGroups", {
-  midas <- prepareMiDAS(
-    hla_calls = MiDAS_tut_HLA,
-    colData = MiDAS_tut_pheno,
-    experiment = c("hla_alleles", "hla_aa")
-  )
-
   # filtration works as expected
   experiment <- "hla_aa"
   mask <- c("A_83", "A_90")
   filtered_midas <-
     filterByOmnibusGroups(
-      object = midas,
+      object = MiDAS_tut_object,
       experiment = experiment,
       groups = mask
     )
-  test_filtered_midas <- midas
+  test_filtered_midas <- MiDAS_tut_object
   vars <- c("A_83_R", "A_83_G", "A_90_D", "A_90_A")
   test_filtered_midas[[experiment]] <- test_filtered_midas[[experiment]][vars, ]
 
@@ -316,7 +283,7 @@ test_that("filterByOmnibusGroups", {
   experiment <- "hla_alleles"
   expect_error(
     filterByOmnibusGroups(
-      object = midas,
+      object = MiDAS_tut_object,
       experiment = experiment,
       groups = mask
     ),
@@ -325,12 +292,7 @@ test_that("filterByOmnibusGroups", {
 })
 
 test_that("getAllelesForAA", {
-  midas <- prepareMiDAS(
-    hla_calls = MiDAS_tut_HLA,
-    colData = MiDAS_tut_pheno,
-    experiment = "hla_alleles"
-  )
-  aa <- getAllelesForAA(midas, "DRA_2")
+  aa <- getAllelesForAA(MiDAS_tut_object, "DRA_2")
   aa_test <- data.frame(
     `HLA-DRA (2)` = c("*", "A"),
     `HLA-DRA alleles` = c("*01:02", "*01:01"),
@@ -340,14 +302,14 @@ test_that("getAllelesForAA", {
     check.names = FALSE
   )
 
-  expect_error(getAllelesForAA(midas, 2),
+  expect_error(getAllelesForAA(MiDAS_tut_object, 2),
                "aa_pos is not a string \\(a length one character vector\\).")
 
-  expect_error(getAllelesForAA(midas, "A"),
+  expect_error(getAllelesForAA(MiDAS_tut_object, "A"),
                "amino acid position should be formatted like: A_9.")
 
-  MultiAssayExperiment::metadata(midas)[["hla_calls"]] <- NULL
-  expect_error(getAllelesForAA(midas, "A_9"),
+  MultiAssayExperiment::metadata(MiDAS_tut_object)[["hla_calls"]] <- NULL
+  expect_error(getAllelesForAA(MiDAS_tut_object, "A_9"),
                "Could not find HLA calls associated with MiDAS object. Make sure to use prepareMiDAS for MiDAS object creation.")
 })
 

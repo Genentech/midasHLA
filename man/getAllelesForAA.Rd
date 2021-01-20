@@ -19,3 +19,7 @@ Data frame containing HLA alleles, their corresponding amino acid
 \description{
 List HLA alleles and amino acid residues at a given position.
 }
+\examples{
+getAllelesForAA(object = MiDAS_tut_object, aa_pos = "A_9")
+
+}

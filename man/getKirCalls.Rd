@@ -15,3 +15,7 @@ KIR calls data frame.
 \description{
 Get KIR calls from MiDAS object.
 }
+\examples{
+getKirCalls(object = MiDAS_tut_object)
+
+}

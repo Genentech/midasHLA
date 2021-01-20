@@ -15,3 +15,7 @@ String giving name of placeholder.
 \description{
 Get placeholder name from MiDAS object.
 }
+\examples{
+getPlaceholder(object = MiDAS_tut_object)
+
+}

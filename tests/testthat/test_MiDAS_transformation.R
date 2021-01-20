@@ -264,11 +264,7 @@ test_that("formatResults", {
 })
 
 test_that("kableResults", {
-  midas <- prepareMiDAS(
-    hla_calls = MiDAS_tut_HLA,
-    colData = MiDAS_tut_pheno,
-    experiment = "hla_alleles"
-  )
+  midas <- midasToWide(MiDAS_tut_object, "hla_alleles")
   object <- lm(disease ~ term, data = midas)
   res <- runMiDAS(object, inheritance_model = "additive", experiment = "hla_alleles")
   res_kable <- kableResults(res)
@@ -403,15 +399,8 @@ test_that("getHlaKirInteractions", {
 })
 
 test_that("filterExperimentByFrequency", {
-  midas <- prepareMiDAS(
-    hla_calls = MiDAS_tut_HLA,
-    kir_calls = MiDAS_tut_KIR,
-    colData = MiDAS_tut_pheno,
-    experiment = c("hla_alleles", "hla_aa")
-  )
-
   # filtering works as expected for fractions
-  experiment <- midas[["hla_alleles"]]
+  experiment <- MiDAS_tut_object[["hla_alleles"]]
   lower_frequency_cutoff <- 0.50
   upper_frequency_cutoff <- 0.90
   experiment_filtered <- filterExperimentByFrequency(
@@ -423,7 +412,7 @@ test_that("filterExperimentByFrequency", {
   expect_equal(experiment_filtered, experiment[expected_vars, ])
 
   # filtering works as expected for counts
-  experiment <- midas[["hla_alleles"]]
+  experiment <- MiDAS_tut_object[["hla_alleles"]]
   lower_frequency_cutoff <- 8
   upper_frequency_cutoff <- 10
   experiment_filtered <- filterExperimentByFrequency(
@@ -448,7 +437,7 @@ test_that("filterExperimentByFrequency", {
   expect_equal(experiment_filtered, experiment[expected_vars, ])
 
   # filtering works as expected for boundry conditions NULL, NULL
-  experiment <- midas[["hla_alleles"]]
+  experiment <- MiDAS_tut_object[["hla_alleles"]]
   lower_frequency_cutoff <- NULL
   upper_frequency_cutoff <- NULL
   experiment_filtered <- filterExperimentByFrequency(
@@ -459,7 +448,7 @@ test_that("filterExperimentByFrequency", {
   expect_equal(experiment_filtered, experiment)
 
   # filtering works as expected for boundry conditions 0, 0
-  experiment <- midas[["hla_alleles"]]
+  experiment <- MiDAS_tut_object[["hla_alleles"]]
   lower_frequency_cutoff <- 0
   upper_frequency_cutoff <- 0
   experiment_filtered <- filterExperimentByFrequency(
@@ -471,7 +460,7 @@ test_that("filterExperimentByFrequency", {
   expect_equal(experiment_filtered, experiment[expected_vars, ])
 
   # filtering works as expected for boundry conditions 1, 1
-  experiment <- midas[["hla_alleles"]]
+  experiment <- MiDAS_tut_object[["hla_alleles"]]
   lower_frequency_cutoff <- 1
   upper_frequency_cutoff <- 1
   experiment_filtered <- filterExperimentByFrequency(
@@ -483,7 +472,7 @@ test_that("filterExperimentByFrequency", {
   expect_equal(experiment_filtered, experiment[expected_vars, ])
   
   # omnibus groups are filtred correctly
-  experiment <- midas[["hla_aa"]]
+  experiment <- MiDAS_tut_object[["hla_aa"]]
   lower_frequency_cutoff <- 0.86
   upper_frequency_cutoff <- 0.87
   experiment_filtered <- filterExperimentByFrequency(
@@ -509,7 +498,7 @@ test_that("filterExperimentByFrequency", {
   )
 
   # carrier_frequency must be a string
-  experiment <- midas[["hla_alleles"]]
+  experiment <- MiDAS_tut_object[["hla_alleles"]]
   inheritance_model <- 1
   lower_frequency_cutoff <- "foo"
   upper_frequency_cutoff <- 0.5
@@ -524,7 +513,7 @@ test_that("filterExperimentByFrequency", {
   )
 
   # lower_frequency_cutof must be a number
-  experiment <- midas[["hla_alleles"]]
+  experiment <- MiDAS_tut_object[["hla_alleles"]]
   lower_frequency_cutoff <- "foo"
   upper_frequency_cutoff <- 0.5
   expect_error(
@@ -537,7 +526,7 @@ test_that("filterExperimentByFrequency", {
   )
 
   # lower_frequency_cutof must be positive
-  experiment <- midas[["hla_alleles"]]
+  experiment <- MiDAS_tut_object[["hla_alleles"]]
   lower_frequency_cutoff <- -1
   upper_frequency_cutoff <- 0.5
   expect_error(
@@ -550,7 +539,7 @@ test_that("filterExperimentByFrequency", {
   )
 
   # upper_frequency_cutoff must be a number
-  experiment <- midas[["hla_alleles"]]
+  experiment <- MiDAS_tut_object[["hla_alleles"]]
   lower_frequency_cutoff <- 0.5
   upper_frequency_cutoff <- "foo"
   expect_error(
@@ -563,7 +552,7 @@ test_that("filterExperimentByFrequency", {
   )
 
   # upper_frequency_cutoff must be positive
-  experiment <- midas[["hla_alleles"]]
+  experiment <- MiDAS_tut_object[["hla_alleles"]]
   lower_frequency_cutoff <- 0
   upper_frequency_cutoff <- -1
   expect_error(
@@ -576,7 +565,7 @@ test_that("filterExperimentByFrequency", {
   )
 
   # lower_frequency_cutoff is lower than upper_frequency_cutoff
-  experiment <- midas[["hla_alleles"]]
+  experiment <- MiDAS_tut_object[["hla_alleles"]]
   lower_frequency_cutoff <- 5
   upper_frequency_cutoff <- 1
   expect_error(
@@ -589,7 +578,7 @@ test_that("filterExperimentByFrequency", {
   )
 
   # Both lower_frequency_cutoff and upper_frequency_cutoff have to be either frequencies or counts
-  experiment <- midas[["hla_alleles"]]
+  experiment <- MiDAS_tut_object[["hla_alleles"]]
   lower_frequency_cutoff <- 0.5
   upper_frequency_cutoff <- 2
   expect_error(

@@ -105,13 +105,7 @@ test_that("backquote", {
 })
 
 test_that("updateModel", {
-  midas <-
-    prepareMiDAS(
-      hla_calls = MiDAS_tut_HLA,
-      colData = MiDAS_tut_pheno,
-      experiment = "hla_alleles"
-    )
-  midas_data <- midasToWide(midas, experiment = "hla_alleles")
+  midas_data <- midasToWide(MiDAS_tut_object, experiment = "hla_alleles")
   mod <- lm(disease ~ 1, data = midas_data)
   mod$call$data <- midas_data
   mod_test <- lm(disease ~ `A*01:01`, data = midas_data)
@@ -355,12 +349,7 @@ test_that("checkKirGenesFormat", {
 
 test_that("iterativeLRT", {
   MiDASdat <-
-    prepareMiDAS(
-      hla_calls = MiDAS_tut_HLA[, 1:3],
-      colData = MiDAS_tut_pheno,
-      experiment = "hla_aa"
-    )
-  MiDASdat <- filterByOmnibusGroups(MiDASdat, "hla_aa", c("A_29", "A_44", "A_65"))
+    filterByOmnibusGroups(MiDAS_tut_object, "hla_aa", c("A_29", "A_44", "A_65"))
   omnibus_groups <- getOmnibusGroups(MiDASdat, "hla_aa")
   placeholder <- getPlaceholder(MiDASdat)
   MiDASdat <- as.data.frame(MiDASdat)
@@ -427,14 +416,12 @@ test_that("iterativeLRT", {
 
 test_that("iterativeModel", {
   MiDASdat <-
-    prepareMiDAS(
-      hla_calls = MiDAS_tut_HLA[, 1:3],
-      colData = MiDAS_tut_pheno,
-      experiment = "hla_alleles"
-    )
+    filterByVariables(MiDAS_tut_object,
+                      "hla_alleles",
+                      c("A*01:01", "A*01:02", "A*01:234"))
   placeholder <- getPlaceholder(MiDASdat)
   variables <- c("A*01:01", "A*01:02", "A*01:234")
-  MiDASdat <- as.data.frame(MiDASdat)
+  MiDASdat <- midasToWide(MiDASdat, "hla_alleles")
   object <- lm(disease ~ outcome + term, data = MiDASdat)
 
   res <- iterativeModel(object, placeholder, variables)

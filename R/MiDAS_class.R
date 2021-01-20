@@ -94,6 +94,9 @@ setValidity(Class = "MiDAS", method = function(object) {
 #' @param object \code{\link{MiDAS}} object.
 #'
 #' @return Character vector giving names of experiments in \code{object}.
+#' 
+#' @examples
+#' getExperiments(object = MiDAS_tut_object)
 #'
 #' @importFrom S4Vectors metadata
 #' @export
@@ -118,6 +121,9 @@ setMethod(
 #' @param object \code{\link{MiDAS}} object.
 #'
 #' @return HLA calls data frame.
+#' 
+#' @examples
+#' getHlaCalls(object = MiDAS_tut_object)
 #'
 #' @importFrom S4Vectors metadata
 #' @export
@@ -143,6 +149,9 @@ setMethod(
 #' @param object \code{\link{MiDAS}} object.
 #'
 #' @return KIR calls data frame.
+#' 
+#' @examples
+#' getKirCalls(object = MiDAS_tut_object)
 #'
 #' @importFrom S4Vectors metadata
 #' @export
@@ -168,6 +177,9 @@ setMethod(
 #' @param object \code{\link{MiDAS}} object.
 #'
 #' @return String giving name of placeholder.
+#' 
+#' @examples
+#' getPlaceholder(object = MiDAS_tut_object)
 #'
 #' @importFrom S4Vectors metadata
 #' @export
@@ -205,6 +217,10 @@ setMethod(
 #' @param experiment String specifying experiment.
 #'
 #' @return List of omnibus groups for a given experiment.
+#' 
+#' @examples
+#' getOmnibusGroups(object = MiDAS_tut_object,
+#'                  experiment = "hla_aa")
 #'
 #' @importFrom assertthat assert_that is.string
 #' @importFrom S4Vectors metadata
@@ -272,19 +288,15 @@ setMethod(
 #'   feature frequencies. If argument \code{compare} is set to \code{TRUE}, 
 #'   further columns will hold frequencies in reference populations.
 #'   
-#' @examples 
-#' midas <- prepareMiDAS(
-#'   hla_calls = MiDAS_tut_HLA,
-#'   colData = MiDAS_tut_pheno,
-#'   experiment = "hla_alleles"
-#' )
-#' 
+#' @examples
 #' # using default reference populations
-#' getFrequencies(midas, experiment = "hla_alleles", compare = TRUE)
+#' getFrequencies(object = MiDAS_tut_object, 
+#'                experiment = "hla_alleles", 
+#'                compare = TRUE)
 #' 
 #' # using customized set of reference populations
 #' getFrequencies(
-#'   object = midas, 
+#'   object = MiDAS_tut_object, 
 #'   experiment = "hla_alleles", 
 #'   compare = TRUE,
 #'   ref_pop = list(
@@ -428,6 +440,13 @@ setMethod(
 #'   numbers between 0 and 1 as fractions.
 #'
 #' @return Filtered \code{\link{MiDAS}} object.
+#' 
+#' @examples
+#' filterByFrequency(object = MiDAS_tut_object, 
+#'                   experiment = "hla_alleles",
+#'                   lower_frequency_cutoff = 0.05,
+#'                   upper_frequency_cutoff = 0.95,
+#'                   carrier_frequency = TRUE)
 #'
 #' @importFrom assertthat assert_that is.string
 #' @importFrom S4Vectors metadata
@@ -497,6 +516,11 @@ setMethod(
 #'   \code{\link{getOmnibusGroups}} for more details.
 #'
 #' @return Filtered \code{\link{MiDAS}} object.
+#' 
+#' @examples
+#' filterByOmnibusGroups(object = MiDAS_tut_object,
+#'                       experiment = "hla_aa",
+#'                       groups = c("A_3", "A_6", "C_1"))
 #'
 #' @importFrom assertthat assert_that is.string see_if
 #' @importFrom S4Vectors metadata
@@ -567,6 +591,11 @@ setMethod(
 #' @param variables Character vector specifying features to select.
 #'
 #' @return Filtered \code{\link{MiDAS}} object.
+#' 
+#' @examples
+#' filterByVariables(object = MiDAS_tut_object,
+#'                   experiment = "hla_alleles",
+#'                   variables = c("A*25:01", "A*26:01", "B*07:02"))
 #'
 #' @export
 setGeneric(
@@ -608,6 +637,9 @@ setMethod(
 #'
 #' @return Data frame containing HLA alleles, their corresponding amino acid
 #'   residues and frequencies at requested position.
+#'   
+#' @examples
+#' getAllelesForAA(object = MiDAS_tut_object, aa_pos = "A_9")
 #'
 #' @export
 setGeneric(
