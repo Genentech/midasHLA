@@ -43,18 +43,18 @@ Character vector of formatted table source code.
 latex format.
 }
 \examples{
-\dontrun{
 midas <- prepareMiDAS(hla_calls = MiDAS_tut_HLA,
                       colData = MiDAS_tut_pheno,
                       experiment = "hla_alleles")
 object <- lm(disease ~ term, data = midas)
-res <- runMiDAS(object, experiment = "hla_alleles")
+res <- runMiDAS(object, 
+                experiment = "hla_alleles", 
+                inheritance_model = "dominant")
 formatResults(res,
               filter_by = c("p.value <= 0.05", "estimate > 0"),
               arrange_by = c("p.value * estimate"),
               select_cols = c("allele", "p-value" = "p.value"),
               format = "html",
               header = "HLA allelic associations")
-}
 
 }
