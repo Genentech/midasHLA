@@ -4,7 +4,7 @@
 #'
 #' Input file has to be a tsv formatted table with a header. First column should
 #' contain sample IDs, further columns hold HLA allele numbers. See
-#' \code{system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")}
+#' \code{system.file("extdata", "HLAHD_output_example.txt", package = "midasHLA")}
 #' for an example.
 #'
 #' \code{resolution} parameter can be used to reduce HLA allele numbers. If
@@ -21,7 +21,7 @@
 #'   hold HLA allele numbers.
 #'
 #' @examples
-#' file <- system.file("extdata", "MiDAS_tut_HLA.txt", package = "MiDAS")
+#' file <- system.file("extdata", "MiDAS_tut_HLA.txt", package = "midasHLA")
 #' hla_calls <- readHlaCalls(file)
 #'
 #' @importFrom assertthat assert_that is.readable see_if
@@ -222,13 +222,13 @@ readHlaAlignments <- function(file,
   } else {
     assert_that(is.string(gene))
     gene <- toupper(gene)
-    file <- paste0(system.file("extdata", package = "MiDAS"),
+    file <- paste0(system.file("extdata", package = "midasHLA"),
                    "/",
                    gene,
                    "_prot.Rdata"
     )
     available_genes <- list.files(
-      path = system.file("extdata", package = "MiDAS"),
+      path = system.file("extdata", package = "midasHLA"),
       pattern = "_prot.Rdata$",
       full.names = TRUE
     )
@@ -269,7 +269,7 @@ readHlaAlignments <- function(file,
 #' Input file has to be a tsv formatted table. First column should be named
 #' "ID" and contain samples IDs, further columns should hold KIR genes presence
 #' / absence indicators. See
-#' \code{system.file("extdata", "MiDAS_tut_KIR", package = "MiDAS")} for an
+#' \code{system.file("extdata", "MiDAS_tut_KIR", package = "midasHLA")} for an
 #' example.
 #'
 #' @inheritParams utils::read.table
@@ -279,7 +279,7 @@ readHlaAlignments <- function(file,
 #'   IDs, further columns hold KIR genes presence / absence indicators.
 #'
 #' @examples
-#' file <- system.file("extdata", "MiDAS_tut_KIR.txt", package = "MiDAS")
+#' file <- system.file("extdata", "MiDAS_tut_KIR.txt", package = "midasHLA")
 #' readKirCalls(file)
 #'
 #' @importFrom assertthat assert_that is.readable see_if

@@ -15,7 +15,7 @@ knitr::opts_chunk$set(collapse = TRUE)
 library("dplyr")
 library("kableExtra")
 library("knitr")
-library("MiDAS")
+library("midasHLA")
 ```
 
 # Introduction
@@ -27,7 +27,7 @@ MiDAS is a comprehensive R package for immunogenetic data manipulation and stati
 `MiDAS` includes functions to read HLA and KIR typing data, checking for the correct format and adherence to the right nomenclature. HLA calls can be reduced to a desired resolution when importing it, e.g. from 6-digit to 4-digit. Phenotypic observations can be read e.g. using the `read.table` function (make sure to include `stringsAsFactors = FALSE` argument).
 
 ```{r load_pheno, echo=TRUE, warning=FALSE}
-pheno_file <- system.file("extdata", "MiDAS_tut_pheno.txt", package = "MiDAS")
+pheno_file <- system.file("extdata", "MiDAS_tut_pheno.txt", package = "midasHLA")
 pheno <- read.table(pheno_file, header = TRUE, stringsAsFactors = FALSE)
 ```
 
@@ -40,7 +40,7 @@ pheno %>%
 
 ```{r load_hla, echo=TRUE, warning=FALSE}
 # HLA calls can be loaded using the readHlaCalls function with the desired resolution
-hla_calls_file <- system.file("extdata", "MiDAS_tut_HLA.txt", package = "MiDAS")
+hla_calls_file <- system.file("extdata", "MiDAS_tut_HLA.txt", package = "midasHLA")
 hla_calls <- readHlaCalls(hla_calls_file, resolution = 4)
 ```
 
@@ -54,7 +54,7 @@ hla_calls %>%
 
 ```{r load_kir, echo=TRUE, warning=FALSE}
 # KIR calls (currently presence/absence calls, no allele-level resolution) can be loaded using the readKirCalls function
-kir_calls_file <- system.file("extdata", "MiDAS_tut_KIR.txt", package = "MiDAS")
+kir_calls_file <- system.file("extdata", "MiDAS_tut_KIR.txt", package = "midasHLA")
 kir_calls <- readKirCalls(kir_calls_file)
 ```
 

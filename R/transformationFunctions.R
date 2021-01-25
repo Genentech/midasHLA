@@ -52,7 +52,7 @@ hlaToAAVariation <- function(hla_calls,
 
   # assert that alignment files are available
   available_genes <- list.files(
-    path = system.file("extdata", package = "MiDAS"),
+    path = system.file("extdata", package = "midasHLA"),
     pattern = "_prot.Rdata$"
   )
   available_genes <- vapply(
@@ -251,7 +251,7 @@ hlaToVariable <- function(hla_calls,
       dictionary <- system.file(
         "extdata",
         paste0("Match_", dictionary, ".txt"),
-        package = "MiDAS"
+        package = "midasHLA"
       )
     }
   }
@@ -875,7 +875,7 @@ countsToVariables <- function(counts,
 #'   kir_calls = MiDAS_tut_KIR, 
 #'   interactions_dict = system.file(
 #'     "extdata", "Match_counts_hla_kir_interactions.txt", 
-#'     package = "MiDAS")
+#'     package = "midasHLA")
 #' )
 #'
 #' @importFrom assertthat assert_that is.string
@@ -886,7 +886,7 @@ countsToVariables <- function(counts,
 #' @export
 getHlaKirInteractions <- function(hla_calls,
                                   kir_calls,
-                                  interactions_dict = system.file("extdata", "Match_counts_hla_kir_interactions.txt", package = "MiDAS")) {
+                                  interactions_dict = system.file("extdata", "Match_counts_hla_kir_interactions.txt", package = "midasHLA")) {
   assert_that(
     checkHlaCallsFormat(hla_calls),
     checkKirCallsFormat(kir_calls),

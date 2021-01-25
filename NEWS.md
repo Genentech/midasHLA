@@ -1,5 +1,6 @@
 # 0.99.13 - 18/01/21
 + changes version number to comply with Bioconductor package submission guidelines.
++ rename package to midasHLA; midas is already in use.
 
 # 1.0.13 - 6/01/21
 + adds new HLA-KIR interaction A*03_A*11_KIR3DL2 defined as (A*03 | A*11) & KIR3DL2.

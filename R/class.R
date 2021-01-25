@@ -1,4 +1,4 @@
-#' @include MiDAS_class.R
+#' @include class.R
 NULL
 
 #' MiDAS class
@@ -38,7 +38,7 @@ setMethod("initialize", "MiDAS", function(.Object, experiments, colData, metadat
     colData = colData,
     metadata = metadata
   )
-  class(midas) <- structure("MiDAS", package = "MiDAS")
+  class(midas) <- structure("MiDAS", package = "midasHLA")
 
   return(midas)
 })
@@ -1118,7 +1118,7 @@ prepareMiDAS_hla_NK_ligands <- function(hla_calls, ...) {
 
   # Bw6 is defined both in Bw and Bw HLA-B only dictionaries, here this unambiguity is removed
   bw_with_A <-
-    system.file("extdata", "Match_allele_HLA_Bw.txt", package = "MiDAS")
+    system.file("extdata", "Match_allele_HLA_Bw.txt", package = "midasHLA")
   bw_with_A <-
     read.table(
       file = bw_with_A,

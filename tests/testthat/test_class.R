@@ -16,7 +16,7 @@ test_that("MiDAS object is valid", {
       colData = pheno,
       metadata = list(placeholder = "term")
     )
-  class(midas) <- structure("MiDAS", package = "MiDAS")
+  class(midas) <- structure("MiDAS", package = "midasHLA")
 
   bad_placeholder <- midas
   S4Vectors::metadata(bad_placeholder)$placeholder <- 1
@@ -433,7 +433,7 @@ test_that("prepareMiDAS_hla_NK_ligands", {
   experiment <- do.call(prepareMiDAS_hla_NK_ligands, args)
 
   allele_HLA_Bw <- read.table(
-    file = system.file("extdata", "Match_allele_HLA_Bw.txt", package = "MiDAS"),
+    file = system.file("extdata", "Match_allele_HLA_Bw.txt", package = "midasHLA"),
     header = TRUE,
     sep = "\t",
     stringsAsFactors = FALSE
@@ -602,7 +602,7 @@ test_that("prepareMiDAS_hla_het", {
 
 test_that("prepareMiDAS_hla_custom", {
   hla_dictionary <- read.table(
-    file = system.file("extdata", "Match_allele_HLA_Ggroup.txt", package = "MiDAS"),
+    file = system.file("extdata", "Match_allele_HLA_Ggroup.txt", package = "midasHLA"),
     header = TRUE,
     sep = "\t",
     quote = "",
@@ -619,7 +619,7 @@ test_that("prepareMiDAS_hla_custom", {
 
 test_that("prepareMiDAS_kir_custom", {
   kir_dictionary <- read.table(
-    file = system.file("extdata", "Match_counts_kir_haplotypes.txt", package = "MiDAS"),
+    file = system.file("extdata", "Match_counts_kir_haplotypes.txt", package = "midasHLA"),
     header = TRUE,
     sep = "\t",
     quote = "",

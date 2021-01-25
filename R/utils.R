@@ -188,7 +188,7 @@ getVariableAAPos <- function(alignment,
 #'   variables according to \code{dictionary}.
 #'
 #' @examples
-#' dictionary <- system.file("extdata", "Match_allele_HLA_supertype.txt", package = "MiDAS")
+#' dictionary <- system.file("extdata", "Match_allele_HLA_supertype.txt", package = "midasHLA")
 #' convertAlleleToVariable(c("A*01:01", "A*02:01"), dictionary = dictionary)
 #'
 #' @importFrom assertthat assert_that is.string is.readable see_if
@@ -326,7 +326,7 @@ updateModel <- function(object,
 listMiDASDictionaries <- function(pattern = "allele", file.names = FALSE) {
   pattern <- paste0("^Match.*", pattern, ".*.txt$")
   lib <- list.files(
-    path = system.file("extdata", package = "MiDAS"),
+    path = system.file("extdata", package = "midasHLA"),
     pattern = pattern,
     full.names = file.names
   )

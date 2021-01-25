@@ -250,7 +250,7 @@ test_that("runMiDAS", {
     if (is(ex, "SummarizedExperiment")) {ex <- assay(ex)}
     if (typeof(ex) == "integer") {
       variables_freq <-
-        MiDAS:::runMiDASGetVarsFreq(
+        midasHLA:::runMiDASGetVarsFreq(
           midas = midas,
           experiment = experiment,
           test_covar = all.vars(formula(object))[1]
@@ -321,7 +321,7 @@ test_that("runMiDAS", {
     if (is(ex, "SummarizedExperiment")) {ex <- assay(ex)}
     if (typeof(ex) == "integer") {
       variables_freq <-
-        MiDAS:::runMiDASGetVarsFreq(
+        midasHLA:::runMiDASGetVarsFreq(
           midas = midas,
           experiment = experiment,
           test_covar = all.vars(formula(object))[1]

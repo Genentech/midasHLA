@@ -1,4 +1,4 @@
 library(testthat)
-library(MiDAS)
+library(midasHLA)
 
-test_check("MiDAS")
+test_check("midasHLA")

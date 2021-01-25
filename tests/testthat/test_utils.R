@@ -50,7 +50,7 @@ test_that("getVariableAAPos", {
   allele <- c("TAP1*01:01:01:01", "TAP1*02:01:02")
   aln <- readHlaAlignments(system.file("extdata",
                                        "TAP1_prot.txt",
-                                       package = "MiDAS"))
+                                       package = "midasHLA"))
   aln <- aln[allele, ]
   expect_equal(getVariableAAPos(aln), c(`333` = 333, `637` = 637))
 
@@ -58,7 +58,7 @@ test_that("getVariableAAPos", {
 })
 
 test_that("convertAlleleToVariable", {
-  path <- system.file("extdata", "Match_allele_HLA_supertype.txt", package = "MiDAS")
+  path <- system.file("extdata", "Match_allele_HLA_supertype.txt", package = "midasHLA")
   addvar <- convertAlleleToVariable(c("A*01:01", "A*02:01", "B*01", NA), dictionary = path)
   expect_equal(addvar, c("A01", "A02", NA, NA))
   dictionary <- read.table(path, header = TRUE, stringsAsFactors = FALSE)

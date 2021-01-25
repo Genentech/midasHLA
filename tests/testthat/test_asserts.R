@@ -1,5 +1,5 @@
 test_that("checkHlaCallsFormat", {
-  file <- system.file("extdata", "MiDAS_tut_HLA.txt", package = "MiDAS")
+  file <- system.file("extdata", "MiDAS_tut_HLA.txt", package = "midasHLA")
   hla_calls <- readHlaCalls(file)
   expect_equal(checkHlaCallsFormat(hla_calls), TRUE)
 

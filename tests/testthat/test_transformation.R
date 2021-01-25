@@ -6,7 +6,7 @@ test_that("hlaToAAVariation", {
                      indels = TRUE,
                      unkchar = TRUE,
                      as_df = FALSE)
-  load(system.file("extdata", "test_aa_variation.Rdata", package = "MiDAS"))
+  load(system.file("extdata", "test_aa_variation.Rdata", package = "midasHLA"))
   expect_equal(aa_variation, test_aa_variation)
 
   expect_error(hlaToAAVariation(MiDAS_tut_HLA, indels = "foo"),
@@ -28,7 +28,7 @@ test_that("hlaToVariable", {
     lapply(
       MiDAS_tut_HLA[,-1],
       convertAlleleToVariable,
-      dictionary = system.file("extdata", "Match_allele_HLA_supertype.txt", package = "MiDAS")
+      dictionary = system.file("extdata", "Match_allele_HLA_supertype.txt", package = "midasHLA")
     )
   na_mask <- vapply(test_hla_supertypes, function(x) all(is.na(x)), FUN.VALUE = logical(1))
   test_hla_supertypes <- test_hla_supertypes[! na_mask]
@@ -377,7 +377,7 @@ test_that("countsToVariables", {
 
 test_that("getHlaKirInteractions", {
   hla_kir <- getHlaKirInteractions(MiDAS_tut_HLA, MiDAS_tut_KIR)
-  load(system.file("extdata", "test_hla_kir_interactions.Rdata", package = "MiDAS"))
+  load(system.file("extdata", "test_hla_kir_interactions.Rdata", package = "midasHLA"))
   expect_equal(hla_kir, test_hla_kir_interactions)
 
   expect_error(
