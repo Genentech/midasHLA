@@ -3,7 +3,7 @@ on:
     branches:
       - master
 
-name: bioconductor-check
+name: bioconductor-check-ubuntu
 
 jobs:
   check:
