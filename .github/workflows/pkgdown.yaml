@@ -7,7 +7,7 @@ name: pkgdown
 
 jobs:
   pkgdown:
-    runs-on: macOS-latest
+    runs-on: ubuntu-18.04
     env:
       GITHUB_PAT: ${{ secrets.GH_PAT }}
     steps:
@@ -16,6 +16,9 @@ jobs:
       - uses: r-lib/actions/setup-r@v1
 
       - uses: r-lib/actions/setup-pandoc@v1
+
+      - name: Install libs
+        run: sudo apt-get install libcurl4-openssl-dev libgit2-dev
 
       - name: Query dependencies
         run: |
@@ -36,7 +39,7 @@ jobs:
           install.packages("BiocManager")
           BiocManager::install(c("SummarizedExperiment", "S4Vectors", "MultiAssayExperiment"))
           remotes::install_deps(dependencies = TRUE)
-          install.packages("pkgdown", type = "binary")
+          install.packages("pkgdown", type = "source")
         shell: Rscript {0}
 
       - name: Install package
