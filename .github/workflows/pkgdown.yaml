@@ -39,7 +39,7 @@ jobs:
           install.packages("BiocManager")
           BiocManager::install(c("SummarizedExperiment", "S4Vectors", "MultiAssayExperiment"))
           remotes::install_deps(dependencies = TRUE)
-          install.packages("pkgdown", type = "source")
+          install.packages("pkgdown")
         shell: Rscript {0}
 
       - name: Install package
