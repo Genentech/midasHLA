@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Read HLA allele calls — readHlaCalls • MiDAS</title>
+<title>Read HLA allele calls — readHlaCalls • midasHLA</title>
 
 
 <!-- jquery -->
@@ -71,7 +71,7 @@
         <span class="icon-bar"></span>
       </button>
       <span class="navbar-brand">
-        <a class="navbar-link" href="../index.html">MiDAS</a>
+        <a class="navbar-link" href="../index.html">midasHLA</a>
         <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.99.13</span>
       </span>
     </div>
@@ -162,7 +162,7 @@
 
     <p>Input file has to be a tsv formatted table with a header. First column should
 contain sample IDs, further columns hold HLA allele numbers. See
-<code><a href='https://rdrr.io/r/base/system.file.html'>system.file("extdata", "HLAHD_output_example.txt", package = "MiDAS")</a></code>
+<code><a href='https://rdrr.io/r/base/system.file.html'>system.file("extdata", "HLAHD_output_example.txt", package = "midasHLA")</a></code>
 for an example.</p>
 <p><code>resolution</code> parameter can be used to reduce HLA allele numbers. If
 reduction is not needed <code>resolution</code> can be set to 8. <code>resolution</code>
@@ -171,7 +171,7 @@ about HLA allele numbers resolution see
 <a href='http://hla.alleles.org/nomenclature/naming.html'>http://hla.alleles.org/nomenclature/naming.html</a>.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='va'>file</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span><span class='op'>(</span><span class='st'>"extdata"</span>, <span class='st'>"MiDAS_tut_HLA.txt"</span>, package <span class='op'>=</span> <span class='st'>"MiDAS"</span><span class='op'>)</span>
+    <pre class="examples"><div class='input'><span class='va'>file</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span><span class='op'>(</span><span class='st'>"extdata"</span>, <span class='st'>"MiDAS_tut_HLA.txt"</span>, package <span class='op'>=</span> <span class='st'>"midasHLA"</span><span class='op'>)</span>
 <span class='va'>hla_calls</span> <span class='op'>&lt;-</span> <span class='fu'>readHlaCalls</span><span class='op'>(</span><span class='va'>file</span><span class='op'>)</span>
 
 </div></pre>
