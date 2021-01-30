@@ -19,4 +19,4 @@ devtools::install_github("Genentech/MiDAS")
 
 ## Usage
 
-A user tutorial is available here: [https://genentech.github.io/MiDAS/articles/MiDAS_tutorial.html](https://genentech.github.io/MiDAS/articles/MiDAS_tutorial.html)
+A user tutorial is available here: [https://genentech.github.io/midasHLA/articles/MiDAS_tutorial.html](https://genentech.github.io/MiDAS/articles/MiDAS_tutorial.html)
