@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Prepare MiDAS data on HLA - KIR interactions level — prepareMiDAS_hla_kir_interactions • midasHLA</title>
+<title>lapply with tryCatch routine — lapply_tryCatch • midasHLA</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,11 @@
 
 
 
-<meta property="og:title" content="Prepare MiDAS data on HLA - KIR interactions level — prepareMiDAS_hla_kir_interactions" />
-<meta property="og:description" content="Prepare MiDAS data on HLA - KIR interactions level" />
+<meta property="og:title" content="lapply with tryCatch routine — lapply_tryCatch" />
+<meta property="og:description" content="Used to run function iteratively over list, while using tryCatch to
+catch warnings and errors to finally present a summary of issues rather
+than error on each and every one. Used in iterativeLRT and
+iterativeModel." />
 
 
 
@@ -121,39 +124,49 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Prepare MiDAS data on HLA - KIR interactions level</h1>
+    <h1>lapply with tryCatch routine</h1>
     
-    <div class="hidden name"><code>prepareMiDAS_hla_kir_interactions.Rd</code></div>
+    <div class="hidden name"><code>lapply_tryCatch.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Prepare MiDAS data on HLA - KIR interactions level</p>
+    <p>Used to run function iteratively over list, while using tryCatch to
+catch warnings and errors to finally present a summary of issues rather
+than error on each and every one. Used in <code>iterativeLRT</code> and
+<code>iterativeModel</code>.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>prepareMiDAS_hla_kir_interactions</span><span class='op'>(</span><span class='va'>hla_calls</span>, <span class='va'>kir_calls</span>, <span class='va'>...</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>lapply_tryCatch</span><span class='op'>(</span><span class='va'>X</span>, <span class='va'>FUN</span>, <span class='va'>err_res</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>hla_calls</th>
-      <td><p>HLA calls data frame, as returned by
-<code><a href='readHlaCalls.html'>readHlaCalls</a></code> function.</p></td>
+      <th>X</th>
+      <td><p>a vector (atomic or list) or an <code><a href='https://rdrr.io/r/base/expression.html'>expression</a></code>
+    object.  Other objects (including classed objects) will be coerced
+    by <code>base::<a href='https://rdrr.io/r/base/list.html'>as.list</a></code>.</p></td>
     </tr>
     <tr>
-      <th>kir_calls</th>
-      <td><p>KIR calls data frame, as returned by
-<code><a href='readKirCalls.html'>readKirCalls</a></code> function.</p></td>
+      <th>FUN</th>
+      <td><p>the function to be applied to each element of <code>X</code>:
+    see &#8216;Details&#8217;.  In the case of functions like
+    <code><a href='https://rdrr.io/r/base/Arithmetic.html'>+</a></code>, <code><a href='https://rdrr.io/r/base/matmult.html'>%*%</a></code>, the function name must be backquoted or quoted.</p></td>
+    </tr>
+    <tr>
+      <th>err_res</th>
+      <td><p>Function creating a result that should be output in case of 
+error.</p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>Not used</p></td>
+      <td><p>optional arguments to <code>FUN</code>.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Matrix</p>
+    <p>List of elements as returned by <code>FUN</code>.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

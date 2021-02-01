@@ -73,7 +73,7 @@ variables using likelihood ratio test." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.99.13</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.99.15</span>
       </span>
     </div>
 
@@ -205,9 +205,13 @@ of variables given in <code>variables</code> as their linear combination.</p>
               A_29 <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"A_29_D"</span>, <span class='st'>"A_29_A"</span><span class='op'>)</span>,
               A_43 <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"A_43_Q"</span>, <span class='st'>"A_43_R"</span><span class='op'>)</span>
             <span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;   group           term df    logLik statistic    p.value p.adjusted
-#&gt; 1  A_29 A_29_D, A_29_A  1 0.5007512  1.001502 0.31694726 0.63389452
-#&gt; 2  A_43 A_43_Q, A_43_R  1 2.1307456  4.261491 0.03898569 0.07797137</div><div class='input'>
+</div><div class='output co'>#&gt; <span class='warning'>Warning: While evaluating the model problems occured:</span>
+#&gt; <span class='warning'></span>
+#&gt; <span class='warning'>* Warnings:</span>
+#&gt; <span class='warning'>* Coefficients for variables: A_29_A could not be estimated, those variables will not be included in likelyhood ratio test result.; occured 1 times, including variables: A_29_D</span>
+#&gt; <span class='warning'>* Coefficients for variables: A_43_R could not be estimated, those variables will not be included in likelyhood ratio test result.; occured 1 times, including variables: A_43_Q</span></div><div class='output co'>#&gt;   group   term df    logLik statistic p.value p.adjusted
+#&gt; 1  A_29 A_29_D  0 0.5007512  1.001502       0          0
+#&gt; 2  A_43 A_43_Q  0 2.1307456  4.261491       0          0</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
