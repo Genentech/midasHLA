@@ -358,6 +358,7 @@ listMiDASDictionaries <- function(pattern = "allele", file.names = FALSE) {
 #'   \code{p.value} corresponding p-value.
 #'
 #' @importFrom assertthat assert_that
+#' @importFrom rlang abort warn
 #' @importFrom stats logLik pchisq
 #'
 LRTest <- function(mod0, mod1) {
@@ -371,16 +372,35 @@ LRTest <- function(mod0, mod1) {
                   paste(vars0[! vars0 %in% vars1], collapse = ", ")
     )
   )
+  
+  # drop vars with NA coefficient
+  coefs <- coef(mod1)
+  na_vars <- names(coefs)[is.na(coefs)]
+  if (length(na_vars)) {
+    warning(sprintf(
+      "Coefficients for variables: %s could not be estimated, those variables will not be included in likelyhood ratio test result.",
+      paste(na_vars, collapse = ",")
+    ))
+    vars1 <- vars1[! vars1 %in% na_vars]
+  }
 
+  new_vars <- vars1[! vars1 %in% vars0]
+  if (! length(new_vars)) {
+    stop("No new variables found in an extended model. Likely coefficients for new variables could not be estimated, please check previous warning messages.",
+         domain = NA
+    )
+  }
+  
   ll0 <- logLik(mod0)
   ll1 <- logLik(mod1)
-  df <- attr(ll1, "df") - attr(ll0, "df")
+  # df <- attr(ll1, "df") - attr(ll0, "df") # here we have decided to calculate df as N-1 where N is number of new vars in mod1
+  df <- length(new_vars) - 1
   statistic <- 2 * (as.numeric(ll1) - as.numeric(ll0))
   p.value <- pchisq(statistic, df = df, lower.tail=FALSE)
 
-  new_vars <- paste(vars1[! vars1 %in% vars0], collapse = ", ")
+  
   res <- data.frame(
-    term = new_vars,
+    term = paste(new_vars, collapse = ", "),
     df = df,
     logLik = ll1 - ll0,
     statistic = statistic,
@@ -854,7 +874,7 @@ iterativeLRT <- function(object, placeholder, omnibus_groups) {
         
         return(failed_result)
       },
-      warning = function(w) {
+      warning = function(w) { # if there is a warning followed by an error the function will actually crash dramatically
         wrr <- get(x = "warning", envir = conditional_msgs)
         wrr <- c(wrr, conditionMessage(w))
         names(wrr)[length(wrr)] <- x[1] # take first variable, len(x) >= 1 
