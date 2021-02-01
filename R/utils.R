@@ -831,20 +831,15 @@ checkKirGenesFormat <- function(genes) {
 #' @importFrom dplyr bind_rows
 #'
 iterativeLRT <- function(object, placeholder, omnibus_groups) {
-  conditional_msgs <- environment()
-  conditional_msgs$error <- character()
-  conditional_msgs$warning <- character()
-  
   mod0 <- updateModel(
     object = object,
     x = "1",
     placeholder = placeholder,
     backquote = FALSE
   )
-  results <- lapply(
-    X = omnibus_groups,
-    FUN = function(x) suppressWarnings(tryCatch(
-      expr = {
+  results <- lapply_tryCatch(
+    X = omnibus_groups, 
+    FUN = function(x)
         LRTest(
           mod0,
           updateModel(
@@ -853,96 +848,19 @@ iterativeLRT <- function(object, placeholder, omnibus_groups) {
             placeholder = placeholder,
             collapse = " + ",
             backquote = TRUE
-         )
-        )
-      },
-      error = function(e) {
-        err <- get(x = "error", envir = conditional_msgs)
-        err <- c(err, conditionMessage(e))
-        
-        names(err)[length(err)] <- x[1] # take first variable, len(x) >= 1 
-        assign(x = "error", value = err, envir = conditional_msgs)
-        
-        failed_result <- data.frame(
-          term = toString(x),
-          df = NA,
-          logLik = NA,
-          statistic = NA,
-          p.value = NA,
-          stringsAsFactors = FALSE
-        )
-        
-        return(failed_result)
-      },
-      warning = function(w) { # if there is a warning followed by an error the function will actually crash dramatically
-        wrr <- get(x = "warning", envir = conditional_msgs)
-        wrr <- c(wrr, conditionMessage(w))
-        names(wrr)[length(wrr)] <- x[1] # take first variable, len(x) >= 1 
-        assign(x = "warning", value = wrr, envir = conditional_msgs)
-        
-        suppressWarnings(LRTest(
-          mod0,
-          updateModel(
-            object = object,
-            x = x,
-            placeholder = placeholder,
-            collapse = " + ",
-            backquote = TRUE
           )
-        ))
-      }
-    ))
+        ), 
+    err_res = function(x)
+      data.frame(
+        term = toString(x),
+        df = NA,
+        logLik = NA,
+        statistic = NA,
+        p.value = NA,
+        stringsAsFactors = FALSE
+      )
   )
   results <- bind_rows(results, .id = "group")
-  
-  # communicate errors and warnings <--------------------------------------------------------------
-  had_error <- length(conditional_msgs$error)
-  had_warning <- length(conditional_msgs$warning)
-  if (had_error || had_warning) {
-    msg <- "While evaluating the model problems occured:\n"
-    if (had_error) {
-      msg <- c(msg, "Errors:\n")
-      err <- table(conditional_msgs$error)
-      for (i in seq_along(err)) {
-        n <- err[i]
-        val <- names(err)[i]
-        vars <- conditional_msgs$error[conditional_msgs$error == val]
-        vars <-
-          ifelse(
-            test = length(vars) <= 5,
-            yes = paste(names(vars), collapse = ", "),
-            no = paste(c(names(vars)[seq_len(5)], "..."), collapse = ", ")
-          )
-        msg <- c(
-          msg,
-          sprintf("%s; occured %i times, including variables: %s", val, n, vars)
-        )
-      }
-      msg <- c(msg, "") # spacer
-    }
-    
-    if (had_warning) {
-      msg <- c(msg, "Warnings:")
-      wrr <- table(conditional_msgs$warning)
-      for (i in seq_along(wrr)) {
-        n <- wrr[i]
-        val <- names(wrr)[i]
-        vars <- conditional_msgs$warning[conditional_msgs$warning == val]
-        vars <-
-          ifelse(
-            test = length(vars) <= 5,
-            yes = paste(names(vars), collapse = ", "),
-            no = paste(c(names(vars)[seq_len(5)], "..."), collapse = ", ")
-          )
-        msg <- c(
-          msg,
-          sprintf("%s; occured %i times, including variables: %s", val, n, vars)
-        )
-      }
-    }
-    
-    warn(msg)
-  }
   
   return(results)
 }
@@ -966,104 +884,29 @@ iterativeModel <- function(object,
                            placeholder,
                            variables,
                            exponentiate = FALSE) {
-  conditional_msgs <- environment()
-  conditional_msgs$error <- character()
-  conditional_msgs$warning <- character()
-  results <- lapply(
+  results <- lapply_tryCatch(
     X = variables,
-    FUN = function(x) suppressWarnings(expr = tryCatch(
-      expr = {
-        obj <- updateModel(
-          object = object,
-          x = x,
-          placeholder = placeholder,
-          backquote = TRUE,
-          collapse = " + "
-        )
-        tidy(x = obj, conf.int = TRUE, exponentiate = exponentiate)
-      },
-      error = function(e) {
-        err <- get(x = "error", envir = conditional_msgs)
-        err <- c(err, conditionMessage(e))
-        
-        names(err)[length(err)] <- x
-        assign(x = "error", value = err, envir = conditional_msgs)
-        
-        failed_result <- tidy(x = object, conf.int = TRUE)[1, ]
-        failed_result[1, ] <- NA
-        failed_result$term <- x
-
-        return(failed_result)
-      },
-      warning = function(w) {
-        wrr <- get(x = "warning", envir = conditional_msgs)
-        wrr <- c(wrr, conditionMessage(w))
-        names(wrr)[length(wrr)] <- x
-        assign(x = "warning", value = wrr, envir = conditional_msgs)
-        
-        obj <- suppressWarnings(updateModel(
-          object = object,
-          x = x,
-          placeholder = placeholder,
-          backquote = TRUE,
-          collapse = " + "
-        ))
-        tidy(x = obj, conf.int = TRUE, exponentiate = exponentiate)
-      }
-    ))
+    FUN = function(x) {
+      obj <- updateModel(
+        object = object,
+        x = x,
+        placeholder = placeholder,
+        backquote = TRUE,
+        collapse = " + "
+      )
+      tidy(x = obj,
+           conf.int = TRUE,
+           exponentiate = exponentiate)
+    },
+    err_res = function(x) {
+      failed_result <- tidy(x = object, conf.int = TRUE)[1,]
+      failed_result[1,] <- NA
+      failed_result$term <- x
+      failed_result
+    }
   )
   results <- bind_rows(results)
   
-  # communicate errors and warnings <--------------------------------------------------------------
-  had_error <- length(conditional_msgs$error)
-  had_warning <- length(conditional_msgs$warning)
-  if (had_error || had_warning) {
-    msg <- "While evaluating the model problems occured:\n"
-    if (had_error) {
-      msg <- c(msg, "Errors:\n")
-      err <- table(conditional_msgs$error)
-      for (i in seq_along(err)) {
-        n <- err[i]
-        val <- names(err)[i]
-        vars <- conditional_msgs$error[conditional_msgs$error == val]
-        vars <-
-          ifelse(
-            test = length(vars) <= 5,
-            yes = paste(names(vars), collapse = ", "),
-            no = paste(c(names(vars[seq_len(5)]), "..."), collapse = ", ")
-          )
-        msg <- c(
-          msg,
-          sprintf("%s; occured %i times, including variables: %s", val, n, vars)
-        )
-      }
-      msg <- c(msg, "") # spacer
-    }
-    
-    if (had_warning) {
-      msg <- c(msg, "Warnings:")
-      wrr <- table(conditional_msgs$warning)
-      for (i in seq_along(wrr)) {
-        n <- wrr[i]
-        val <- names(wrr)[i]
-        vars <- conditional_msgs$warning[conditional_msgs$warning == val]
-        vars <-
-          ifelse(
-            test = length(vars) <= 5,
-            yes = paste(names(vars), collapse = ", "),
-            no = paste(c(names(vars)[seq_len(5)], "..."), collapse = ", ")
-          )
-        msg <- c(
-          msg,
-          sprintf("%s; occured %i times, including variables: %s", val, n, vars)
-        )
-      }
-    }
-    
-    warn(msg)
-  }
-  
-
   # drop covariates
   results$term <- gsub("`", "", results$term)
   results <- results[results$term %in% variables, ]
@@ -1203,4 +1046,109 @@ filterListByElements <- function(list, elements) {
   new_list <- new_list[vapply(X = new_list, FUN = function(x) length(x) != 0, FUN.VALUE = logical(1L))]
   
   return(new_list)
+}
+
+#' lapply with tryCatch routine
+#'
+#' Used to run function iteratively over list, while using tryCatch to
+#' catch warnings and errors to finally present a summary of issues rather
+#' than error on each and every one. Used in \code{iterativeLRT} and
+#' \code{iterativeModel}.
+#'
+#' @inheritParams base::lapply
+#' @param err_res Function creating a result that should be output in case of 
+#'   error.
+#'
+#' @return List of elements as returned by \code{FUN}.
+#'
+#'
+lapply_tryCatch <- function(X, FUN, err_res, ...) {
+  conditional_msgs <- environment()
+  conditional_msgs$error <- character()
+  conditional_msgs$warning <- character()
+  
+  result <- lapply(
+    X = X,
+    FUN = function(x) suppressWarnings(tryCatch(
+      expr = FUN(x, ...),
+      error = function(e) {
+        err <- get(x = "error", envir = conditional_msgs)
+        err <- c(err, conditionMessage(e))
+        names(err)[length(err)] <- x[1] # take first variable, len(x) >= 1 
+        assign(x = "error", value = err, envir = conditional_msgs)
+        
+        return(err_res(x))
+      },
+      warning = function(w) { # if there is a warning followed by an error the function will actually crash dramatically
+        wrr <- get(x = "warning", envir = conditional_msgs)
+        wrr <- c(wrr, conditionMessage(w))
+        names(wrr)[length(wrr)] <- x[1] # take first variable, len(x) >= 1 
+        assign(x = "warning", value = wrr, envir = conditional_msgs)
+        
+        res <- suppressWarnings(try(expr = FUN(x, ...), silent = TRUE))
+        if (assertthat::is.error(res)) {
+          err <- get(x = "error", envir = conditional_msgs)
+          err <- c(err, toString(res))
+          names(err)[length(err)] <- x[1] # take first variable, len(x) >= 1 
+          assign(x = "error", value = err, envir = conditional_msgs)
+
+          res <- err_res(x)
+        }
+        
+        res
+      }  
+    ))
+  )
+  
+  # messages in this section has been created specifically for iterativeLRT and iterativeModel  
+  # communicate errors and warnings <--------------------------------------------------------------
+  had_error <- length(conditional_msgs$error)
+  had_warning <- length(conditional_msgs$warning)
+  if (had_error || had_warning) {
+    msg <- "While evaluating the model problems occured:\n"
+    if (had_error) {
+      msg <- c(msg, "Errors:\n")
+      err <- table(conditional_msgs$error)
+      for (i in seq_along(err)) {
+        n <- err[i]
+        val <- names(err)[i]
+        vars <- conditional_msgs$error[conditional_msgs$error == val]
+        vars <-
+          ifelse(
+            test = length(vars) <= 5,
+            yes = paste(names(vars), collapse = ", "),
+            no = paste(c(names(vars)[seq_len(5)], "..."), collapse = ", ")
+          )
+        msg <- c(
+          msg,
+          sprintf("%s; occured %i times, including variables: %s", val, n, vars)
+        )
+      }
+      msg <- c(msg, "") # spacer
+    }
+    
+    if (had_warning) {
+      msg <- c(msg, "Warnings:")
+      wrr <- table(conditional_msgs$warning)
+      for (i in seq_along(wrr)) {
+        n <- wrr[i]
+        val <- names(wrr)[i]
+        vars <- conditional_msgs$warning[conditional_msgs$warning == val]
+        vars <-
+          ifelse(
+            test = length(vars) <= 5,
+            yes = paste(names(vars), collapse = ", "),
+            no = paste(c(names(vars)[seq_len(5)], "..."), collapse = ", ")
+          )
+        msg <- c(
+          msg,
+          sprintf("%s; occured %i times, including variables: %s", val, n, vars)
+        )
+      }
+    }
+    
+    warn(msg)
+  }
+  
+  return(result)
 }

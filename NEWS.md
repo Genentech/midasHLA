@@ -1,3 +1,6 @@
+# 0.99.15 - 01/02/21
++ fixes bug causing LRT to report wrong number of tested residues.
+
 # 0.99.13 - 18/01/21
 + changes version number to comply with Bioconductor package submission guidelines.
 + rename package to midasHLA; midas is already in use.

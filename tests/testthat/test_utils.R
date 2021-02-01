@@ -356,26 +356,42 @@ test_that("iterativeLRT", {
   object <- lm(disease ~ outcome + term, data = MiDASdat)
 
   res <- iterativeLRT(object, placeholder, omnibus_groups)
-  test_res <- lapply(
-    X = omnibus_groups, 
-    FUN = function (gr) {
-      mod0 <- updateModel(
+  
+  fun <- function (x) {
+    mod0 <- updateModel(
+      object = object,
+      x = "1",
+      placeholder = placeholder,
+      backquote = FALSE
+    )
+    LRTest(
+      mod0,
+      updateModel(
         object = object,
-        x = "1",
+        x = x,
         placeholder = placeholder,
-        backquote = FALSE
+        collapse = " + ",
+        backquote = TRUE
       )
-      test <- LRTest(
-        mod0,
-        updateModel(
-          object = object,
-          x = gr,
-          placeholder = placeholder,
-          collapse = " + ",
-          backquote = TRUE
+    )
+  }
+  test_res <- lapply(
+    X = omnibus_groups,
+    FUN = function(x) suppressWarnings(tryCatch(
+      expr = fun(x),
+      error = function(e) {
+        
+        data.frame(
+          term = toString(x),
+          df = NA,
+          logLik = NA,
+          statistic = NA,
+          p.value = NA,
+          stringsAsFactors = FALSE
         )
-      )
-    })
+      }  
+    ))
+  )
   test_res <- dplyr::bind_rows(test_res, .id = "group")
   expect_equal(res, test_res)
 
