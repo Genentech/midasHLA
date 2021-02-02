@@ -44,5 +44,5 @@ jobs:
         shell: Rscript {0}
 
       - name: Check package
-        run: devtools::check()
+        run: devtools::check(error_on = "error")
         shell: Rscript {0}

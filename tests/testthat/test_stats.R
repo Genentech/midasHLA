@@ -202,7 +202,7 @@ test_that("omnibusTest", {
            mod0 = lm(disease ~ 1, data = midas_data))
   omnibus_res_test <- data.frame(
     group = c("A_77", "A_79"),
-    term = c("A_77_D, A_77_N, A_77_S", "A_79_G, A_79_R"),
+    term = c("A_77_D, A_77_N", "A_79_G"),
     df = sapply(LRT, `[[`, "df"),
     logLik = sapply(LRT, `[[`, "logLik"),
     statistic = sapply(LRT, `[[`, "statistic"),
@@ -433,7 +433,7 @@ test_that("runMiDAS", {
   )
   test_res <- dplyr::tibble(
     aa_pos = c("A_6", "A_12"),
-    residues = c("R, G", "V, M"),
+    residues = c("R", "V"),
     df = c(1, 1),
     statistic = c(1.00150233709155, 0.43786032955245),
     p.value = c(0.316947259129448, 0.508156995160654),
@@ -458,7 +458,7 @@ test_that("runMiDAS", {
   )
   test_res <- dplyr::tibble(
     aa_pos = c("DRA_217", "DQA1_34"),
-    residues = c("L, V", "Q, E"),
+    residues = c("L", "Q"),
     df = c(1, 1),
     statistic = c(11.7515320865891, 8.92028215923278),
     p.value = c(0.000607931755127601, 0.00282020937328977),
@@ -480,7 +480,7 @@ test_that("runMiDAS", {
   test_res <- list(
     dplyr::tibble(
       aa_pos = c("DRA_217", "B_178"),
-      residues = c("L, V", "K, T"),
+      residues = c("L", "K"),
       df = c(1, 1),
       statistic = c(11.7515320865891, 5.63638399577462),
       p.value = c(0.000607931755127601, 0.0175914523736528),

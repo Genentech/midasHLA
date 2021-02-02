@@ -374,7 +374,7 @@ LRTest <- function(mod0, mod1) {
   )
   
   # drop vars with NA coefficient
-  coefs <- coef(mod1)
+  coefs <- stats::coef(mod1)
   na_vars <- names(coefs)[is.na(coefs)]
   if (length(na_vars)) {
     warning(sprintf(
@@ -391,10 +391,13 @@ LRTest <- function(mod0, mod1) {
     )
   }
   
+  # df <- length(new_vars) - 1
+  # according to this post https://stackoverflow.com/questions/37917437/loglik-lm-why-does-r-use-p-1-instead-of-p-for-degree-of-freedom
+  # df <- attr(ll1, "df") - attr(ll0, "df") is proper
   ll0 <- logLik(mod0)
   ll1 <- logLik(mod1)
-  # df <- attr(ll1, "df") - attr(ll0, "df") # here we have decided to calculate df as N-1 where N is number of new vars in mod1
-  df <- length(new_vars) - 1
+  df <- attr(ll1, "df") - attr(ll0, "df")
+  
   statistic <- 2 * (as.numeric(ll1) - as.numeric(ll0))
   p.value <- pchisq(statistic, df = df, lower.tail=FALSE)
 

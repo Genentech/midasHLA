@@ -167,7 +167,7 @@ test_that("LRTest", {
     lrt_res,
     data.frame(
       term = "AGE",
-      df = 0,
+      df = 1,
       logLik = 109.840111592134,
       statistic = 219.680223184268,
       p.value = 1.06202635429558e-49,
