@@ -3,11 +3,11 @@ on:
     branches:
       - master
 
-name: check
+name: bioconductor-check-windows
 
 jobs:
   check:
-    runs-on: ubuntu-18.04
+    runs-on: windows-latest
     env:
       GITHUB_PAT: ${{ secrets.GH_PAT }}
     steps:
@@ -15,12 +15,9 @@ jobs:
 
       - uses: r-lib/actions/setup-r@v1
         with:
-          r-version: '4.0.0' 
+          r-version: 'release' 
 
       - uses: r-lib/actions/setup-pandoc@v1
-
-      - name: Install libs
-        run: sudo apt-get install libcurl4-openssl-dev libgit2-dev libnlopt-dev
 
       - name: Query dependencies
         run: |
@@ -39,10 +36,16 @@ jobs:
       - name: Install dependencies
         run: |
           install.packages(c("devtools", "BiocManager"))
-          BiocManager::install(c("SummarizedExperiment", "S4Vectors", "MultiAssayExperiment"))
+          BiocManager::install(c("BiocCheck", "SummarizedExperiment", "S4Vectors", "MultiAssayExperiment"))
           remotes::install_deps(dependencies = TRUE)
         shell: Rscript {0}
 
       - name: Check package
-        run: devtools::check(error_on = "error")
+        run: devtools::check()
+        shell: Rscript {0}
+
+      - name: Check Bioconductor
+        run: |
+          BiocCheck::BiocCheckGitClone()
+          BiocCheck::BiocCheck()
         shell: Rscript {0}

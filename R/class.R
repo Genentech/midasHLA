@@ -1,4 +1,4 @@
-#' @include MiDAS_class.R
+#' @include class.R
 NULL
 
 #' MiDAS class
@@ -38,7 +38,7 @@ setMethod("initialize", "MiDAS", function(.Object, experiments, colData, metadat
     colData = colData,
     metadata = metadata
   )
-  class(midas) <- structure("MiDAS", package = "MiDAS")
+  class(midas) <- structure("MiDAS", package = "midasHLA")
 
   return(midas)
 })
@@ -94,6 +94,9 @@ setValidity(Class = "MiDAS", method = function(object) {
 #' @param object \code{\link{MiDAS}} object.
 #'
 #' @return Character vector giving names of experiments in \code{object}.
+#' 
+#' @examples
+#' getExperiments(object = MiDAS_tut_object)
 #'
 #' @importFrom S4Vectors metadata
 #' @export
@@ -118,6 +121,9 @@ setMethod(
 #' @param object \code{\link{MiDAS}} object.
 #'
 #' @return HLA calls data frame.
+#' 
+#' @examples
+#' getHlaCalls(object = MiDAS_tut_object)
 #'
 #' @importFrom S4Vectors metadata
 #' @export
@@ -143,6 +149,9 @@ setMethod(
 #' @param object \code{\link{MiDAS}} object.
 #'
 #' @return KIR calls data frame.
+#' 
+#' @examples
+#' getKirCalls(object = MiDAS_tut_object)
 #'
 #' @importFrom S4Vectors metadata
 #' @export
@@ -168,6 +177,9 @@ setMethod(
 #' @param object \code{\link{MiDAS}} object.
 #'
 #' @return String giving name of placeholder.
+#' 
+#' @examples
+#' getPlaceholder(object = MiDAS_tut_object)
 #'
 #' @importFrom S4Vectors metadata
 #' @export
@@ -205,6 +217,10 @@ setMethod(
 #' @param experiment String specifying experiment.
 #'
 #' @return List of omnibus groups for a given experiment.
+#' 
+#' @examples
+#' getOmnibusGroups(object = MiDAS_tut_object,
+#'                  experiment = "hla_aa")
 #'
 #' @importFrom assertthat assert_that is.string
 #' @importFrom S4Vectors metadata
@@ -214,14 +230,9 @@ setGeneric(
   def = function(object, experiment) standardGeneric("getOmnibusGroups")
 )
 
-#' Get omnibus groups from MiDAS object.
+#' @rdname MiDAS-class
 #'
-#' @details For some experiments features can be naturally divided into groups
-#' (here called omnibus groups). For example, in \code{'hla_aa'} experiment
-#' features can be grouped by amino acid position (\code{"B_46_E"},
-#' \code{"B_46_A"}) can be grouped into \code{B_46} group). Such groups can be
-#' then used to perform omnibus test, see \code{\link{runMiDAS}} for more
-#' details.
+#' @title Get omnibus groups from MiDAS object.
 #'
 #' @param object \code{\link{MiDAS}} object.
 #' @param experiment String specifying experiment.
@@ -272,19 +283,15 @@ setMethod(
 #'   feature frequencies. If argument \code{compare} is set to \code{TRUE}, 
 #'   further columns will hold frequencies in reference populations.
 #'   
-#' @examples 
-#' midas <- prepareMiDAS(
-#'   hla_calls = MiDAS_tut_HLA,
-#'   colData = MiDAS_tut_pheno,
-#'   experiment = "hla_alleles"
-#' )
-#' 
+#' @examples
 #' # using default reference populations
-#' getFrequencies(midas, experiment = "hla_alleles", compare = TRUE)
+#' getFrequencies(object = MiDAS_tut_object, 
+#'                experiment = "hla_alleles", 
+#'                compare = TRUE)
 #' 
 #' # using customized set of reference populations
 #' getFrequencies(
-#'   object = midas, 
+#'   object = MiDAS_tut_object, 
 #'   experiment = "hla_alleles", 
 #'   compare = TRUE,
 #'   ref_pop = list(
@@ -428,6 +435,13 @@ setMethod(
 #'   numbers between 0 and 1 as fractions.
 #'
 #' @return Filtered \code{\link{MiDAS}} object.
+#' 
+#' @examples
+#' filterByFrequency(object = MiDAS_tut_object, 
+#'                   experiment = "hla_alleles",
+#'                   lower_frequency_cutoff = 0.05,
+#'                   upper_frequency_cutoff = 0.95,
+#'                   carrier_frequency = TRUE)
 #'
 #' @importFrom assertthat assert_that is.string
 #' @importFrom S4Vectors metadata
@@ -497,6 +511,11 @@ setMethod(
 #'   \code{\link{getOmnibusGroups}} for more details.
 #'
 #' @return Filtered \code{\link{MiDAS}} object.
+#' 
+#' @examples
+#' filterByOmnibusGroups(object = MiDAS_tut_object,
+#'                       experiment = "hla_aa",
+#'                       groups = c("A_3", "A_6", "C_1"))
 #'
 #' @importFrom assertthat assert_that is.string see_if
 #' @importFrom S4Vectors metadata
@@ -567,6 +586,11 @@ setMethod(
 #' @param variables Character vector specifying features to select.
 #'
 #' @return Filtered \code{\link{MiDAS}} object.
+#' 
+#' @examples
+#' filterByVariables(object = MiDAS_tut_object,
+#'                   experiment = "hla_alleles",
+#'                   variables = c("A*25:01", "A*26:01", "B*07:02"))
 #'
 #' @export
 setGeneric(
@@ -608,6 +632,9 @@ setMethod(
 #'
 #' @return Data frame containing HLA alleles, their corresponding amino acid
 #'   residues and frequencies at requested position.
+#'   
+#' @examples
+#' getAllelesForAA(object = MiDAS_tut_object, aa_pos = "A_9")
 #'
 #' @export
 setGeneric(
@@ -1091,7 +1118,7 @@ prepareMiDAS_hla_NK_ligands <- function(hla_calls, ...) {
 
   # Bw6 is defined both in Bw and Bw HLA-B only dictionaries, here this unambiguity is removed
   bw_with_A <-
-    system.file("extdata", "Match_allele_HLA_Bw.txt", package = "MiDAS")
+    system.file("extdata", "Match_allele_HLA_Bw.txt", package = "midasHLA")
   bw_with_A <-
     read.table(
       file = bw_with_A,
@@ -1289,7 +1316,7 @@ prepareMiDAS_hla_het <- function(hla_calls, hla_het_resolution = 8, ...) {
   )
 
   # filter non-classical genes
-  sel <- c("ID", paste0(rep(classical_genes, each = 2), "_", 1:2))
+  sel <- c("ID", paste0(rep(classical_genes, each = 2), "_", seq_len(2)))
   hla_calls <- hla_calls[, colnames(hla_calls) %in% sel, drop = FALSE]
   genes <- getHlaCallsGenes(hla_calls)
 

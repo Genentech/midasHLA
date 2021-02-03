@@ -1,12 +1,7 @@
 context("stats")
 
 test_that("analyzeAssociations", {
-  midas <-
-    prepareMiDAS(hla_calls = MiDAS_tut_HLA,
-                 colData = MiDAS_tut_pheno,
-                 experiment = "hla_alleles")
-
-  midas_data <- midasToWide(midas, experiment = "hla_alleles")
+  midas_data <- midasToWide(MiDAS_tut_object, experiment = "hla_alleles")
   object <- lm(disease ~ term, data = midas_data)
 
   res <- analyzeAssociations(object,
@@ -15,8 +10,8 @@ test_that("analyzeAssociations", {
   )
 
   test_res <- list(
-    lm(disease ~ `A*01:01`, data = midas),
-    lm(disease ~ `A*02:01`, data = midas)
+    lm(disease ~ `A*01:01`, data = midas_data),
+    lm(disease ~ `A*02:01`, data = midas_data)
   )
   test_res <- do.call("rbind", lapply(test_res, tidy, conf.int = TRUE))
   test_res$term <- gsub("`", "", test_res$term)
@@ -70,11 +65,7 @@ test_that("analyzeAssociations", {
 })
 
 test_that("analyzeConditionalAssociations", {
-  midas <-
-    prepareMiDAS(hla_calls = MiDAS_tut_HLA,
-                 colData = MiDAS_tut_pheno,
-                 experiment = "hla_alleles")
-  midas_data <- midasToWide(midas, experiment = "hla_alleles")
+  midas_data <- midasToWide(MiDAS_tut_object, experiment = "hla_alleles")
 
   object <- lm(disease ~ term, data = midas_data)
 
@@ -195,13 +186,7 @@ test_that("analyzeConditionalAssociations", {
 })
 
 test_that("omnibusTest", {
-  midas <-
-    prepareMiDAS(
-      hla_calls = MiDAS_tut_HLA,
-      colData = MiDAS_tut_pheno,
-      experiment = "hla_aa"
-    )
-  midas_data <- midasToWide(midas, experiment = "hla_aa")
+  midas_data <- midasToWide(MiDAS_tut_object, experiment = "hla_aa")
   object <- lm(disease ~ term, data = midas_data)
   omnibus_groups <- list(
     A_77 = c("A_77_D", "A_77_N", "A_77_S"),
@@ -217,7 +202,7 @@ test_that("omnibusTest", {
            mod0 = lm(disease ~ 1, data = midas_data))
   omnibus_res_test <- data.frame(
     group = c("A_77", "A_79"),
-    term = c("A_77_D, A_77_N, A_77_S", "A_79_G, A_79_R"),
+    term = c("A_77_D, A_77_N", "A_79_G"),
     df = sapply(LRT, `[[`, "df"),
     logLik = sapply(LRT, `[[`, "logLik"),
     statistic = sapply(LRT, `[[`, "statistic"),
@@ -229,22 +214,7 @@ test_that("omnibusTest", {
 })
 
 test_that("runMiDAS", {
-  midas <-
-    prepareMiDAS(
-      hla_calls = MiDAS_tut_HLA,
-      kir_call = MiDAS_tut_KIR,
-      colData = MiDAS_tut_pheno,
-      experiment = c(
-        "hla_alleles",
-        "hla_aa",
-        "hla_g_groups",
-        "hla_supertypes",
-        "hla_NK_ligands",
-        "kir_genes",
-        "hla_kir_interactions",
-        "hla_divergence"
-      )
-    )
+  midas <- MiDAS_tut_object
 
   # linear
   conditional = FALSE
@@ -280,7 +250,7 @@ test_that("runMiDAS", {
     if (is(ex, "SummarizedExperiment")) {ex <- assay(ex)}
     if (typeof(ex) == "integer") {
       variables_freq <-
-        MiDAS:::runMiDASGetVarsFreq(
+        midasHLA:::runMiDASGetVarsFreq(
           midas = midas,
           experiment = experiment,
           test_covar = all.vars(formula(object))[1]
@@ -351,7 +321,7 @@ test_that("runMiDAS", {
     if (is(ex, "SummarizedExperiment")) {ex <- assay(ex)}
     if (typeof(ex) == "integer") {
       variables_freq <-
-        MiDAS:::runMiDASGetVarsFreq(
+        midasHLA:::runMiDASGetVarsFreq(
           midas = midas,
           experiment = experiment,
           test_covar = all.vars(formula(object))[1]
@@ -463,7 +433,7 @@ test_that("runMiDAS", {
   )
   test_res <- dplyr::tibble(
     aa_pos = c("A_6", "A_12"),
-    residues = c("R, G", "V, M"),
+    residues = c("R", "V"),
     df = c(1, 1),
     statistic = c(1.00150233709155, 0.43786032955245),
     p.value = c(0.316947259129448, 0.508156995160654),
@@ -488,7 +458,7 @@ test_that("runMiDAS", {
   )
   test_res <- dplyr::tibble(
     aa_pos = c("DRA_217", "DQA1_34"),
-    residues = c("L, V", "Q, E"),
+    residues = c("L", "Q"),
     df = c(1, 1),
     statistic = c(11.7515320865891, 8.92028215923278),
     p.value = c(0.000607931755127601, 0.00282020937328977),
@@ -510,7 +480,7 @@ test_that("runMiDAS", {
   test_res <- list(
     dplyr::tibble(
       aa_pos = c("DRA_217", "B_178"),
-      residues = c("L, V", "K, T"),
+      residues = c("L", "K"),
       df = c(1, 1),
       statistic = c(11.7515320865891, 5.63638399577462),
       p.value = c(0.000607931755127601, 0.0175914523736528),
@@ -565,7 +535,7 @@ test_that("runMiDAS", {
   )
 
   expect_error(runMiDAS(object, experiment = "foo"),
-               "experiment should be one of \"hla_alleles\", \"hla_aa\", \"hla_g_groups\", \"hla_supertypes\", \"hla_NK_ligands\", \"kir_genes\", \"hla_kir_interactions\", \"hla_divergence\"."
+               "experiment should be one of \"hla_alleles\", \"hla_aa\", \"hla_g_groups\", \"hla_supertypes\", \"hla_NK_ligands\", \"kir_genes\", \"kir_haplotypes\", \"hla_kir_interactions\", \"hla_divergence\", \"hla_het\"."
   )
 
   expect_error(runMiDAS(object, experiment = "hla_alleles", inheritance_model = 1),
@@ -649,9 +619,7 @@ test_that("runMiDAS", {
 })
 
 test_that("HWETest", {
-  midas <- prepareMiDAS(hla_calls = MiDAS_tut_HLA,
-                        colData = MiDAS_tut_pheno,
-                        experiment = "hla_alleles")
+  midas <- MiDAS_tut_object
   res <- HWETest(midas, experiment = "hla_alleles", HWE_cutoff = 0.988)
   rownames(res) <- NULL
   test_res <- data.frame(

@@ -1,14 +1,14 @@
 context("parsing functions")
 
 test_that("readHlaCalls", {
-  file <- system.file("extdata", "MiDAS_tut_HLA.txt", package = "MiDAS")
+  file <- system.file("extdata", "MiDAS_tut_HLA.txt", package = "midasHLA")
   hla_calls <- readHlaCalls(file)
-  load(system.file("extdata", "test_hla_calls.Rdata", package = "MiDAS"))
+  load(system.file("extdata", "test_hla_calls.Rdata", package = "midasHLA"))
   expect_equal(hla_calls, test_hla_calls)
 
   hla_calls_res2 <- readHlaCalls(file, resolution = 2)
   res2 <- getAlleleResolution(unlist(hla_calls_res2[, -1]))
-  load(system.file("extdata", "test_hla_calls_res.Rdata", package = "MiDAS"))
+  load(system.file("extdata", "test_hla_calls_res.Rdata", package = "midasHLA"))
   expect_equal(res2, test_hla_calls_res)
 
   expect_error(readHlaCalls(file.path("path", "to", "nonexisting", "file")),
@@ -56,7 +56,7 @@ test_that("readHlaCalls", {
 })
 
 test_that("readHlaAlignments", {
-  file <- system.file("extdata", "TAP1_prot.txt", package = "MiDAS")
+  file <- system.file("extdata", "TAP1_prot.txt", package = "midasHLA")
   hla_alignments <- readHlaAlignments(file)
   test_hla_alignments <- readHlaAlignments(gene = "TAP1")
   expect_equal(hla_alignments, test_hla_alignments)
@@ -73,16 +73,16 @@ test_that("readHlaAlignments", {
   )
 
   expect_error(
-    readHlaAlignments(system.file("extdata", "A_prot.txt", package = "MiDAS"),
-                      trim = c(T, T),
+    readHlaAlignments(system.file("extdata", "A_prot.txt", package = "midasHLA"),
+                      trim = c(TRUE, TRUE),
                       unkchar = ""
     ),
     "trim is not a flag \\(a length one logical vector\\)."
   )
 
   expect_error(
-    readHlaAlignments(system.file("extdata", "A_prot.txt", package = "MiDAS"),
-                      trim = T,
+    readHlaAlignments(system.file("extdata", "A_prot.txt", package = "midasHLA"),
+                      trim = TRUE,
                       unkchar = c("a", "b", "c")
     ),
     "unkchar is not a string \\(a length one character vector\\)."
@@ -92,9 +92,9 @@ test_that("readHlaAlignments", {
                "alignment for FOO is not available"
   )
 
-  aln_file <- system.file("extdata/TAP1_prot.txt", package = "MiDAS")
+  aln_file <- system.file("extdata/TAP1_prot.txt", package = "midasHLA")
   hla_alignments <- readHlaAlignments(aln_file, trim = FALSE)
-  fasta_file <- system.file("extdata", "TAP1_prot.fasta", package = "MiDAS")
+  fasta_file <- system.file("extdata", "TAP1_prot.fasta", package = "midasHLA")
   fasta <- seqinr::read.alignment(fasta_file, format = "fasta")
   fasta <- fasta$seq[[1]]
   expect_equal(paste(hla_alignments[1, ], collapse = ""),

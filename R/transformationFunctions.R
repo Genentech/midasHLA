@@ -52,7 +52,7 @@ hlaToAAVariation <- function(hla_calls,
 
   # assert that alignment files are available
   available_genes <- list.files(
-    path = system.file("extdata", package = "MiDAS"),
+    path = system.file("extdata", package = "midasHLA"),
     pattern = "_prot.Rdata$"
   )
   available_genes <- vapply(
@@ -97,7 +97,7 @@ hlaToAAVariation <- function(hla_calls,
 
   # get aa variations for each gene
   aa_variation <- list()
-  for (i in 1:length(gene_names_uniq)) {
+  for (i in seq_along(gene_names_uniq)) {
     x_calls <- hla_calls[, gene_names == gene_names_uniq[i], drop = FALSE]
 
     # mark alleles w/o reference as NAs
@@ -125,14 +125,14 @@ hlaToAAVariation <- function(hla_calls,
                                 )
     )
     var_aln <- lapply(colnames(x_calls), function(allele) {
-      mask <- 1:nrow(hla_aln[[i]]) # NAs in character index gives oob error, so it is needed to refer to indexes
+      mask <- seq_len(nrow(hla_aln[[i]])) # NAs in character index gives oob error, so it is needed to refer to indexes
       names(mask) <- rownames(hla_aln[[i]])
       x <- hla_aln[[i]][mask[x_calls[, allele]], var_pos, drop = FALSE]
       colnames(x) <- paste0(allele, "_", "AA_", colnames(x))
       return(x)
     })
     var_aln <- do.call(cbind, var_aln)
-    ord <- as.vector(vapply(1:length(var_pos),
+    ord <- as.vector(vapply(seq_along(var_pos),
                   function(j) {
                     c(j, j + length(var_pos))
                   },
@@ -251,7 +251,7 @@ hlaToVariable <- function(hla_calls,
       dictionary <- system.file(
         "extdata",
         paste0("Match_", dictionary, ".txt"),
-        package = "MiDAS"
+        package = "midasHLA"
       )
     }
   }
@@ -498,7 +498,7 @@ aaVariationToCounts <- function(aa_variation) {
   aa_counts <- aa_variation[, -1]
   aa_ids <- colnames(aa_variation[, -1])
   aa_ids <- gsub("_[12]_AA", "", aa_ids)
-  aa_counts <- lapply(1:(ncol(aa_counts)),
+  aa_counts <- lapply(seq_len(ncol(aa_counts)),
                          function(i) {
                            x <- paste(aa_ids[i], aa_counts[, i], sep = "_")
                            x[is.na(aa_counts[, i])] <- NA
@@ -587,7 +587,9 @@ getAAFrequencies <- function(aa_variation) {
 #'                       colData = MiDAS_tut_pheno,
 #'                       experiment = "hla_alleles")
 #' object <- lm(disease ~ term, data = midas)
-#' res <- runMiDAS(object, experiment = "hla_alleles")
+#' res <- runMiDAS(object, 
+#'                 experiment = "hla_alleles", 
+#'                 inheritance_model = "dominant")
 #' formatResults(res,
 #'               filter_by = c("p.value <= 0.05", "estimate > 0"),
 #'               arrange_by = c("p.value * estimate"),
@@ -873,7 +875,7 @@ countsToVariables <- function(counts,
 #'   kir_calls = MiDAS_tut_KIR, 
 #'   interactions_dict = system.file(
 #'     "extdata", "Match_counts_hla_kir_interactions.txt", 
-#'     package = "MiDAS")
+#'     package = "midasHLA")
 #' )
 #'
 #' @importFrom assertthat assert_that is.string
@@ -884,7 +886,7 @@ countsToVariables <- function(counts,
 #' @export
 getHlaKirInteractions <- function(hla_calls,
                                   kir_calls,
-                                  interactions_dict = system.file("extdata", "Match_counts_hla_kir_interactions.txt", package = "MiDAS")) {
+                                  interactions_dict = system.file("extdata", "Match_counts_hla_kir_interactions.txt", package = "midasHLA")) {
   assert_that(
     checkHlaCallsFormat(hla_calls),
     checkKirCallsFormat(kir_calls),

@@ -1,6 +1,6 @@
-Package: MiDAS
+Package: midasHLA
 Title: R package for immunogenomics data handling and association analysis
-Version: 1.0.12
+Version: 0.99.15
 Authors@R: c(
   person("Christian", "Hammer", email = "hammerc6@gene.com", role = "aut"),
   person("Maciej", "Migdał", email = "mcjmigdal@gmail.com", role = c("aut", "cre")))
@@ -9,7 +9,7 @@ License: MIT + file LICENCE
 Encoding: UTF-8
 LazyData: true
 Depends:
-    R (>= 3.5), MultiAssayExperiment (>= 1.8.3)
+    R (>= 4.0.0), MultiAssayExperiment (>= 1.8.3)
 Imports:
     assertthat (>= 0.2.0), broom (>= 0.5.1), dplyr (>= 0.8.0.1), formattable (>= 0.2.0.1),
     HardyWeinberg (>= 1.6.3), kableExtra (>= 1.1.0), knitr (>= 1.21), magrittr (>= 1.5), 
@@ -22,13 +22,14 @@ Suggests:
 RoxygenNote: 7.1.1
 VignetteBuilder: knitr
 Collate: 
-    'MiDAS.R'
-    'MiDAS_asserts.R'
-    'MiDAS_class.R'
-    'MiDAS_parsingFunctions.R'
-    'MiDAS_stats.R'
-    'MiDAS_summarise.R'
-    'MiDAS_transformationFunctions.R'
-    'MiDAS_utils.R'
+    'asserts.R'
+    'class.R'
     'data.R'
     'global.R'
+    'midasHLA.R'
+    'parsingFunctions.R'
+    'stats.R'
+    'summarise.R'
+    'transformationFunctions.R'
+    'utils.R'
+biocViews: Genetics, StatisticalMethod
