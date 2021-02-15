@@ -1000,10 +1000,6 @@ getReferenceFrequencies <- function(ref, pop, carrier_frequency = FALSE) {
 #'
 adjustPValues <- function(p, method, n = length(p)) {
   assert_that(
-    assertthat::see_if(
-      is.numeric(p),
-      msg = sprintf("%s that is bad", as.character(p))
-    ),
     is.numeric(p),
     is.string(method),
     is.number(n)
