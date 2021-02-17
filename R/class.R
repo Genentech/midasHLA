@@ -14,6 +14,8 @@ NULL
 #' \code{\link{runMiDAS}} for more details). Optionally the object's metadata
 #' can also store \code{'hla_calls'} and \code{'kir_calls'} data frames (see
 #' \code{\link{prepareMiDAS}} for more details).
+#' 
+#' @return Instance of class MiDAS
 #'
 #' @importFrom methods setClass new
 #' @importClassesFrom MultiAssayExperiment MultiAssayExperiment
