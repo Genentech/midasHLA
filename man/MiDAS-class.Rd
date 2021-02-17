@@ -91,6 +91,9 @@ numbers between 0 and 1 as fractions.}
 \item{aa_pos}{String specifying gene and amino acid position, example
 \code{"A_9"}.}
 }
+\value{
+Instance of class MiDAS
+}
 \description{
 The \code{MiDAS} class is a \code{\link{MultiAssayExperiment}} object
 containing data and metadata required for MiDAS analysis.
