@@ -32,4 +32,4 @@ Collate:
     'summarise.R'
     'transformationFunctions.R'
     'utils.R'
-biocViews: Genetics, StatisticalMethod
+biocViews: CellBiology, Genetics, StatisticalMethod
