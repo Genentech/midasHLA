@@ -14,13 +14,7 @@ vignette: >
 
 ```{r my_setup, echo=FALSE, warning=FALSE, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, fig.align="center")
-library("cowplot")
-library("dplyr")
-library("ggplot2")
-library("ggpubr")
-library("kableExtra")
-library("midasHLA")
-library("tidyr")
+devtools::load_all()
 ```
 
 ```{r logo, echo=FALSE, warning=FALSE}
@@ -83,7 +77,7 @@ freq_HLA %>%
 Let's assume our cohort is of predominantly European ancestry. We can plot the following comparison to see if allele frequencies in our data are distributed as expected, for example by visualizing common HLA-A allele frequencies in comparison with European, Chinese, and African American reference populations: 
 
 ```{r plot_frequencies, echo=TRUE, warning=FALSE, fig.height=7, fig.width=7}
-freq_HLA_long <- gather(
+freq_HLA_long <- tidyr::gather(
   data = freq_HLA,
   key = "population",
   value = "freq",
@@ -96,15 +90,15 @@ freq_HLA_long <- gather(
   filter(grepl("^A", allele))
 
 plot_HLAfreq <-
-  ggplot(data = freq_HLA_long, aes(x = allele, y = freq, fill = population)) +
-  geom_bar(
+  ggplot2::ggplot(data = freq_HLA_long, ggplot2::aes(x = allele, y = freq, fill = population)) +
+  ggplot2::geom_bar(
     stat = "identity",
-    position = position_dodge(0.7),
+    position = ggplot2::position_dodge(0.7),
     width = 0.7,
     colour = "black"
   ) +
-  coord_flip() +
-  scale_y_continuous(labels = formattable::percent)
+  ggplot2::coord_flip() +
+  ggplot2::scale_y_continuous(labels = formattable::percent)
 
 plot_HLAfreq
 ```

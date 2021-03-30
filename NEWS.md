@@ -1,3 +1,7 @@
+# 0.99.31 - 30/03/21
++ removed unneeded dependencies from package tutorial
++ in the tutorial, external packages are now called explicitly
+
 # 0.99.15 - 01/02/21
 + fixes bug causing LRT to report wrong number of tested residues.
 
