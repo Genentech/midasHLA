@@ -4,7 +4,7 @@
 #'
 #' Input file has to be a tsv formatted table with a header. First column should
 #' contain sample IDs, further columns hold HLA allele numbers. See
-#' \code{system.file("extdata", "HLAHD_output_example.txt", package = "midasHLA")}
+#' \code{system.file("extdata", "MiDAS_tut_HLA.txt", package = "midasHLA")} file
 #' for an example.
 #'
 #' \code{resolution} parameter can be used to reduce HLA allele numbers. If
