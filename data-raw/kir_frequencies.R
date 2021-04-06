@@ -85,7 +85,7 @@ kir_frequencies <-
   kirfrequency_df[, c(
     "var",
     "population",
-    "proc.ind.with.allele" # here we take carrier frequency, as it is only relevant to current KIR typing implementations
+    "proc.ind.with.allele" # here we take carrier frequency, as it is only relevant to current KIR typing implementations (present/absent)
   )]
 colnames(kir_frequencies)[colnames(kir_frequencies) == "proc.ind.with.allele"] <- "frequency"
 
