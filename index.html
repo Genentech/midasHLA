@@ -94,6 +94,19 @@
 <a href="#usage" class="anchor"></a>Usage</h2>
 <p>A user tutorial is available here: <a href="https://genentech.github.io/MiDAS/articles/MiDAS_tutorial.html">https://genentech.github.io/midasHLA/articles/MiDAS_tutorial.html</a></p>
 </div>
+<div id="developers-notes" class="section level2">
+<h2 class="hasAnchor">
+<a href="#developers-notes" class="anchor"></a>Developers notes</h2>
+<div id="external-data" class="section level3">
+<h3 class="hasAnchor">
+<a href="#external-data" class="anchor"></a>External data</h3>
+<p>The package is shipped together with external data such as alignment files or allele frequencies. With time, it is possible that those resources will become outdated. Here follows a brief description of scripts that can be used for updating those data. It should be noted that data storage details, at the external sources, may be changed. In such circumstances, the scripts might become obsolete. Nevertheless, they should be a good starting point to update those sources in next package iterations.</p>
+<p><code>inst/scripts/download_extdata.R</code> script is used to download HLA alignments files. Those are used for translating HLA alleles to amino acid level. The alignments are downloaded from <a href="www.ebi.ac.uk/ipd/imgt/hla/">EBI’s IPD-IMGT/HLA database</a>. In some cases alignment files contain sequences for multiple genes, those will be split into separate files (eg. DRB genes)</p>
+<p><code>inst/scripts/parse_alignments.R</code> script pre-parses alignments files for package use. Purpose of using pre-parsed files is to speed up allele to amino acid sequence translation. Resulting <code>.Rdata</code> files should be then placed in <code>inst/extdata</code> replacing the old alignment files.</p>
+<p><code>data-raw/allele_frequencies.R</code> script fetches HLA allele frequencies (for genes A, B, C, DQA1, DQB1, DPA1, DPB1, DRB1, DRB3, DRB4, DRB5) from <a href="www.allelefrequencies.net">www.allelefrequencies.net</a> database and save it in a usable format in <code>data</code> directory. This data is then available under the <code>allele_frequencies</code> variable.</p>
+<p><code>data-raw/kir_frequencies.R</code> script fetches KIR genes frequencies (for genes 3DL3, 2DS2, 2DL2, 2DL3, 2DP1, 2DL1, 3DP1, 2DL4, 3DL1, 3DS1, 2DL5, 2DS3, 2DS5, 2DS4, 2DS1, 3DL2) from <a href="www.allelefrequencies.net">www.allelefrequencies.net</a> database and save it in a usable format in <code>data</code> directory. This data is then available under the <code>kir_frequencies</code> variable.</p>
+</div>
+</div>
 </div>
   </div>
 
