@@ -106,6 +106,17 @@
 <p><code>data-raw/allele_frequencies.R</code> script fetches HLA allele frequencies (for genes A, B, C, DQA1, DQB1, DPA1, DPB1, DRB1, DRB3, DRB4, DRB5) from <a href="www.allelefrequencies.net">www.allelefrequencies.net</a> database and save it in a usable format in <code>data</code> directory. This data is then available under the <code>allele_frequencies</code> variable.</p>
 <p><code>data-raw/kir_frequencies.R</code> script fetches KIR genes frequencies (for genes 3DL3, 2DS2, 2DL2, 2DL3, 2DP1, 2DL1, 3DP1, 2DL4, 3DL1, 3DS1, 2DL5, 2DS3, 2DS5, 2DS4, 2DS1, 3DL2) from <a href="www.allelefrequencies.net">www.allelefrequencies.net</a> database and save it in a usable format in <code>data</code> directory. This data is then available under the <code>kir_frequencies</code> variable.</p>
 </div>
+<div id="package-performance" class="section level3">
+<h3 class="hasAnchor">
+<a href="#package-performance" class="anchor"></a>Package performance</h3>
+<p>Package performance can be easly checked by pushing to <code>benchmark_midas</code> branch. There is a job in <code>.github/workflows</code> that run simple benchmarking scripts located in <code>inst/benchmark</code>. Briefly, we used GNU’s <code>time</code> (<code>/usr/bin/time -v</code>) to measure time and memory consumption of data transformation and 2 workflows. All tests include loading package and reading in input files steps. Look into <code>inst/benchmark/*</code> for more details.</p>
+<p>Benchmarking results can then be found in the GitHub Action report, somewhere towards the end of it.</p>
+</div>
+</div>
+<div id="citing" class="section level2">
+<h2 class="hasAnchor">
+<a href="#citing" class="anchor"></a>Citing</h2>
+<p>Maciej Migdal, Dan Fu Ruan, William F. Forrest, Amir Horowitz, Christian Hammer. MiDAS - Meaningful Immunogenetic Data at Scale. bioRxiv 2021.01.12.425276; doi: <a href="https://doi.org/10.1101/2021.01.12.425276" class="uri">https://doi.org/10.1101/2021.01.12.425276</a>.</p>
 </div>
 </div>
   </div>
