@@ -61,3 +61,21 @@ then available under the `allele_frequencies` variable.
 [www.allelefrequencies.net](www.allelefrequencies.net)
 database and save it in a usable format in `data` directory. This data is
 then available under the `kir_frequencies` variable.
+
+### Package performance
+
+Package performance can be easly checked by pushing to `benchmark_midas` 
+branch. There is a job in `.github/workflows` that run simple benchmarking
+scripts located in `inst/benchmark`. Briefly, we used GNU's `time` (`/usr/bin/time -v`)
+to measure time and memory consumption of data transformation and 2 workflows. 
+All tests include loading package and reading in input files steps. Look into 
+`inst/benchmark/*` for more details. 
+
+Benchmarking results can then be found in the GitHub Action report, somewhere
+towards the end of it. 
+
+## Citing
+Maciej Migdal, Dan Fu Ruan, William F. Forrest, Amir Horowitz, Christian Hammer. 
+MiDAS - Meaningful Immunogenetic Data at Scale. bioRxiv 2021.01.12.425276; 
+doi: https://doi.org/10.1101/2021.01.12.425276.
+
