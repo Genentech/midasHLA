@@ -19,6 +19,9 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@v1
 
+      - name: Install packages
+        run: brew install gnu-time
+
       - name: Query dependencies
         run: |
           install.packages('remotes')
@@ -52,14 +55,14 @@ jobs:
           for size in "100" "1000" "10000" "100000"; do
             for j in 1 2 3; do
               log_err="inst/benchmark/prepareMiDAS_hla_alleles_3_${size}_err.log"
-              /usr/bin/time -v Rscript $script ${in_prefix}_${size}.tsv 2> >(tee -a ${log_err} >&2)
+              gtime -v Rscript $script ${in_prefix}_${size}.tsv 2> >(tee -a ${log_err} >&2)
             done
           done
           in_prefix="inst/benchmark/hla_calls_ABCDMADMB"
           for size in "100" "1000" "10000" "100000"; do
             for j in 1 2 3; do
               log_err="inst/benchmark/prepareMiDAS_hla_alleles_5_${size}_err.log"
-              /usr/bin/time -v Rscript $script ${in_prefix}_${size}.tsv 2> >(tee -a ${log_err} >&2)
+              gtime -v Rscript $script ${in_prefix}_${size}.tsv 2> >(tee -a ${log_err} >&2)
             done
           done
 
@@ -70,14 +73,14 @@ jobs:
           for size in "100" "1000" "10000" "100000"; do
             for j in 1 2 3; do
               log_err="inst/benchmark/prepareMiDAS_hla_aa_3_${size}_err.log"
-              /usr/bin/time -v Rscript $script ${in_prefix}_${size}.tsv 2> >(tee -a ${log_err} >&2)
+              gtime -v Rscript $script ${in_prefix}_${size}.tsv 2> >(tee -a ${log_err} >&2)
             done
           done
           in_prefix="inst/benchmark/hla_calls_ABCDMADMB"
           for size in "100" "1000" "10000" "100000"; do
             for j in 1 2 3; do
               log_err="inst/benchmark/prepareMiDAS_hla_aa_5_${size}_err.log"
-              /usr/bin/time -v Rscript $script ${in_prefix}_${size}.tsv 2> >(tee -a ${log_err} >&2)
+              gtime -v Rscript $script ${in_prefix}_${size}.tsv 2> >(tee -a ${log_err} >&2)
             done
           done
 
@@ -88,14 +91,14 @@ jobs:
           for size in "100" "1000" "10000" "100000"; do
             for j in 1 2 3; do
               log_err="inst/benchmark/workflow_hla_alleles_3_${size}_err.log"
-              /usr/bin/time -v Rscript $script ${in_prefix}_${size}.tsv 2> >(tee -a ${log_err} >&2)
+              gtime -v Rscript $script ${in_prefix}_${size}.tsv 2> >(tee -a ${log_err} >&2)
             done
           done
           in_prefix="inst/benchmark/hla_calls_ABCDMADMB"
           for size in "100" "1000" "10000" "100000"; do
             for j in 1 2 3; do
               log_err="inst/benchmark/workflow_hla_alleles_5_${size}_err.log"
-              /usr/bin/time -v Rscript $script ${in_prefix}_${size}.tsv 2> >(tee -a ${log_err} >&2)
+              gtime -v Rscript $script ${in_prefix}_${size}.tsv 2> >(tee -a ${log_err} >&2)
             done
           done
 
@@ -106,14 +109,14 @@ jobs:
           for size in "100" "1000" "10000" "100000"; do
             for j in 1 2 3; do
               log_err="inst/benchmark/workflow_hla_aa_3_${size}_err.log"
-              /usr/bin/time -v Rscript $script ${in_prefix}_${size}.tsv 2> >(tee -a ${log_err} >&2)
+              gtime -v Rscript $script ${in_prefix}_${size}.tsv 2> >(tee -a ${log_err} >&2)
             done
           done
           in_prefix="inst/benchmark/hla_calls_ABCDMADMB"
           for size in "100" "1000" "10000" "100000"; do
             for j in 1 2 3; do
               log_err="inst/benchmark/workflow_hla_aa_5_${size}_err.log"
-              /usr/bin/time -v Rscript $script ${in_prefix}_${size}.tsv 2> >(tee -a ${log_err} >&2)
+              gtime -v Rscript $script ${in_prefix}_${size}.tsv 2> >(tee -a ${log_err} >&2)
             done
           done
 
