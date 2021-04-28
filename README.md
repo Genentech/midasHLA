@@ -64,15 +64,11 @@ then available under the `kir_frequencies` variable.
 
 ### Package performance
 
-Package performance can be easly checked by pushing to `benchmark_midas` 
-branch. There is a job in `.github/workflows` that run simple benchmarking
-scripts located in `inst/benchmark`. Briefly, we used GNU's `time` (`/usr/bin/time -v`)
-to measure time and memory consumption of data transformation and 2 workflows. 
-All tests include loading package and reading in input files steps. Look into 
-`inst/benchmark/*` for more details. 
-
-Benchmarking results can then be found in the GitHub Action report, somewhere
-towards the end of it. 
+Package performance can be checked using scripts located in `inst/benchmark`. 
+Briefly, we used GNU's `time` (`/usr/bin/time -v`) to measure time and memory 
+consumption of data transformation and 2 workflows. All tests include loading 
+package and reading in input files steps. Look into `inst/benchmark/*` for more 
+details. 
 
 ## Citing
 Maciej Migdal, Dan Fu Ruan, William F. Forrest, Amir Horowitz, Christian Hammer. 
