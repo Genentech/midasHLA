@@ -12,6 +12,21 @@ for (file in alignment_files) {
                       trim = FALSE,
                       unkchar = "*",
                       resolution = 8)
+  # infer missing lower resolution alleles
+  for (res in c(6, 4)) {
+    allele_numbers <- reduceAlleleResolution(rownames(alignment), resolution = res)
+    missing_alleles <- unique(allele_numbers[! allele_numbers %in% rownames(alignment)])
+    missing_aln <- list()
+    for (allele in missing_alleles) {
+      i <- allele_numbers == allele
+      missing_aln[[allele]] <- apply(alignment[i, , drop=FALSE], 2, function(col) {
+        if (all(col == col[1])) col[1]
+        else "*"
+      })
+    }
+    missing_aln <- do.call(rbind, missing_aln)
+    alignment <- rbind(alignment, missing_aln)
+  }
 
   # find first codon idx
   aln_raw <- stri_read_lines(file)

@@ -613,14 +613,14 @@ hlaCallsGranthamDistance <- function(hla_calls,
 
     sel <- paste0(gene, c("_1", "_2"))
     pairs <- hla_calls[, sel]
-    resolution <- getAlleleResolution(unlist(pairs)) %>%
-      na.omit()
-    assert_that( # this should become obsolete
-      see_if(
-        all(resolution == resolution[1]),
-        msg = sprintf("Allele resolutions for gene %s are not equal", gene)
-      )
-    )
+    # resolution <- getAlleleResolution(unlist(pairs)) %>%
+    #   na.omit()
+    # assert_that( # this should become obsolete
+    #   see_if(
+    #     all(resolution == resolution[1]),
+    #     msg = sprintf("Allele resolutions for gene %s are not equal", gene)
+    #   )
+    # )
 
     # process alignment
     aa_sel <- list(
@@ -628,7 +628,7 @@ hlaCallsGranthamDistance <- function(hla_calls,
       B_pocket =  c(7, 9, 24, 25, 34, 45, 63, 66, 67, 70, 99),
       F_pocket = c(77, 80, 81, 84, 95, 116, 123, 143, 146, 147)
     )
-    alignment <- hlaAlignmentGrantham(gene, resolution[1], aa_sel[[aa_selection]])
+    alignment <- hlaAlignmentGrantham(gene, aa_sel[[aa_selection]])
 
     allele_numbers <- rownames(alignment)
     d[[gene]] <- vapply(
@@ -662,17 +662,15 @@ hlaCallsGranthamDistance <- function(hla_calls,
 #' Helper function returning alignment for Grantham distance calculations
 #'
 #' @param gene Character vector specifying HLA gene.
-#' @param resolution Number giving allele resolution.
 #' @param aa_sel Numeric vector specifying amino acids that should be extracted.
 #'
 #' @return HLA alignment processed for grantham distance calculation. Processing 
 #'   includes extracting specific amino acids, masking indels, gaps and stop 
 #'   codons.
 #'
-hlaAlignmentGrantham <- function(gene, resolution, aa_sel = 2:182) {
+hlaAlignmentGrantham <- function(gene, aa_sel = 2:182) {
   alignment <- readHlaAlignments(
     gene = gene,
-    resolution = resolution,
     trim = TRUE
   )
   alignment <- alignment[, aa_sel] # select amino acids

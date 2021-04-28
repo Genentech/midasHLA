@@ -91,9 +91,15 @@ readHlaCalls <- function(file,
 #' set to \code{NULL}, \code{file} parameter is used instead and alignment is
 #' read from the provided file. In EBI database alignments for DRB1, DRB3, DRB4
 #' and DRB5 genes are provided as a single file, here they are separated.
+#' Additionally, were possible sequences for alleles not present in the alignments have been 
+#' inferred based on higher resolution alleles. To this end we have reduced 
+#' alleles to 6 and 4 digit resolution and took consensus sequence to represent
+#' missing alleles. Positions for which there was no full agreement were marked
+#' as unknown.
+#' 
+#' 
 #'
 #' @inheritParams readHlaCalls
-#' @inheritParams reduceAlleleResolution
 #' @param gene Character vector of length one specifying the name of a gene for
 #'   which alignment is required. See details for further explanations.
 #' @param trim Logical indicating if alignment should be trimmed to start codon
@@ -112,19 +118,17 @@ readHlaCalls <- function(file,
 #' @examples
 #' hla_alignments <- readHlaAlignments(gene = "A")
 #'
-#' @importFrom assertthat assert_that is.count is.readable is.string
+#' @importFrom assertthat assert_that is.count is.readable is.string see_if
 #' @importFrom stringi stri_flatten stri_split_regex stri_sub
 #' @importFrom stringi stri_subset_fixed stri_read_lines stri_detect_regex
 #' @export
 readHlaAlignments <- function(file,
                               gene = NULL,
                               trim = FALSE,
-                              unkchar = "",
-                              resolution = 8) {
+                              unkchar = "") {
   assert_that(
     isTRUEorFALSE(trim),
-    is.string(unkchar),
-    is.count(resolution)
+    is.string(unkchar)
   )
 
   if (is.null(gene)) {
@@ -238,7 +242,7 @@ readHlaAlignments <- function(file,
       )
     )
 
-    cached_aln_obj <- readRDS(file) # list(readHlaAlignments(file, trim = FALSE, unkchar = "*", resolution = 8), first_codon_idx)
+    cached_aln_obj <- readRDS(file) # list(readHlaAlignments(file, trim = FALSE, unkchar = "*"), first_codon_idx)
     aln <- cached_aln_obj[[1]]
 
     # discard aa '5 to start codon of mature protein
@@ -250,14 +254,6 @@ readHlaAlignments <- function(file,
 
   # substitute unkchar
   aln[aln == "*"] <- unkchar
-
-  # reduce alignment matrix to selected resolution
-  allele_numbers <- reduceAlleleResolution(rownames(aln),
-                                           resolution = resolution
-  )
-  unique_numbers <- ! duplicated(allele_numbers)
-  aln <- aln[unique_numbers, , drop = FALSE]
-  rownames(aln) <- allele_numbers[unique_numbers]
 
   return(aln)
 }

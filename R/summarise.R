@@ -60,7 +60,6 @@ summariseAAPosition <- function(hla_calls,
   alleles_wo_na <- reduceAlleleResolution(alleles_wo_na, hla_resolution)
   aln <- readHlaAlignments(
     gene = gsub("_", "", gene),
-    resolution = hla_resolution,
     unkchar = "*"
   )
 

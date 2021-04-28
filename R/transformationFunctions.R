@@ -75,26 +75,25 @@ hlaToAAVariation <- function(hla_calls,
     gene_names_uniq <- gene_names_uniq[av_genes_idx]
   }
 
-  # read alignment matrices in all resolutions
-  hla_aln <- lapply(X = gene_names_uniq,
-                    FUN = function(x) {
-                      alns <- lapply(
-                        X = c(2, 4, 6, 8),
-                        FUN = function(res) {
-                          readHlaAlignments(
-                            gene = x,
-                            resolution = res,
-                            unkchar = "*"
-                          )
-                        }
-                      )
-                      aln <- do.call(rbind, alns)
-                      aln <- aln[! duplicated(rownames(aln)), ]
-
-                      return(aln)
-                    }
+  # read alignment matrices
+  hla_aln <- lapply(
+    X = gene_names_uniq,
+    FUN = function(x) {
+      readHlaAlignments(gene = x,
+                        unkchar = "*")
+    }
   )
 
+  # helper function
+  truncVector <- function(vec, len, append) {
+    if (length(vec) > len) {
+      vec <- vec[1:len]
+      vec <- c(vec, append)
+    }
+    
+    return(vec)
+  }
+  
   # get aa variations for each gene
   aa_variation <- list()
   for (i in seq_along(gene_names_uniq)) {
@@ -107,7 +106,7 @@ hlaToAAVariation <- function(hla_calls,
     if (any(mask_alleles_wo_ref[! is.na(x_calls_unlist)], na.rm = TRUE)) {
       warn(sprintf(
         "Alignments for alleles %s are not available and will be omitted.",
-        paste(x_calls_unlist[mask_alleles_wo_ref], collapse = ", ")
+        paste(truncVector(x_calls_unlist[mask_alleles_wo_ref], 10, "..."), collapse = ", ")
       ))
       x_calls_unlist[mask_alleles_wo_ref] <- NA
     }
@@ -157,8 +156,7 @@ hlaToAAVariation <- function(hla_calls,
   if (as_df) {
     aa_variation <- as.data.frame(aa_variation,
                                   optional = TRUE,
-                                  stringsAsFactors = FALSE
-    )
+                                  stringsAsFactors = FALSE)
     aa_variation <- cbind(ID = ids, aa_variation, stringsAsFactors = FALSE)
     rownames(aa_variation) <- NULL
   }

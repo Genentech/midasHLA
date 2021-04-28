@@ -269,20 +269,13 @@ test_that("hlaCallsGranthamDistance", {
   expect_error(hlaCallsGranthamDistance(MiDAS_tut_HLA, genes = c("A", NA)),
                "genes contains 1 missing values")
 
-  hla_calls_bad <- MiDAS_tut_HLA
-  hla_calls_bad[2, 2] <- "A*01"
-  expect_error(
-    hlaCallsGranthamDistance(hla_calls_bad, genes = "A"),
-    "Allele resolutions for gene A are not equal"
-  )
-
   expect_error(hlaCallsGranthamDistance(MiDAS_tut_HLA, genes = "A", aa_selection = "Z"),
                "aa_selection should be one of \"binding_groove\", \"B_pocket\", \"F_pocket\".")
 })
 
 test_that("hlaAlignmentGrantham", {
-  aln <- hlaAlignmentGrantham("TAP1", 2, 2:182)
-  aln_test <- readHlaAlignments(gene = "TAP1", resolution = 2)
+  aln <- hlaAlignmentGrantham("TAP1", 2:182)
+  aln_test <- readHlaAlignments(gene = "TAP1")
   aln_test <- aln_test[, 2:182]
   mask <- apply(aln_test, 1, function(x) any(x == "" | x == "X" | x == "."))
   aln_test <- aln_test[! mask, ]

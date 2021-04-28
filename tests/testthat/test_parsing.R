@@ -57,14 +57,13 @@ test_that("readHlaCalls", {
 
 test_that("readHlaAlignments", {
   file <- system.file("extdata", "TAP1_prot.txt", package = "midasHLA")
-  hla_alignments <- readHlaAlignments(file)
-  test_hla_alignments <- readHlaAlignments(gene = "TAP1")
+  # our alignment files also contain infered alignment sequences
+  m <- c("TAP1*01:02N", "TAP1*03:01", "TAP1*04:01", "TAP1*05:01", "TAP1*06:01", 
+         "TAP1*02:01:01", "TAP1*02:01:02", "TAP1*01:01:01:01", "TAP1*01:01:01:02", 
+         "TAP1*01:01:01:03", "TAP1*01:01:01:04", "TAP1*01:01:01:05")
+  hla_alignments <- readHlaAlignments(file)[m, ]
+  test_hla_alignments <- readHlaAlignments(gene = "TAP1")[m, ]
   expect_equal(hla_alignments, test_hla_alignments)
-
-  hla_alignments_res2 <- readHlaAlignments(gene = "TAP1", resolution = 2)
-  res2 <- getAlleleResolution(rownames(hla_alignments_res2))
-  test_res2 <- c(2, 4, 2, 2, 2, 2, 2)
-  expect_equal(res2, test_res2)
 
   expect_error(readHlaAlignments(file.path("path", "to", "nonexisting", "file")),
                sprintf("Path '%s' does not exist",
@@ -97,7 +96,7 @@ test_that("readHlaAlignments", {
   fasta_file <- system.file("extdata", "TAP1_prot.fasta", package = "midasHLA")
   fasta <- seqinr::read.alignment(fasta_file, format = "fasta")
   fasta <- fasta$seq[[1]]
-  expect_equal(paste(hla_alignments[1, ], collapse = ""),
+  expect_equal(paste(hla_alignments["TAP1*01:01:01:01", ], collapse = ""),
                toupper(fasta)
   ) # check sequence with sequence from fasta
 

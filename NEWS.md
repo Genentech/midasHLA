@@ -1,3 +1,7 @@
+# 0.99.33 - 28/04/21
++ fixed bug causing hlaToAAVariation infer 2-digit alleles amino acid sequences.
+  Now 2-digit alleles are treated as NA.
+
 # 0.99.31 - 30/03/21
 + removed unneeded dependencies from package tutorial
 + in the tutorial, external packages are now called explicitly

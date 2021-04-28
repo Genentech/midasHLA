@@ -165,10 +165,10 @@ test_that("hlaToAAVariation", {
   aa_counts <- aaVariationToCounts(aa_var)
   test_aa_counts <- data.frame(
     ID = c("P1", "P2"),
-    `A_-15_L` = c(1, 1),
-    `A_-15_V` = c(1, 1),
     A_44_K = c(1, 1),
     A_44_R = c(1, 1),
+    A_62_Q = c(1, 1),
+    A_62_G = c(1, 1),
     stringsAsFactors = FALSE, check.names = FALSE
   )
   expect_equal(aa_counts, test_aa_counts)
@@ -194,7 +194,7 @@ test_that("getAAFrequencies", {
   aa_var <- hlaToAAVariation(minimal_hla_calls)[, 1:5]
   aa_freq <- getAAFrequencies(aa_var)
   test_aa_freq <- data.frame(
-    aa_pos = c("A_-15_L", "A_-15_V", "A_44_K", "A_44_R"),
+    aa_pos = c("A_44_K", "A_44_R", "A_62_Q", "A_62_G"),
     Counts = c(2, 2, 2, 2),
     Freq = c(0.5, 0.5, 0.5, 0.5),
     row.names = NULL,

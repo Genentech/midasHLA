@@ -4,12 +4,10 @@
 \alias{hlaAlignmentGrantham}
 \title{Helper function returning alignment for Grantham distance calculations}
 \usage{
-hlaAlignmentGrantham(gene, resolution, aa_sel = 2:182)
+hlaAlignmentGrantham(gene, aa_sel = 2:182)
 }
 \arguments{
 \item{gene}{Character vector specifying HLA gene.}
-
-\item{resolution}{Number giving allele resolution.}
 
 \item{aa_sel}{Numeric vector specifying amino acids that should be extracted.}
 }

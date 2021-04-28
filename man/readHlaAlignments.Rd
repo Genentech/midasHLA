@@ -4,13 +4,7 @@
 \alias{readHlaAlignments}
 \title{Read HLA allele alignments}
 \usage{
-readHlaAlignments(
-  file,
-  gene = NULL,
-  trim = FALSE,
-  unkchar = "",
-  resolution = 8
-)
+readHlaAlignments(file, gene = NULL, trim = FALSE, unkchar = "")
 }
 \arguments{
 \item{file}{Path to input file.}
@@ -23,8 +17,6 @@ of the mature protein.}
 
 \item{unkchar}{Character to be used to represent positions with unknown
 sequence.}
-
-\item{resolution}{Number specifying desired resolution.}
 }
 \value{
 Matrix containing HLA allele alignments.
@@ -48,6 +40,10 @@ They can be easily accessed using \code{gene} parameter. If \code{gene} is
 set to \code{NULL}, \code{file} parameter is used instead and alignment is
 read from the provided file. In EBI database alignments for DRB1, DRB3, DRB4
 and DRB5 genes are provided as a single file, here they are separated.
+
+Additionally, for the alleles without sequence defined in the original 
+alignment files we have infered thier sequence based on known higher resolution
+alleles.
 }
 \examples{
 hla_alignments <- readHlaAlignments(gene = "A")
