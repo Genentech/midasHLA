@@ -130,13 +130,7 @@
     <p><code>readHlaAlignments</code> read HLA allele alignments from file.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>readHlaAlignments</span><span class='op'>(</span>
-  <span class='va'>file</span>,
-  gene <span class='op'>=</span> <span class='cn'>NULL</span>,
-  trim <span class='op'>=</span> <span class='cn'>FALSE</span>,
-  unkchar <span class='op'>=</span> <span class='st'>""</span>,
-  resolution <span class='op'>=</span> <span class='fl'>8</span>
-<span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>readHlaAlignments</span><span class='op'>(</span><span class='va'>file</span>, gene <span class='op'>=</span> <span class='cn'>NULL</span>, trim <span class='op'>=</span> <span class='cn'>FALSE</span>, unkchar <span class='op'>=</span> <span class='st'>""</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -160,11 +154,6 @@ of the mature protein.</p></td>
       <td><p>Character to be used to represent positions with unknown
 sequence.</p></td>
     </tr>
-    <tr>
-      <th>resolution</th>
-      <td><p>Number specifying desired resolution. Possible values 
-include <code>4</code>, <code>6</code>, <code>8</code>.</p></td>
-    </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
@@ -185,6 +174,9 @@ They can be easily accessed using <code>gene</code> parameter. If <code>gene</co
 set to <code>NULL</code>, <code>file</code> parameter is used instead and alignment is
 read from the provided file. In EBI database alignments for DRB1, DRB3, DRB4
 and DRB5 genes are provided as a single file, here they are separated.</p>
+<p>Additionally, for the alleles without sequence defined in the original 
+alignment files we have infered thier sequence based on known higher resolution
+alleles.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='va'>hla_alignments</span> <span class='op'>&lt;-</span> <span class='fu'>readHlaAlignments</span><span class='op'>(</span>gene <span class='op'>=</span> <span class='st'>"A"</span><span class='op'>)</span>
