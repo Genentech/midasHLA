@@ -1,3 +1,6 @@
+# 1.1.0 - 25/05/21
++ Bioconductor release!
+
 # 0.99.33 - 28/04/21
 + fixed bug causing hlaToAAVariation infer 2-digit alleles amino acid sequences.
   Now 2-digit alleles are treated as NA.
