@@ -1,6 +1,6 @@
 Package: midasHLA
 Title: R package for immunogenomics data handling and association analysis
-Version: 0.99.33
+Version: 1.1.0
 Authors@R: c(
   person("Christian", "Hammer", email = "hammerc6@gene.com", role = "aut"),
   person("Maciej", "Migdał", email = "mcjmigdal@gmail.com", role = c("aut", "cre")))
@@ -9,7 +9,7 @@ License: MIT + file LICENCE
 Encoding: UTF-8
 LazyData: true
 Depends:
-    R (>= 4.0.0), MultiAssayExperiment (>= 1.8.3)
+    R (>= 4.1), MultiAssayExperiment (>= 1.8.3)
 Imports:
     assertthat (>= 0.2.0), broom (>= 0.5.1), dplyr (>= 0.8.0.1), formattable (>= 0.2.0.1),
     HardyWeinberg (>= 1.6.3), kableExtra (>= 1.1.0), knitr (>= 1.21), magrittr (>= 1.5), 
@@ -32,4 +32,4 @@ Collate:
     'summarise.R'
     'transformationFunctions.R'
     'utils.R'
-biocViews: Genetics, StatisticalMethod
+biocViews: CellBiology, Genetics, StatisticalMethod
