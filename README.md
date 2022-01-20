@@ -71,7 +71,5 @@ package and reading in input files steps. Look into `inst/benchmark/*` for more
 details. 
 
 ## Citing
-Maciej Migdal, Dan Fu Ruan, William F. Forrest, Amir Horowitz, Christian Hammer. 
-MiDAS - Meaningful Immunogenetic Data at Scale. bioRxiv 2021.01.12.425276; 
-doi: https://doi.org/10.1101/2021.01.12.425276.
+Migdal M, Ruan DF, Forrest WF, Horowitz A, Hammer C (2021) MiDAS—Meaningful Immunogenetic Data at Scale. PLOS Computational Biology 17(7): e1009131. https://doi.org/10.1371/journal.pcbi.1009131
 
