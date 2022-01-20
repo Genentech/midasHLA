@@ -13,6 +13,9 @@ efficient utilization to make meaningful discoveries.
 ## Installation
 
 ``` r
+# Install from Bioconductor
+BiocManager::install("midasHLA")
+
 # Install development version from GitHub
 devtools::install_github("Genentech/MiDAS")
 ```
