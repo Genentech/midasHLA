@@ -1,8 +1,8 @@
 pandoc: 2.7.3
-pkgdown: 1.6.1
+pkgdown: 2.0.2
 pkgdown_sha: ~
 articles:
   MiDAS_tutorial: MiDAS_tutorial.html
   MiDAS_vignette: MiDAS_vignette.html
-last_built: 2021-05-26T17:19Z
+last_built: 2022-01-20T14:14Z
 

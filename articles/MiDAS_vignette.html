@@ -19,6 +19,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -31,18 +33,12 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-<li>
-  <a href="../index.html">
-    <span class="fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
@@ -80,9 +76,9 @@
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>MiDAS quick start</h1>
-                        <h4 class="author">Maciej Migdał &amp; Christian Hammer</h4>
+                        <h4 data-toc-skip class="author">Maciej Migdał &amp; Christian Hammer</h4>
             
-            <h4 class="date">2021-05-26</h4>
+            <h4 data-toc-skip class="date">2022-01-20</h4>
       
       
       <div class="hidden name"><code>MiDAS_vignette.Rmd</code></div>
@@ -91,22 +87,22 @@
 
     
     
-<div id="introduction" class="section level1">
-<h1 class="hasAnchor">
-<a href="#introduction" class="anchor"></a>Introduction</h1>
+<div class="section level2">
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+</h2>
 <p>MiDAS is a comprehensive R package for immunogenetic data manipulation and statistical analysis. MiDAS recodes input data in the form of HLA alleles and KIR types into biologically meaningful variables, allowing HLA amino acid fine mapping, analyses of HLA evolutionary divergence as well as validated HLA-KIR interactions. Further, it allows comprehensive statistical association analysis workflows with phenotypes of diverse measurement scales. MiDAS thus closes the gap between the inference of immunogenetic variation and its efficient utilization to make relevant discoveries related to T cell, Natural Killer cell, and disease biology.</p>
 </div>
-<div id="quick-start" class="section level1">
-<h1 class="hasAnchor">
-<a href="#quick-start" class="anchor"></a>Quick start</h1>
-<div id="reading-input-data" class="section level2">
-<h2 class="hasAnchor">
-<a href="#reading-input-data" class="anchor"></a>Reading input data</h2>
+<div class="section level2">
+<h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
+</h2>
+<div class="section level3">
+<h3 id="reading-input-data">Reading input data<a class="anchor" aria-label="anchor" href="#reading-input-data"></a>
+</h3>
 <p><code>MiDAS</code> includes functions to read HLA and KIR typing data, checking for the correct format and adherence to the right nomenclature. HLA calls can be reduced to a desired resolution when importing it, e.g. from 6-digit to 4-digit. Phenotypic observations can be read e.g. using the <code>read.table</code> function (make sure to include <code>stringsAsFactors = FALSE</code> argument).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">pheno_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"MiDAS_tut_pheno.txt"</span>, package <span class="op">=</span> <span class="st">"midasHLA"</span><span class="op">)</span>
-<span class="va">pheno</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.table</a></span><span class="op">(</span><span class="va">pheno_file</span>, header <span class="op">=</span> <span class="cn">TRUE</span>, stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
-<table class="table table table-striped table-hover table-condensed">
+<code class="sourceCode R"><span class="va">pheno_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"MiDAS_tut_pheno.txt"</span>, package <span class="op">=</span> <span class="st">"midasHLA"</span><span class="op">)</span>
+<span class="va">pheno</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="va">pheno_file</span>, header <span class="op">=</span> <span class="cn">TRUE</span>, stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+<table class="table table table-striped table-hover table-condensed" style="margin-left: auto; margin-right: auto;">
 <thead><tr>
 <th style="text-align:left;">
 ID
@@ -266,10 +262,10 @@ P010
 </table>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># HLA calls can be loaded using the readHlaCalls function with the desired resolution</span>
-<span class="va">hla_calls_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"MiDAS_tut_HLA.txt"</span>, package <span class="op">=</span> <span class="st">"midasHLA"</span><span class="op">)</span>
+<span class="va">hla_calls_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"MiDAS_tut_HLA.txt"</span>, package <span class="op">=</span> <span class="st">"midasHLA"</span><span class="op">)</span>
 <span class="va">hla_calls</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/readHlaCalls.html">readHlaCalls</a></span><span class="op">(</span><span class="va">hla_calls_file</span>, resolution <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></code></pre></div>
 <div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:200px; overflow-x: scroll; width:100%; ">
-<table class="table table table-striped table-hover table-condensed">
+<table class="table table table-striped table-hover table-condensed" style="margin-left: auto; margin-right: auto;">
 <thead><tr>
 <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
 ID
@@ -925,10 +921,10 @@ DRB1*09:01
 </div>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># KIR calls (currently presence/absence calls, no allele-level resolution) can be loaded using the readKirCalls function</span>
-<span class="va">kir_calls_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"MiDAS_tut_KIR.txt"</span>, package <span class="op">=</span> <span class="st">"midasHLA"</span><span class="op">)</span>
+<span class="va">kir_calls_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"MiDAS_tut_KIR.txt"</span>, package <span class="op">=</span> <span class="st">"midasHLA"</span><span class="op">)</span>
 <span class="va">kir_calls</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/readKirCalls.html">readKirCalls</a></span><span class="op">(</span><span class="va">kir_calls_file</span><span class="op">)</span></code></pre></div>
 <div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:200px; overflow-x: scroll; width:100%; ">
-<table class="table table table-striped table-hover table-condensed">
+<table class="table table table-striped table-hover table-condensed" style="margin-left: auto; margin-right: auto;">
 <thead><tr>
 <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
 ID
@@ -1522,21 +1518,21 @@ C010
 <span class="va">KIR</span> <span class="op">&lt;-</span> <span class="va">MiDAS_tut_KIR</span>
 <span class="va">pheno</span> <span class="op">&lt;-</span> <span class="va">MiDAS_tut_pheno</span></code></pre></div>
 </div>
-<div id="creating-midas-objects" class="section level2">
-<h2 class="hasAnchor">
-<a href="#creating-midas-objects" class="anchor"></a>Creating midas objects</h2>
+<div class="section level3">
+<h3 id="creating-midas-objects">Creating midas objects<a class="anchor" aria-label="anchor" href="#creating-midas-objects"></a>
+</h3>
 <p><code>MiDAS</code> provides the <code>prepareMiDAS</code> function to combine genetic and phenotypic data for subsequent analysis. In this step, it is also possible to infer amino acid level information from HLA calls, encode HLA-KIR interactions, or calculate HLA evolutionary divergence (<code>experiment</code> argument).</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">midas</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepareMiDAS.html">prepareMiDAS</a></span><span class="op">(</span>
   hla_calls <span class="op">=</span> <span class="va">HLA</span>,
   kir_calls <span class="op">=</span> <span class="va">KIR</span>,
   colData <span class="op">=</span> <span class="va">pheno</span>,
-  experiment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"hla_alleles"</span>, <span class="st">"hla_aa"</span><span class="op">)</span>
+  experiment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hla_alleles"</span>, <span class="st">"hla_aa"</span><span class="op">)</span>
   <span class="op">)</span></code></pre></div>
 </div>
-<div id="midas-object" class="section level2">
-<h2 class="hasAnchor">
-<a href="#midas-object" class="anchor"></a>MiDAS object</h2>
+<div class="section level3">
+<h3 id="midas-object">MiDAS object<a class="anchor" aria-label="anchor" href="#midas-object"></a>
+</h3>
 <p>A MiDAS object contains our input data as well as defined transformations. This is an extension of a <code>MultiAssayExperiment</code> and can be handled as such. <code>MiDAS</code> provides some functions to interact with <code>MiDAS</code> objects (check <code>?MiDAS-class</code> for a full list).</p>
 <p>For example, we can explore the HLA alleles frequencies, compare them with published frequencies from the allelefrequencies.net database, and filter out low frequency alleles.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
@@ -1547,7 +1543,7 @@ C010
   compare <span class="op">=</span> <span class="cn">TRUE</span>
 <span class="op">)</span></code></pre></div>
 <div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:200px; overflow-x: scroll; width:100%; ">
-<table class="table table table-striped table-hover table-condensed">
+<table class="table table table-striped table-hover table-condensed" style="margin-left: auto; margin-right: auto;">
 <thead><tr>
 <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
 term
@@ -15896,22 +15892,22 @@ NA
     lower_frequency_cutoff <span class="op">=</span> <span class="fl">0.01</span>
     <span class="op">)</span></code></pre></div>
 </div>
-<div id="association-analysis" class="section level2">
-<h2 class="hasAnchor">
-<a href="#association-analysis" class="anchor"></a>Association analysis</h2>
-<div id="model-definition" class="section level3">
-<h3 class="hasAnchor">
-<a href="#model-definition" class="anchor"></a>Model definition</h3>
+<div class="section level3">
+<h3 id="association-analysis">Association analysis<a class="anchor" aria-label="anchor" href="#association-analysis"></a>
+</h3>
+<div class="section level4">
+<h4 id="model-definition">Model definition<a class="anchor" aria-label="anchor" href="#model-definition"></a>
+</h4>
 <p>Before the actual analysis can be run, we still need to define a statistical model we would like to use. We can use most of the statistical models available in R, such as <code>lm</code>, <code>glm</code>, <code>coxme</code> etc. (technically, they need to have a tidy method available). <code>MiDAS</code> then provides a wrapper function that will evaluate our model for each HLA allele in our data.</p>
 <p>Here we will use a very simple formula <code>disease ~ term</code>, term being a placeholder for each tested HLA allele. This notation is necessary to also allow interaction tests (e.g. <code>disease ~ lab_value:term</code>) and also works with other appropriate operations.</p>
 <p><code>midas</code> has to be passed as a <code>data</code> argument to our statistical function, here <code>glm</code>.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Logistic regression</span>
-<span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span><span class="op">(</span><span class="va">disease</span> <span class="op">~</span> <span class="va">term</span>, data <span class="op">=</span> <span class="va">midas</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html">binomial</a></span><span class="op">(</span>link <span class="op">=</span> <span class="st">"logit"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">disease</span> <span class="op">~</span> <span class="va">term</span>, data <span class="op">=</span> <span class="va">midas</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span>link <span class="op">=</span> <span class="st">"logit"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 </div>
-<div id="running-analysis" class="section level3">
-<h3 class="hasAnchor">
-<a href="#running-analysis" class="anchor"></a>Running analysis</h3>
+<div class="section level4">
+<h4 id="running-analysis">Running analysis<a class="anchor" aria-label="anchor" href="#running-analysis"></a>
+</h4>
 <p>To run our analysis, we will use the <code>runMiDAS</code> function. This function offers multiple analysis scenarios which can be tuned using <code>conditional</code> and <code>omnibus</code> arguments. It can also pre-filter input data based on frequency (check <code><a href="../reference/runMiDAS.html">?runMiDAS</a></code> to learn more).</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">results</span> <span class="op">&lt;-</span>
@@ -15926,7 +15922,7 @@ NA
 
 <span class="fu"><a href="../reference/kableResults.html">kableResults</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></code></pre></div>
 <div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:400px; overflow-x: scroll; width:100%; ">
-<table class="table table table-striped table-hover table-condensed">
+<table class="table table table-striped table-hover table-condensed" style="margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
 <th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; position: sticky; top:0; background-color: #FFFFFF;" colspan="14">
@@ -17980,11 +17976,13 @@ A*01:01
 
 
       <footer><div class="copyright">
-  <p>Developed by Christian Hammer, Maciej Migdał.</p>
+  <p></p>
+<p>Developed by Christian Hammer, Maciej Migdał.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
       </footer>
@@ -17992,6 +17990,8 @@ A*01:01
 
   
 
+
+  
 
   </body>
 </html>

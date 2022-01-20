@@ -19,6 +19,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-home">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -31,18 +33,12 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-<li>
-  <a href="index.html">
-    <span class="fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
 <li>
   <a href="reference/index.html">Reference</a>
 </li>
@@ -77,83 +73,95 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
-<div id="meaningful-immunogenetic-data-at-scale-" class="section level1">
-<div class="page-header"><h1 class="hasAnchor">
-<a href="#meaningful-immunogenetic-data-at-scale-" class="anchor"></a>Meaningful Immunogenetic Data at Scale <img src="articles/MiDAS_logo.png" align="right" alt="" width="120">
+<div class="section level1">
+<div class="page-header"><h1 id="meaningful-immunogenetic-data-at-scale-">Meaningful Immunogenetic Data at Scale <img src="articles/MiDAS_logo.png" align="right" alt="" width="120"><a class="anchor" aria-label="anchor" href="#meaningful-immunogenetic-data-at-scale-"></a>
 </h1></div>
 <p>Human immunogenetic variation in the form of HLA and KIR types has been shown to be strongly associated with a multitude of immune-related phenotypes. We present MiDAS, an R package enabling statistical association analysis and using immunogenetic data transformation functions for HLA amino acid fine mapping, analysis of HLA evolutionary divergence as well as HLA-KIR interactions. MiDAS closes the gap between inference of immunogenetic variation and its efficient utilization to make meaningful discoveries.</p>
-<div id="installation" class="section level2">
-<h2 class="hasAnchor">
-<a href="#installation" class="anchor"></a>Installation</h2>
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Install development version from GitHub</span>
-<span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span><span class="op">(</span><span class="st">"Genentech/MiDAS"</span><span class="op">)</span></code></pre></div>
+<span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/remote-reexports.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"Genentech/MiDAS"</span><span class="op">)</span></code></pre></div>
 </div>
-<div id="usage" class="section level2">
-<h2 class="hasAnchor">
-<a href="#usage" class="anchor"></a>Usage</h2>
-<p>A user tutorial is available here: <a href="https://genentech.github.io/MiDAS/articles/MiDAS_tutorial.html">https://genentech.github.io/midasHLA/articles/MiDAS_tutorial.html</a></p>
+<div class="section level2">
+<h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
+</h2>
+<p>A user tutorial is available here: <a href="https://genentech.github.io/MiDAS/articles/MiDAS_tutorial.html" class="external-link">https://genentech.github.io/midasHLA/articles/MiDAS_tutorial.html</a></p>
 </div>
-<div id="developers-notes" class="section level2">
-<h2 class="hasAnchor">
-<a href="#developers-notes" class="anchor"></a>Developers notes</h2>
-<div id="external-data" class="section level3">
-<h3 class="hasAnchor">
-<a href="#external-data" class="anchor"></a>External data</h3>
+<div class="section level2">
+<h2 id="developers-notes">Developers notes<a class="anchor" aria-label="anchor" href="#developers-notes"></a>
+</h2>
+<div class="section level3">
+<h3 id="external-data">External data<a class="anchor" aria-label="anchor" href="#external-data"></a>
+</h3>
 <p>The package is shipped together with external data such as alignment files or allele frequencies. With time, it is possible that those resources will become outdated. Here follows a brief description of scripts that can be used for updating those data. It should be noted that data storage details, at the external sources, may be changed. In such circumstances, the scripts might become obsolete. Nevertheless, they should be a good starting point to update those sources in next package iterations.</p>
 <p><code>inst/scripts/download_extdata.R</code> script is used to download HLA alignments files. Those are used for translating HLA alleles to amino acid level. The alignments are downloaded from <a href="www.ebi.ac.uk/ipd/imgt/hla/">EBI’s IPD-IMGT/HLA database</a>. In some cases alignment files contain sequences for multiple genes, those will be split into separate files (eg. DRB genes)</p>
 <p><code>inst/scripts/parse_alignments.R</code> script pre-parses alignments files for package use. Purpose of using pre-parsed files is to speed up allele to amino acid sequence translation. Resulting <code>.Rdata</code> files should be then placed in <code>inst/extdata</code> replacing the old alignment files.</p>
 <p><code>data-raw/allele_frequencies.R</code> script fetches HLA allele frequencies (for genes A, B, C, DQA1, DQB1, DPA1, DPB1, DRB1, DRB3, DRB4, DRB5) from <a href="www.allelefrequencies.net">www.allelefrequencies.net</a> database and save it in a usable format in <code>data</code> directory. This data is then available under the <code>allele_frequencies</code> variable.</p>
 <p><code>data-raw/kir_frequencies.R</code> script fetches KIR genes frequencies (for genes 3DL3, 2DS2, 2DL2, 2DL3, 2DP1, 2DL1, 3DP1, 2DL4, 3DL1, 3DS1, 2DL5, 2DS3, 2DS5, 2DS4, 2DS1, 3DL2) from <a href="www.allelefrequencies.net">www.allelefrequencies.net</a> database and save it in a usable format in <code>data</code> directory. This data is then available under the <code>kir_frequencies</code> variable.</p>
 </div>
-<div id="package-performance" class="section level3">
-<h3 class="hasAnchor">
-<a href="#package-performance" class="anchor"></a>Package performance</h3>
+<div class="section level3">
+<h3 id="package-performance">Package performance<a class="anchor" aria-label="anchor" href="#package-performance"></a>
+</h3>
 <p>Package performance can be checked using scripts located in <code>inst/benchmark</code>. Briefly, we used GNU’s <code>time</code> (<code>/usr/bin/time -v</code>) to measure time and memory consumption of data transformation and 2 workflows. All tests include loading package and reading in input files steps. Look into <code>inst/benchmark/*</code> for more details.</p>
 </div>
 </div>
-<div id="citing" class="section level2">
-<h2 class="hasAnchor">
-<a href="#citing" class="anchor"></a>Citing</h2>
-<p>Maciej Migdal, Dan Fu Ruan, William F. Forrest, Amir Horowitz, Christian Hammer. MiDAS - Meaningful Immunogenetic Data at Scale. bioRxiv 2021.01.12.425276; doi: <a href="https://doi.org/10.1101/2021.01.12.425276" class="uri">https://doi.org/10.1101/2021.01.12.425276</a>.</p>
+<div class="section level2">
+<h2 id="citing">Citing<a class="anchor" aria-label="anchor" href="#citing"></a>
+</h2>
+<p>Migdal M, Ruan DF, Forrest WF, Horowitz A, Hammer C (2021) MiDAS—Meaningful Immunogenetic Data at Scale. PLOS Computational Biology 17(7): e1009131. <a href="https://doi.org/10.1371/journal.pcbi.1009131" class="external-link uri">https://doi.org/10.1371/journal.pcbi.1009131</a></p>
 </div>
 </div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <div class="links">
-<h2>Links</h2>
+<h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
-<li>Download from BIOC at <br><a href="https://www.bioconductor.org/packages/midasHLA">https://​www.bioconductor.org/​packages/​midasHLA</a>
-</li>
+<li><a href="https://www.bioconductor.org/packages/midasHLA" class="external-link">View on Bioconductor</a></li>
 </ul>
 </div>
+
 <div class="license">
-<h2>License</h2>
+<h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
 <li>
-<a href="https://opensource.org/licenses/mit-license.php">MIT</a> + file <a href="LICENSE-text.html">LICENCE</a>
+<a href="https://opensource.org/licenses/mit-license.php" class="external-link">MIT</a> + file <a href="LICENSE-text.html">LICENCE</a>
 </li>
 </ul>
 </div>
+
+
+<div class="citation">
+<h2 data-toc-skip>Citation</h2>
+<ul class="list-unstyled">
+<li><a href="authors.html#citation">Citing midasHLA</a></li>
+</ul>
+</div>
+
 <div class="developers">
-<h2>Developers</h2>
+<h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
 <li>Christian Hammer <br><small class="roles"> Author </small>  </li>
 <li>Maciej Migdał <br><small class="roles"> Author, maintainer </small>  </li>
 </ul>
 </div>
 
+
+
   </div>
 </div>
 
 
       <footer><div class="copyright">
-  <p>Developed by Christian Hammer, Maciej Migdał.</p>
+  <p></p>
+<p>Developed by Christian Hammer, Maciej Migdał.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
       </footer>
@@ -161,6 +169,8 @@
 
   
 
+
+  
 
   </body>
 </html>
