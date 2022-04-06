@@ -7,7 +7,7 @@ name: check
 
 jobs:
   check:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     env:
       GITHUB_PAT: ${{ secrets.GH_PAT }}
     steps:
@@ -15,7 +15,7 @@ jobs:
 
       - uses: r-lib/actions/setup-r@v1
         with:
-          r-version: '4.1.0' 
+          r-version: 'devel' 
 
       - uses: r-lib/actions/setup-pandoc@v1
 
@@ -39,6 +39,7 @@ jobs:
       - name: Install dependencies
         run: |
           install.packages(c("devtools", "BiocManager"))
+          BiocManager::install(version='devel')
           BiocManager::install(c("SummarizedExperiment", "S4Vectors", "MultiAssayExperiment"))
           remotes::install_deps(dependencies = TRUE)
         shell: Rscript {0}
