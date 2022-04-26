@@ -1,6 +1,6 @@
 Package: midasHLA
 Title: R package for immunogenomics data handling and association analysis
-Version: 1.4.0
+Version: 1.5.0
 Authors@R: c(
   person("Christian", "Hammer", email = "hammerc6@gene.com", role = "aut"),
   person("Maciej", "Migdał", email = "mcjmigdal@gmail.com", role = c("aut", "cre")))
