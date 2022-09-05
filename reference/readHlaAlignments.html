@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -60,27 +60,38 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">readHlaAlignments</span><span class="op">(</span><span class="va">file</span>, gene <span class="op">=</span> <span class="cn">NULL</span>, trim <span class="op">=</span> <span class="cn">FALSE</span>, unkchar <span class="op">=</span> <span class="st">""</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">readHlaAlignments</span><span class="op">(</span><span class="va">file</span>, gene <span class="op">=</span> <span class="cn">NULL</span>, trim <span class="op">=</span> <span class="cn">FALSE</span>, unkchar <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>file</dt>
 <dd><p>Path to input file.</p></dd>
+
+
 <dt>gene</dt>
 <dd><p>Character vector of length one specifying the name of a gene for
 which alignment is required. See details for further explanations.</p></dd>
+
+
 <dt>trim</dt>
 <dd><p>Logical indicating if alignment should be trimmed to start codon
 of the mature protein.</p></dd>
+
+
 <dt>unkchar</dt>
 <dd><p>Character to be used to represent positions with unknown
 sequence.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Matrix containing HLA allele alignments.
-  Rownames correspond to allele numbers and columns to positions in the
+    
+
+<p>Matrix containing HLA allele alignments.</p>
+
+
+<p>Rownames correspond to allele numbers and columns to positions in the
   alignment. Sequences following the termination codon are marked as empty
   character (<code>""</code>). Unknown sequences are marked with a character of
   choice, by default <code>""</code>. Stop codons are represented by a hash (X).
@@ -103,8 +114,8 @@ alleles.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">hla_alignments</span> <span class="op">&lt;-</span> <span class="fu">readHlaAlignments</span><span class="op">(</span>gene <span class="op">=</span> <span class="st">"A"</span><span class="op">)</span></span>
-<span class="r-in"></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">hla_alignments</span> <span class="op">&lt;-</span> <span class="fu">readHlaAlignments</span><span class="op">(</span>gene <span class="op">=</span> <span class="st">"A"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -119,7 +130,7 @@ alleles.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

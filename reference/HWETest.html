@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -60,36 +60,47 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">HWETest</span><span class="op">(</span>
-  <span class="va">object</span>,
-  experiment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hla_alleles"</span>, <span class="st">"hla_aa"</span>, <span class="st">"hla_g_groups"</span>, <span class="st">"hla_supertypes"</span>,
-    <span class="st">"hla_NK_ligands"</span><span class="op">)</span>,
-  HWE_group <span class="op">=</span> <span class="cn">NULL</span>,
-  HWE_cutoff <span class="op">=</span> <span class="cn">NULL</span>,
-  as.MiDAS <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">HWETest</span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  experiment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hla_alleles"</span>, <span class="st">"hla_aa"</span>, <span class="st">"hla_g_groups"</span>, <span class="st">"hla_supertypes"</span>,</span>
+<span>    <span class="st">"hla_NK_ligands"</span><span class="op">)</span>,</span>
+<span>  HWE_group <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  HWE_cutoff <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  as.MiDAS <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>object</dt>
 <dd><p><code><a href="MiDAS-class.html">MiDAS</a></code> object.</p></dd>
+
+
 <dt>experiment</dt>
 <dd><p>String specifying experiment to test. Valid values
 includes <code>"hla_alleles"</code>, <code>"hla_aa"</code>, <code>"hla_g_groups"</code>,
 <code>"hla_supertypes"</code>, <code>"hla_NK_ligands"</code>.</p></dd>
+
+
 <dt>HWE_group</dt>
 <dd><p>Expression defining samples grouping to test for Hardy
 Weinberg equilibrium. By default samples are not grouped.</p></dd>
+
+
 <dt>HWE_cutoff</dt>
 <dd><p>Number specifying p-value threshold. When <code>HWE_group</code>
 is specified both groups are thresholded.</p></dd>
+
+
 <dt>as.MiDAS</dt>
 <dd><p>Logical flag indicating if MiDAS object should be returned.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Data frame with Hardy Weinberg Equilibrium test results or a filtered
+    
+
+<p>Data frame with Hardy Weinberg Equilibrium test results or a filtered
   MiDAS object.</p>
     </div>
     <div id="details">
@@ -100,14 +111,14 @@ p-value cut-off given by <code>HWE_cutoff</code>.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># create MiDAS object</span></span>
-<span class="r-in"><span class="va">midas</span> <span class="op">&lt;-</span> <span class="fu"><a href="prepareMiDAS.html">prepareMiDAS</a></span><span class="op">(</span>hla_calls <span class="op">=</span> <span class="va">MiDAS_tut_HLA</span>,</span>
-<span class="r-in">                      colData <span class="op">=</span> <span class="va">MiDAS_tut_pheno</span>,</span>
-<span class="r-in">                      experiment <span class="op">=</span> <span class="st">"hla_alleles"</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># get HWE p-values as data frame</span></span>
-<span class="r-in"><span class="fu">HWETest</span><span class="op">(</span><span class="va">midas</span>, experiment <span class="op">=</span> <span class="st">"hla_alleles"</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># create MiDAS object</span></span></span>
+<span class="r-in"><span><span class="va">midas</span> <span class="op">&lt;-</span> <span class="fu"><a href="prepareMiDAS.html">prepareMiDAS</a></span><span class="op">(</span>hla_calls <span class="op">=</span> <span class="va">MiDAS_tut_HLA</span>,</span></span>
+<span class="r-in"><span>                      colData <span class="op">=</span> <span class="va">MiDAS_tut_pheno</span>,</span></span>
+<span class="r-in"><span>                      experiment <span class="op">=</span> <span class="st">"hla_alleles"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># get HWE p-values as data frame</span></span></span>
+<span class="r-in"><span><span class="fu">HWETest</span><span class="op">(</span><span class="va">midas</span>, experiment <span class="op">=</span> <span class="st">"hla_alleles"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             var       p.value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1       A*01:01  9.815768e-01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2       A*01:02  9.747476e-01</span>
@@ -556,11 +567,11 @@ p-value cut-off given by <code>HWE_cutoff</code>.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 445  DRB1*16:15  8.737410e-01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 446  DRB1*16:32  9.873786e-01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 447  DRB1*16:42  9.873786e-01</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># get HWE in groups defined by disease status</span></span>
-<span class="r-in"><span class="co"># grouping by `disease == 1` will divide samples into two groups:</span></span>
-<span class="r-in"><span class="co"># `disease == 1` and `not disease == 1`</span></span>
-<span class="r-in"><span class="fu">HWETest</span><span class="op">(</span><span class="va">midas</span>, experiment <span class="op">=</span> <span class="st">"hla_alleles"</span>, HWE_group <span class="op">=</span> <span class="va">disease</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># get HWE in groups defined by disease status</span></span></span>
+<span class="r-in"><span><span class="co"># grouping by `disease == 1` will divide samples into two groups:</span></span></span>
+<span class="r-in"><span><span class="co"># `disease == 1` and `not disease == 1`</span></span></span>
+<span class="r-in"><span><span class="fu">HWETest</span><span class="op">(</span><span class="va">midas</span>, experiment <span class="op">=</span> <span class="st">"hla_alleles"</span>, HWE_group <span class="op">=</span> <span class="va">disease</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             var  disease == 1 not disease == 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1       A*01:01  4.458834e-01     4.510815e-01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2       A*01:02  9.642580e-01              NaN</span>
@@ -1009,9 +1020,9 @@ p-value cut-off given by <code>HWE_cutoff</code>.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 445  DRB1*16:15  9.821424e-01     8.390774e-01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 446  DRB1*16:32  9.821424e-01              NaN</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 447  DRB1*16:42  9.821424e-01              NaN</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># filter MiDAS object by HWE test p-value</span></span>
-<span class="r-in"><span class="fu">HWETest</span><span class="op">(</span><span class="va">midas</span>, experiment <span class="op">=</span> <span class="st">"hla_alleles"</span>, HWE_cutoff <span class="op">=</span> <span class="fl">0.05</span>, as.MiDAS <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># filter MiDAS object by HWE test p-value</span></span></span>
+<span class="r-in"><span><span class="fu">HWETest</span><span class="op">(</span><span class="va">midas</span>, experiment <span class="op">=</span> <span class="st">"hla_alleles"</span>, HWE_cutoff <span class="op">=</span> <span class="fl">0.05</span>, as.MiDAS <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> A MiDAS object of 1 listed</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  experiment with a user-defined name and respective class.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Containing an ExperimentList class object of length 1:</span>
@@ -1024,7 +1035,7 @@ p-value cut-off given by <code>HWE_cutoff</code>.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  *Format() - convert into a long or wide DataFrame</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  assays() - convert ExperimentList to a SimpleList of matrices</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  exportClass() - save data to flat files</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -1039,7 +1050,7 @@ p-value cut-off given by <code>HWE_cutoff</code>.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

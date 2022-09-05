@@ -18,7 +18,7 @@ variables using likelihood ratio test."><!-- mathjax --><script src="https://cdn
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -62,13 +62,13 @@ variables using likelihood ratio test.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">omnibusTest</span><span class="op">(</span>
-  <span class="va">object</span>,
-  <span class="va">omnibus_groups</span>,
-  placeholder <span class="op">=</span> <span class="st">"term"</span>,
-  correction <span class="op">=</span> <span class="st">"bonferroni"</span>,
-  n_correction <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">omnibusTest</span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  <span class="va">omnibus_groups</span>,</span>
+<span>  placeholder <span class="op">=</span> <span class="st">"term"</span>,</span>
+<span>  correction <span class="op">=</span> <span class="st">"bonferroni"</span>,</span>
+<span>  n_correction <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -76,15 +76,23 @@ variables using likelihood ratio test.</p>
     <dl><dt>object</dt>
 <dd><p>An existing fit from a model function such as lm, glm and many
 others.</p></dd>
+
+
 <dt>omnibus_groups</dt>
 <dd><p>List of character vectors giving sets of variables for
 which omnibus test should be applied.</p></dd>
+
+
 <dt>placeholder</dt>
 <dd><p>String specifying term in <code>object</code>'s formula which
 should be substituted with variables during analysis.</p></dd>
+
+
 <dt>correction</dt>
 <dd><p>String specifying multiple testing correction method. See
 details for further information.</p></dd>
+
+
 <dt>n_correction</dt>
 <dd><p>Integer specifying number of comparisons to consider
 during multiple testing correction calculations. For Bonferroni correction
@@ -93,10 +101,15 @@ being made. This is useful in cases when knowledge about the biology or
 redundance of alleles reduces the need for correction. For other methods it
 must be at least equal to the number of comparisons being made; only set
 this (to non-default) when you know what you are doing!</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Data frame with columns:</p><ul><li><p>"group" Omnibus group name</p></li>
+    
+
+<p>Data frame with columns:</p>
+<p></p>
+<ul><li><p>"group" Omnibus group name</p></li>
 <li><p>"term" Elements of omnibus group added to base model</p></li>
 <li><p>"df" Difference in degrees of freedom between base and extended model</p></li>
 <li><p>"logLik" Difference in log likelihoods between base and extended model</p></li>
@@ -113,17 +126,17 @@ of variables given in <code>variables</code> as their linear combination.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">midas</span> <span class="op">&lt;-</span> <span class="fu"><a href="prepareMiDAS.html">prepareMiDAS</a></span><span class="op">(</span>hla_calls <span class="op">=</span> <span class="va">MiDAS_tut_HLA</span>,</span>
-<span class="r-in">                      colData <span class="op">=</span> <span class="va">MiDAS_tut_pheno</span>,</span>
-<span class="r-in">                      experiment <span class="op">=</span> <span class="st">"hla_aa"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># define base model</span></span>
-<span class="r-in"><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">disease</span> <span class="op">~</span> <span class="va">term</span>, data <span class="op">=</span> <span class="va">midas</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">omnibusTest</span><span class="op">(</span><span class="va">object</span>,</span>
-<span class="r-in">            omnibus_groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span class="r-in">              A_29 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A_29_D"</span>, <span class="st">"A_29_A"</span><span class="op">)</span>,</span>
-<span class="r-in">              A_43 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A_43_Q"</span>, <span class="st">"A_43_R"</span><span class="op">)</span></span>
-<span class="r-in">            <span class="op">)</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">midas</span> <span class="op">&lt;-</span> <span class="fu"><a href="prepareMiDAS.html">prepareMiDAS</a></span><span class="op">(</span>hla_calls <span class="op">=</span> <span class="va">MiDAS_tut_HLA</span>,</span></span>
+<span class="r-in"><span>                      colData <span class="op">=</span> <span class="va">MiDAS_tut_pheno</span>,</span></span>
+<span class="r-in"><span>                      experiment <span class="op">=</span> <span class="st">"hla_aa"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># define base model</span></span></span>
+<span class="r-in"><span><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">disease</span> <span class="op">~</span> <span class="va">term</span>, data <span class="op">=</span> <span class="va">midas</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">omnibusTest</span><span class="op">(</span><span class="va">object</span>,</span></span>
+<span class="r-in"><span>            omnibus_groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>              A_29 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A_29_D"</span>, <span class="st">"A_29_A"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>              A_43 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A_43_Q"</span>, <span class="st">"A_43_R"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>            <span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>While evaluating the model problems occured:</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> Warnings:</span>
@@ -132,7 +145,7 @@ of variables given in <code>variables</code> as their linear combination.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   group   term df    logLik statistic    p.value p.adjusted</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1  A_29 A_29_D  1 0.5007512  1.001502 0.31694726 0.63389452</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2  A_43 A_43_Q  1 2.1307456  4.261491 0.03898569 0.07797137</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -147,7 +160,7 @@ of variables given in <code>variables</code> as their linear combination.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

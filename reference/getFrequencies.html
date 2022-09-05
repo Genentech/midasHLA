@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -60,59 +60,73 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">getFrequencies</span><span class="op">(</span>
-  <span class="va">object</span>,
-  <span class="va">experiment</span>,
-  carrier_frequency <span class="op">=</span> <span class="cn">FALSE</span>,
-  compare <span class="op">=</span> <span class="cn">FALSE</span>,
-  ref_pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>hla_alleles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"USA NMDP African American pop 2"</span>, <span class="st">"USA NMDP Chinese"</span>,
-    <span class="st">"USA NMDP European Caucasian"</span>, <span class="st">"USA NMDP Hispanic South or Central American"</span>,
-    <span class="st">"USA NMDP Japanese"</span>, <span class="st">"USA NMDP North American Amerindian"</span>,
-    <span class="st">"USA NMDP South Asian Indian"</span><span class="op">)</span>, kir_genes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"USA California African American KIR"</span>,
-    <span class="st">"USA California Asian American KIR"</span>, <span class="st">"USA California Caucasians KIR"</span>,
-    <span class="st">"USA California Hispanic KIR"</span><span class="op">)</span><span class="op">)</span>,
-  ref <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>hla_alleles <span class="op">=</span> <span class="va">allele_frequencies</span>, kir_genes <span class="op">=</span> <span class="va">kir_frequencies</span><span class="op">)</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">getFrequencies</span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  <span class="va">experiment</span>,</span>
+<span>  carrier_frequency <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  compare <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  ref_pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>hla_alleles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"USA NMDP African American pop 2"</span>, <span class="st">"USA NMDP Chinese"</span>,</span>
+<span>    <span class="st">"USA NMDP European Caucasian"</span>, <span class="st">"USA NMDP Hispanic South or Central American"</span>,</span>
+<span>    <span class="st">"USA NMDP Japanese"</span>, <span class="st">"USA NMDP North American Amerindian"</span>,</span>
+<span>    <span class="st">"USA NMDP South Asian Indian"</span><span class="op">)</span>, kir_genes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"USA California African American KIR"</span>,</span>
+<span>    <span class="st">"USA California Asian American KIR"</span>, <span class="st">"USA California Caucasians KIR"</span>,</span>
+<span>    <span class="st">"USA California Hispanic KIR"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  ref <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>hla_alleles <span class="op">=</span> <span class="va">allele_frequencies</span>, kir_genes <span class="op">=</span> <span class="va">kir_frequencies</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>object</dt>
 <dd><p><code><a href="MiDAS-class.html">MiDAS</a></code> object.</p></dd>
+
+
 <dt>experiment</dt>
 <dd><p>Matrix or SummarizedExperiment object.</p></dd>
+
+
 <dt>carrier_frequency</dt>
 <dd><p>Logical flag indicating if carrier frequency should
 be returned.</p></dd>
+
+
 <dt>compare</dt>
 <dd><p>Logical flag indicating if <code>hla_calls</code> frequencies
 should be compared to reference frequencies given in <code>ref</code>.</p></dd>
+
+
 <dt>ref_pop</dt>
 <dd><p>Named list of character vectors giving names of reference
 populations in <code>ref</code> to compare with. Optionally vectors can be named,
 then those names will be used as population names. Each vector should
 correspond to a specific experiment.</p></dd>
+
+
 <dt>ref</dt>
 <dd><p>Named list of reference frequencies data frames. Each element
 should give reference for a specific experiment. See
 <code><a href="allele_frequencies.html">allele_frequencies</a></code> for an example on how reference
 frequency data frame should be formatted.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Data frame with features from selected experiment and their
-  corresponding frequencies. Column <code>"term"</code> hold features names, 
-<code>"Counts"</code> hold number of feature occurrences, <code>"Freq"</code> hold 
+    
+
+<p>Data frame with features from selected experiment and their
+  corresponding frequencies. Column <code>"term"</code> hold features names,</p>
+<p></p>
+<p><code>"Counts"</code> hold number of feature occurrences, <code>"Freq"</code> hold 
   feature frequencies. If argument <code>compare</code> is set to <code>TRUE</code>, 
   further columns will hold frequencies in reference populations.</p>
     </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># using default reference populations</span></span>
-<span class="r-in"><span class="fu">getFrequencies</span><span class="op">(</span>object <span class="op">=</span> <span class="va">MiDAS_tut_object</span>, </span>
-<span class="r-in">               experiment <span class="op">=</span> <span class="st">"hla_alleles"</span>, </span>
-<span class="r-in">               compare <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># using default reference populations</span></span></span>
+<span class="r-in"><span><span class="fu">getFrequencies</span><span class="op">(</span>object <span class="op">=</span> <span class="va">MiDAS_tut_object</span>, </span></span>
+<span class="r-in"><span>               experiment <span class="op">=</span> <span class="st">"hla_alleles"</span>, </span></span>
+<span class="r-in"><span>               compare <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            term Counts   Freq USA NMDP African American pop 2 USA NMDP Chinese</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1       A*25:01     52 0.0260                        0.003400         0.000200</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2       A*26:01     90 0.0450                        0.014600         0.023700</span>
@@ -1905,17 +1919,17 @@ frequency data frame should be formatted.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 445                          NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 446                          NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 447                    0.000010</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># using customized set of reference populations</span></span>
-<span class="r-in"><span class="fu">getFrequencies</span><span class="op">(</span></span>
-<span class="r-in">  object <span class="op">=</span> <span class="va">MiDAS_tut_object</span>, </span>
-<span class="r-in">  experiment <span class="op">=</span> <span class="st">"hla_alleles"</span>, </span>
-<span class="r-in">  compare <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span class="r-in">  ref_pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span class="r-in">    hla_alleles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"USA NMDP Chinese"</span>, <span class="st">"USA NMDP European Caucasian"</span><span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span>,</span>
-<span class="r-in">  ref <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>hla_alleles <span class="op">=</span> <span class="va">allele_frequencies</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># using customized set of reference populations</span></span></span>
+<span class="r-in"><span><span class="fu">getFrequencies</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  object <span class="op">=</span> <span class="va">MiDAS_tut_object</span>, </span></span>
+<span class="r-in"><span>  experiment <span class="op">=</span> <span class="st">"hla_alleles"</span>, </span></span>
+<span class="r-in"><span>  compare <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  ref_pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    hla_alleles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"USA NMDP Chinese"</span>, <span class="st">"USA NMDP European Caucasian"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span>,</span></span>
+<span class="r-in"><span>  ref <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>hla_alleles <span class="op">=</span> <span class="va">allele_frequencies</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            term Counts   Freq USA NMDP Chinese USA NMDP European Caucasian</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1       A*25:01     52 0.0260         0.000200                   0.0210000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2       A*26:01     90 0.0450         0.023700                   0.0309000</span>
@@ -2364,7 +2378,7 @@ frequency data frame should be formatted.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 445     C*03:06      1 0.0005               NA                   0.0000143</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 446 DQB1*05:107      1 0.0005               NA                          NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 447     C*15:09      1 0.0005               NA                   0.0000133</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -2379,7 +2393,7 @@ frequency data frame should be formatted.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

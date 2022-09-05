@@ -18,7 +18,7 @@ sequence alignment."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/a
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -62,7 +62,7 @@ sequence alignment.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">getVariableAAPos</span><span class="op">(</span><span class="va">alignment</span>, varchar <span class="op">=</span> <span class="st">"[A-Z]"</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">getVariableAAPos</span><span class="op">(</span><span class="va">alignment</span>, varchar <span class="op">=</span> <span class="st">"[A-Z]"</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -70,14 +70,19 @@ sequence alignment.</p>
     <dl><dt>alignment</dt>
 <dd><p>Matrix containing amino acid level alignment, as returned by
 <code><a href="readHlaAlignments.html">readHlaAlignments</a></code>,</p></dd>
+
+
 <dt>varchar</dt>
 <dd><p>Regex matching characters that should be considered when
 looking for variable amino acid positions. See details for further
 explanations.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Integer vector specifying which alignment columns are variable.</p>
+    
+
+<p>Integer vector specifying which alignment columns are variable.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -92,13 +97,13 @@ detect this kind of variability <code>varchar = "[A-Z\\.]"</code> should be used
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">alignment</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHlaAlignments.html">readHlaAlignments</a></span><span class="op">(</span>gene <span class="op">=</span> <span class="st">"TAP1"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">getVariableAAPos</span><span class="op">(</span><span class="va">alignment</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">alignment</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHlaAlignments.html">readHlaAlignments</a></span><span class="op">(</span>gene <span class="op">=</span> <span class="st">"TAP1"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">getVariableAAPos</span><span class="op">(</span><span class="va">alignment</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  80 131 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  80 131 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 219 220 221 222 223 224 225 226 227 228 333 370 458 518 637 648 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 219 220 221 222 223 224 225 226 227 228 333 370 458 518 637 648 </span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -113,7 +118,7 @@ detect this kind of variability <code>varchar = "[A-Z\\.]"</code> should be used
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

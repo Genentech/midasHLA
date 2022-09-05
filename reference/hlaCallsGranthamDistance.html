@@ -19,7 +19,7 @@ Grantham R. 1974.."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/aj
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -64,11 +64,11 @@ alleles of a given, using original formula by
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">hlaCallsGranthamDistance</span><span class="op">(</span>
-  <span class="va">hla_calls</span>,
-  genes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span><span class="op">)</span>,
-  aa_selection <span class="op">=</span> <span class="st">"binding_groove"</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">hlaCallsGranthamDistance</span><span class="op">(</span></span>
+<span>  <span class="va">hla_calls</span>,</span>
+<span>  genes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span><span class="op">)</span>,</span>
+<span>  aa_selection <span class="op">=</span> <span class="st">"binding_groove"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -76,20 +76,28 @@ alleles of a given, using original formula by
     <dl><dt>hla_calls</dt>
 <dd><p>HLA calls data frame, as returned by
 <code><a href="readHlaCalls.html">readHlaCalls</a></code> function.</p></dd>
+
+
 <dt>genes</dt>
 <dd><p>Character vector specifying genes for which allelic distance
 should be calculated.</p></dd>
+
+
 <dt>aa_selection</dt>
 <dd><p>String specifying variable region in peptide binding
 groove which should be considered for Grantham distance calculation. Valid
 choices includes: <code>"binding_groove"</code>, <code>"B_pocket"</code>,
 <code>"F_pocket"</code>. See details for more information.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Data frame of normalized Grantham distances between pairs of alleles
-  for each specified HLA gene. First column (<code>ID</code>) is the same as in
-<code>hla_calls</code>, further columns are named as given by <code>genes</code>.</p>
+    
+
+<p>Data frame of normalized Grantham distances between pairs of alleles
+  for each specified HLA gene. First column (<code>ID</code>) is the same as in</p>
+<p></p>
+<p><code>hla_calls</code>, further columns are named as given by <code>genes</code>.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -107,7 +115,7 @@ more details on the choice of exons 2 and 3.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu">hlaCallsGranthamDistance</span><span class="op">(</span><span class="va">MiDAS_tut_HLA</span>, genes <span class="op">=</span> <span class="st">"A"</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">hlaCallsGranthamDistance</span><span class="op">(</span><span class="va">MiDAS_tut_HLA</span>, genes <span class="op">=</span> <span class="st">"A"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        ID          A</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1    C001  3.8121547</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2    C002  0.8729282</span>
@@ -1109,7 +1117,7 @@ more details on the choice of exons 2 and 3.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 998  P498  0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 999  P499 12.5303867</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1000 P500  6.4254144</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -1124,7 +1132,7 @@ more details on the choice of exons 2 and 3.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

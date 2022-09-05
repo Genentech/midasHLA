@@ -18,7 +18,7 @@ interactions."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/li
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -62,12 +62,12 @@ interactions.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">getHlaKirInteractions</span><span class="op">(</span>
-  <span class="va">hla_calls</span>,
-  <span class="va">kir_calls</span>,
-  interactions_dict <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"Match_counts_hla_kir_interactions.txt"</span>,
-    package <span class="op">=</span> <span class="st">"midasHLA"</span><span class="op">)</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">getHlaKirInteractions</span><span class="op">(</span></span>
+<span>  <span class="va">hla_calls</span>,</span>
+<span>  <span class="va">kir_calls</span>,</span>
+<span>  interactions_dict <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"Match_counts_hla_kir_interactions.txt"</span>,</span>
+<span>    package <span class="op">=</span> <span class="st">"midasHLA"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -75,17 +75,28 @@ interactions.</p>
     <dl><dt>hla_calls</dt>
 <dd><p>HLA calls data frame, as returned by
 <code><a href="readHlaCalls.html">readHlaCalls</a></code> function.</p></dd>
+
+
 <dt>kir_calls</dt>
 <dd><p>KIR calls data frame, as returned by
 <code><a href="readKirCalls.html">readKirCalls</a></code> function.</p></dd>
+
+
 <dt>interactions_dict</dt>
 <dd><p>Path to HLA - KIR interactions dictionary.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Data frame with variable number of columns. First column named 
-<code>"ID"</code> corresponds to <code>"ID"</code> column in <code>counts</code>, further
-  columns hold indicators for HLA - KIR interactions. <code>1</code> and <code>0</code>  code presence and absence of a variable respectively.</p>
+    
+
+<p>Data frame with variable number of columns. First column named</p>
+<p></p>
+<p><code>"ID"</code> corresponds to <code>"ID"</code> column in <code>counts</code>, further
+  columns hold indicators for HLA - KIR interactions. <code>1</code> and <code>0</code></p>
+ 
+
+<p>code presence and absence of a variable respectively.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -102,13 +113,13 @@ file based on <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6558367/" cl
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu">getHlaKirInteractions</span><span class="op">(</span></span>
-<span class="r-in">  hla_calls <span class="op">=</span> <span class="va">MiDAS_tut_HLA</span>, </span>
-<span class="r-in">  kir_calls <span class="op">=</span> <span class="va">MiDAS_tut_KIR</span>, </span>
-<span class="r-in">  interactions_dict <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="st">"extdata"</span>, <span class="st">"Match_counts_hla_kir_interactions.txt"</span>, </span>
-<span class="r-in">    package <span class="op">=</span> <span class="st">"midasHLA"</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">getHlaKirInteractions</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  hla_calls <span class="op">=</span> <span class="va">MiDAS_tut_HLA</span>, </span></span>
+<span class="r-in"><span>  kir_calls <span class="op">=</span> <span class="va">MiDAS_tut_KIR</span>, </span></span>
+<span class="r-in"><span>  interactions_dict <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="st">"extdata"</span>, <span class="st">"Match_counts_hla_kir_interactions.txt"</span>, </span></span>
+<span class="r-in"><span>    package <span class="op">=</span> <span class="st">"midasHLA"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>In ambiguous cases Bw4 will be assigned! See 'hlaToVariable' documentation for more details.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        ID C2_KIR2DL1 C1_KIR2DL2 B*46:01_KIR2DL2 B*73:01_KIR2DL2 C2_KIR2DL2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1    C001          0          0               0               0          0</span>
@@ -7117,7 +7128,7 @@ file based on <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6558367/" cl
 <span class="r-out co"><span class="r-pr">#&gt;</span> 998                  0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 999                  0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1000                 1</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -7132,7 +7143,7 @@ file based on <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6558367/" cl
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

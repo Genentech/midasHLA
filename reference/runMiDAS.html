@@ -19,7 +19,7 @@ See examples section."><!-- mathjax --><script src="https://cdnjs.cloudflare.com
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -64,23 +64,23 @@ See examples section.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">runMiDAS</span><span class="op">(</span>
-  <span class="va">object</span>,
-  <span class="va">experiment</span>,
-  inheritance_model <span class="op">=</span> <span class="cn">NULL</span>,
-  conditional <span class="op">=</span> <span class="cn">FALSE</span>,
-  omnibus <span class="op">=</span> <span class="cn">FALSE</span>,
-  omnibus_groups_filter <span class="op">=</span> <span class="cn">NULL</span>,
-  lower_frequency_cutoff <span class="op">=</span> <span class="cn">NULL</span>,
-  upper_frequency_cutoff <span class="op">=</span> <span class="cn">NULL</span>,
-  correction <span class="op">=</span> <span class="st">"bonferroni"</span>,
-  n_correction <span class="op">=</span> <span class="cn">NULL</span>,
-  exponentiate <span class="op">=</span> <span class="cn">FALSE</span>,
-  th <span class="op">=</span> <span class="fl">0.05</span>,
-  th_adj <span class="op">=</span> <span class="cn">TRUE</span>,
-  keep <span class="op">=</span> <span class="cn">FALSE</span>,
-  rss_th <span class="op">=</span> <span class="fl">1e-07</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">runMiDAS</span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  <span class="va">experiment</span>,</span>
+<span>  inheritance_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  conditional <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  omnibus <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  omnibus_groups_filter <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  lower_frequency_cutoff <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  upper_frequency_cutoff <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  correction <span class="op">=</span> <span class="st">"bonferroni"</span>,</span>
+<span>  n_correction <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  exponentiate <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  th <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>  th_adj <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  keep <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  rss_th <span class="op">=</span> <span class="fl">1e-07</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -88,6 +88,8 @@ See examples section.</p>
     <dl><dt>object</dt>
 <dd><p>An existing fit from a model function such as lm, glm and many
 others.</p></dd>
+
+
 <dt>experiment</dt>
 <dd><p>String indicating the experiment associated with
 <code>object</code>'s <code>MiDAS</code> data to use. Valid values includes:
@@ -96,29 +98,45 @@ others.</p></dd>
 <code>"kir_haplotypes"</code>, <code>"hla_kir_interactions"</code>,
 <code>"hla_divergence"</code>, <code>"hla_het"</code>, <code>"hla_custom"</code>,
 <code>"kir_custom"</code>. See <code><a href="prepareMiDAS.html">prepareMiDAS</a></code> for more information.</p></dd>
+
+
 <dt>inheritance_model</dt>
 <dd><p>String specifying inheritance model to use.
 Available choices are <code>"dominant"</code>, <code>"recessive"</code>,
 <code>"additive"</code>.</p></dd>
+
+
 <dt>conditional</dt>
 <dd><p>Logical flag indicating if conditional analysis should be
 performed.</p></dd>
+
+
 <dt>omnibus</dt>
 <dd><p>Logical flag indicating if omnibus test should be used.</p></dd>
+
+
 <dt>omnibus_groups_filter</dt>
 <dd><p>Character vector specifying omnibus groups to
 use.</p></dd>
+
+
 <dt>lower_frequency_cutoff</dt>
 <dd><p>Number giving lower frequency threshold.
 Numbers greater than 1 are interpreted as the number of feature occurrences,
 numbers between 0 and 1 as fractions.</p></dd>
+
+
 <dt>upper_frequency_cutoff</dt>
 <dd><p>Number giving upper frequency threshold.
 Numbers greater than 1 are interpreted as the number of feature occurrences,
 numbers between 0 and 1 as fractions.</p></dd>
+
+
 <dt>correction</dt>
 <dd><p>String specifying multiple testing correction method. See
 details for further information.</p></dd>
+
+
 <dt>n_correction</dt>
 <dd><p>Integer specifying number of comparisons to consider
 during multiple testing correction calculations. For Bonferroni correction
@@ -127,32 +145,47 @@ being made. This is useful in cases when knowledge about the biology or
 redundance of alleles reduces the need for correction. For other methods it
 must be at least equal to the number of comparisons being made; only set
 this (to non-default) when you know what you are doing!</p></dd>
+
+
 <dt>exponentiate</dt>
 <dd><p>Logical flag indicating whether or not to exponentiate
 the coefficient estimates. Internally this is passed to
 <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></code>. This is typical for logistic and multinomial
 regressions, but a bad idea if there is no log or logit link. Defaults to
 FALSE.</p></dd>
+
+
 <dt>th</dt>
 <dd><p>Number specifying threshold for a variable to be considered
 significant.</p></dd>
+
+
 <dt>th_adj</dt>
 <dd><p>Logical flag indicating if adjusted p-value should be used as
 threshold criteria, otherwise unadjusted p-value is used.</p></dd>
+
+
 <dt>keep</dt>
 <dd><p>Logical flag indicating if the output should be a list of results
 resulting from each selection step. Default is to return only the final
 result.</p></dd>
+
+
 <dt>rss_th</dt>
 <dd><p>Number specifying residual sum of squares threshold at which
 function should stop adding additional variables. As the residual sum of
 squares approaches <code>0</code> the perfect fit is obtained making further
 attempts at variable selection nonsense. This behavior can be controlled
 using <code>rss_th</code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Analysis results, depending on the parameters:</p><dl><dt><code>conditional=FALSE, omnibus=FALSE</code></dt>
+    
+
+<p>Analysis results, depending on the parameters:</p>
+<p></p>
+<dl><dt><code>conditional=FALSE, omnibus=FALSE</code></dt>
 <dd><p>Tibble with first column <code>"term"</code> holding names of tested 
       variables (eg. alleles). Further columns depends on the used 
       model and are determined by associated <code>tidy</code> function. Generally 
@@ -222,47 +255,48 @@ is Benjamini &amp; Hochberg (1995) (<code>"BH"</code>). Internally this is passe
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># create MiDAS object</span></span>
-<span class="r-in"><span class="va">midas</span> <span class="op">&lt;-</span> <span class="fu"><a href="prepareMiDAS.html">prepareMiDAS</a></span><span class="op">(</span>hla_calls <span class="op">=</span> <span class="va">MiDAS_tut_HLA</span>,</span>
-<span class="r-in">                      colData <span class="op">=</span> <span class="va">MiDAS_tut_pheno</span>,</span>
-<span class="r-in">                      experiment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hla_alleles"</span>, <span class="st">"hla_aa"</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># construct statistical model</span></span>
-<span class="r-in"><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">disease</span> <span class="op">~</span> <span class="va">term</span>, data <span class="op">=</span> <span class="va">midas</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># run analysis</span></span>
-<span class="r-in"><span class="fu">runMiDAS</span><span class="op">(</span><span class="va">object</span>, experiment <span class="op">=</span> <span class="st">"hla_alleles"</span>, inheritance_model <span class="op">=</span> <span class="st">"dominant"</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># create MiDAS object</span></span></span>
+<span class="r-in"><span><span class="va">midas</span> <span class="op">&lt;-</span> <span class="fu"><a href="prepareMiDAS.html">prepareMiDAS</a></span><span class="op">(</span>hla_calls <span class="op">=</span> <span class="va">MiDAS_tut_HLA</span>,</span></span>
+<span class="r-in"><span>                      colData <span class="op">=</span> <span class="va">MiDAS_tut_pheno</span>,</span></span>
+<span class="r-in"><span>                      experiment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hla_alleles"</span>, <span class="st">"hla_aa"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># construct statistical model</span></span></span>
+<span class="r-in"><span><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">disease</span> <span class="op">~</span> <span class="va">term</span>, data <span class="op">=</span> <span class="va">midas</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># run analysis</span></span></span>
+<span class="r-in"><span><span class="fu">runMiDAS</span><span class="op">(</span><span class="va">object</span>, experiment <span class="op">=</span> <span class="st">"hla_alleles"</span>, inheritance_model <span class="op">=</span> <span class="st">"dominant"</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'experiments' dropped; see 'metadata'</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 447 × 14</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    allele     p.value p.adjusted estimate std.error conf.low conf.high statistic</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> DQB1*06:02 1.73<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span>   0.000<span style="text-decoration: underline;">773</span>   0.189     0.039<span style="text-decoration: underline;">3</span>   0.112     0.266       4.81</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> DRB1*15:01 5.29<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span>   0.002<span style="text-decoration: underline;">36</span>    0.177     0.038<span style="text-decoration: underline;">7</span>   0.101     0.253       4.58</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> B*57:01    1.34<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span>   0.006<span style="text-decoration: underline;">01</span>    0.254     0.058<span style="text-decoration: underline;">1</span>   0.140     0.368       4.37</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> C*07:02    1.60<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>   0.071<span style="text-decoration: underline;">4</span>     0.148     0.039<span style="text-decoration: underline;">0</span>   0.071<span style="text-decoration: underline;">3</span>    0.224       3.79</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> B*18:01    4.93<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>   0.220     -<span style="color: #BB0000;">0.168</span>     0.048<span style="text-decoration: underline;">1</span>  -<span style="color: #BB0000;">0.262</span>    -<span style="color: #BB0000;">0.073</span><span style="color: #BB0000; text-decoration: underline;">7</span>     -<span style="color: #BB0000;">3.50</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> DRA*01:02  2.63<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span>   1          0.096<span style="text-decoration: underline;">0</span>    0.031<span style="text-decoration: underline;">9</span>   0.033<span style="text-decoration: underline;">5</span>    0.159       3.02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> DQB1*02:02 4.34<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span>   1         -<span style="color: #BB0000;">0.116</span>     0.040<span style="text-decoration: underline;">6</span>  -<span style="color: #BB0000;">0.196</span>    -<span style="color: #BB0000;">0.036</span><span style="color: #BB0000; text-decoration: underline;">4</span>     -<span style="color: #BB0000;">2.86</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> B*51:01    4.49<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span>   1          0.134     0.047<span style="text-decoration: underline;">2</span>   0.041<span style="text-decoration: underline;">8</span>    0.227       2.85</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> DRA*01:01  1.02<span style="color: #949494;">e</span><span style="color: #BB0000;">-2</span>   1         -<span style="color: #BB0000;">0.118</span>     0.045<span style="text-decoration: underline;">7</span>  -<span style="color: #BB0000;">0.207</span>    -<span style="color: #BB0000;">0.027</span><span style="color: #BB0000; text-decoration: underline;">9</span>     -<span style="color: #BB0000;">2.57</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> DRB1*16:15 1.10<span style="color: #949494;">e</span><span style="color: #BB0000;">-2</span>   1         -<span style="color: #BB0000;">0.404</span>     0.159   -<span style="color: #BB0000;">0.715</span>    -<span style="color: #BB0000;">0.092</span><span style="color: #BB0000; text-decoration: underline;">9</span>     -<span style="color: #BB0000;">2.55</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># … with 437 more rows, and 6 more variables: Ntotal &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   Ntotal.percent &lt;formttbl&gt;, `N(disease=0)` &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    allele p.value p.adj…¹ estim…² std.e…³ conf.…⁴ conf.…⁵ stati…⁶ Ntotal Ntota…⁷</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;formt&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> DQB1*… 1.73<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 7.73<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>  0.189   0.039<span style="text-decoration: underline;">3</span>  0.112   0.266     4.81    198 9.90%  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> DRB1*… 5.29<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 2.36<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span>  0.177   0.038<span style="text-decoration: underline;">7</span>  0.101   0.253     4.58    206 10.30% </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> B*57:… 1.34<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 6.01<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span>  0.254   0.058<span style="text-decoration: underline;">1</span>  0.140   0.368     4.37     79 3.95%  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> C*07:… 1.60<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span> 7.14<span style="color: #949494;">e</span><span style="color: #BB0000;">-2</span>  0.148   0.039<span style="text-decoration: underline;">0</span>  0.071<span style="text-decoration: underline;">3</span>  0.224     3.79    204 10.20% </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> B*18:… 4.93<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span> 2.20<span style="color: #949494;">e</span><span style="color: #BB0000;">-1</span> -<span style="color: #BB0000;">0.168</span>   0.048<span style="text-decoration: underline;">1</span> -<span style="color: #BB0000;">0.262</span>  -<span style="color: #BB0000;">0.073</span><span style="color: #BB0000; text-decoration: underline;">7</span>   -<span style="color: #BB0000;">3.50</span>    122 6.10%  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> DRA*0… 2.63<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span> 1   <span style="color: #949494;">e</span>+0  0.096<span style="text-decoration: underline;">0</span>  0.031<span style="text-decoration: underline;">9</span>  0.033<span style="text-decoration: underline;">5</span>  0.159     3.02    573 28.65% </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> DQB1*… 4.34<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span> 1   <span style="color: #949494;">e</span>+0 -<span style="color: #BB0000;">0.116</span>   0.040<span style="text-decoration: underline;">6</span> -<span style="color: #BB0000;">0.196</span>  -<span style="color: #BB0000;">0.036</span><span style="color: #BB0000; text-decoration: underline;">4</span>   -<span style="color: #BB0000;">2.86</span>    185 9.25%  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> B*51:… 4.49<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span> 1   <span style="color: #949494;">e</span>+0  0.134   0.047<span style="text-decoration: underline;">2</span>  0.041<span style="text-decoration: underline;">8</span>  0.227     2.85    128 6.40%  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> DRA*0… 1.02<span style="color: #949494;">e</span><span style="color: #BB0000;">-2</span> 1   <span style="color: #949494;">e</span>+0 -<span style="color: #BB0000;">0.118</span>   0.045<span style="text-decoration: underline;">7</span> -<span style="color: #BB0000;">0.207</span>  -<span style="color: #BB0000;">0.027</span><span style="color: #BB0000; text-decoration: underline;">9</span>   -<span style="color: #BB0000;">2.57</span>    862 43.10% </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> DRB1*… 1.10<span style="color: #949494;">e</span><span style="color: #BB0000;">-2</span> 1   <span style="color: #949494;">e</span>+0 -<span style="color: #BB0000;">0.404</span>   0.159  -<span style="color: #BB0000;">0.715</span>  -<span style="color: #BB0000;">0.092</span><span style="color: #BB0000; text-decoration: underline;">9</span>   -<span style="color: #BB0000;">2.55</span>     10 0.50%  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># … with 437 more rows, 4 more variables: `N(disease=0)` &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   `N(disease=0).percent` &lt;formttbl&gt;, `N(disease=1)` &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   `N(disease=1).percent` &lt;formttbl&gt;</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># omnibus test</span></span>
-<span class="r-in"><span class="co"># omnibus_groups_filter argument can be used to restrict omnibus test only</span></span>
-<span class="r-in"><span class="co"># to selected variables groups, here we restrict the analysis to HLA-A</span></span>
-<span class="r-in"><span class="co"># positions 29 and 43.</span></span>
-<span class="r-in"><span class="fu">runMiDAS</span><span class="op">(</span></span>
-<span class="r-in">  <span class="va">object</span>,</span>
-<span class="r-in">  experiment <span class="op">=</span> <span class="st">"hla_aa"</span>,</span>
-<span class="r-in">  inheritance_model <span class="op">=</span> <span class="st">"dominant"</span>,</span>
-<span class="r-in">  omnibus <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span class="r-in">  omnibus_groups_filter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A_29"</span>, <span class="st">"A_43"</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   `N(disease=1).percent` &lt;formttbl&gt;, and abbreviated variable names</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   ¹​p.adjusted, ²​estimate, ³​std.error, ⁴​conf.low, ⁵​conf.high, ⁶​statistic,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   ⁷​Ntotal.percent</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># omnibus test</span></span></span>
+<span class="r-in"><span><span class="co"># omnibus_groups_filter argument can be used to restrict omnibus test only</span></span></span>
+<span class="r-in"><span><span class="co"># to selected variables groups, here we restrict the analysis to HLA-A</span></span></span>
+<span class="r-in"><span><span class="co"># positions 29 and 43.</span></span></span>
+<span class="r-in"><span><span class="fu">runMiDAS</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="va">object</span>,</span></span>
+<span class="r-in"><span>  experiment <span class="op">=</span> <span class="st">"hla_aa"</span>,</span></span>
+<span class="r-in"><span>  inheritance_model <span class="op">=</span> <span class="st">"dominant"</span>,</span></span>
+<span class="r-in"><span>  omnibus <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  omnibus_groups_filter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A_29"</span>, <span class="st">"A_43"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'experiments' dropped; see 'metadata'</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>While evaluating the model problems occured:</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> </span>
@@ -273,7 +307,7 @@ is Benjamini &amp; Hochberg (1995) (<code>"BH"</code>). Internally this is passe
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> A_43   Q, R         2      8.36  0.015<span style="text-decoration: underline;">3</span>     0.030<span style="text-decoration: underline;">6</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> A_29   A            1      1.00  0.317      0.634 </span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -288,7 +322,7 @@ is Benjamini &amp; Hochberg (1995) (<code>"BH"</code>). Internally this is passe
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -60,7 +60,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">countsToVariables</span><span class="op">(</span><span class="va">counts</span>, <span class="va">dictionary</span>, na.value <span class="op">=</span> <span class="cn">NA</span>, nacols.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">countsToVariables</span><span class="op">(</span><span class="va">counts</span>, <span class="va">dictionary</span>, na.value <span class="op">=</span> <span class="cn">NA</span>, nacols.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -70,21 +70,34 @@
 <code><a href="hlaCallsToCounts.html">hlaCallsToCounts</a></code> function. First column should contain
 samples IDs, following columns should contain counts (natural numbers
 including zero).</p></dd>
+
+
 <dt>dictionary</dt>
 <dd><p>Path to file containing variables dictionary or data
 frame. See details for further explanations.</p></dd>
+
+
 <dt>na.value</dt>
 <dd><p>Vector of length one speciyfing value for variables with no
 matching entry in <code>dictionary</code>. Default is to use <code>0</code>.</p></dd>
+
+
 <dt>nacols.rm</dt>
 <dd><p>Logical indicating if result columns that contain only
 <code>NA</code> should be removed.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Data frame with variable number of columns. First column named 
-<code>"ID"</code> corresponds to <code>"ID"</code> column in <code>counts</code>, further
-  columns hold indicators for converted variables. <code>1</code> and <code>0</code>  code presence and absence of a variable respectively.</p>
+    
+
+<p>Data frame with variable number of columns. First column named</p>
+<p></p>
+<p><code>"ID"</code> corresponds to <code>"ID"</code> column in <code>counts</code>, further
+  columns hold indicators for converted variables. <code>1</code> and <code>0</code></p>
+ 
+
+<p>code presence and absence of a variable respectively.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -102,7 +115,7 @@ in the same manner can be passed instead.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu">countsToVariables</span><span class="op">(</span><span class="va">MiDAS_tut_KIR</span>, <span class="st">"kir_haplotypes"</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">countsToVariables</span><span class="op">(</span><span class="va">MiDAS_tut_KIR</span>, <span class="st">"kir_haplotypes"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        ID cenAA cenBB cenAB telAA telBB telAB</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1    C001     1     0     0     1     0     0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2    C002     1     0     0     1     0     0</span>
@@ -1104,7 +1117,7 @@ in the same manner can be passed instead.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 998  P498     0     0     1     0     0     1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 999  P499     1     0     0     0     0     1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1000 P500     0     0     1     0     0     1</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -1119,7 +1132,7 @@ in the same manner can be passed instead.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

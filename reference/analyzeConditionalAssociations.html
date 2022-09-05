@@ -19,7 +19,7 @@ more significant variables based on a self-defined threshold."><!-- mathjax --><
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -64,18 +64,18 @@ more significant variables based on a self-defined threshold.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">analyzeConditionalAssociations</span><span class="op">(</span>
-  <span class="va">object</span>,
-  <span class="va">variables</span>,
-  placeholder <span class="op">=</span> <span class="st">"term"</span>,
-  correction <span class="op">=</span> <span class="st">"bonferroni"</span>,
-  n_correction <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">th</span>,
-  th_adj <span class="op">=</span> <span class="cn">TRUE</span>,
-  keep <span class="op">=</span> <span class="cn">FALSE</span>,
-  rss_th <span class="op">=</span> <span class="fl">1e-07</span>,
-  exponentiate <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">analyzeConditionalAssociations</span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  <span class="va">variables</span>,</span>
+<span>  placeholder <span class="op">=</span> <span class="st">"term"</span>,</span>
+<span>  correction <span class="op">=</span> <span class="st">"bonferroni"</span>,</span>
+<span>  n_correction <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">th</span>,</span>
+<span>  th_adj <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  keep <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  rss_th <span class="op">=</span> <span class="fl">1e-07</span>,</span>
+<span>  exponentiate <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -83,15 +83,23 @@ more significant variables based on a self-defined threshold.</p>
     <dl><dt>object</dt>
 <dd><p>An existing fit from a model function such as lm, glm and many
 others.</p></dd>
+
+
 <dt>variables</dt>
 <dd><p>Character vector specifying variables to use in association
 tests.</p></dd>
+
+
 <dt>placeholder</dt>
 <dd><p>String specifying term to substitute with value from
 <code>x</code>. Ignored if set to <code>NULL</code>.</p></dd>
+
+
 <dt>correction</dt>
 <dd><p>String specifying multiple testing correction method. See
 details for further information.</p></dd>
+
+
 <dt>n_correction</dt>
 <dd><p>Integer specifying number of comparisons to consider
 during multiple testing correction calculations. For Bonferroni correction
@@ -100,59 +108,75 @@ being made. This is useful in cases when knowledge about the biology or
 redundance of alleles reduces the need for correction. For other methods it
 must be at least equal to the number of comparisons being made; only set
 this (to non-default) when you know what you are doing!</p></dd>
+
+
 <dt>th</dt>
 <dd><p>Number specifying threshold for a variable to be considered
 significant.</p></dd>
+
+
 <dt>th_adj</dt>
 <dd><p>Logical flag indicating if adjusted p-value should be used as
 threshold criteria, otherwise unadjusted p-value is used.</p></dd>
+
+
 <dt>keep</dt>
 <dd><p>Logical flag indicating if the output should be a list of results
 resulting from each selection step. Default is to return only the final
 result.</p></dd>
+
+
 <dt>rss_th</dt>
 <dd><p>Number specifying residual sum of squares threshold at which
 function should stop adding additional variables. As the residual sum of
 squares approaches <code>0</code> the perfect fit is obtained making further
 attempts at variable selection nonsense. This behavior can be controlled
 using <code>rss_th</code>.</p></dd>
+
+
 <dt>exponentiate</dt>
 <dd><p>Logical flag indicating whether or not to exponentiate
 the coefficient estimates. Internally this is passed to
 <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></code>. This is typical for logistic and multinomial
 regressions, but a bad idea if there is no log or logit link. Defaults to
 FALSE.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Tibble with stepwise conditional testing results or a list of tibbles,
- see <code>keep</code> argument. The first column <code>"term"</code> hold the names of 
-<code>variables</code>. Further columns depends on the used model and are 
- determined by associated <code>tidy</code> function. Generally they will include 
-<code>"estimate"</code>, <code>"std.error"</code>, <code>"statistic"</code>, <code>"p.value"</code>, 
-<code>"conf.low"</code>, <code>"conf.high"</code>, <code>"p.adjusted"</code>.</p>
+    
+
+<p>Tibble with stepwise conditional testing results or a list of tibbles,
+ see <code>keep</code> argument. The first column <code>"term"</code> hold the names of</p>
+<p></p>
+<p><code>variables</code>. Further columns depends on the used model and are 
+ determined by associated <code>tidy</code> function. Generally they will include</p>
+<p></p>
+<p><code>"estimate"</code>, <code>"std.error"</code>, <code>"statistic"</code>, <code>"p.value"</code>,</p>
+<p></p>
+<p><code>"conf.low"</code>, <code>"conf.high"</code>, <code>"p.adjusted"</code>.</p>
     </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">midas</span> <span class="op">&lt;-</span> <span class="fu"><a href="prepareMiDAS.html">prepareMiDAS</a></span><span class="op">(</span>hla_calls <span class="op">=</span> <span class="va">MiDAS_tut_HLA</span>,</span>
-<span class="r-in">                      colData <span class="op">=</span> <span class="va">MiDAS_tut_pheno</span>,</span>
-<span class="r-in">                      experiment <span class="op">=</span> <span class="st">"hla_alleles"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># analyzeConditionalAssociations expects model data to be a data.frame</span></span>
-<span class="r-in"><span class="va">midas_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">midas</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># define base model</span></span>
-<span class="r-in"><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">disease</span> <span class="op">~</span> <span class="va">term</span>, data <span class="op">=</span> <span class="va">midas_data</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">analyzeConditionalAssociations</span><span class="op">(</span><span class="va">object</span>,</span>
-<span class="r-in">                            variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"B*14:02"</span>, <span class="st">"DRB1*11:01"</span><span class="op">)</span>,</span>
-<span class="r-in">                            th <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">midas</span> <span class="op">&lt;-</span> <span class="fu"><a href="prepareMiDAS.html">prepareMiDAS</a></span><span class="op">(</span>hla_calls <span class="op">=</span> <span class="va">MiDAS_tut_HLA</span>,</span></span>
+<span class="r-in"><span>                      colData <span class="op">=</span> <span class="va">MiDAS_tut_pheno</span>,</span></span>
+<span class="r-in"><span>                      experiment <span class="op">=</span> <span class="st">"hla_alleles"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># analyzeConditionalAssociations expects model data to be a data.frame</span></span></span>
+<span class="r-in"><span><span class="va">midas_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">midas</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># define base model</span></span></span>
+<span class="r-in"><span><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">disease</span> <span class="op">~</span> <span class="va">term</span>, data <span class="op">=</span> <span class="va">midas_data</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">analyzeConditionalAssociations</span><span class="op">(</span><span class="va">object</span>,</span></span>
+<span class="r-in"><span>                            variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"B*14:02"</span>, <span class="st">"DRB1*11:01"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                            th <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>No significant variables found. Returning empty table.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 0 × 9</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># … with 9 variables: term &lt;chr&gt;, estimate &lt;dbl&gt;, std.error &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   statistic &lt;dbl&gt;, p.value &lt;dbl&gt;, conf.low &lt;dbl&gt;, conf.high &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   p.adjusted &lt;dbl&gt;, covariates &lt;chr&gt;</span></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -167,7 +191,7 @@ FALSE.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

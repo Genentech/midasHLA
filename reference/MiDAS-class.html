@@ -25,7 +25,7 @@ prepareMiDAS for more details)."><!-- mathjax --><script src="https://cdnjs.clou
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -76,97 +76,120 @@ can also store <code>'hla_calls'</code> and <code>'kir_calls'</code> data frames
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S4 method for MiDAS</span>
-<span class="fu"><a href="getExperiments.html">getExperiments</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span>
-
-<span class="co"># S4 method for MiDAS</span>
-<span class="fu"><a href="getHlaCalls.html">getHlaCalls</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span>
-
-<span class="co"># S4 method for MiDAS</span>
-<span class="fu"><a href="getKirCalls.html">getKirCalls</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span>
-
-<span class="co"># S4 method for MiDAS</span>
-<span class="fu"><a href="getPlaceholder.html">getPlaceholder</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span>
-
-<span class="co"># S4 method for MiDAS</span>
-<span class="fu"><a href="getOmnibusGroups.html">getOmnibusGroups</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">experiment</span><span class="op">)</span>
-
-<span class="co"># S4 method for MiDAS</span>
-<span class="fu"><a href="getFrequencies.html">getFrequencies</a></span><span class="op">(</span>
-  <span class="va">object</span>,
-  <span class="va">experiment</span>,
-  carrier_frequency <span class="op">=</span> <span class="cn">FALSE</span>,
-  compare <span class="op">=</span> <span class="cn">FALSE</span>,
-  ref_pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>hla_alleles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"USA NMDP African American pop 2"</span>, <span class="st">"USA NMDP Chinese"</span>,
-    <span class="st">"USA NMDP European Caucasian"</span>, <span class="st">"USA NMDP Hispanic South or Central American"</span>,
-    <span class="st">"USA NMDP Japanese"</span>, <span class="st">"USA NMDP North American Amerindian"</span>,
-    <span class="st">"USA NMDP South Asian Indian"</span><span class="op">)</span>, kir_genes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"USA California African American KIR"</span>,
-    <span class="st">"USA California Asian American KIR"</span>, <span class="st">"USA California Caucasians KIR"</span>,
-    <span class="st">"USA California Hispanic KIR"</span><span class="op">)</span><span class="op">)</span>,
-  ref <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>hla_alleles <span class="op">=</span> <span class="va">allele_frequencies</span>, kir_genes <span class="op">=</span> <span class="va">kir_frequencies</span><span class="op">)</span>
-<span class="op">)</span>
-
-<span class="co"># S4 method for MiDAS</span>
-<span class="fu"><a href="filterByFrequency.html">filterByFrequency</a></span><span class="op">(</span>
-  <span class="va">object</span>,
-  <span class="va">experiment</span>,
-  lower_frequency_cutoff <span class="op">=</span> <span class="cn">NULL</span>,
-  upper_frequency_cutoff <span class="op">=</span> <span class="cn">NULL</span>,
-  carrier_frequency <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span>
-
-<span class="co"># S4 method for MiDAS</span>
-<span class="fu"><a href="filterByOmnibusGroups.html">filterByOmnibusGroups</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">experiment</span>, <span class="va">groups</span><span class="op">)</span>
-
-<span class="co"># S4 method for MiDAS</span>
-<span class="fu"><a href="filterByVariables.html">filterByVariables</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">experiment</span>, <span class="va">variables</span><span class="op">)</span>
-
-<span class="co"># S4 method for MiDAS</span>
-<span class="fu"><a href="getAllelesForAA.html">getAllelesForAA</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">aa_pos</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S4 method for MiDAS</span></span>
+<span><span class="fu"><a href="getExperiments.html">getExperiments</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for MiDAS</span></span>
+<span><span class="fu"><a href="getHlaCalls.html">getHlaCalls</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for MiDAS</span></span>
+<span><span class="fu"><a href="getKirCalls.html">getKirCalls</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for MiDAS</span></span>
+<span><span class="fu"><a href="getPlaceholder.html">getPlaceholder</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for MiDAS</span></span>
+<span><span class="fu"><a href="getOmnibusGroups.html">getOmnibusGroups</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">experiment</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for MiDAS</span></span>
+<span><span class="fu"><a href="getFrequencies.html">getFrequencies</a></span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  <span class="va">experiment</span>,</span>
+<span>  carrier_frequency <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  compare <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  ref_pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>hla_alleles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"USA NMDP African American pop 2"</span>, <span class="st">"USA NMDP Chinese"</span>,</span>
+<span>    <span class="st">"USA NMDP European Caucasian"</span>, <span class="st">"USA NMDP Hispanic South or Central American"</span>,</span>
+<span>    <span class="st">"USA NMDP Japanese"</span>, <span class="st">"USA NMDP North American Amerindian"</span>,</span>
+<span>    <span class="st">"USA NMDP South Asian Indian"</span><span class="op">)</span>, kir_genes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"USA California African American KIR"</span>,</span>
+<span>    <span class="st">"USA California Asian American KIR"</span>, <span class="st">"USA California Caucasians KIR"</span>,</span>
+<span>    <span class="st">"USA California Hispanic KIR"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  ref <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>hla_alleles <span class="op">=</span> <span class="va">allele_frequencies</span>, kir_genes <span class="op">=</span> <span class="va">kir_frequencies</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for MiDAS</span></span>
+<span><span class="fu"><a href="filterByFrequency.html">filterByFrequency</a></span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  <span class="va">experiment</span>,</span>
+<span>  lower_frequency_cutoff <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  upper_frequency_cutoff <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  carrier_frequency <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for MiDAS</span></span>
+<span><span class="fu"><a href="filterByOmnibusGroups.html">filterByOmnibusGroups</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">experiment</span>, <span class="va">groups</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for MiDAS</span></span>
+<span><span class="fu"><a href="filterByVariables.html">filterByVariables</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">experiment</span>, <span class="va">variables</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for MiDAS</span></span>
+<span><span class="fu"><a href="getAllelesForAA.html">getAllelesForAA</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">aa_pos</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>object</dt>
 <dd><p><code>MiDAS</code> object.</p></dd>
+
+
 <dt>experiment</dt>
 <dd><p>String specifying experiment.</p></dd>
+
+
 <dt>carrier_frequency</dt>
 <dd><p>Logical flag indicating if carrier frequency should
 be returned.</p></dd>
+
+
 <dt>compare</dt>
 <dd><p>Logical flag indicating if <code>hla_calls</code> frequencies
 should be compared to reference frequencies given in <code>ref</code>.</p></dd>
+
+
 <dt>ref_pop</dt>
 <dd><p>Named list of character vectors giving names of reference
 populations in <code>ref</code> to compare with. Optionally vectors can be named,
 then those names will be used as population names. Each vector should
 correspond to a specific experiment.</p></dd>
+
+
 <dt>ref</dt>
 <dd><p>Named list of reference frequencies data frames. Each element
 should give reference for a specific experiment. See
 <code><a href="allele_frequencies.html">allele_frequencies</a></code> for an example on how reference
 frequency data frame should be formatted.</p></dd>
+
+
 <dt>lower_frequency_cutoff</dt>
 <dd><p>Number giving lower frequency threshold.
 Numbers greater than 1 are interpreted as the number of feature occurrences,
 numbers between 0 and 1 as fractions.</p></dd>
+
+
 <dt>upper_frequency_cutoff</dt>
 <dd><p>Number giving upper frequency threshold.
 Numbers greater than 1 are interpreted as the number of feature occurrences,
 numbers between 0 and 1 as fractions.</p></dd>
+
+
 <dt>groups</dt>
 <dd><p>Character vector specifying omnibus groups to select. See
 <code><a href="getOmnibusGroups.html">getOmnibusGroups</a></code> for more details.</p></dd>
+
+
 <dt>variables</dt>
 <dd><p>Character vector specifying features to select.</p></dd>
+
+
 <dt>aa_pos</dt>
 <dd><p>String specifying gene and amino acid position, example
 <code>"A_9"</code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Instance of class MiDAS</p>
+    
+
+<p>Instance of class MiDAS</p>
     </div>
 
   </div>
@@ -181,7 +204,7 @@ numbers between 0 and 1 as fractions.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

@@ -18,7 +18,7 @@ tidy function."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/l
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -62,7 +62,7 @@ tidy function."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/l
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">iterativeModel</span><span class="op">(</span><span class="va">object</span>, <span class="va">placeholder</span>, <span class="va">variables</span>, exponentiate <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">iterativeModel</span><span class="op">(</span><span class="va">object</span>, <span class="va">placeholder</span>, <span class="va">variables</span>, exponentiate <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -70,24 +70,34 @@ tidy function."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/l
     <dl><dt>object</dt>
 <dd><p>An existing fit from a model function such as lm, glm and many
 others.</p></dd>
+
+
 <dt>placeholder</dt>
 <dd><p>String specifying term to substitute with value from
 <code>x</code>. Ignored if set to <code>NULL</code>.</p></dd>
+
+
 <dt>variables</dt>
 <dd><p>Character vector specifying variables to use in association
 tests.</p></dd>
+
+
 <dt>exponentiate</dt>
 <dd><p>Logical flag indicating whether or not to exponentiate
 the coefficient estimates. Internally this is passed to
 <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></code>. This is typical for logistic and multinomial
 regressions, but a bad idea if there is no log or logit link. Defaults to
 FALSE.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Tibble containing per variable summarised model statistics. The exact
-  output format is model dependent and controlled by model's dedicated 
-<code>tidy</code> function.</p>
+    
+
+<p>Tibble containing per variable summarised model statistics. The exact
+  output format is model dependent and controlled by model's dedicated</p>
+<p></p>
+<p><code>tidy</code> function.</p>
     </div>
 
   </div>
@@ -102,7 +112,7 @@ FALSE.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

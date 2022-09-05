@@ -18,7 +18,7 @@ level using a statistical model of choice."><!-- mathjax --><script src="https:/
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -62,14 +62,14 @@ level using a statistical model of choice.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">analyzeAssociations</span><span class="op">(</span>
-  <span class="va">object</span>,
-  <span class="va">variables</span>,
-  placeholder <span class="op">=</span> <span class="st">"term"</span>,
-  correction <span class="op">=</span> <span class="st">"bonferroni"</span>,
-  n_correction <span class="op">=</span> <span class="cn">NULL</span>,
-  exponentiate <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">analyzeAssociations</span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  <span class="va">variables</span>,</span>
+<span>  placeholder <span class="op">=</span> <span class="st">"term"</span>,</span>
+<span>  correction <span class="op">=</span> <span class="st">"bonferroni"</span>,</span>
+<span>  n_correction <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  exponentiate <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -77,15 +77,23 @@ level using a statistical model of choice.</p>
     <dl><dt>object</dt>
 <dd><p>An existing fit from a model function such as lm, glm and many
 others.</p></dd>
+
+
 <dt>variables</dt>
 <dd><p>Character vector specifying variables to use in association
 tests.</p></dd>
+
+
 <dt>placeholder</dt>
 <dd><p>String specifying term in <code>object</code>'s formula which
 should be substituted with variables during analysis.</p></dd>
+
+
 <dt>correction</dt>
 <dd><p>String specifying multiple testing correction method. See
 details for further information.</p></dd>
+
+
 <dt>n_correction</dt>
 <dd><p>Integer specifying number of comparisons to consider
 during multiple testing correction calculations. For Bonferroni correction
@@ -94,21 +102,29 @@ being made. This is useful in cases when knowledge about the biology or
 redundance of alleles reduces the need for correction. For other methods it
 must be at least equal to the number of comparisons being made; only set
 this (to non-default) when you know what you are doing!</p></dd>
+
+
 <dt>exponentiate</dt>
 <dd><p>Logical flag indicating whether or not to exponentiate
 the coefficient estimates. Internally this is passed to
 <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></code>. This is typical for logistic and multinomial
 regressions, but a bad idea if there is no log or logit link. Defaults to
 FALSE.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Tibble containing combined results for all <code>variables</code>. The 
+    
+
+<p>Tibble containing combined results for all <code>variables</code>. The 
   first column <code>"term"</code> hold the names of <code>variables</code>. Further
-  columns depends on the used model and are determined by associated 
-<code>tidy</code> function. Generally they will include <code>"estimate"</code>, 
-<code>"std.error"</code>, <code>"statistic"</code>, <code>"p.value"</code>, <code>"conf.low"</code>,
-<code>"conf.high"</code>, <code>"p.adjusted"</code>.</p>
+  columns depends on the used model and are determined by associated</p>
+<p></p>
+<p><code>tidy</code> function. Generally they will include <code>"estimate"</code>,</p>
+<p></p>
+<p><code>"std.error"</code>, <code>"statistic"</code>, <code>"p.value"</code>, <code>"conf.low"</code>,</p>
+<p></p>
+<p><code>"conf.high"</code>, <code>"p.adjusted"</code>.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -119,25 +135,25 @@ is Benjamini &amp; Hochberg (1995) (<code>"BH"</code>). Internally this is passe
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">midas</span> <span class="op">&lt;-</span> <span class="fu"><a href="prepareMiDAS.html">prepareMiDAS</a></span><span class="op">(</span>hla_calls <span class="op">=</span> <span class="va">MiDAS_tut_HLA</span>,</span>
-<span class="r-in">                      colData <span class="op">=</span> <span class="va">MiDAS_tut_pheno</span>,</span>
-<span class="r-in">                      experiment <span class="op">=</span> <span class="st">"hla_alleles"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># analyzeAssociations expects model data to be a data.frame</span></span>
-<span class="r-in"><span class="va">midas_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">midas</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># define base model</span></span>
-<span class="r-in"><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">disease</span> <span class="op">~</span> <span class="va">term</span>, data <span class="op">=</span> <span class="va">midas_data</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># test for alleles associations</span></span>
-<span class="r-in"><span class="fu">analyzeAssociations</span><span class="op">(</span>object <span class="op">=</span> <span class="va">object</span>,</span>
-<span class="r-in">                    variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"B*14:02"</span>, <span class="st">"DRB1*11:01"</span><span class="op">)</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">midas</span> <span class="op">&lt;-</span> <span class="fu"><a href="prepareMiDAS.html">prepareMiDAS</a></span><span class="op">(</span>hla_calls <span class="op">=</span> <span class="va">MiDAS_tut_HLA</span>,</span></span>
+<span class="r-in"><span>                      colData <span class="op">=</span> <span class="va">MiDAS_tut_pheno</span>,</span></span>
+<span class="r-in"><span>                      experiment <span class="op">=</span> <span class="st">"hla_alleles"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># analyzeAssociations expects model data to be a data.frame</span></span></span>
+<span class="r-in"><span><span class="va">midas_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">midas</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># define base model</span></span></span>
+<span class="r-in"><span><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">disease</span> <span class="op">~</span> <span class="va">term</span>, data <span class="op">=</span> <span class="va">midas_data</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># test for alleles associations</span></span></span>
+<span class="r-in"><span><span class="fu">analyzeAssociations</span><span class="op">(</span>object <span class="op">=</span> <span class="va">object</span>,</span></span>
+<span class="r-in"><span>                    variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"B*14:02"</span>, <span class="st">"DRB1*11:01"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 8</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   term       estimate std.error statistic p.value conf.low conf.high p.adjusted</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> B*14:02      0.104     0.080<span style="text-decoration: underline;">7</span>      1.29  0.197   -<span style="color: #BB0000;">0.054</span><span style="color: #BB0000; text-decoration: underline;">2</span>    0.263      0.394 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> DRB1*11:01  -<span style="color: #BB0000;">0.096</span><span style="color: #BB0000; text-decoration: underline;">0</span>    0.043<span style="text-decoration: underline;">8</span>     -<span style="color: #BB0000;">2.19</span>  0.028<span style="text-decoration: underline;">5</span>  -<span style="color: #BB0000;">0.182</span>    -<span style="color: #BB0000;">0.010</span><span style="color: #BB0000; text-decoration: underline;">1</span>     0.057<span style="text-decoration: underline;">0</span></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -152,7 +168,7 @@ is Benjamini &amp; Hochberg (1995) (<code>"BH"</code>). Internally this is passe
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -60,7 +60,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">reduceHlaCalls</span><span class="op">(</span><span class="va">hla_calls</span>, resolution <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">reduceHlaCalls</span><span class="op">(</span><span class="va">hla_calls</span>, resolution <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -68,12 +68,17 @@
     <dl><dt>hla_calls</dt>
 <dd><p>HLA calls data frame, as returned by
 <code><a href="readHlaCalls.html">readHlaCalls</a></code> function.</p></dd>
+
+
 <dt>resolution</dt>
 <dd><p>Number specifying desired resolution.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>HLA calls data frame reduced to specified resolution.</p>
+    
+
+<p>HLA calls data frame reduced to specified resolution.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -83,7 +88,7 @@ are returned unchanged.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu">reduceHlaCalls</span><span class="op">(</span><span class="va">MiDAS_tut_HLA</span>, resolution <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">reduceHlaCalls</span><span class="op">(</span><span class="va">MiDAS_tut_HLA</span>, resolution <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        ID  A_1      A_2       B_1  B_2  C_1  C_2  DPA1_1  DPA1_2   DPB1_1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1    C001 A*25     A*26      B*07 B*18 C*12 C*07 DPA1*01 DPA1*01  DPB1*02</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2    C002 A*02     A*02      B*50 B*18 C*06 C*12 DPA1*01 DPA1*01  DPB1*04</span>
@@ -2086,7 +2091,7 @@ are returned unchanged.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 998   DPB1*04 DQA1*02 DQA1*01 DQB1*02 DQB1*05 DRA*01 DRA*01 DRB1*07 DRB1*01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 999   DPB1*04 DQA1*02 DQA1*03 DQB1*03 DQB1*02 DRA*01 DRA*01 DRB1*04 DRB1*07</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1000  DPB1*04 DQA1*05 DQA1*01 DQB1*02 DQB1*05 DRA*01 DRA*01 DRB1*01 DRB1*03</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -2101,7 +2106,7 @@ are returned unchanged.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

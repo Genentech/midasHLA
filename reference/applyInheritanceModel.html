@@ -18,7 +18,7 @@ inheritance_model."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/aj
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -62,36 +62,41 @@ inheritance_model."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/aj
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">applyInheritanceModel</span><span class="op">(</span>
-  <span class="va">experiment</span>,
-  inheritance_model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dominant"</span>, <span class="st">"recessive"</span>, <span class="st">"additive"</span>, <span class="st">"overdominant"</span><span class="op">)</span>
-<span class="op">)</span>
-
-<span class="co"># S3 method for matrix</span>
-<span class="fu">applyInheritanceModel</span><span class="op">(</span>
-  <span class="va">experiment</span>,
-  inheritance_model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dominant"</span>, <span class="st">"recessive"</span>, <span class="st">"additive"</span>, <span class="st">"overdominant"</span><span class="op">)</span>
-<span class="op">)</span>
-
-<span class="co"># S3 method for SummarizedExperiment</span>
-<span class="fu">applyInheritanceModel</span><span class="op">(</span>
-  <span class="va">experiment</span>,
-  inheritance_model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dominant"</span>, <span class="st">"recessive"</span>, <span class="st">"additive"</span>, <span class="st">"overdominant"</span><span class="op">)</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">applyInheritanceModel</span><span class="op">(</span></span>
+<span>  <span class="va">experiment</span>,</span>
+<span>  inheritance_model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dominant"</span>, <span class="st">"recessive"</span>, <span class="st">"additive"</span>, <span class="st">"overdominant"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for matrix</span></span>
+<span><span class="fu">applyInheritanceModel</span><span class="op">(</span></span>
+<span>  <span class="va">experiment</span>,</span>
+<span>  inheritance_model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dominant"</span>, <span class="st">"recessive"</span>, <span class="st">"additive"</span>, <span class="st">"overdominant"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for SummarizedExperiment</span></span>
+<span><span class="fu">applyInheritanceModel</span><span class="op">(</span></span>
+<span>  <span class="va">experiment</span>,</span>
+<span>  inheritance_model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dominant"</span>, <span class="st">"recessive"</span>, <span class="st">"additive"</span>, <span class="st">"overdominant"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>experiment</dt>
 <dd><p>Matrix or SummarizedExperiment object.</p></dd>
+
+
 <dt>inheritance_model</dt>
 <dd><p>String specifying inheritance model to use.
 Available choices are <code>"dominant"</code>, <code>"recessive"</code>,
 <code>"additive"</code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p><code>experiment</code> converted to specified inheritance model.</p>
+    
+
+<p><code>experiment</code> converted to specified inheritance model.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -114,7 +119,7 @@ other as <code>0</code>. In <code>"additive"</code> model homozygotes are coded 
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -60,13 +60,13 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">hlaToVariable</span><span class="op">(</span>
-  <span class="va">hla_calls</span>,
-  <span class="va">dictionary</span>,
-  reduce <span class="op">=</span> <span class="cn">TRUE</span>,
-  na.value <span class="op">=</span> <span class="fl">0</span>,
-  nacols.rm <span class="op">=</span> <span class="cn">TRUE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">hlaToVariable</span><span class="op">(</span></span>
+<span>  <span class="va">hla_calls</span>,</span>
+<span>  <span class="va">dictionary</span>,</span>
+<span>  reduce <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  na.value <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  nacols.rm <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -74,23 +74,35 @@
     <dl><dt>hla_calls</dt>
 <dd><p>HLA calls data frame, as returned by
 <code><a href="readHlaCalls.html">readHlaCalls</a></code> function.</p></dd>
+
+
 <dt>dictionary</dt>
 <dd><p>Path to file containing HLA allele dictionary or a
 data frame.</p></dd>
+
+
 <dt>reduce</dt>
 <dd><p>Logical indicating if function should try to reduce allele
 resolution when no matching entry  in the dictionary is found. See details.</p></dd>
+
+
 <dt>na.value</dt>
 <dd><p>Vector of length one speciyfing value for alleles with
 no matching entry in <code>dictionary</code>. Default is to use <code>0</code>.</p></dd>
+
+
 <dt>nacols.rm</dt>
 <dd><p>Logical indicating if result columns that contain only
 <code>NA</code> should be removed.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Data frame with variable number of columns. First column named 
-<code>"ID"</code> corresponds to <code>"ID"</code> column in <code>hla_calls</code>, further
+    
+
+<p>Data frame with variable number of columns. First column named</p>
+<p></p>
+<p><code>"ID"</code> corresponds to <code>"ID"</code> column in <code>hla_calls</code>, further
   columns holds converted HLA variables.</p>
     </div>
     <div id="details">
@@ -135,7 +147,7 @@ reduced or all have been successfully converted.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu">hlaToVariable</span><span class="op">(</span><span class="va">MiDAS_tut_HLA</span>, dictionary <span class="op">=</span> <span class="st">"allele_HLA_supertype"</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">hlaToVariable</span><span class="op">(</span><span class="va">MiDAS_tut_HLA</span>, dictionary <span class="op">=</span> <span class="st">"allele_HLA_supertype"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        ID supertype_A_1 supertype_A_2 supertype_B_1 supertype_B_2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1    C001           A01           A01           B07           B44</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2    C002           A02          &lt;NA&gt;           B44           B44</span>
@@ -1137,7 +1149,7 @@ reduced or all have been successfully converted.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 998  P498           A02           A02           B44           B27</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 999  P499           A24           A01           B62           B44</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1000 P500           A02           A03           B08           B07</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -1152,7 +1164,7 @@ reduced or all have been successfully converted.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

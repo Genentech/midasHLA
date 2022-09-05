@@ -18,7 +18,7 @@ latex format."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/li
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -62,63 +62,78 @@ latex format.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">formatResults</span><span class="op">(</span>
-  <span class="va">results</span>,
-  filter_by <span class="op">=</span> <span class="st">"p.value &lt;= 0.05"</span>,
-  arrange_by <span class="op">=</span> <span class="st">"p.value"</span>,
-  select_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"term"</span>, <span class="st">"estimate"</span>, <span class="st">"std.error"</span>, <span class="st">"p.value"</span>, <span class="st">"p.adjusted"</span><span class="op">)</span>,
-  format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"html"</span>, <span class="st">"latex"</span><span class="op">)</span>,
-  header <span class="op">=</span> <span class="cn">NULL</span>,
-  scroll_box_height <span class="op">=</span> <span class="st">"400px"</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">formatResults</span><span class="op">(</span></span>
+<span>  <span class="va">results</span>,</span>
+<span>  filter_by <span class="op">=</span> <span class="st">"p.value &lt;= 0.05"</span>,</span>
+<span>  arrange_by <span class="op">=</span> <span class="st">"p.value"</span>,</span>
+<span>  select_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"term"</span>, <span class="st">"estimate"</span>, <span class="st">"std.error"</span>, <span class="st">"p.value"</span>, <span class="st">"p.adjusted"</span><span class="op">)</span>,</span>
+<span>  format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"html"</span>, <span class="st">"latex"</span><span class="op">)</span>,</span>
+<span>  header <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  scroll_box_height <span class="op">=</span> <span class="st">"400px"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>results</dt>
 <dd><p>Tibble as returned by <code><a href="runMiDAS.html">runMiDAS</a></code>.</p></dd>
+
+
 <dt>filter_by</dt>
 <dd><p>Character vector specifying conditional expression used to
 filter <code>results</code>, this is equivalent to <code>...</code> argument passed to
 <code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></code>.</p></dd>
+
+
 <dt>arrange_by</dt>
 <dd><p>Character vector specifying variable names to use for
 sorting. Equivalent to <code>...</code> argument passed to
 <code><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></code>.</p></dd>
+
+
 <dt>select_cols</dt>
 <dd><p>Character vector specifying variable names that should be
 included in the output table. Can be also used to rename selected
 variables, see examples.</p></dd>
+
+
 <dt>format</dt>
 <dd><p>String <code>"latex"</code> or <code>"html"</code>.</p></dd>
+
+
 <dt>header</dt>
 <dd><p>String specifying header for result table. If <code>NULL</code> no header is added.</p></dd>
+
+
 <dt>scroll_box_height</dt>
 <dd><p>A character string indicating the height of the table.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Character vector of formatted table source code.</p>
+    
+
+<p>Character vector of formatted table source code.</p>
     </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="va">midas</span> <span class="op">&lt;-</span> <span class="fu"><a href="prepareMiDAS.html">prepareMiDAS</a></span><span class="op">(</span>hla_calls <span class="op">=</span> <span class="va">MiDAS_tut_HLA</span>,</span>
-<span class="r-in">                      colData <span class="op">=</span> <span class="va">MiDAS_tut_pheno</span>,</span>
-<span class="r-in">                      experiment <span class="op">=</span> <span class="st">"hla_alleles"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">disease</span> <span class="op">~</span> <span class="va">term</span>, data <span class="op">=</span> <span class="va">midas</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="runMiDAS.html">runMiDAS</a></span><span class="op">(</span><span class="va">object</span>, </span>
-<span class="r-in">                experiment <span class="op">=</span> <span class="st">"hla_alleles"</span>, </span>
-<span class="r-in">                inheritance_model <span class="op">=</span> <span class="st">"dominant"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">formatResults</span><span class="op">(</span><span class="va">res</span>,</span>
-<span class="r-in">              filter_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"p.value &lt;= 0.05"</span>, <span class="st">"estimate &gt; 0"</span><span class="op">)</span>,</span>
-<span class="r-in">              arrange_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"p.value * estimate"</span><span class="op">)</span>,</span>
-<span class="r-in">              select_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"allele"</span>, <span class="st">"p-value"</span> <span class="op">=</span> <span class="st">"p.value"</span><span class="op">)</span>,</span>
-<span class="r-in">              format <span class="op">=</span> <span class="st">"html"</span>,</span>
-<span class="r-in">              header <span class="op">=</span> <span class="st">"HLA allelic associations"</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="va">midas</span> <span class="op">&lt;-</span> <span class="fu"><a href="prepareMiDAS.html">prepareMiDAS</a></span><span class="op">(</span>hla_calls <span class="op">=</span> <span class="va">MiDAS_tut_HLA</span>,</span></span>
+<span class="r-in"><span>                      colData <span class="op">=</span> <span class="va">MiDAS_tut_pheno</span>,</span></span>
+<span class="r-in"><span>                      experiment <span class="op">=</span> <span class="st">"hla_alleles"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">disease</span> <span class="op">~</span> <span class="va">term</span>, data <span class="op">=</span> <span class="va">midas</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="runMiDAS.html">runMiDAS</a></span><span class="op">(</span><span class="va">object</span>, </span></span>
+<span class="r-in"><span>                experiment <span class="op">=</span> <span class="st">"hla_alleles"</span>, </span></span>
+<span class="r-in"><span>                inheritance_model <span class="op">=</span> <span class="st">"dominant"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">formatResults</span><span class="op">(</span><span class="va">res</span>,</span></span>
+<span class="r-in"><span>              filter_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"p.value &lt;= 0.05"</span>, <span class="st">"estimate &gt; 0"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>              arrange_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"p.value * estimate"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>              select_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"allele"</span>, <span class="st">"p-value"</span> <span class="op">=</span> <span class="st">"p.value"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>              format <span class="op">=</span> <span class="st">"html"</span>,</span></span>
+<span class="r-in"><span>              header <span class="op">=</span> <span class="st">"HLA allelic associations"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -133,7 +148,7 @@ variables, see examples.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

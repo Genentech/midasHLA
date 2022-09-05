@@ -18,7 +18,7 @@ methods."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/ma
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -62,7 +62,7 @@ methods.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">adjustPValues</span><span class="op">(</span><span class="va">p</span>, <span class="va">method</span>, n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">adjustPValues</span><span class="op">(</span><span class="va">p</span>, <span class="va">method</span>, n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -71,17 +71,24 @@ methods.</p>
 <dd><p>numeric vector of p-values (possibly with
     <code><a href="https://rdrr.io/r/base/NA.html" class="external-link">NA</a></code>s).  Any other <span style="R">R</span> object is coerced by
     <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></code>.</p></dd>
+
+
 <dt>method</dt>
 <dd><p>correction method.  Can be abbreviated.</p></dd>
+
+
 <dt>n</dt>
 <dd><p>number of comparisons, must be at least <code>length(p)</code>; only set
 this (to non-default) when you know what you are doing! Note that for
 Bonferroni correction it is possible to specify number lower than
 <code>length(p)</code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A numeric vector of corrected p-values (of the same length as p, with
+    
+
+<p>A numeric vector of corrected p-values (of the same length as p, with
   names copied from p).</p>
     </div>
     <div id="details">
@@ -105,7 +112,7 @@ redundance of alleles reduces the need for correction.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

@@ -18,7 +18,7 @@ frame."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/math
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -62,16 +62,16 @@ frame.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">getHlaFrequencies</span><span class="op">(</span>
-  <span class="va">hla_calls</span>,
-  carrier_frequency <span class="op">=</span> <span class="cn">FALSE</span>,
-  compare <span class="op">=</span> <span class="cn">FALSE</span>,
-  ref_pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"USA NMDP African American pop 2"</span>, <span class="st">"USA NMDP Chinese"</span>,
-    <span class="st">"USA NMDP European Caucasian"</span>, <span class="st">"USA NMDP Hispanic South or Central American"</span>,
-    <span class="st">"USA NMDP Japanese"</span>, <span class="st">"USA NMDP North American Amerindian"</span>,
-    <span class="st">"USA NMDP South Asian Indian"</span><span class="op">)</span>,
-  ref <span class="op">=</span> <span class="va">allele_frequencies</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">getHlaFrequencies</span><span class="op">(</span></span>
+<span>  <span class="va">hla_calls</span>,</span>
+<span>  carrier_frequency <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  compare <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  ref_pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"USA NMDP African American pop 2"</span>, <span class="st">"USA NMDP Chinese"</span>,</span>
+<span>    <span class="st">"USA NMDP European Caucasian"</span>, <span class="st">"USA NMDP Hispanic South or Central American"</span>,</span>
+<span>    <span class="st">"USA NMDP Japanese"</span>, <span class="st">"USA NMDP North American Amerindian"</span>,</span>
+<span>    <span class="st">"USA NMDP South Asian Indian"</span><span class="op">)</span>,</span>
+<span>  ref <span class="op">=</span> <span class="va">allele_frequencies</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -79,23 +79,34 @@ frame.</p>
     <dl><dt>hla_calls</dt>
 <dd><p>HLA calls data frame, as returned by
 <code><a href="readHlaCalls.html">readHlaCalls</a></code> function.</p></dd>
+
+
 <dt>carrier_frequency</dt>
 <dd><p>Logical flag indicating if carrier frequency should
 be returned.</p></dd>
+
+
 <dt>compare</dt>
 <dd><p>Logical flag indicating if <code>hla_calls</code> frequencies
 should be compared to reference frequencies given in <code>ref</code>.</p></dd>
+
+
 <dt>ref_pop</dt>
 <dd><p>Character vector giving names of reference populations in
 <code>ref</code> to compare with. Optionally vector can be named, then those
 names will be used as population names.</p></dd>
+
+
 <dt>ref</dt>
 <dd><p>Data frame giving reference allele frequencies. See
 <code><a href="allele_frequencies.html">allele_frequencies</a></code> for an example.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Data frame with each row holding HLA allele, it's count and 
+    
+
+<p>Data frame with each row holding HLA allele, it's count and 
   frequency.</p>
     </div>
     <div id="details">
@@ -107,7 +118,7 @@ occurrences and <code>j</code> is the number of samples in <code>hla_calls</code
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu">getHlaFrequencies</span><span class="op">(</span><span class="va">MiDAS_tut_HLA</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">getHlaFrequencies</span><span class="op">(</span><span class="va">MiDAS_tut_HLA</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          allele Counts   Freq</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1       A*01:01    236 0.1180</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2       A*01:02      2 0.0010</span>
@@ -556,7 +567,7 @@ occurrences and <code>j</code> is the number of samples in <code>hla_calls</code
 <span class="r-out co"><span class="r-pr">#&gt;</span> 445  DRB1*16:15     10 0.0050</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 446  DRB1*16:32      1 0.0005</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 447  DRB1*16:42      1 0.0005</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -571,7 +582,7 @@ occurrences and <code>j</code> is the number of samples in <code>hla_calls</code
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

@@ -18,7 +18,7 @@ data frame."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -62,7 +62,7 @@ data frame.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">getAAFrequencies</span><span class="op">(</span><span class="va">aa_variation</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">getAAFrequencies</span><span class="op">(</span><span class="va">aa_variation</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -70,10 +70,13 @@ data frame.</p>
     <dl><dt>aa_variation</dt>
 <dd><p>Amino acid variation data frame as returned by
 <a href="hlaToAAVariation.html">hlaToAAVariation</a>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Data frame with each row holding specific amino acid position, it's 
+    
+
+<p>Data frame with each row holding specific amino acid position, it's 
   count and frequency.</p>
     </div>
     <div id="details">
@@ -85,8 +88,8 @@ occurrences and <code>j</code> is the number of samples in <code>aa_variation</c
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">aa_variation</span> <span class="op">&lt;-</span> <span class="fu"><a href="hlaToAAVariation.html">hlaToAAVariation</a></span><span class="op">(</span><span class="va">MiDAS_tut_HLA</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">getAAFrequencies</span><span class="op">(</span><span class="va">aa_variation</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">aa_variation</span> <span class="op">&lt;-</span> <span class="fu"><a href="hlaToAAVariation.html">hlaToAAVariation</a></span><span class="op">(</span><span class="va">MiDAS_tut_HLA</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">getAAFrequencies</span><span class="op">(</span><span class="va">aa_variation</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          aa_pos Counts   Freq</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1       A_-21_*   1931 0.9655</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2       A_-21_V      2 0.0010</span>
@@ -1253,7 +1256,7 @@ occurrences and <code>j</code> is the number of samples in <code>aa_variation</c
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1163 DRB1_233_*   1986 0.9930</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1164 DRB1_233_R     10 0.0050</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1165 DRB1_233_T      4 0.0020</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -1268,7 +1271,7 @@ occurrences and <code>j</code> is the number of samples in <code>aa_variation</c
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

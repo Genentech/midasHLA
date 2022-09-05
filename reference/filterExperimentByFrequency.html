@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -60,49 +60,58 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">filterExperimentByFrequency</span><span class="op">(</span>
-  <span class="va">experiment</span>,
-  carrier_frequency <span class="op">=</span> <span class="cn">FALSE</span>,
-  lower_frequency_cutoff <span class="op">=</span> <span class="cn">NULL</span>,
-  upper_frequency_cutoff <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span>
-
-<span class="co"># S3 method for matrix</span>
-<span class="fu">filterExperimentByFrequency</span><span class="op">(</span>
-  <span class="va">experiment</span>,
-  carrier_frequency <span class="op">=</span> <span class="cn">FALSE</span>,
-  lower_frequency_cutoff <span class="op">=</span> <span class="cn">NULL</span>,
-  upper_frequency_cutoff <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span>
-
-<span class="co"># S3 method for SummarizedExperiment</span>
-<span class="fu">filterExperimentByFrequency</span><span class="op">(</span>
-  <span class="va">experiment</span>,
-  carrier_frequency <span class="op">=</span> <span class="cn">FALSE</span>,
-  lower_frequency_cutoff <span class="op">=</span> <span class="cn">NULL</span>,
-  upper_frequency_cutoff <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">filterExperimentByFrequency</span><span class="op">(</span></span>
+<span>  <span class="va">experiment</span>,</span>
+<span>  carrier_frequency <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  lower_frequency_cutoff <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  upper_frequency_cutoff <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for matrix</span></span>
+<span><span class="fu">filterExperimentByFrequency</span><span class="op">(</span></span>
+<span>  <span class="va">experiment</span>,</span>
+<span>  carrier_frequency <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  lower_frequency_cutoff <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  upper_frequency_cutoff <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for SummarizedExperiment</span></span>
+<span><span class="fu">filterExperimentByFrequency</span><span class="op">(</span></span>
+<span>  <span class="va">experiment</span>,</span>
+<span>  carrier_frequency <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  lower_frequency_cutoff <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  upper_frequency_cutoff <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>experiment</dt>
 <dd><p>Matrix or SummarizedExperiment object.</p></dd>
+
+
 <dt>carrier_frequency</dt>
 <dd><p>Logical flag indicating if carrier frequency should
 be returned.</p></dd>
+
+
 <dt>lower_frequency_cutoff</dt>
 <dd><p>Positive number or <code>NULL</code>. Numbers greater
 than 1 are interpreted as number of feature occurrences, numbers between 0
 and 1 as fractions.</p></dd>
+
+
 <dt>upper_frequency_cutoff</dt>
 <dd><p>Positive number or <code>NULL</code>. Numbers greater
 than 1 are interpreted as number of feature occurrences, numbers between 0
 and 1 as fractions.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Filtered experiment matrix.</p>
+    
+
+<p>Filtered experiment matrix.</p>
     </div>
 
   </div>
@@ -117,7 +126,7 @@ and 1 as fractions.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

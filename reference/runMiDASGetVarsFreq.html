@@ -19,7 +19,7 @@ runMiDAS."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/m
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -64,22 +64,30 @@ binary test covariate frequencies per phenotype are added. Used in scope of
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">runMiDASGetVarsFreq</span><span class="op">(</span><span class="va">midas</span>, <span class="va">experiment</span>, <span class="va">test_covar</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">runMiDASGetVarsFreq</span><span class="op">(</span><span class="va">midas</span>, <span class="va">experiment</span>, <span class="va">test_covar</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>midas</dt>
 <dd><p>MiDAS object.</p></dd>
+
+
 <dt>experiment</dt>
 <dd><p>String specifying experiment from <code>midas</code>.</p></dd>
+
+
 <dt>test_covar</dt>
 <dd><p>String giving name of test covariate.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Data frame with variable number of columns. First column,
-<code>"term"</code> holds experiment's variables, further columns hold number of
+    
+
+<p>Data frame with variable number of columns. First column,</p>
+<p></p>
+<p><code>"term"</code> holds experiment's variables, further columns hold number of
   variable occurrence and their frequencies.</p>
     </div>
 
@@ -95,7 +103,7 @@ binary test covariate frequencies per phenotype are added. Used in scope of
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

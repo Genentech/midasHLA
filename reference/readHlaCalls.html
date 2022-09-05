@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -60,15 +60,19 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">readHlaCalls</span><span class="op">(</span><span class="va">file</span>, resolution <span class="op">=</span> <span class="fl">4</span>, na.strings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Not typed"</span>, <span class="st">"-"</span>, <span class="st">"NA"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">readHlaCalls</span><span class="op">(</span><span class="va">file</span>, resolution <span class="op">=</span> <span class="fl">4</span>, na.strings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Not typed"</span>, <span class="st">"-"</span>, <span class="st">"NA"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>file</dt>
 <dd><p>Path to input file.</p></dd>
+
+
 <dt>resolution</dt>
 <dd><p>Number specifying desired resolution.</p></dd>
+
+
 <dt>na.strings</dt>
 <dd><p>a character vector of strings which are to be
     interpreted as <code><a href="https://rdrr.io/r/base/NA.html" class="external-link">NA</a></code> values.  Blank fields are also
@@ -76,10 +80,13 @@
     complex fields.  Note that the test happens <em>after</em> 
     white space is stripped from the input, so <code>na.strings</code> 
     values may need their own white space stripped in advance.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>HLA calls data frame. First column hold sample IDs, further columns 
+    
+
+<p>HLA calls data frame. First column hold sample IDs, further columns 
   hold HLA allele numbers.</p>
     </div>
     <div id="details">
@@ -97,9 +104,9 @@ about HLA allele numbers resolution see
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"MiDAS_tut_HLA.txt"</span>, package <span class="op">=</span> <span class="st">"midasHLA"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">hla_calls</span> <span class="op">&lt;-</span> <span class="fu">readHlaCalls</span><span class="op">(</span><span class="va">file</span><span class="op">)</span></span>
-<span class="r-in"></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"MiDAS_tut_HLA.txt"</span>, package <span class="op">=</span> <span class="st">"midasHLA"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">hla_calls</span> <span class="op">&lt;-</span> <span class="fu">readHlaCalls</span><span class="op">(</span><span class="va">file</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -114,7 +121,7 @@ about HLA allele numbers resolution see
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

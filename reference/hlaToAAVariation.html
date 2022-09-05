@@ -18,7 +18,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -62,7 +62,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">hlaToAAVariation</span><span class="op">(</span><span class="va">hla_calls</span>, indels <span class="op">=</span> <span class="cn">TRUE</span>, unkchar <span class="op">=</span> <span class="cn">FALSE</span>, as_df <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">hlaToAAVariation</span><span class="op">(</span><span class="va">hla_calls</span>, indels <span class="op">=</span> <span class="cn">TRUE</span>, unkchar <span class="op">=</span> <span class="cn">FALSE</span>, as_df <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -70,22 +70,32 @@
     <dl><dt>hla_calls</dt>
 <dd><p>HLA calls data frame, as returned by
 <code><a href="readHlaCalls.html">readHlaCalls</a></code> function.</p></dd>
+
+
 <dt>indels</dt>
 <dd><p>Logical indicating whether indels should be considered when
 checking variability.</p></dd>
+
+
 <dt>unkchar</dt>
 <dd><p>Logical indicating whether unknown characters in the alignment
 should be considered when checking variability.</p></dd>
+
+
 <dt>as_df</dt>
 <dd><p>Logical indicating if data frame should be returned.
 Otherwise a matrix is returned.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Matrix or data frame containing variable amino acid positions.
+    
+
+<p>Matrix or data frame containing variable amino acid positions.
   Rownames corresponds to ID column in <code>hla_calls</code>, and colnames to
-  alignment positions. If no variation is found one column matrix filled with
-<code>NA</code>'s is returned.</p>
+  alignment positions. If no variation is found one column matrix filled with</p>
+<p></p>
+<p><code>NA</code>'s is returned.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -99,7 +109,7 @@ processes alignments for all HLA genes found in <code>hla_calls</code>.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu">hlaToAAVariation</span><span class="op">(</span><span class="va">MiDAS_tut_HLA</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">hlaToAAVariation</span><span class="op">(</span><span class="va">MiDAS_tut_HLA</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       ID A_1_AA_-21 A_2_AA_-21 A_1_AA_-18 A_2_AA_-18 A_1_AA_-16 A_2_AA_-16</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1   C001          *          *          *          *          *          *</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2   C002          *          *          *          *          *          *</span>
@@ -17594,7 +17604,7 @@ processes alignments for all HLA genes found in <code>hla_calls</code>.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 117             *             *             *             *</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 118             V             *             R             *</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [ reached 'max' / getOption("max.print") -- omitted 882 rows ]</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -17609,7 +17619,7 @@ processes alignments for all HLA genes found in <code>hla_calls</code>.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

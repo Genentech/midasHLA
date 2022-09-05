@@ -20,7 +20,7 @@ iterativeModel."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -66,7 +66,7 @@ than error on each and every one. Used in <code>iterativeLRT</code> and
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">lapply_tryCatch</span><span class="op">(</span><span class="va">X</span>, <span class="va">FUN</span>, <span class="va">err_res</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">lapply_tryCatch</span><span class="op">(</span><span class="va">X</span>, <span class="va">FUN</span>, <span class="va">err_res</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -75,19 +75,28 @@ than error on each and every one. Used in <code>iterativeLRT</code> and
 <dd><p>a vector (atomic or list) or an <code><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></code>
     object.  Other objects (including classed objects) will be coerced
     by <code>base::<a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></code>.</p></dd>
+
+
 <dt>FUN</dt>
 <dd><p>the function to be applied to each element of <code>X</code>:
     see ‘Details’.  In the case of functions like
     <code>+</code>, <code>%*%</code>, the function name must be backquoted or quoted.</p></dd>
+
+
 <dt>err_res</dt>
 <dd><p>Function creating a result that should be output in case of 
 error.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>optional arguments to <code>FUN</code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>List of elements as returned by <code>FUN</code>.</p>
+    
+
+<p>List of elements as returned by <code>FUN</code>.</p>
     </div>
 
   </div>
@@ -102,7 +111,7 @@ error.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -60,7 +60,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">hlaCallsToCounts</span><span class="op">(</span><span class="va">hla_calls</span>, check_hla_format <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">hlaCallsToCounts</span><span class="op">(</span><span class="va">hla_calls</span>, check_hla_format <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -68,14 +68,19 @@
     <dl><dt>hla_calls</dt>
 <dd><p>HLA calls data frame, as returned by
 <code><a href="readHlaCalls.html">readHlaCalls</a></code> function.</p></dd>
+
+
 <dt>check_hla_format</dt>
 <dd><p>Logical indicating if <code>hla_calls</code> format should
 be checked. This is useful if one wants to use <code>hlaCallsToCounts</code> with
 input not adhering to HLA nomenclature standards. See examples.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>HLA allele counts data frame. First column holds samples ID's, further 
+    
+
+<p>HLA allele counts data frame. First column holds samples ID's, further 
   columns, corresponding to specific alleles, give information on the number 
   of their occurrences in each sample.</p>
     </div>
@@ -92,7 +97,7 @@ input not adhering to HLA nomenclature standards. See examples.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

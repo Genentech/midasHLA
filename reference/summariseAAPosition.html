@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -60,7 +60,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">summariseAAPosition</span><span class="op">(</span><span class="va">hla_calls</span>, <span class="va">aa_pos</span>, aln <span class="op">=</span> <span class="cn">NULL</span>, na.rm <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">summariseAAPosition</span><span class="op">(</span><span class="va">hla_calls</span>, <span class="va">aa_pos</span>, aln <span class="op">=</span> <span class="cn">NULL</span>, na.rm <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -68,26 +68,35 @@
     <dl><dt>hla_calls</dt>
 <dd><p>HLA calls data frame, as returned by
 <code><a href="readHlaCalls.html">readHlaCalls</a></code> function.</p></dd>
+
+
 <dt>aa_pos</dt>
 <dd><p>String specifying gene and amino acid position, example
 <code>"A_9"</code>.</p></dd>
+
+
 <dt>aln</dt>
 <dd><p>Matrix containing amino acid sequence alignments as returned by
 <code><a href="readHlaAlignments.html">readHlaAlignments</a></code> function. By default function will use
 alignment files shipped with the package.</p></dd>
+
+
 <dt>na.rm</dt>
 <dd><p>Logical flag indicating if <code>NA</code> values should be considered
 for frequency calculations.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Data frame containing HLA alleles, their corresponding amino acid
+    
+
+<p>Data frame containing HLA alleles, their corresponding amino acid
   residues and frequencies at requested position.</p>
     </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu">summariseAAPosition</span><span class="op">(</span><span class="va">MiDAS_tut_HLA</span>, <span class="st">"A_9"</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">summariseAAPosition</span><span class="op">(</span><span class="va">MiDAS_tut_HLA</span>, <span class="st">"A_9"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   HLA-A (9)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1         F</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2         S</span>
@@ -103,7 +112,7 @@ for frequency calculations.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2   379    18.95%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3   155     7.75%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4   429    21.45%</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -118,7 +127,7 @@ for frequency calculations.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

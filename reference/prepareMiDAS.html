@@ -18,7 +18,7 @@ to selected experiments creating a MiDAS object."><!-- mathjax --><script src="h
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">midasHLA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -62,23 +62,23 @@ to selected <code>experiment</code>s creating a <code><a href="MiDAS-class.html"
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">prepareMiDAS</span><span class="op">(</span>
-  hla_calls <span class="op">=</span> <span class="cn">NULL</span>,
-  kir_calls <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">colData</span>,
-  experiment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hla_alleles"</span>, <span class="st">"hla_aa"</span>, <span class="st">"hla_g_groups"</span>, <span class="st">"hla_supertypes"</span>,
-    <span class="st">"hla_NK_ligands"</span>, <span class="st">"kir_genes"</span>, <span class="st">"kir_haplotypes"</span>, <span class="st">"hla_kir_interactions"</span>,
-    <span class="st">"hla_divergence"</span>, <span class="st">"hla_het"</span>, <span class="st">"hla_custom"</span>, <span class="st">"kir_custom"</span><span class="op">)</span>,
-  placeholder <span class="op">=</span> <span class="st">"term"</span>,
-  lower_frequency_cutoff <span class="op">=</span> <span class="cn">NULL</span>,
-  upper_frequency_cutoff <span class="op">=</span> <span class="cn">NULL</span>,
-  indels <span class="op">=</span> <span class="cn">TRUE</span>,
-  unkchar <span class="op">=</span> <span class="cn">FALSE</span>,
-  hla_divergence_aa_selection <span class="op">=</span> <span class="st">"binding_groove"</span>,
-  hla_het_resolution <span class="op">=</span> <span class="fl">8</span>,
-  hla_dictionary <span class="op">=</span> <span class="cn">NULL</span>,
-  kir_dictionary <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">prepareMiDAS</span><span class="op">(</span></span>
+<span>  hla_calls <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  kir_calls <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">colData</span>,</span>
+<span>  experiment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hla_alleles"</span>, <span class="st">"hla_aa"</span>, <span class="st">"hla_g_groups"</span>, <span class="st">"hla_supertypes"</span>,</span>
+<span>    <span class="st">"hla_NK_ligands"</span>, <span class="st">"kir_genes"</span>, <span class="st">"kir_haplotypes"</span>, <span class="st">"hla_kir_interactions"</span>,</span>
+<span>    <span class="st">"hla_divergence"</span>, <span class="st">"hla_het"</span>, <span class="st">"hla_custom"</span>, <span class="st">"kir_custom"</span><span class="op">)</span>,</span>
+<span>  placeholder <span class="op">=</span> <span class="st">"term"</span>,</span>
+<span>  lower_frequency_cutoff <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  upper_frequency_cutoff <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  indels <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  unkchar <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  hla_divergence_aa_selection <span class="op">=</span> <span class="st">"binding_groove"</span>,</span>
+<span>  hla_het_resolution <span class="op">=</span> <span class="fl">8</span>,</span>
+<span>  hla_dictionary <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  kir_dictionary <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -86,15 +86,21 @@ to selected <code>experiment</code>s creating a <code><a href="MiDAS-class.html"
     <dl><dt>hla_calls</dt>
 <dd><p>HLA calls data frame, as returned by
 <code><a href="readHlaCalls.html">readHlaCalls</a></code> function.</p></dd>
+
+
 <dt>kir_calls</dt>
 <dd><p>KIR calls data frame, as returned by
 <code><a href="readKirCalls.html">readKirCalls</a></code> function.</p></dd>
+
+
 <dt>colData</dt>
 <dd><p>Data frame holding additional variables like phenotypic
 observations or covariates. It have to contain <code>'ID'</code> column holding
 samples identifiers corresponding to identifiers in <code>hla_calls</code> and
 <code>kir_calls</code>. Importantly rows of <code>hla_calls</code> and
 <code>kir_calls</code> without corresponding phenotype are discarded.</p></dd>
+
+
 <dt>experiment</dt>
 <dd><p>Character vector indicating analysis type for which data
 should be prepared. Valid choices are <code>"hla_alleles"</code>,
@@ -102,45 +108,68 @@ should be prepared. Valid choices are <code>"hla_alleles"</code>,
 <code>"hla_NK_ligands"</code>, <code>"kir_genes"</code>, <code>"hla_kir_interactions"</code>,
 <code>"hla_divergence"</code>, <code>"hla_het"</code>.
 See details for further explanations.</p></dd>
+
+
 <dt>placeholder</dt>
 <dd><p>String giving name for dummy variable inserted to
 <code>colData</code>. This variable can be than used to define base statistical
 model used by <code><a href="runMiDAS.html">runMiDAS</a></code>.</p></dd>
+
+
 <dt>lower_frequency_cutoff</dt>
 <dd><p>Number giving lower frequency threshold.
 Numbers greater than 1 are interpreted as the number of feature occurrences,
 numbers between 0 and 1 as fractions.</p></dd>
+
+
 <dt>upper_frequency_cutoff</dt>
 <dd><p>Number giving upper frequency threshold.
 Numbers greater than 1 are interpreted as the number of feature occurrences,
 numbers between 0 and 1 as fractions.</p></dd>
+
+
 <dt>indels</dt>
 <dd><p>Logical indicating whether indels should be considered when
 checking amino acid variability in <code>'hla_aa'</code> experiment.</p></dd>
+
+
 <dt>unkchar</dt>
 <dd><p>Logical indicating whether unknown characters in the alignment
 should be considered when checking amino acid variability in
 <code>'hla_aa'</code> experiment.</p></dd>
+
+
 <dt>hla_divergence_aa_selection</dt>
 <dd><p>String specifying variable region in peptide binding
 groove which should be considered for Grantham distance calculation. Valid
 choices includes: <code>"binding_groove"</code>, <code>"B_pocket"</code>,
 <code>"F_pocket"</code>. See details for more information.</p></dd>
+
+
 <dt>hla_het_resolution</dt>
 <dd><p>Number specifying HLA alleles resolution used to
 calculate heterogeneity in <code>"hla_het"</code> experiment.</p></dd>
+
+
 <dt>hla_dictionary</dt>
 <dd><p>Data frame giving HLA allele dictionary used in
 <code>'hla_custom'</code> experiment. See <code><a href="hlaToVariable.html">hlaToVariable</a></code> for more
 details.</p></dd>
+
+
 <dt>kir_dictionary</dt>
 <dd><p>Data frame giving KIR genes dictionary used in
 <code>'kir_custom'</code> experiment. See <code><a href="countsToVariables.html">countsToVariables</a></code> for more
 details.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Object of class <code><a href="MiDAS-class.html">MiDAS</a></code></p>
+    
+
+<p>Object of class <code><a href="MiDAS-class.html">MiDAS</a></code></p>
+
+
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -206,11 +235,11 @@ details.</p></dd>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">midas</span> <span class="op">&lt;-</span> <span class="fu">prepareMiDAS</span><span class="op">(</span>hla_calls <span class="op">=</span> <span class="va">MiDAS_tut_HLA</span>,</span>
-<span class="r-in">                      kir_calls <span class="op">=</span> <span class="va">MiDAS_tut_KIR</span>,</span>
-<span class="r-in">                      colData <span class="op">=</span> <span class="va">MiDAS_tut_pheno</span>,</span>
-<span class="r-in">                      experiment <span class="op">=</span> <span class="st">"hla_alleles"</span><span class="op">)</span></span>
-<span class="r-in"></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">midas</span> <span class="op">&lt;-</span> <span class="fu">prepareMiDAS</span><span class="op">(</span>hla_calls <span class="op">=</span> <span class="va">MiDAS_tut_HLA</span>,</span></span>
+<span class="r-in"><span>                      kir_calls <span class="op">=</span> <span class="va">MiDAS_tut_KIR</span>,</span></span>
+<span class="r-in"><span>                      colData <span class="op">=</span> <span class="va">MiDAS_tut_pheno</span>,</span></span>
+<span class="r-in"><span>                      experiment <span class="op">=</span> <span class="st">"hla_alleles"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -225,7 +254,7 @@ details.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>
