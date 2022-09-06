@@ -39,6 +39,7 @@ jobs:
       - name: Install dependencies
         run: |
           install.packages(c("devtools", "BiocManager"))
+          install.packages("stringi") # check #103
           BiocManager::install(version='devel', ask=FALSE)
           BiocManager::install(c("SummarizedExperiment", "S4Vectors", "MultiAssayExperiment"))
           remotes::install_deps(dependencies = TRUE)
