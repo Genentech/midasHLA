@@ -20,7 +20,7 @@ jobs:
       - uses: r-lib/actions/setup-pandoc@v1
 
       - name: Install libs
-        run: sudo apt-get install libcurl4-openssl-dev libgit2-dev libnlopt-dev
+        run: sudo apt-get install libcurl4-openssl-dev libgit2-dev libnlopt-dev libharfbuzz-dev libfribidi-dev
 
       - name: Query dependencies
         run: |
@@ -39,7 +39,7 @@ jobs:
       - name: Install dependencies
         run: |
           install.packages(c("devtools", "BiocManager"))
-          BiocManager::install(version='devel')
+          BiocManager::install(version='devel', ask=FALSE)
           BiocManager::install(c("SummarizedExperiment", "S4Vectors", "MultiAssayExperiment"))
           remotes::install_deps(dependencies = TRUE)
         shell: Rscript {0}
