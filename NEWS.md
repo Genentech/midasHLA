@@ -1,4 +1,7 @@
 # 1.5.2 - 25/05/21
++ failed test fixed after update in tide dependence.
+
+# 1.1.0 - 25/05/21
 + Bioconductor release!
 
 # 0.99.33 - 28/04/21

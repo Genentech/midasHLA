@@ -444,7 +444,7 @@ test_that("iterativeModel", {
           backquote = TRUE,
           collapse = " + "
         )
-        r <- tidy(x = obj, conf.int = TRUE, exponentiate = exponentiate)
+        r <- tidy(x = obj, conf.int = TRUE)
         r$term <- gsub("`", "", r$term)
         r <- r[r$term %in% variables, ]
     }
