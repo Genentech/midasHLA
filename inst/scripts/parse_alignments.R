@@ -10,8 +10,7 @@ for (file in alignment_files) {
   alignment <-
     readHlaAlignments(file,
                       trim = FALSE,
-                      unkchar = "*",
-                      resolution = 8)
+                      unkchar = "*")
   # infer missing lower resolution alleles
   for (res in c(6, 4)) {
     allele_numbers <- reduceAlleleResolution(rownames(alignment), resolution = res)
