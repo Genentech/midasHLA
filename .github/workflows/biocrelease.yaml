@@ -1,0 +1,29 @@
+on:
+  cron: "* * * * *"
+
+name: syncronise-bioconductor-release
+
+jobs:
+  send-pull-requests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@
+        with:
+          fetch-depth: 0
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Make PR
+        run: |
+          BIOC_REMOTE=''
+          GH_REMOTE=''
+          LATEST_BIOC_TAG=`git ls-remote ${BIOC_REMOTE} HEAD`
+          LATEST_GH_TAG=`git ls-remote ${GH_REMOTE} HEAD`
+          [[ ${LATEST_BIOC_TAG} == ${LATEST_GH_TAG} ]] && exit 0
+          
+
+          
+          
+      
