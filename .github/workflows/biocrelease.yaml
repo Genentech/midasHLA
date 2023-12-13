@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{github.event.pull_request.head.ref}}
@@ -17,13 +17,18 @@ jobs:
 
       - name: Make PR
         run: |
-          BIOC_REMOTE=''
-          GH_REMOTE=''
-          LATEST_BIOC_TAG=`git ls-remote ${BIOC_REMOTE} HEAD`
-          LATEST_GH_TAG=`git ls-remote ${GH_REMOTE} HEAD`
-          [[ ${LATEST_BIOC_TAG} == ${LATEST_GH_TAG} ]] && exit 0
+          BIOC_REMOTE='git@git.bioconductor.org:packages/midasHLA'
+          MAIN_BRANCH='master'
+          COMMIT_TITLE='New Bioconductor release'
+          gitlog() {
+            git --no-pager log --pretty=format:'%h' ${@}
+          }
+          git remote add bioconductor ${BIOC_REMOTE}
+          git fetch bioconductor
+          BIOC_TAG=`gitlog bioconductor/master -1`
+          COMMIT_BODY=`git --no-pager log bioconductor/master --pretty=format:'%s' -1`
+          gitlog ${MAIN_BRANCH}
+          gitlog ${MAIN_BRANCH} | grep -q -e ${BIOC_TAG} && exit 0
+          git checkout bioconductor/master
+          gh pr create --base master --title ${COMMIT_TITLE} --body ${COMMIT_BODY}
           
-
-          
-          
-      
