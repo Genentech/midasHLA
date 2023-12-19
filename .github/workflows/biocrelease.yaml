@@ -1,6 +1,6 @@
 on:
   schedule:
-    - cron: "55 13 * * *"
+    - cron: "10 14 * * *"
 
 name: syncronise-bioconductor-release
 
@@ -31,5 +31,6 @@ jobs:
           COMMIT_BODY=`git --no-pager log bioconductor/master --pretty=format:'%s' -1`
           if gitlog ${MAIN_BRANCH} | grep -q -e ${BIOC_TAG}; then
             git checkout bioconductor/master
+            git switch -c bioconductor_update
             gh pr create --base master --title "${COMMIT_TITLE}" --body "${COMMIT_BODY}"
           fi
