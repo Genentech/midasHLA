@@ -1,6 +1,6 @@
 on:
   schedule:
-    - cron: "14 * * * *"
+    - cron: "30 13 * * *"
 
 name: syncronise-bioconductor-release
 
@@ -15,10 +15,11 @@ jobs:
           ref: ${{github.event.pull_request.head.ref}}
           repository: ${{github.event.pull_request.head.repo.full_name}}
           token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Make PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          BIOC_REMOTE='git@git.bioconductor.org:packages/midasHLA'
+          BIOC_REMOTE='https://git.bioconductor.org/packages/xcore'
           MAIN_BRANCH='master'
           COMMIT_TITLE='New Bioconductor release'
           gitlog() {
@@ -28,8 +29,7 @@ jobs:
           git fetch bioconductor
           BIOC_TAG=`gitlog bioconductor/master -1`
           COMMIT_BODY=`git --no-pager log bioconductor/master --pretty=format:'%s' -1`
-          gitlog ${MAIN_BRANCH}
-          gitlog ${MAIN_BRANCH} | grep -q -e ${BIOC_TAG} && exit 0
-          git checkout bioconductor/master
-          gh pr create --base master --title ${COMMIT_TITLE} --body ${COMMIT_BODY}
-          
+          if [[ gitlog ${MAIN_BRANCH} | grep -q -e ${BIOC_TAG} ]]; then
+            git checkout bioconductor/master
+            gh pr create --base master --title "${COMMIT_TITLE}" --body "${COMMIT_BODY}"
+          fi
