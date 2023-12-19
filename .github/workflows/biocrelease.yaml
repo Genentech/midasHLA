@@ -1,6 +1,6 @@
 on:
   schedule:
-    - cron: "10 14 * * *"
+    - cron: "25 14 * * *"
 
 name: syncronise-bioconductor-release
 
@@ -21,16 +21,14 @@ jobs:
         run: |
           BIOC_REMOTE='https://git.bioconductor.org/packages/midasHLA'
           MAIN_BRANCH='master'
-          COMMIT_TITLE='New Bioconductor release'
           gitlog() {
             git --no-pager log --pretty=format:'%h' ${@}
           }
           git remote add bioconductor ${BIOC_REMOTE}
           git fetch bioconductor
           BIOC_TAG=`gitlog bioconductor/master -1`
-          COMMIT_BODY=`git --no-pager log bioconductor/master --pretty=format:'%s' -1`
           if gitlog ${MAIN_BRANCH} | grep -q -e ${BIOC_TAG}; then
             git checkout bioconductor/master
             git switch -c bioconductor_update
-            gh pr create --base master --title "${COMMIT_TITLE}" --body "${COMMIT_BODY}"
+            gh pr create --base ${MAIN_BRANCH} --fill --head
           fi
