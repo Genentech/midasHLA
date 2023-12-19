@@ -1,6 +1,6 @@
 on:
   schedule:
-    - cron: "40 13 * * *"
+    - cron: "55 13 * * *"
 
 name: syncronise-bioconductor-release
 
@@ -19,7 +19,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          BIOC_REMOTE='https://git.bioconductor.org/packages/xcore'
+          BIOC_REMOTE='https://git.bioconductor.org/packages/midasHLA'
           MAIN_BRANCH='master'
           COMMIT_TITLE='New Bioconductor release'
           gitlog() {
@@ -29,7 +29,7 @@ jobs:
           git fetch bioconductor
           BIOC_TAG=`gitlog bioconductor/master -1`
           COMMIT_BODY=`git --no-pager log bioconductor/master --pretty=format:'%s' -1`
-          if [[ gitlog ${MAIN_BRANCH} | grep -q -e ${BIOC_TAG} ]]; then
+          if gitlog ${MAIN_BRANCH} | grep -q -e ${BIOC_TAG}; then
             git checkout bioconductor/master
             gh pr create --base master --title "${COMMIT_TITLE}" --body "${COMMIT_BODY}"
           fi
