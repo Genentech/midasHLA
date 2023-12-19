@@ -1,0 +1,35 @@
+on:
+  schedule:
+    - cron: "35 13 * * *"
+
+name: syncronise-bioconductor-release
+
+jobs:
+  send-pull-requests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Make PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BIOC_REMOTE='https://git.bioconductor.org/packages/xcore'
+          MAIN_BRANCH='master'
+          COMMIT_TITLE='New Bioconductor release'
+          gitlog() {
+            git --no-pager log --pretty=format:'%h' ${@}
+          }
+          git remote add bioconductor ${BIOC_REMOTE}
+          git fetch bioconductor
+          BIOC_TAG=`gitlog bioconductor/master -1`
+          COMMIT_BODY=`git --no-pager log bioconductor/master --pretty=format:'%s' -1`
+          if [[ gitlog ${MAIN_BRANCH} | grep -q -e ${BIOC_TAG} ]]; then
+            git checkout bioconductor/master
+            gh pr create --base master --title "${COMMIT_TITLE}" --body "${COMMIT_BODY}"
+          fi
