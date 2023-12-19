@@ -25,10 +25,9 @@ jobs:
             git --no-pager log --pretty=format:'%h' ${@}
           }
           git remote add bioconductor ${BIOC_REMOTE}
-          git fetch bioconductor
-          BIOC_TAG=`gitlog bioconductor/master -1`
-          if gitlog ${MAIN_BRANCH} | grep -q -e ${BIOC_TAG}; then
-            git checkout bioconductor/master
-            git switch -c bioconductor_update
-            gh pr create --base ${MAIN_BRANCH} --fill --head
+          git fetch bioconductor ${MAIN_BRANCH}:bioconductor_update
+          BIOC_TAG=`gitlog bioconductor_update -1`
+          if ! gitlog ${MAIN_BRANCH} | grep -q -e ${BIOC_TAG}; then
+            git checkout bioconductor_update
+            gh pr create --base ${MAIN_BRANCH} --head bioconductor_update --fill
           fi
