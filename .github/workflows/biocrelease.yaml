@@ -1,6 +1,6 @@
 on:
   schedule:
-    - cron: "25 14 * * *"
+    - cron: "42 14 * * *"
 
 name: syncronise-bioconductor-release
 
