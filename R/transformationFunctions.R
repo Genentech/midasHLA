@@ -289,7 +289,7 @@ hlaToVariable <- function(hla_calls,
   }
 
   variable <- cbind(hla_calls[, 1, drop = FALSE], variable, stringsAsFactors = FALSE)
-  colnames(variable) <- c("ID", colnames(variable[, -1]))
+  colnames(variable) <- c("ID", colnames(variable)[-1])
 
   if (ncol(variable) <= 1) {
     warn("HLA alleles could not be converted to any new variables.")
