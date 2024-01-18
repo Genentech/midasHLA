@@ -1,3 +1,6 @@
+# 1.11.1 18/01/24
++ Fix bug on hlaToVariable() function that variable would erroneously be named NA.
+
 # 1.5.2 - 25/05/21
 + alleles and KIR frequenceis updated.
 
