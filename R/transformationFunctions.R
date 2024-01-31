@@ -691,7 +691,7 @@ kableResults <- function(results,
                          colnames = NULL,
                          header = "MiDAS analysis results",
                          pvalue_cutoff = NULL,
-                         format = getOption("knitr.table.format"),
+                         format = 'html', # getOption("knitr.table.format"), started to fail on github runner...
                          scroll_box_height = "400px") {
   assert_that(
     is.data.frame(results),
