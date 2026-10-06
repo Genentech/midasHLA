@@ -36,7 +36,7 @@ others.}
 
 \item{inheritance_model}{String specifying inheritance model to use.
 Available choices are \code{"dominant"}, \code{"recessive"},
-\code{"additive"}.}
+\code{"additive"}, \code{"overdominant"}.}
 
 \item{conditional}{Logical flag indicating if conditional analysis should be
 performed.}

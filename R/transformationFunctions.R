@@ -1139,7 +1139,7 @@ getExperimentFrequencies.SummarizedExperiment <-
 #' @param experiment Matrix or SummarizedExperiment object.
 #' @param inheritance_model String specifying inheritance model to use.
 #'  Available choices are \code{"dominant"}, \code{"recessive"},
-#'  \code{"additive"}.
+#'  \code{"additive"}, \code{"overdominant"}.
 #'
 #' @return \code{experiment} converted to specified inheritance model.
 #'
@@ -1184,6 +1184,13 @@ applyInheritanceModel.SummarizedExperiment <- function(experiment,
                                                        inheritance_model =  c("dominant", "recessive", "additive", "overdominant")) {
   SummarizedExperiment::assay(experiment) <-
     applyInheritanceModel(SummarizedExperiment::assay(experiment), inheritance_model)
+
+  # after transformation values are 0/1 per sample instead of allele copies,
+  # thus frequencies should not take account of gene copies
+  if (inheritance_model != "additive" &&
+      ! is.null(S4Vectors::metadata(experiment)[["pop_mul"]])) {
+    S4Vectors::metadata(experiment)[["pop_mul"]] <- 1
+  }
 
   return(experiment)
 }
