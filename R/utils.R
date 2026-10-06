@@ -505,6 +505,74 @@ runMiDASGetVarsFreq <- function(midas, experiment, test_covar) {
   return(variables_freq)
 }
 
+#' Warn about missing data in MiDAS analysis
+#'
+#' Helper warning about missing data that would otherwise be handled silently.
+#' In experiments based on HLA alleles counts (eg. \code{"hla_alleles"},
+#' \code{"hla_aa"}) missing HLA calls are counted as \code{0}, so such samples
+#' are treated as not carrying the variable instead of being excluded.
+#' Samples with missing values in model variables are excluded from the
+#' analysis by the model fitting function. Used in scope of \code{runMiDAS}.
+#'
+#' @param midas MiDAS object.
+#' @param experiment String specifying experiment from \code{midas}.
+#' @param formula_vars Character vector giving names of variables in model
+#'   formula.
+#'
+#' @return \code{NULL} invisibly, the function is called for its side effect of
+#'   issuing warnings.
+#'
+#' @importFrom MultiAssayExperiment colData
+#' @importFrom rlang warn
+#' @importFrom SummarizedExperiment assay
+#'
+runMiDASWarnMissing <- function(midas, experiment, formula_vars) {
+  ex <- midas[[experiment]]
+  ex_mat <- if (is(ex, "SummarizedExperiment")) assay(ex) else ex
+  samples <- colnames(ex_mat)
+
+  # missing HLA calls are counted as 0 in counts based experiments
+  hla_calls <- getHlaCalls(midas)
+  if (! is.null(hla_calls) &&
+      startsWith(experiment, "hla_") &&
+      isExperimentInheritanceModelApplicable(ex)) {
+    hla_calls <- hla_calls[hla_calls[, 1] %in% samples, -1, drop = FALSE]
+    na_calls <- is.na(hla_calls)
+    n_missing <- sum(rowSums(na_calls) > 0)
+    if (n_missing > 0) {
+      genes <- unique(sub("_[0-9]+$", "", colnames(hla_calls)[colSums(na_calls) > 0]))
+      warn(sprintf(
+        "%d sample(s) have missing HLA calls (genes: %s). In experiment '%s' missing calls are counted as 0, i.e. these samples are treated as not carrying the tested variable instead of being excluded from the analysis. To exclude them, remove these samples from the data before calling prepareMiDAS.",
+        n_missing, paste(genes, collapse = ", "), experiment
+      ))
+    }
+  }
+
+  # samples with missing values in model variables are dropped by model fit
+  col_data <- as.data.frame(colData(midas), optional = TRUE)
+  vars <- formula_vars[formula_vars %in% colnames(col_data)]
+  col_data <- col_data[samples, vars, drop = FALSE]
+  na_vars <- is.na(col_data)
+  n_missing <- sum(rowSums(na_vars) > 0)
+  if (n_missing > 0) {
+    warn(sprintf(
+      "%d sample(s) have missing values in model variables (%s) and will be excluded from the analysis by the model fitting function.",
+      n_missing, paste(vars[colSums(na_vars) > 0], collapse = ", ")
+    ))
+  }
+
+  # missing values in experiment are dropped by model fit for affected variables
+  n_missing <- sum(colSums(is.na(ex_mat)) > 0)
+  if (n_missing > 0) {
+    warn(sprintf(
+      "%d sample(s) have missing values in experiment '%s' and will be excluded from the analysis of the affected variables by the model fitting function.",
+      n_missing, experiment
+    ))
+  }
+
+  invisible(NULL)
+}
+
 #' Calculate Grantham distance between amino acid sequences
 #'
 #' \code{distGrantham} calculates normalized Grantham distance between two
