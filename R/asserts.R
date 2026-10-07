@@ -178,9 +178,10 @@ hasTidyMethod <- function(class) {
 }
 
 assertthat::on_failure(hasTidyMethod) <- function(call, env) {
-  paste0("Could not find 'tidy' function for statistical model '",
-         eval(expr = call$class, envir = env),
-         "'. Please ensure that 'tidy' for selected model is available. See the 'broom' package for more information on 'tidy' function."
+  cl <- eval(expr = call$class, envir = env)
+  sprintf(
+    "Could not find 'tidy' method for statistical model of class '%s'. Make sure the package providing 'tidy.%s' is installed and loaded (e.g. 'broom.mixed' for many mixed effects models), or define your own 'tidy.%s' method. It should return a data frame with one row per model term, including 'term', 'estimate' and 'p.value' columns, and support the 'conf.int' argument.",
+    cl, cl, cl
   )
 }
 
