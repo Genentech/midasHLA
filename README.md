@@ -40,17 +40,26 @@ a good starting point to update those sources in next package
 iterations.
 
 `inst/scripts/download_extdata.R` script is used to download HLA 
-alignments files. Those are used for translating HLA alleles to 
-amino acid level. The alignments are downloaded from 
-[EBI's IPD-IMGT/HLA database](www.ebi.ac.uk/ipd/imgt/hla/).
-In some cases alignment files contain sequences for multiple genes,
- those will be split into separate files (eg. DRB genes)
+protein alignment files for all genes shipped with the package. Those are used
+for translating HLA alleles to amino acid level. The alignments are downloaded
+from the [IPD-IMGT/HLA GitHub repository](https://github.com/ANHIG/IMGTHLA);
+the `release` variable in the script selects the IPD-IMGT/HLA release (eg.
+`"3650"` for 3.65.0).
 
 `inst/scripts/parse_alignments.R` script pre-parses alignments files 
 for package use. Purpose of using pre-parsed files is to speed up 
 allele to amino acid sequence translation. Resulting `.Rdata` files 
 should be then placed in `inst/extdata` replacing the old alignment 
 files. 
+
+Both scripts load the package with `devtools::load_all()` and use relative
+paths, so they have to be run from the root of a clone of this repository:
+
+```
+Rscript inst/scripts/download_extdata.R   # downloads files to alignments/
+Rscript inst/scripts/parse_alignments.R   # writes *_prot.Rdata to the current directory
+mv *_prot.Rdata inst/extdata/
+```
 
 `data-raw/allele_frequencies.R` script fetches HLA allele frequencies 
 (for genes A, B, C, DQA1, DQB1, DPA1, DPB1, DRB1, DRB3, DRB4, DRB5) from 

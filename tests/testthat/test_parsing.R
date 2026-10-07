@@ -55,6 +55,33 @@ test_that("readHlaCalls", {
   unlink(fake_calls_NA_col)
 })
 
+test_that("readHlaAlignments handles gaps in reference allele", {
+  # since IPD-IMGT/HLA 3.5x the reference allele contains gaps ('.') in columns
+  # where other alleles have insertions; these columns are not numbered
+  file <- test_path("test_ref_gaps_prot.txt")
+  aln <- readHlaAlignments(file)
+  pos <- c(-3:-1, 1:13)
+  ref <- c("M", "K", "A", "G", "S", "H", "S", "M", "R", "Y", "F", "F", "T",
+           "S", "V", "S")
+
+  expect_equal(colnames(aln), as.character(pos))
+  expect_equal(
+    rownames(aln),
+    c("X*01:01:01:01", "X*01:02", "X*02:01", "X*03:01", "X*04:01")
+  )
+  expect_equal(unname(aln["X*01:01:01:01", ]), ref)
+  # insertions relative to the reference are not part of numbered positions
+  expect_equal(unname(aln["X*01:02", ]), ref)
+  # substitution
+  expect_equal(unname(aln["X*02:01", ]), replace(ref, pos == 9, "Y"))
+  # deletions
+  expect_equal(unname(aln["X*03:01", ]), replace(ref, pos == 3, "."))
+  expect_equal(unname(aln["X*04:01", ]), replace(ref, pos == 13, "."))
+
+  aln_trim <- readHlaAlignments(file, trim = TRUE)
+  expect_equal(aln_trim, aln[, as.character(1:13)])
+})
+
 test_that("readHlaAlignments", {
   file <- system.file("extdata", "TAP1_prot.txt", package = "midasHLA")
   # our alignment files also contain infered alignment sequences

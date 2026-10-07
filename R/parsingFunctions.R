@@ -210,6 +210,18 @@ readHlaAlignments <- function(file,
              msg = "start codon is not marked properly in the input file"
       )
     )
+
+    # gaps in the reference allele mark insertions present in other alleles,
+    # such columns are not numbered in the IPD-IMGT/HLA nomenclature
+    ref_residues <- ref_seq != "."
+    assert_that(
+      see_if(isTRUE(ref_residues[first_codon_idx]),
+             msg = "start codon is not marked properly in the input file"
+      )
+    )
+    first_codon_idx <- sum(ref_residues[seq_len(first_codon_idx)])
+    aln <- aln[, ref_residues, drop = FALSE]
+
     if (first_codon_idx > 1) {
       aln_colnames <- c(seq(1 - first_codon_idx, -1, 1),
                         seq(1, ncol(aln) + 1 - first_codon_idx, 1)
