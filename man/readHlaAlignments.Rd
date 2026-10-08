@@ -4,7 +4,13 @@
 \alias{readHlaAlignments}
 \title{Read HLA allele alignments}
 \usage{
-readHlaAlignments(file, gene = NULL, trim = FALSE, unkchar = "")
+readHlaAlignments(
+  file,
+  gene = NULL,
+  trim = FALSE,
+  unkchar = "",
+  release = getOption("midasHLA.alignments_release")
+)
 }
 \arguments{
 \item{file}{Path to input file.}
@@ -17,6 +23,17 @@ of the mature protein.}
 
 \item{unkchar}{Character to be used to represent positions with unknown
 sequence.}
+
+\item{release}{String giving IPD-IMGT/HLA release (eg. \code{"3.44.0"}) of
+the alignment to use when reading alignment for \code{gene}. By default the
+release of alignments shipped with the package is used, see
+\code{\link{getAlignmentsRelease}}. Alignments of other releases are
+downloaded from the IMGTHLA GitHub repository
+(\url{https://github.com/ANHIG/IMGTHLA}), parsed and cached in the
+directory given by the \code{midasHLA.cache_dir} option, by default
+\code{tools::R_user_dir("midasHLA", "cache")}. Setting the
+\code{midasHLA.alignments_release} option changes the release used by all
+functions using HLA alignments, eg. \code{prepareMiDAS}.}
 }
 \value{
 Matrix containing HLA allele alignments.
@@ -48,10 +65,11 @@ They can be easily accessed using \code{gene} parameter. If \code{gene} is
 set to \code{NULL}, \code{file} parameter is used instead and alignment is
 read from the provided file. In EBI database alignments for DRB1, DRB3, DRB4
 and DRB5 genes are provided as a single file, here they are separated.
-
-Additionally, for the alleles without sequence defined in the original 
-alignment files we have infered thier sequence based on known higher resolution
-alleles.
+Additionally, were possible sequences for alleles not present in the alignments have been 
+inferred based on higher resolution alleles. To this end we have reduced 
+alleles to 6 and 4 digit resolution and took consensus sequence to represent
+missing alleles. Positions for which there was no full agreement were marked
+as unknown.
 }
 \examples{
 hla_alignments <- readHlaAlignments(gene = "A")

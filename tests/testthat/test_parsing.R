@@ -87,6 +87,21 @@ test_that("readHlaAlignments handles gaps in reference allele", {
 
   aln_trim <- readHlaAlignments(file, trim = TRUE)
   expect_equal(aln_trim, aln[, which(pos == "1"):length(pos)])
+
+  # header used in IPD-IMGT/HLA releases prior to 3.3x, the title line
+  # contains word 'Protein'
+  lines <- readLines(file)
+  old_header <- c(
+    "HLA-X Protein Sequence Alignments",
+    "IPD-IMGT/HLA Release: 3.30.0",
+    "Sequences Aligned: 2017 October 27",
+    "Steven GE Marsh, Anthony Nolan Research Institute.",
+    "Please see http://hla.alleles.org/terms.html for terms of use."
+  )
+  old_file <- tempfile(fileext = "_prot.txt")
+  on.exit(unlink(old_file))
+  writeLines(c(old_header, lines[! startsWith(lines, "#")]), old_file)
+  expect_equal(readHlaAlignments(old_file), aln)
 })
 
 test_that("readHlaAlignments agrees with IPD-IMGT/HLA protein records", {
