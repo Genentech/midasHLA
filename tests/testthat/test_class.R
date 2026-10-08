@@ -218,6 +218,10 @@ test_that("getAllelesForAA", {
   expect_error(getAllelesForAA(MiDAS_tut_object, "A"),
                "amino acid position should be formatted like: A_9.")
 
+  # insertion positions are accepted
+  expect_error(getAllelesForAA(MiDAS_tut_object, "A_9.1"),
+               "amino acid position 9.1 was not found in amino acid sequence.")
+
   MultiAssayExperiment::metadata(MiDAS_tut_object)[["hla_calls"]] <- NULL
   expect_error(getAllelesForAA(MiDAS_tut_object, "A_9"),
                "Could not find HLA calls associated with MiDAS object. Make sure to use prepareMiDAS for MiDAS object creation.")

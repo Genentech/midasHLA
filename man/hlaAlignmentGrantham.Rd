@@ -9,7 +9,9 @@ hlaAlignmentGrantham(gene, aa_sel = 2:182)
 \arguments{
 \item{gene}{Character vector specifying HLA gene.}
 
-\item{aa_sel}{Numeric vector specifying amino acids that should be extracted.}
+\item{aa_sel}{Numeric vector specifying amino acid positions that should be
+extracted. Only numbered positions are used, insertion positions (eg.
+\code{"4.1"}) are not considered.}
 }
 \value{
 HLA alignment processed for grantham distance calculation. Processing 

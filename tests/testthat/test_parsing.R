@@ -57,29 +57,90 @@ test_that("readHlaCalls", {
 
 test_that("readHlaAlignments handles gaps in reference allele", {
   # since IPD-IMGT/HLA 3.5x the reference allele contains gaps ('.') in columns
-  # where other alleles have insertions; these columns are not numbered
+  # where other alleles have insertions; these columns are not numbered, they
+  # are named after the preceding numbered position, eg. 4.1, 4.2
   file <- test_path("test_ref_gaps_prot.txt")
   aln <- readHlaAlignments(file)
-  pos <- c(-3:-1, 1:13)
-  ref <- c("M", "K", "A", "G", "S", "H", "S", "M", "R", "Y", "F", "F", "T",
-           "S", "V", "S")
+  pos <- c("-3", "-2", "-2.1", "-1", "1", "1.1", "2", "3", "4", "4.1", "4.2",
+           "5", "6", "7", "8", "9", "10", "11", "11.1", "12", "13")
+  ref <- c("M", "K", ".", "A", "G", ".", "S", "H", "S", ".", ".", "M", "R",
+           "Y", "F", "F", "T", "S", ".", "V", "S")
 
-  expect_equal(colnames(aln), as.character(pos))
+  expect_equal(colnames(aln), pos)
   expect_equal(
     rownames(aln),
     c("X*01:01:01:01", "X*01:02", "X*02:01", "X*03:01", "X*04:01")
   )
   expect_equal(unname(aln["X*01:01:01:01", ]), ref)
-  # insertions relative to the reference are not part of numbered positions
-  expect_equal(unname(aln["X*01:02", ]), ref)
-  # substitution
-  expect_equal(unname(aln["X*02:01", ]), replace(ref, pos == 9, "Y"))
-  # deletions
-  expect_equal(unname(aln["X*03:01", ]), replace(ref, pos == 3, "."))
-  expect_equal(unname(aln["X*04:01", ]), replace(ref, pos == 13, "."))
+  # insertions
+  expect_equal(unname(aln["X*01:02", ]), replace(ref, pos == "1.1", "K"))
+  expect_equal(
+    unname(aln["X*02:01", ]),
+    replace(ref, pos %in% c("4.1", "4.2", "9"), c("R", "R", "Y"))
+  )
+  expect_equal(
+    unname(aln["X*04:01", ]),
+    replace(ref, pos %in% c("-2.1", "13"), c("Q", "."))
+  )
+  # deletion
+  expect_equal(unname(aln["X*03:01", ]), replace(ref, pos == "3", "."))
 
   aln_trim <- readHlaAlignments(file, trim = TRUE)
-  expect_equal(aln_trim, aln[, as.character(1:13)])
+  expect_equal(aln_trim, aln[, which(pos == "1"):length(pos)])
+})
+
+test_that("readHlaAlignments agrees with IPD-IMGT/HLA protein records", {
+  # alignments/<gene>_prot.txt are excerpts of IPD-IMGT/HLA 3.65.0 alignment
+  # files; expected alignments are built from IPD-IMGT/HLA REST API records
+  # (see helper-ipd.R), which are independent of the alignment files
+  for (gene in c("A", "B", "C", "DQB1")) {
+    ipd <- readIpdProtein(gene)
+    aln <- readHlaAlignments(
+      test_path("alignments", paste0(gene, "_prot.txt")),
+      unkchar = "*"
+    )
+    expected <- ipdAlignment(ipd)
+
+    # columns beyond allele sequence: no residue
+    aln[aln == ""] <- "."
+    expected[expected == ""] <- "."
+
+    expect_equal(colnames(aln), colnames(expected), info = gene)
+    expect_equal(aln[ipd$allele, ], expected, info = gene)
+
+    for (i in seq_len(nrow(ipd))) {
+      allele <- ipd$allele[i]
+      # parsing is lossless: residues read in order give allele's sequence
+      residues <- aln[allele, ! aln[allele, ] %in% c(".", "*")]
+      expect_equal(
+        paste(residues, collapse = ""),
+        ipd$protein[i],
+        info = allele
+      )
+      # mature protein of allele starts at position 1
+      if (! is.na(ipd$signal_length[i])) {
+        signal <- as.integer(ipd$signal_length[i])
+        expect_equal(
+          aln[allele, "1"],
+          substr(ipd$protein[i], signal + 1, signal + 1),
+          info = allele
+        )
+      }
+    }
+  }
+
+  # known insertions
+  aln <- readHlaAlignments(test_path("alignments", "C_prot.txt"))
+  expect_equal(
+    unname(aln["C*17:03:01:01", paste0("300.", 1:6)]),
+    c("A", "V", "L", "A", "V", "L")
+  )
+  expect_equal(
+    unname(aln["C*01:02:01:01", paste0("300.", 1:6)]),
+    rep(".", 6)
+  )
+  aln <- readHlaAlignments(test_path("alignments", "B_prot.txt"))
+  expect_equal(unname(aln["B*73:01:01:01", "296.1"]), "T")
 })
 
 test_that("readHlaAlignments", {

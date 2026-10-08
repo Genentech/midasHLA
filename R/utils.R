@@ -662,7 +662,9 @@ hlaCallsGranthamDistance <- function(hla_calls,
 #' Helper function returning alignment for Grantham distance calculations
 #'
 #' @param gene Character vector specifying HLA gene.
-#' @param aa_sel Numeric vector specifying amino acids that should be extracted.
+#' @param aa_sel Numeric vector specifying amino acid positions that should be
+#'   extracted. Only numbered positions are used, insertion positions (eg.
+#'   \code{"4.1"}) are not considered.
 #'
 #' @return HLA alignment processed for grantham distance calculation. Processing 
 #'   includes extracting specific amino acids, masking indels, gaps and stop 
@@ -673,7 +675,7 @@ hlaAlignmentGrantham <- function(gene, aa_sel = 2:182) {
     gene = gene,
     trim = TRUE
   )
-  alignment <- alignment[, aa_sel] # select amino acids
+  alignment <- alignment[, as.character(aa_sel)] # select amino acids by position
   mask <- apply(alignment, 1, function(x) any(x == "" | x == "X" | x == ".")) # mask gaps, stop codons, indels
   alignment <- alignment[! mask, ]
 

@@ -18,7 +18,7 @@ Imports:
 Suggests:
     broom.mixed (>= 0.2.4), cowplot (>= 1.0.0), devtools (>= 2.0.1), ggplot2 (>= 3.1.0), 
     ggpubr (>= 0.2.5), rmarkdown, seqinr (>= 3.4-5), survival (>= 2.43-3), 
-    testthat (>= 2.0.1), tidyr (>= 1.1.2)
+    testthat (>= 3.1.7), tidyr (>= 1.1.2)
 RoxygenNote: 7.1.1
 VignetteBuilder: knitr
 Collate: 

@@ -110,10 +110,18 @@ readHlaCalls <- function(file,
 #' @return Matrix containing HLA allele alignments.
 #'
 #'   Rownames correspond to allele numbers and columns to positions in the
-#'   alignment. Sequences following the termination codon are marked as empty
+#'   alignment. Positions are numbered according to the IPD-IMGT/HLA
+#'   nomenclature: residues of the reference allele are numbered from the first
+#'   codon of the mature protein (position 1), positions of the signal peptide
+#'   are negative and position 0 is omitted. Columns where the reference allele
+#'   has no residue hold insertions present in other alleles, they are named
+#'   after the preceding position followed by the insertion index, eg.
+#'   \code{"4.1"}, \code{"4.2"}. Column names should be treated as text, not
+#'   numbers. Sequences following the termination codon are marked as empty
 #'   character (\code{""}). Unknown sequences are marked with a character of
 #'   choice, by default \code{""}. Stop codons are represented by a hash (X).
-#'   Insertion and deletions are marked with period (.).
+#'   Insertion and deletions are marked with period (.). See
+#'   \code{vignette("MiDAS_alignments", package = "midasHLA")} for details.
 #'
 #' @examples
 #' hla_alignments <- readHlaAlignments(gene = "A")
@@ -172,20 +180,20 @@ readHlaAlignments <- function(file,
     }
     aln_list <- as.list(tmp_aln_env)[unique(allele_numbers)] # convert to list and sort
 
-    ref_seq <- stri_flatten(aln_list[[1]])
-    seq_along_ref <- seq(1, nchar(ref_seq), 1)
-    ref_seq <- stri_sub(ref_seq,
-                        seq_along_ref,
-                        seq_along_ref
+    # alignment spans the longest allele, as some alleles extend beyond the
+    # reference sequence
+    aln_list <- lapply(aln_list, stri_flatten)
+    seq_along_aln <- seq_len(max(nchar(unlist(aln_list))))
+    ref_seq <- stri_sub(aln_list[[1]],
+                        seq_along_aln,
+                        seq_along_aln
     )
-    ref_len <- length(ref_seq)
     aln <- do.call(rbind,
                    lapply(aln_list,
                           function(a) {
-                            a <- stri_flatten(a)
                             a <- stri_sub(a,
-                                          seq_along_ref,
-                                          seq_along_ref
+                                          seq_along_aln,
+                                          seq_along_aln
                             )
                             i <- a == "-"
                             a[i] <- ref_seq[i]
@@ -211,24 +219,22 @@ readHlaAlignments <- function(file,
       )
     )
 
-    # gaps in the reference allele mark insertions present in other alleles,
-    # such columns are not numbered in the IPD-IMGT/HLA nomenclature
-    ref_residues <- ref_seq != "."
+    # positions are numbered according to the reference allele, starting from
+    # the first codon of the mature protein and omitting 0. Columns where the
+    # reference allele has no residue are insertions present in other alleles,
+    # they are named after the preceding position, eg. 4.1, 4.2, ...
+    ref_residues <- ! ref_seq %in% c(".", "")
     assert_that(
       see_if(isTRUE(ref_residues[first_codon_idx]),
              msg = "start codon is not marked properly in the input file"
       )
     )
-    first_codon_idx <- sum(ref_residues[seq_len(first_codon_idx)])
-    aln <- aln[, ref_residues, drop = FALSE]
-
-    if (first_codon_idx > 1) {
-      aln_colnames <- c(seq(1 - first_codon_idx, -1, 1),
-                        seq(1, ncol(aln) + 1 - first_codon_idx, 1)
-                      )
-    } else {
-      aln_colnames <- seq(1, ncol(aln) + 1 - first_codon_idx, 1)
-    }
+    ref_count <- cumsum(ref_residues)
+    pos <- ref_count - ref_count[first_codon_idx] + 1
+    pos <- ifelse(pos <= 0, pos - 1, pos)
+    ins <- seq_along(ref_count) - match(ref_count, ref_count) + 1 -
+      (ref_count > 0)
+    aln_colnames <- ifelse(ref_residues, pos, paste0(pos, ".", ins))
     colnames(aln) <- aln_colnames
 
     # discard aa '5 to start codon of mature protein

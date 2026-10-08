@@ -1,0 +1,30 @@
+# file: DQB1_prot.txt
+# date: 2026-07-14
+# version: IPD-IMGT/HLA 3.65.0
+# origin: https://github.com/ANHIG/IMGTHLA/blob/Latest/alignments/DQB1_prot.txt
+# repository: https://raw.githubusercontent.com/ANHIG/IMGTHLA/Latest/alignments/DQB1_prot.txt
+# author: IPD Team (ipdsubs@anthonynolan.org)
+                   
+ Prot               -40                                         1
+                    |                                           |
+ DQB1*05:01:01:01           MS WKKSLRIPGD LRVATVTLML AILSSSLAEG RDSPEDFVYQ FKGLCYFTNG TERVRGVTRH IYNREEYVRF DSDVGVYRAV TPQGRPVAEY 
+ DQB1*05:03:01:01           -- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ------D--- 
+ DQB1*02:01:01:01           -- ---A-----G --A------- SM--TPV--- ---------- ---M------ -----L-S-S ------I--- -----EF--- -LL-L-A--- 
+                   
+ Prot               61
+                    |
+ DQB1*05:01:01:01   WNSQKEVLEG ARASVDRVCR HNYEVAYRGI .LQRRVEPTV TISPSRTEAL NHHNLLICSV TDFYPSQIKV RWFRNDQEET AGVVSTPLIR NGDWTFQILV 
+ DQB1*05:03:01:01   ---------- ---------- ---------- .--------- ---------- ---------- ---------- ---------- ---------- ---------- 
+ DQB1*02:01:01:01   -----DI--R K--A------ ---QLEL-TT .--------- ---------- ------V--- -----A---- ---------- ---------- ---------- 
+                   
+ Prot               160
+                    |
+ DQB1*05:01:01:01   MLEMTPQR.. .GDVYTCHVE HPSLQSPITV EWRAQSESAQ SKMLSGVGGF VLGLIFLGLG LIIRQRSRKG ........LL H  
+ DQB1*05:03:01:01   --------.. .--------- ---------- ---------- ---------- ---------- ---------- PQGPPPAG-- -  
+ DQB1*02:01:01:01   --------.. .--------- ---------- ---------- ------I--- ---------- ---HH--Q-- ........-- -  
+                    
+ Prot               230
+                    |
+
+Please see https://github.com/ANHIG/IMGTHLA/blob/Latest/LICENCE.md for terms of use.
+
