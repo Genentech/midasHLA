@@ -1,3 +1,10 @@
+# 1.21.6 08/10/26
++ readHlaAlignments() numbers alignment positions according to the IPD-IMGT/HLA nomenclature also when the reference allele contains gaps: columns with insertions present in other alleles are named after the preceding position (e.g. 300.1) instead of shifting the following positions, and alleles longer than the reference are kept.
++ Grantham distance selects positions by name and uses numbered positions only.
++ getAllelesForAA(), summariseAAPosition() and runMiDAS() results support insertion positions; summariseAAPosition() uses the aln argument when provided.
++ Alignment download and pre-parsing scripts fixed; alignments are downloaded for a pinned IPD-IMGT/HLA release from the IMGTHLA GitHub repository.
++ New vignette describing IPD-IMGT/HLA alignments and their parsing.
+
 # 1.11.1 18/01/24
 + Fix bug on hlaToVariable() function that variable would erroneously be named NA.
 
