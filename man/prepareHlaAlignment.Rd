@@ -23,6 +23,7 @@ List with two elements: matrix containing HLA allele alignments, as
 \code{prepareHlaAlignment} reads HLA protein alignment file and infers
 sequences of lower resolution alleles not present in the alignment. Alleles
 are reduced to 6 and 4 digit resolution and consensus sequence is used to
-represent missing alleles; positions without full agreement are marked as
-unknown (\code{"*"}).
+represent missing alleles. Unknown residues of partially sequenced alleles
+are ignored; positions where the known residues disagree, or no residue is
+known, are marked as unknown (\code{"*"}).
 }

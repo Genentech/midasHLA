@@ -407,8 +407,9 @@ downloadHlaAlignment <- function(gene, release, dir) {
 #' \code{prepareHlaAlignment} reads HLA protein alignment file and infers
 #' sequences of lower resolution alleles not present in the alignment. Alleles
 #' are reduced to 6 and 4 digit resolution and consensus sequence is used to
-#' represent missing alleles; positions without full agreement are marked as
-#' unknown (\code{"*"}).
+#' represent missing alleles. Unknown residues of partially sequenced alleles
+#' are ignored; positions where the known residues disagree, or no residue is
+#' known, are marked as unknown (\code{"*"}).
 #'
 #' @inheritParams readHlaAlignments
 #' @param gene String giving name of HLA gene. If specified, only alleles of
@@ -442,7 +443,9 @@ prepareHlaAlignment <- function(file, gene = NULL) {
     missing_aln <- lapply(missing_alleles, function(allele) {
       i <- allele_numbers == allele
       apply(alignment[i, , drop = FALSE], 2, function(col) {
-        if (all(col == col[1])) col[1] else "*"
+        # unknown residues of partially sequenced alleles are ignored
+        known <- unique(col[col != "*"])
+        if (length(known) == 1) known else "*"
       })
     })
     if (length(missing_aln) == 0) next

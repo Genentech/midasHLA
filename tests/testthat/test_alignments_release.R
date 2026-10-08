@@ -25,6 +25,22 @@ test_that("prepareHlaAlignment", {
   expect_equal(aln["C*17:03", ], parsed["C*17:03:01:01", ])
   expect_equal(aln["C*17:03:01", ], parsed["C*17:03:01:01", ])
 
+  # unknown residues of partially sequenced alleles do not mask residues known
+  # from other alleles, disagreeing residues are marked as unknown
+  partial_file <- tempfile(fileext = "_prot.txt")
+  on.exit(unlink(partial_file))
+  writeLines(c(
+    " Prot              1",
+    "                   |",
+    " X*01:01:01:01     MKAG ",
+    " X*01:01:02        **-- ",
+    " X*02:01:01        -R-- ",
+    " X*02:01:02        -Q-* "
+  ), partial_file)
+  aln <- prepareHlaAlignment(partial_file)[[1]]
+  expect_equal(unname(aln["X*01:01", ]), c("M", "K", "A", "G"))
+  expect_equal(unname(aln["X*02:01", ]), c("M", "*", "A", "G"))
+
   # alignments of multiple genes can be subset to a single gene
   aln <- prepareHlaAlignment(file, gene = "C")[[1]]
   expect_true(all(startsWith(rownames(aln), "C*")))
@@ -54,22 +70,24 @@ test_that("readHlaAlignments reads other releases on demand", {
     }
   )
   expected <- prepareHlaAlignment(test_path("alignments", "C_prot.txt"))[[1]]
+  # any release other than the shipped one, download is mocked
+  release <- if (getAlignmentsRelease() == "3.60.0") "3.61.0" else "3.60.0"
 
-  aln <- readHlaAlignments(gene = "C", release = "3.65.0", unkchar = "*")
+  aln <- readHlaAlignments(gene = "C", release = release, unkchar = "*")
   expect_equal(aln, expected)
   expect_equal(downloads, 1)
   expect_true(
-    file.exists(file.path(cache_dir, "alignments", "3.65.0", "C_prot.Rdata"))
+    file.exists(file.path(cache_dir, "alignments", release, "C_prot.Rdata"))
   )
 
   # cached release is not downloaded again
-  aln <- readHlaAlignments(gene = "C", release = "3.65.0", trim = TRUE,
+  aln <- readHlaAlignments(gene = "C", release = release, trim = TRUE,
                            unkchar = "*")
   expect_equal(aln, expected[, which(colnames(expected) == "1"):ncol(expected)])
   expect_equal(downloads, 1)
 
   # release can be set with an option
-  options(midasHLA.alignments_release = "3.65.0")
+  options(midasHLA.alignments_release = release)
   expect_equal(readHlaAlignments(gene = "C", unkchar = "*"), expected)
   expect_equal(downloads, 1)
 
