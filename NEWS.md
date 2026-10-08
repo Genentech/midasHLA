@@ -1,3 +1,6 @@
+# 1.21.4 07/10/26
++ Tutorial now loads midasHLA and the packages it uses (dplyr, knitr, kableExtra) with visible library() calls instead of a hidden devtools::load_all().
+
 # 1.11.1 18/01/24
 + Fix bug on hlaToVariable() function that variable would erroneously be named NA.
 

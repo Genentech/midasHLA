@@ -14,7 +14,6 @@ vignette: >
 
 ```{r my_setup, echo=FALSE, warning=FALSE, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, fig.align="center")
-devtools::load_all()
 ```
 
 ```{r logo, echo=FALSE, warning=FALSE}
@@ -30,6 +29,15 @@ htmltools::img(
 Welcome to MiDAS. This tutorial is supposed to help you get started with your analyses of immunogenetic associations. We will work with a simulated data set of 500 patients and 500 controls with a binary disease diagnosis.
 
 We also have high resolution HLA alleles (4 - 6 digit), and presence/absence calls for KIR genes.
+
+First, let's load MiDAS together with the packages used in this tutorial for data manipulation (`dplyr`) and for displaying results tables (`knitr`, `kableExtra`).
+
+```{r load_packages, message=FALSE, warning=FALSE}
+library(midasHLA)
+library(dplyr)
+library(knitr)
+library(kableExtra)
+```
 
 ## Data import and sanity check
 
