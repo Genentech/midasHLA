@@ -1,5 +1,25 @@
 context("Summarising MiDAS results")
 
+test_that("summarize amino acid insertion position", {
+  aln <- readHlaAlignments(test_path("alignments", "C_prot.txt"), unkchar = "*")
+  hla_calls <- data.frame(
+    ID = c("P1", "P2", "P3"),
+    C_1 = c("C*17:03:01:01", "C*01:02:01:01", "C*07:01:01:01"),
+    C_2 = c("C*17:03:01:01", "C*07:01:01:01", "C*01:02:01:01"),
+    stringsAsFactors = FALSE
+  )
+  aa_sum <- summariseAAPosition(hla_calls, "C_300.1", aln = aln)
+  aa_sum_test <- data.frame(
+    `HLA-C (300.1)` = c(".", "A"),
+    `HLA-C alleles` = c("*01:02:01:01, *07:01:01:01", "*17:03:01:01"),
+    count = c(4L, 2L),
+    frequency = formattable::percent(c(4, 2) / 6),
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
+  expect_equal(aa_sum, aa_sum_test)
+})
+
 test_that("summarize amino acid position", {
   aa_sum <- summariseAAPosition(MiDAS_tut_HLA, "DRA_2")
   aa_sum_test <- data.frame(

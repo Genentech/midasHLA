@@ -1,51 +1,30 @@
 #!/usr/bin/env R
 # By Migdal 2018
-# Downloads HLA alignments files
-# If alignment files contain sequences for multiple genes those will be split into separate files (eg. DRB genes)
-library("dplyr")
-library("RCurl")
-library("XML")
-library("rvest")
-devtools::load_all()
+# Downloads HLA protein alignment files from the IPD-IMGT/HLA GitHub repository
+# (https://github.com/ANHIG/IMGTHLA) for all genes shipped with the package.
+# The script should be run from the package repository root, files are saved
+# to the 'alignments' directory, which is then used by 'parse_alignments.R'.
 
+# IPD-IMGT/HLA release to download; the repository keeps a branch for each
+# release, eg. "3650" for release 3.65.0, "Latest" points to the newest one
+release <- "3650"
 out_dir <- "alignments"
-hla_alignmnets_url <- "ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/alignments/"
-hla_alignmnets_db <- getURL(hla_alignmnets_url,
-                            verbose=TRUE,
-                            ftp.use.epsv= FALSE,
-                            dirlistonly = TRUE
+options(timeout = max(600, getOption("timeout")))
+
+dir.create(out_dir, showWarnings = FALSE)
+genes <- sub(
+  pattern = "_prot.Rdata$",
+  replacement = "",
+  x = list.files(file.path("inst", "extdata"), pattern = "_prot.Rdata$")
 )
-hla_alignmnets_db <- strsplit(hla_alignmnets_db, "\n")[[1]] %>%
-  grep("_prot.txt", ., value = TRUE) %>%
-  grep("ClassI_prot.txt", ., invert = TRUE, value = TRUE)
-for (aln in hla_alignmnets_db) {
-    download.file(paste0(hla_alignmnets_url, aln), destfile = paste0(out_dir, aln))
-}
-# check if alignemnt files contains mixed records
-multi_aln <- lapply(
-  paste0(out_dir, hla_alignmnets_db),
-  function(aln_file) {
-    numbers <- rownames(readHlaAlignments(aln_file))
-    numbers <- vapply(strsplit(numbers, "\\*"), `[[`, 1, FUN.VALUE = character(length = 1))
-    return(length(unique(numbers)) > 1)
-  }
-) %>%
-  unlist()
-for (aln_file in paste0(out_dir, hla_alignmnets_db)[multi_aln]) {
-  aln <-readHlaAlignments(aln_file)
-  genes <- rownames(aln)
-  ref_name <- genes[1]
-  genes <- vapply(strsplit(genes, "\\*"), `[[`, 1, FUN.VALUE = character(length = 1))
-  genes <- unique(genes)
-  raw_aln <- readLines(aln_file)
-  ref_seq_ids <- grep(ref_name, raw_aln, fixed = TRUE)
-  for (i in 1:length(genes)) {
-    keep <- ! grepl(paste(genes[-i], collapse = "|"), raw_aln)
-    keep[ref_seq_ids] <- TRUE
-    writeLines(text = raw_aln[keep],
-               con = paste0(out_dir, genes[i], "_prot.txt"),
-               sep = "\n"
-    )
-  }
-  unlink(aln_file)
+stopifnot(
+  "no alignments found in inst/extdata, run the script from the repository root" = length(genes) > 0
+)
+
+url <- "https://raw.githubusercontent.com/ANHIG/IMGTHLA/%s/alignments/%s_prot.txt"
+for (gene in genes) {
+  download.file(
+    url = sprintf(url, release, gene),
+    destfile = file.path(out_dir, paste0(gene, "_prot.txt"))
+  )
 }

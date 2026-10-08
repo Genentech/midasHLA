@@ -1,0 +1,406 @@
+---
+title: "HLA protein alignments in MiDAS"
+author: "Maciej Migdał"
+date: "`r Sys.Date()`"
+output:
+  html_vignette:
+    toc: true
+    toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{HLA protein alignments in MiDAS}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+```{r load_packages, message = FALSE}
+library(midasHLA)
+```
+
+## Introduction
+
+Several MiDAS analyses work on the level of amino acid positions rather than
+whole alleles:
+
+- the `hla_aa` experiment of `prepareMiDAS()` tests individual residues
+  (e.g. `DRB1_11_V`) and, in omnibus tests, whole positions (e.g. `DRB1_11`);
+- `getAllelesForAA()` and `summariseAAPosition()` show which alleles carry
+  which residue at a given position;
+- `hla_divergence` (Grantham distance) is computed over a fixed set of
+  positions, e.g. the peptide binding groove (positions 2-182) or the B and F
+  pockets.
+
+All of them translate HLA alleles to amino acid sequences using the protein
+alignments published by the IPD-IMGT/HLA Database [1, 2]. For results to be
+interpretable, positions have to be numbered exactly as in the IPD-IMGT/HLA
+nomenclature [3]: this is the numbering used to define structural features of
+HLA molecules, such as the peptide binding pockets [4], and to report
+associations, e.g. HLA-DRB1 positions 11, 71 and 74 in rheumatoid arthritis
+[5] or HLA-B positions 67, 70, 97 and 156 in HIV-1 control [6]. Tools imputing
+or testing HLA amino acid polymorphisms, such as SNP2HLA [7], HLA-TAPAS [8],
+HATK [9] or HLAtools [10], use the same numbering.
+
+This vignette describes the IPD-IMGT/HLA protein alignment format, how MiDAS
+parses it and numbers positions, and how the parsing algorithm changed to keep
+up with the evolving format of the alignments.
+
+## IPD-IMGT/HLA protein alignments
+
+### Where they come from
+
+The IPD-IMGT/HLA Database [1, 2] publishes multiple sequence alignments of
+all known alleles of each HLA gene with each release (currently every three
+months). Protein alignments are named `<gene>_prot.txt` (e.g. `A_prot.txt`)
+and are available from the
+[IMGTHLA GitHub repository](https://github.com/ANHIG/IMGTHLA/tree/Latest/alignments),
+which keeps a separate branch for each release (e.g. `3650` for release
+3.65.0) and a `Latest` branch.
+
+MiDAS ships pre-parsed alignments of the supported genes in its `extdata`
+directory. The scripts used to download and pre-parse them are described in
+the package README (section *Developers notes*).
+
+### File layout
+
+A (shortened) alignment file looks like this:
+
+```
+# file: A_prot.txt
+# date: 2026-07-14
+# version: IPD-IMGT/HLA 3.65.0
+...
+ Prot              -30                                1
+                   |                                  |
+ A*01:01:01:01           MAVM APRTLLLLLS GALAL..TQT WAG.SHS... ....MRYFFT SVSRPGRGEP ...
+ A*01:01:01:02N          ---- ---------- -----..--- ---.---... ....------ ---------- ...
+ A*01:01:01:03           ---- ---------- -----..--- ---.---... ....------ ---------- ...
+ ...
+
+ Prot              61
+                   |
+ A*01:01:01:01     DQETRNMKAH SQTDRANLGT LRGYYNQSED ...
+ ...
+```
+
+- Lines starting with `#` hold metadata, including the release version.
+- The alignment is split into **blocks**. Each block starts with a `Prot`
+  line giving position numbers, followed by a line with `|` markers placed
+  above the columns these numbers refer to. Each block then lists all alleles
+  with their sequences, in groups of ten residues.
+- The **first allele** in the file is the **reference allele** (e.g.
+  `A*01:01:01:01`, `B*07:02:01:01`, `C*01:02:01:01`, `DRB1*01:01:01:01`). Its
+  full sequence is shown; other alleles are shown relative to it.
+
+Characters used in the sequences:
+
+| Character | Meaning |
+|---|---|
+| `A`-`Z` | amino acid residue (`X` marks a stop codon) |
+| `-` | same residue as in the reference allele |
+| `.` | no residue in this allele at this column (a gap) |
+| `*` | residue unknown, the allele was not sequenced in this region |
+
+The IPD-IMGT/HLA REST API (`https://www.ebi.ac.uk/cgi-bin/ipd/api/allele/`)
+provides the same information for individual alleles: allele's protein
+sequence, signal peptide and mature protein boundaries, and a "protein CIGAR"
+string describing where allele's residues are placed in the alignment (`M` -
+residue, `D` - no residue, `N` - not sequenced). We use it to validate the
+parser (see [Validation](#validation)).
+
+### Position numbering
+
+Positions are numbered according to the **reference allele** [3]:
+
+- position 1 is the first residue of the mature protein, it is marked by the
+  `1` above the first block;
+- residues of the signal peptide (leader) have negative numbers: -1 is the
+  residue directly preceding position 1. There is no position 0;
+- every residue of the reference allele gets the next number.
+
+Because the numbering follows the residues of the reference allele, **an
+alignment column where the reference allele has a gap (`.`) has no number**.
+Such a column exists only because some other allele has an extra residue
+there - an **insertion** relative to the reference. In the example above
+`A*01:01:01:01` reads `WAG.SHS... ....MRYFFT`: `G` is position 1, it is
+followed by one insertion column, `S`, `H` and `S` are positions 2-4, followed
+by seven insertion columns, and `M` is position 5.
+
+In contrast, a gap in any other allele, in a column where the reference allele
+has a residue, is a **deletion** in that allele; the column keeps its number.
+
+A few more details matter when parsing:
+
+- Some alleles extend beyond the last residue of the reference allele. Their
+  extra residues are shown in additional columns, or in additional blocks
+  listing only these alleles.
+- The `Prot` lines are labels for readers rather than a strict index: a block
+  starting with insertion columns is labelled with the number of the next
+  numbered position, and in some files (e.g. TAP1) block labels are off by
+  one. MiDAS therefore uses only the first marked position (`1`) as an anchor
+  and counts the reference residues from there.
+
+### Naming insertion positions
+
+Insertion columns still carry information: for example all HLA-C\*17 alleles
+have six extra residues (`AVLAVL`) in the transmembrane region, after position
+300 of the reference allele. They need a name that does not consume a position
+number - otherwise every following position would be shifted. MiDAS names
+insertion columns after the preceding numbered position followed by the index
+of the insertion column, e.g. `300.1`, `300.2`, ..., `300.6`. The same
+convention is used by HLAtools [10]. Other tools represent insertions
+differently, e.g. SNP2HLA and HLA-TAPAS encode a whole insertion as a single
+marker spanning two positions, such as `INS_C_295x296_VLAVLA` [7, 8].
+
+Note that `300.10` and `300.1` are different positions: position names must
+always be treated as text, not numbers.
+
+## Parsing algorithm
+
+`readHlaAlignments()` parses an alignment file in the following steps:
+
+1. Read lines with allele sequences, recognized by a valid allele name in the
+   first field, and concatenate each allele's sequence over all blocks.
+2. Make all sequences as long as the longest allele, so that alleles extending
+   beyond the reference allele are kept. Columns beyond the end of an allele's
+   sequence are marked with `""`.
+3. Replace `-` with the residue of the reference allele in that column.
+4. Find the alignment column of position 1, using the `1` marker in the first
+   `Prot` line.
+5. Number the columns: count residues of the reference allele, with position 1
+   at the marked column, negative positions before it and no position 0.
+   Columns where the reference allele has no residue are named after the
+   preceding position: `<position>.<k>`, where `k` is the index of the
+   insertion column.
+6. Optionally (`trim = TRUE`) drop the signal peptide, i.e. columns before
+   position 1.
+
+The example below uses a small alignment in the IPD-IMGT/HLA format. The
+reference allele `X*01:01:01:01` has gaps in four places: one in the signal
+peptide, one after position 1, two after position 4 and one after position 11.
+
+```{r toy_alignment}
+toy_alignment <- c(
+  "# file: X_prot.txt",
+  "                   ",
+  " Prot              -3   1",
+  "                    |   |",
+  " X*01:01:01:01      MK.AG.SHS..MRYFF ",
+  " X*01:02            --.--K---..----- ",
+  " X*02:01            --.--.---RR----Y ",
+  " X*03:01            --.--.-.-..----- ",
+  " X*04:01            --Q--.---..----- ",
+  "",
+  " Prot               10",
+  "                    |",
+  " X*01:01:01:01      TS.VS ",
+  " X*01:02            --.-- ",
+  " X*02:01            --.-- ",
+  " X*03:01            --.-- ",
+  " X*04:01            --.-. "
+)
+file <- tempfile(fileext = "_prot.txt")
+writeLines(toy_alignment, file)
+
+aln <- readHlaAlignments(file)
+aln
+```
+
+In the resulting matrix:
+
+- `X*01:02` has an insertion of `K` after position 1 (column `1.1`);
+- `X*02:01` has an insertion of `RR` after position 4 (`4.1`, `4.2`) and a
+  substitution `F9Y`;
+- `X*03:01` has a deletion of position 3;
+- `X*04:01` has an insertion of `Q` in the signal peptide (`-2.1`) and a
+  deletion of position 13.
+
+The columns corresponding to the reference residues are numbered exactly as
+in the IPD-IMGT/HLA nomenclature, regardless of insertions in other alleles:
+
+```{r numbered_positions}
+aln[, ! grepl(".", colnames(aln), fixed = TRUE)]
+```
+
+With `trim = TRUE` the signal peptide is removed:
+
+```{r trim}
+readHlaAlignments(file, trim = TRUE)
+```
+
+### Use of positions in MiDAS
+
+- **`hla_aa` experiment.** Insertion columns are treated like any other
+  position: variables are named `<gene>_<position>_<residue>`, e.g.
+  `C_300.1_A` for the first inserted residue of HLA-C\*17 alleles, and
+  `C_300.1_.` for alleles without the insertion. As only variable positions
+  are used, insertion columns appear in the analysis only when alleles with the
+  insertion are present in the data. Omnibus tests group variables by
+  position, e.g. `C_300.1`.
+- **`getAllelesForAA()` and `summariseAAPosition()`** accept insertion
+  positions, e.g. `getAllelesForAA(midas, "C_300.1")`.
+- **Grantham distance** (`hla_divergence`) [11, 12] is computed only over
+  numbered positions (e.g. 2-182 for the binding groove). Positions are
+  selected by name, so insertion columns do not shift the selection; Grantham
+  distance is not defined between a residue and a gap, thus insertion columns
+  are not used.
+
+For example, with alignments from IPD-IMGT/HLA release 3.65.0:
+
+```{r insertion_example, eval = FALSE}
+aln <- readHlaAlignments(gene = "C")
+aln[c("C*01:02:01:01", "C*17:03:01:01"), c("300", paste0("300.", 1:6), "301")]
+#>               300 300.1 300.2 300.3 300.4 300.5 300.6 301
+#> C*01:02:01:01 "L" "."   "."   "."   "."   "."   "."   "G"
+#> C*17:03:01:01 "L" "A"   "V"   "L"   "A"   "V"   "L"   "G"
+```
+
+## How the algorithm changed
+
+### Original implementation
+
+The original parser (used up to midasHLA 1.21.5) followed steps 1, 3, 4 and 6
+of the algorithm above, but in step 5 it **numbered every alignment column**:
+columns before the `1` marker received negative numbers and all following
+columns received consecutive numbers. Sequences were also truncated to the
+length of the reference allele.
+
+This is correct only if the reference allele has a residue in every column,
+which held for most genes in the releases available when MiDAS was developed.
+Each insertion column, however, shifted the numbers of all the following
+positions by one. In the shipped alignments (IPD-IMGT/HLA release 3.44.0)
+this affected the C-terminal parts of a few genes, whose reference alleles
+already contained insertion columns:
+
+- HLA-B: one insertion column after position 294, so positions after it were
+  shifted by one (the last position was 339 instead of 338);
+- HLA-C: six insertion columns after position 300 (the HLA-C\*17 insertion),
+  so positions after it were shifted by six (the last position was 348
+  instead of 342):
+
+| Reference `C*01:02:01:01` | ... | 300 | | | | | | | 301 | 302 | ... |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| IPD-IMGT/HLA numbering | ... | 300 | *300.1* | *300.2* | *300.3* | *300.4* | *300.5* | *300.6* | 301 | 302 | ... |
+| original parser | ... | 300 | 301 | 302 | 303 | 304 | 305 | 306 | 307 | 308 | ... |
+
+- HLA-DQB1 and MICA: similar shifts towards the C-terminus.
+
+Positions in the peptide binding groove, the B and F pockets and therefore the
+Grantham distances were not affected, which may explain why the problem went
+unnoticed.
+
+### Evolving IPD-IMGT/HLA alignments
+
+With new alleles, the IPD-IMGT/HLA alignments gained insertion columns in
+many more places, including the signal peptide and the peptide binding groove
+- e.g. HLA-B has 131 insertion columns in release 3.65.0, the first ones in
+the signal peptide and after position 24. When the alignments were updated to
+release 3.55.0 in January 2024, the original parser shifted almost all
+positions, which broke amino acid level analyses and Grantham distances. The
+update was reverted until the parser could be fixed.
+
+The `Grantham distance` calculation had an additional hidden assumption: it
+selected positions 2-182 by **column index** rather than by position name,
+which is equivalent only when every column is a numbered position.
+
+### Current implementation
+
+The parser was changed in two steps:
+
+1. Columns where the reference allele has a gap are recognized as insertion
+   columns and excluded from numbering, restoring the IPD-IMGT/HLA numbering
+   of all positions.
+2. Instead of being dropped, insertion columns are kept and named
+   `<position>.<k>`, and the alignment spans the longest allele, so that the
+   sequences of all alleles are represented completely.
+
+Along with it:
+
+- Grantham distance selects positions by name and uses numbered positions
+  only;
+- position names in `getAllelesForAA()`, `summariseAAPosition()` and
+  `runMiDAS()` results accept insertion positions;
+- the alignment pre-parsing script reuses the numbering of
+  `readHlaAlignments()` instead of a separate copy of the original logic,
+  and the download script fetches alignments of a pinned IPD-IMGT/HLA release
+  from the IMGTHLA GitHub repository.
+
+## Validation {#validation}
+
+The parser is validated against data independent of the alignment text files:
+records of the IPD-IMGT/HLA REST API, which provide each allele's protein
+sequence, signal peptide length and placement of its residues in the
+alignment. Package tests use excerpts of IPD-IMGT/HLA 3.65.0 alignments of
+HLA-A, -B, -C and -DQB1, covering reference alleles, insertions in the signal
+peptide and the transmembrane region, an allele extending far beyond the
+reference allele, deletions and a partially sequenced allele, and check that:
+
+- every column name and every residue matches the alignment built from the API
+  records, numbered as described above;
+- reading an allele's residues in order gives exactly its protein sequence,
+  i.e. nothing is lost or reordered;
+- position 1 is the first residue of the allele's mature protein.
+
+Additionally, for all genes shipped with MiDAS we checked, using release
+3.65.0, that numbered positions agree with the position labels of the `Prot`
+lines and that, outside of the regions described in
+[Original implementation](#original-implementation), they agree with the
+previously shipped alignments (apart from a few dozen residues corrected by
+IPD-IMGT/HLA between the releases). For HLA-A, -B and -C, the conserved
+cysteines of class I heavy chains are found at positions 101, 164, 203 and
+259. For HLA-A, -B, -C and -DQB1, numbered positions and residues also agree
+with alignments built by HLAtools [10].
+
+## References
+
+1. Robinson J, Barker DJ, Georgiou X, Cooper MA, Flicek P, Marsh SGE.
+   IPD-IMGT/HLA Database. *Nucleic Acids Research*. 2020;48(D1):D948-D955.
+   [doi:10.1093/nar/gkz950](https://doi.org/10.1093/nar/gkz950)
+2. Barker DJ, Maccari G, Georgiou X, Cooper MA, Flicek P, Robinson J, Marsh
+   SGE. The IPD-IMGT/HLA Database. *Nucleic Acids Research*.
+   2023;51(D1):D1053-D1060.
+   [doi:10.1093/nar/gkac1011](https://doi.org/10.1093/nar/gkac1011)
+3. Marsh SGE, Albert ED, Bodmer WF, et al. Nomenclature for factors of the
+   HLA system, 2010. *Tissue Antigens*. 2010;75(4):291-455.
+   [doi:10.1111/j.1399-0039.2010.01466.x](https://doi.org/10.1111/j.1399-0039.2010.01466.x)
+4. Saper MA, Bjorkman PJ, Wiley DC. Refined structure of the human
+   histocompatibility antigen HLA-A2 at 2.6 Å resolution. *Journal of
+   Molecular Biology*. 1991;219(2):277-319.
+   [doi:10.1016/0022-2836(91)90567-P](https://doi.org/10.1016/0022-2836(91)90567-P)
+5. Raychaudhuri S, Sandor C, Stahl EA, et al. Five amino acids in three HLA
+   proteins explain most of the association between MHC and seropositive
+   rheumatoid arthritis. *Nature Genetics*. 2012;44(3):291-296.
+   [doi:10.1038/ng.1076](https://doi.org/10.1038/ng.1076)
+6. The International HIV Controllers Study. The major genetic determinants of
+   HIV-1 control affect HLA class I peptide presentation. *Science*.
+   2010;330(6010):1551-1557.
+   [doi:10.1126/science.1195271](https://doi.org/10.1126/science.1195271)
+7. Jia X, Han B, Onengut-Gumuscu S, et al. Imputing amino acid polymorphisms
+   in human leukocyte antigens. *PLoS ONE*. 2013;8(6):e64683.
+   [doi:10.1371/journal.pone.0064683](https://doi.org/10.1371/journal.pone.0064683)
+8. Luo Y, Kanai M, Choi W, et al. A high-resolution HLA reference panel
+   capturing global population diversity enables multi-ancestry fine-mapping
+   in HIV host response. *Nature Genetics*. 2021;53(10):1504-1516.
+   [doi:10.1038/s41588-021-00935-7](https://doi.org/10.1038/s41588-021-00935-7)
+9. Choi W, Luo Y, Raychaudhuri S, Han B. HATK: HLA analysis toolkit.
+   *Bioinformatics*. 2021;37(3):416-418.
+   [doi:10.1093/bioinformatics/btaa684](https://doi.org/10.1093/bioinformatics/btaa684)
+10. Tran L, Nickens R, Luu V, Petersdorf EW, Mack SJ. HLAtools, Searching Shared HLA Amino Acid Residue
+    Prevalence, and the Global Frequency Browsers: New Computational Resources
+    for Working With HLA Data and Visualizing Global Patterns of HLA Variation.
+    *International Journal of Immunogenetics*. 2025;52(6):358-370.
+    [doi:10.1111/iji.70013](https://doi.org/10.1111/iji.70013);
+    R package: [CRAN](https://cran.r-project.org/package=HLAtools)
+11. Grantham R. Amino acid difference formula to help explain protein
+    evolution. *Science*. 1974;185(4154):862-864.
+    [doi:10.1126/science.185.4154.862](https://doi.org/10.1126/science.185.4154.862)
+12. Pierini F, Lenz TL. Divergent allele advantage at human MHC genes:
+    signatures of past and ongoing selection. *Molecular Biology and
+    Evolution*. 2018;35(9):2145-2158.
+    [doi:10.1093/molbev/msy116](https://doi.org/10.1093/molbev/msy116)
+13. Migdal M, Ruan DF, Forrest WF, Horowitz A, Hammer C. MiDAS—Meaningful
+    Immunogenetic Data at Scale. *PLoS Computational Biology*.
+    2021;17(7):e1009131.
+    [doi:10.1371/journal.pcbi.1009131](https://doi.org/10.1371/journal.pcbi.1009131)

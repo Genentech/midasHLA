@@ -22,10 +22,18 @@ sequence.}
 Matrix containing HLA allele alignments.
 
   Rownames correspond to allele numbers and columns to positions in the
-  alignment. Sequences following the termination codon are marked as empty
+  alignment. Positions are numbered according to the IPD-IMGT/HLA
+  nomenclature: residues of the reference allele are numbered from the first
+  codon of the mature protein (position 1), positions of the signal peptide
+  are negative and position 0 is omitted. Columns where the reference allele
+  has no residue hold insertions present in other alleles, they are named
+  after the preceding position followed by the insertion index, eg.
+  \code{"4.1"}, \code{"4.2"}. Column names should be treated as text, not
+  numbers. Sequences following the termination codon are marked as empty
   character (\code{""}). Unknown sequences are marked with a character of
   choice, by default \code{""}. Stop codons are represented by a hash (X).
-  Insertion and deletions are marked with period (.).
+  Insertion and deletions are marked with period (.). See
+  \code{vignette("MiDAS_alignments", package = "midasHLA")} for details.
 }
 \description{
 \code{readHlaAlignments} read HLA allele alignments from file.

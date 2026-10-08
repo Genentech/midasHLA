@@ -244,3 +244,51 @@ test_that("HWETest", {
 
   expect_error(HWETest(midas, experiment = "hla_alleles", as.MiDAS = "foo"), "as.MiDAS is not a flag \\(a length one logical vector\\).")
 })
+
+test_that("runMiDAS omnibus test on amino acid insertion position", {
+  # use IPD-IMGT/HLA 3.65.0 alignment excerpts, HLA-C*17 alleles carry
+  # insertion of six residues after position 300
+  read_aln <- readHlaAlignments
+  local_mocked_bindings(
+    readHlaAlignments = function(file, gene = NULL, trim = FALSE, unkchar = "") {
+      read_aln(
+        test_path("alignments", paste0(gene, "_prot.txt")),
+        trim = trim,
+        unkchar = unkchar
+      )
+    }
+  )
+  alleles <- c("C*17:03:01:01", "C*01:02:01:01", "C*07:01:01:01")
+  hla_calls <- data.frame(
+    ID = sprintf("P%02d", 1:30),
+    C_1 = rep(alleles, each = 10),
+    C_2 = rep(alleles[2:3], 15),
+    stringsAsFactors = FALSE
+  )
+  pheno <- data.frame(
+    ID = hla_calls$ID,
+    disease = c(1, 1, 1, 1, 1, 1, 0, 0, 1, 0, rep(c(1, 0, 0, 0, 0), 4)),
+    stringsAsFactors = FALSE
+  )
+  midas <- prepareMiDAS(
+    hla_calls = hla_calls,
+    colData = pheno,
+    experiment = "hla_aa"
+  )
+  expect_true(
+    all(c("C_300.1_A", "C_300.6_L") %in% rownames(midas[["hla_aa"]]))
+  )
+
+  object <- lm(disease ~ term, data = midas)
+  # C_300.1_. is collinear with C_300.1_A, thus it is dropped from the test
+  res <- suppressWarnings(runMiDAS(
+    object,
+    experiment = "hla_aa",
+    inheritance_model = "additive",
+    omnibus = TRUE,
+    omnibus_groups_filter = "C_300.1"
+  ))
+  expect_equal(res$aa_pos, "C_300.1")
+  expect_equal(res$residues, "A")
+  expect_equal(res$df, 1)
+})

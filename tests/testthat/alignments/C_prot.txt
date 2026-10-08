@@ -1,0 +1,47 @@
+# file: C_prot.txt
+# date: 2026-07-14
+# version: IPD-IMGT/HLA 3.65.0
+# origin: https://github.com/ANHIG/IMGTHLA/blob/Latest/alignments/C_prot.txt
+# repository: https://raw.githubusercontent.com/ANHIG/IMGTHLA/Latest/alignments/C_prot.txt
+# author: IPD Team (ipdsubs@anthonynolan.org)
+                   
+ Prot              -30                              1
+                   |                                |
+ C*01:02:01:01           MRVM APRTLILLLS GALALTETWA CSHSMKYFFT SVSRPGRGEP RFISVGYVDD TQFV...RFD SDAASPRGEP RAPWVEQEG. ....PEYWDR 
+ C*03:46                 ---- ---------- ---------- G----R--Y- A--------- H--A------ ----...--- ---------- ------.--. ....------ 
+ C*07:01:01:01           ---- ---A-L---- -G-------- -----R--D- A--------- ---------- ----...--- ---------- ---------. ....------ 
+ C*17:03:01:01           ---- --QA-L---- -----I---T G----R--Y- A--------- ---A------ ----...--- ---------- ---------. ....------ 
+                   
+ Prot              63
+                   |
+ C*01:02:01:01     ETQK.YKRQA QTDRVSLRNL RGYYNQSEA. GSHTLQWMCG CDLGPDGRLL RGYDQYAYDG KDYIALNEDL RSWTAADTAA QIT....... QRKWEAAREA 
+ C*03:46           ----.----- ---------- ---------. ---II-R-Y- --V------- ---------- ---------- ---------- ---....... ---------- 
+ C*07:01:01:01     ---N.----- -A-------- --------D. ------R-Y- ---------- -----S---- ---------- ---------- ---....... ---L----A- 
+ C*17:03:01:01     ----.----- -A---N--K- ---------. ----I-R-Y- ---------- ---N-F---- ---------- ---------- --S....... ---L------ 
+                   
+ Prot              154
+                   |
+ C*01:02:01:01     EQRRAYLEGT CVEWLRRYLE N.....G... .........K ETLQRA..EH PKTHVTHHPV SDHEATLRCW ALGFYPAEIT LTWQWDGEDQ T.QDTELVET 
+ C*03:46           --L------L ---------K -.....-... .........- ------..-- ---------- ---------- ---------- ---------- -.-------- 
+ C*07:01:01:01     --L------- ---------- -.....-... .........- ------..-P ---------L ---------- ---------- ----R----- -.-------- 
+ C*17:03:01:01     --L------E ------G--- -.....-... .........- ------..-R ---------- ---------- ---------- ----R----- -.-------- 
+                   
+ Prot              234
+                   |
+ C*01:02:01:01     RPAGDGTFQK WAAVMVPSGE EQRYTCHVQH EGLPEPLTLR WEPSSQPTIP IVGIVAGLAV LAVLAVL... ...GAVVAVV MCRRKSSG.. ....GKGGSC 
+ C*03:46           ---------- ----V----- ---------- ---------- ---------- ---------- -------... ...------- --------.. ....------ 
+ C*07:01:01:01     ---------- ----V----Q -------M-- ---Q-----S ---------- -M-------- -V-----... ...----TAM --------.. ....------ 
+ C*17:03:01:01     ---------- ----V----Q ---------- ---Q--C--- -K-------- NL---S-P-- -------AVL AVL-----A- IH------.. ....------ 
+                   
+ Prot              322
+                   |
+ C*01:02:01:01     SQAASSNSAQ GSDESLIACK A        
+ C*03:46           ---------- ---------- -        
+ C*07:01:01:01     ----C----- -------T-- -        
+ C*17:03:01:01     ---------- ---------- -        
+                   
+ Prot              343
+                   |
+
+Please see https://github.com/ANHIG/IMGTHLA/blob/Latest/LICENCE.md for terms of use.
+

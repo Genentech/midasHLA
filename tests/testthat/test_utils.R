@@ -280,6 +280,16 @@ test_that("hlaAlignmentGrantham", {
   mask <- apply(aln_test, 1, function(x) any(x == "" | x == "X" | x == "."))
   aln_test <- aln_test[! mask, ]
   expect_equal(aln, aln_test)
+
+  # positions are selected by name, insertion columns (eg. 34.1) are not used
+  aln_c <- readHlaAlignments(test_path("alignments", "C_prot.txt"), trim = TRUE)
+  local_mocked_bindings(readHlaAlignments = function(...) aln_c)
+  pos <- c("1", "2", "300", "301")
+  aln <- hlaAlignmentGrantham("C", as.integer(pos))
+  expect_equal(colnames(aln), pos)
+  expect_equal(aln, aln_c[rownames(aln), pos])
+  # insertion after position 300 does not mask the allele
+  expect_true("C*17:03:01:01" %in% rownames(aln))
 })
 
 test_that("getHlaCallsGenes", {

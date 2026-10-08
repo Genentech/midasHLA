@@ -783,7 +783,7 @@ runMiDAS_linear_omnibus <- function(call,
                        "group"
   )
   term_prefix <- switch (experiment,
-                         "hla_aa" = "[A-Z0-9]+_-*[0-9]+_",
+                         "hla_aa" = "[A-Z0-9]+_-?[0-9]+(\\.[0-9]+)?_",
                          ""
   )
   term_name <- switch (experiment,
@@ -917,7 +917,7 @@ runMiDAS_conditional_omnibus <- function(call,
                         "group"
   )
   term_prefix <- switch (experiment,
-                         "hla_aa" = "[A-Z0-9]+_-*[0-9]+_",
+                         "hla_aa" = "[A-Z0-9]+_-?[0-9]+(\\.[0-9]+)?_",
                          ""
   )
   term_name <- switch (experiment,

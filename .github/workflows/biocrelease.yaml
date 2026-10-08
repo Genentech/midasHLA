@@ -4,6 +4,10 @@ on:
 
 name: syncronise-bioconductor-release
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   send-pull-requests:
     runs-on: ubuntu-latest
@@ -20,14 +24,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           BIOC_REMOTE='https://git.bioconductor.org/packages/midasHLA'
+          # Bioconductor renamed its default branch from master to devel
+          BIOC_BRANCH='devel'
           MAIN_BRANCH='master'
-          gitlog() {
-            git --no-pager log --pretty=format:'%h' ${@}
-          }
-          git remote add bioconductor ${BIOC_REMOTE}
-          git fetch bioconductor ${MAIN_BRANCH}:bioconductor_update
-          BIOC_TAG=`gitlog bioconductor_update -1`
-          if ! gitlog ${MAIN_BRANCH} | grep -q -e ${BIOC_TAG}; then
-            git checkout bioconductor_update
-            gh pr create --base ${MAIN_BRANCH} --head bioconductor_update --fill
+          git remote add bioconductor "${BIOC_REMOTE}"
+          git fetch bioconductor "${BIOC_BRANCH}:bioconductor_update"
+          if ! git merge-base --is-ancestor bioconductor_update "origin/${MAIN_BRANCH}"; then
+            git push --force origin bioconductor_update
+            gh pr create --base "${MAIN_BRANCH}" --head bioconductor_update --fill \
+              || echo "Pull request from bioconductor_update is already open"
           fi

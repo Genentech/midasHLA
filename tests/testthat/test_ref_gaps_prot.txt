@@ -1,0 +1,21 @@
+# file: X_prot.txt
+# date: 2026-10-07
+# version: test fixture mimicking IPD-IMGT/HLA 3.65.0 format
+                   
+ Prot              -3   1
+                    |   |
+ X*01:01:01:01      MK.AG.SHS..MRYFF 
+ X*01:02            --.--K---..----- 
+ X*02:01            --.--.---RR----Y 
+ X*03:01            --.--.-.-..----- 
+ X*04:01            --Q--.---..----- 
+
+ Prot               10
+                    |
+ X*01:01:01:01      TS.VS 
+ X*01:02            --.-- 
+ X*02:01            --.-- 
+ X*03:01            --.-- 
+ X*04:01            --.-. 
+
+Please see http://hla.alleles.org/terms.html for terms of use.
