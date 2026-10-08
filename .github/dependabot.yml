@@ -1,0 +1,15 @@
+# Dependabot keeps GitHub Actions used in .github/workflows up to date.
+# R package dependencies (CRAN / Bioconductor) are not supported by Dependabot.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "ci"
