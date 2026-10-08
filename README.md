@@ -56,10 +56,19 @@ Both scripts load the package with `devtools::load_all()` and use relative
 paths, so they have to be run from the root of a clone of this repository:
 
 ```
-Rscript inst/scripts/download_extdata.R   # downloads files to alignments/
-Rscript inst/scripts/parse_alignments.R   # writes *_prot.Rdata to the current directory
+Rscript inst/scripts/download_extdata.R 3650   # downloads release 3.65.0 to alignments/
+Rscript inst/scripts/parse_alignments.R        # writes *_prot.Rdata to the current directory
 mv *_prot.Rdata inst/extdata/
+echo 3.65.0 > inst/extdata/alignments_release.txt
 ```
+
+The release of the shipped alignments is recorded in
+`inst/extdata/alignments_release.txt`. The `update-alignments` GitHub workflow
+(`.github/workflows/update-alignments.yaml`) runs weekly: when a newer
+IPD-IMGT/HLA release is available, it downloads and parses the alignments,
+bumps the package version and opens a pull request with the updated data.
+Tests comparing against stored snapshots of alignment based results (e.g.
+`hlaToAAVariation`) may need to be updated in that pull request.
 
 `data-raw/allele_frequencies.R` script fetches HLA allele frequencies 
 (for genes A, B, C, DQA1, DQB1, DPA1, DPB1, DRB1, DRB3, DRB4, DRB5) from 
