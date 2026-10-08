@@ -106,6 +106,16 @@ readHlaCalls <- function(file,
 #'   of the mature protein.
 #' @param unkchar Character to be used to represent positions with unknown
 #'   sequence.
+#' @param release String giving IPD-IMGT/HLA release (eg. \code{"3.44.0"}) of
+#'   the alignment to use when reading alignment for \code{gene}. By default the
+#'   release of alignments shipped with the package is used, see
+#'   \code{\link{getAlignmentsRelease}}. Alignments of other releases are
+#'   downloaded from the IMGTHLA GitHub repository
+#'   (\url{https://github.com/ANHIG/IMGTHLA}), parsed and cached in the
+#'   directory given by the \code{midasHLA.cache_dir} option, by default
+#'   \code{tools::R_user_dir("midasHLA", "cache")}. Setting the
+#'   \code{midasHLA.alignments_release} option changes the release used by all
+#'   functions using HLA alignments, eg. \code{prepareMiDAS}.
 #'
 #' @return Matrix containing HLA allele alignments.
 #'
@@ -128,15 +138,21 @@ readHlaCalls <- function(file,
 #'
 #' @importFrom assertthat assert_that is.count is.readable is.string see_if
 #' @importFrom stringi stri_flatten stri_split_regex stri_sub
-#' @importFrom stringi stri_subset_fixed stri_read_lines stri_detect_regex
+#' @importFrom stringi stri_subset_fixed stri_subset_regex stri_read_lines
+#' @importFrom stringi stri_detect_regex
 #' @export
 readHlaAlignments <- function(file,
                               gene = NULL,
                               trim = FALSE,
-                              unkchar = "") {
+                              unkchar = "",
+                              release = getOption("midasHLA.alignments_release")) {
   assert_that(
     isTRUEorFALSE(trim),
-    is.string(unkchar)
+    is.string(unkchar),
+    see_if(
+      is.null(release) || (is.string(release) && grepl("^[0-9]+\\.[0-9]+\\.[0-9]+$", release)),
+      msg = "release should be formatted like: 3.65.0"
+    )
   )
 
   if (is.null(gene)) {
@@ -205,7 +221,9 @@ readHlaAlignments <- function(file,
 
     # find AA positions numbers
     aln_raw <- aln_raw[nonempty_lines]
-    raw_first_codon_idx <- nchar(stri_subset_fixed(aln_raw, "Prot")[1])
+    # line with positions numbers, older releases also have a title line
+    # containing word "Protein"
+    raw_first_codon_idx <- nchar(stri_subset_regex(aln_raw, "^\\s*Prot\\s")[1])
     raw_alignment_line <- stri_sub(aln_raw[allele_lines][1],
                                    1,
                                    raw_first_codon_idx
@@ -259,6 +277,9 @@ readHlaAlignments <- function(file,
              msg = sprintf("alignment for %s is not available", gene)
       )
     )
+    if (! is.null(release) && release != getAlignmentsRelease()) {
+      file <- releaseAlignmentFile(gene, release)
+    }
 
     cached_aln_obj <- readRDS(file) # list(readHlaAlignments(file, trim = FALSE, unkchar = "*"), first_codon_idx)
     aln <- cached_aln_obj[[1]]
@@ -274,6 +295,201 @@ readHlaAlignments <- function(file,
   aln[aln == "*"] <- unkchar
 
   return(aln)
+}
+
+#' Get IPD-IMGT/HLA release of shipped HLA alignments
+#'
+#' \code{getAlignmentsRelease} returns the IPD-IMGT/HLA release of the HLA
+#' protein alignments shipped with the package.
+#'
+#' Alignments of other IPD-IMGT/HLA releases can be used by setting the
+#' \code{midasHLA.alignments_release} option, see
+#' \code{\link{readHlaAlignments}}.
+#'
+#' @return String giving IPD-IMGT/HLA release, eg. \code{"3.65.0"}.
+#'
+#' @examples
+#' getAlignmentsRelease()
+#'
+#' @export
+getAlignmentsRelease <- function() {
+  file <- system.file("extdata", "alignments_release.txt", package = "midasHLA")
+  release <- readLines(file, n = 1, warn = FALSE)
+
+  return(trimws(release))
+}
+
+#' Get IPD-IMGT/HLA repository branch of a release
+#'
+#' The IMGTHLA GitHub repository keeps a branch for each IPD-IMGT/HLA release,
+#' named after the release number without dots, eg. \code{"3650"} for release
+#' \code{"3.65.0"}.
+#'
+#' @param release String giving IPD-IMGT/HLA release, eg. \code{"3.65.0"}.
+#'
+#' @return String giving name of the release branch.
+#'
+#' @importFrom assertthat assert_that is.string see_if
+#'
+alignmentsReleaseBranch <- function(release) {
+  assert_that(
+    see_if(
+      is.string(release) && grepl("^[0-9]+\\.[0-9]+\\.[0-9]+$", release),
+      msg = "release should be formatted like: 3.65.0"
+    )
+  )
+
+  return(gsub(".", "", release, fixed = TRUE))
+}
+
+#' Download HLA protein alignment of an IPD-IMGT/HLA release
+#'
+#' Downloads HLA protein alignment file of a given IPD-IMGT/HLA release from
+#' the IMGTHLA GitHub repository (\url{https://github.com/ANHIG/IMGTHLA}).
+#' Releases prior to 3.5x provide alignments of DRB genes in a single file
+#' (\code{DRB_prot.txt}), which is downloaded instead of a missing gene's
+#' file.
+#'
+#' @param gene String giving name of HLA gene.
+#' @inheritParams alignmentsReleaseBranch
+#' @param dir String giving path to the directory where the file is saved.
+#'
+#' @return String giving path to the downloaded file.
+#'
+#' @importFrom assertthat assert_that see_if
+#' @importFrom utils download.file
+#'
+downloadHlaAlignment <- function(gene, release, dir) {
+  branch <- alignmentsReleaseBranch(release)
+  url <- "https://raw.githubusercontent.com/ANHIG/IMGTHLA/%s/alignments/%s_prot.txt"
+  old_options <- options(timeout = max(600, getOption("timeout")))
+  on.exit(options(old_options))
+
+  download <- function(name) {
+    file <- file.path(dir, paste0(name, "_prot.txt"))
+    ok <- tryCatch(
+      download.file(sprintf(url, branch, name), destfile = file, quiet = TRUE) == 0,
+      error = function(e) FALSE,
+      warning = function(w) FALSE
+    )
+    if (ok) file else NULL
+  }
+  file <- download(gene)
+  if (is.null(file) && grepl("^DRB[0-9]$", gene)) {
+    file <- download("DRB")
+  }
+  assert_that(
+    see_if(
+      ! is.null(file),
+      msg = sprintf(
+        "alignment for %s could not be downloaded from IPD-IMGT/HLA release %s",
+        gene,
+        release
+      )
+    )
+  )
+
+  # check that the file comes from the requested release
+  header <- readLines(file, n = 10, warn = FALSE)
+  release_pattern <- paste0("IPD-IMGT/HLA.* ", gsub(".", "\\.", release, fixed = TRUE), "$")
+  assert_that(
+    see_if(
+      any(grepl(release_pattern, header)),
+      msg = sprintf("downloaded alignment is not from IPD-IMGT/HLA release %s", release)
+    )
+  )
+
+  return(file)
+}
+
+#' Prepare HLA alignment for package use
+#'
+#' \code{prepareHlaAlignment} reads HLA protein alignment file and infers
+#' sequences of lower resolution alleles not present in the alignment. Alleles
+#' are reduced to 6 and 4 digit resolution and consensus sequence is used to
+#' represent missing alleles; positions without full agreement are marked as
+#' unknown (\code{"*"}).
+#'
+#' @inheritParams readHlaAlignments
+#' @param gene String giving name of HLA gene. If specified, only alleles of
+#'   this gene are kept, which is used for alignment files containing multiple
+#'   genes.
+#'
+#' @return List with two elements: matrix containing HLA allele alignments, as
+#'   returned by \code{\link{readHlaAlignments}} with \code{unkchar = "*"}, and
+#'   index of the column holding position 1. This is the format of the
+#'   alignments shipped with the package.
+#'
+#' @importFrom assertthat assert_that see_if
+#'
+prepareHlaAlignment <- function(file, gene = NULL) {
+  alignment <- readHlaAlignments(file, trim = FALSE, unkchar = "*")
+
+  if (! is.null(gene)) {
+    alignment <- alignment[startsWith(rownames(alignment), paste0(gene, "*")), , drop = FALSE]
+    assert_that(
+      see_if(
+        nrow(alignment) > 0,
+        msg = sprintf("alignment does not contain alleles of gene %s", gene)
+      )
+    )
+  }
+
+  # infer missing lower resolution alleles
+  for (res in c(6, 4)) {
+    allele_numbers <- reduceAlleleResolution(rownames(alignment), resolution = res)
+    missing_alleles <- unique(allele_numbers[! allele_numbers %in% rownames(alignment)])
+    missing_aln <- lapply(missing_alleles, function(allele) {
+      i <- allele_numbers == allele
+      apply(alignment[i, , drop = FALSE], 2, function(col) {
+        if (all(col == col[1])) col[1] else "*"
+      })
+    })
+    if (length(missing_aln) == 0) next
+    missing_aln <- do.call(rbind, missing_aln)
+    rownames(missing_aln) <- missing_alleles
+    alignment <- rbind(alignment, missing_aln)
+  }
+
+  first_codon_idx <- which(colnames(alignment) == "1")
+
+  return(list(alignment, first_codon_idx))
+}
+
+#' Get path to HLA alignment of an IPD-IMGT/HLA release
+#'
+#' Returns path to the prepared HLA protein alignment of a given IPD-IMGT/HLA
+#' release. Alignments are downloaded and prepared once and stored in the cache
+#' directory, given by the \code{midasHLA.cache_dir} option, by default
+#' \code{tools::R_user_dir("midasHLA", "cache")}.
+#'
+#' @inheritParams downloadHlaAlignment
+#'
+#' @return String giving path to the prepared alignment file.
+#'
+releaseAlignmentFile <- function(gene, release) {
+  cache_dir <- getOption(
+    "midasHLA.cache_dir",
+    default = tools::R_user_dir("midasHLA", "cache")
+  )
+  release_dir <- file.path(cache_dir, "alignments", release)
+  file <- file.path(release_dir, paste0(gene, "_prot.Rdata"))
+  if (! file.exists(file)) {
+    message(sprintf(
+      "Downloading and parsing HLA-%s alignment from IPD-IMGT/HLA release %s",
+      gene,
+      release
+    ))
+    download_dir <- tempfile()
+    dir.create(download_dir)
+    on.exit(unlink(download_dir, recursive = TRUE))
+    aln_file <- downloadHlaAlignment(gene, release, download_dir)
+    cached_aln_obj <- prepareHlaAlignment(aln_file, gene = gene)
+    dir.create(release_dir, recursive = TRUE, showWarnings = FALSE)
+    saveRDS(cached_aln_obj, file = file)
+  }
+
+  return(file)
 }
 
 #' Read KIR calls

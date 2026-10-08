@@ -30,7 +30,7 @@ jobs:
         shell: Rscript {0}
 
       - name: Cache R packages
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ env.R_LIBS_USER }}
           key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
@@ -46,5 +46,8 @@ jobs:
         shell: Rscript {0}
 
       - name: Check package
+        env:
+          # also test parsing of historical IPD-IMGT/HLA alignment releases
+          MIDASHLA_TEST_RELEASES: true
         run: devtools::check(error_on = "error")
         shell: Rscript {0}

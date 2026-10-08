@@ -91,6 +91,9 @@ jobs:
         id: tests
         if: steps.release.outputs.update == 'true'
         continue-on-error: true
+        env:
+          # also test parsing of historical IPD-IMGT/HLA alignment releases
+          MIDASHLA_TEST_RELEASES: true
         shell: Rscript {0}
         run: |
           results <- as.data.frame(devtools::test(reporter = "summary"))
