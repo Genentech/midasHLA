@@ -363,7 +363,7 @@ changed with the `midasHLA.cache_dir` option). A single gene can be read with
 
 Note that older releases are parsed with the current parser: positions follow
 the IPD-IMGT/HLA numbering described above, which, for some genes, differs
-from the numbering used by MiDAS versions prior to 1.11.7 (see
+from the numbering used by MiDAS versions prior to 1.21.6 (see
 [Original implementation](#original-implementation)). The parser is tested on
 historical releases, starting with 3.30.0, so that it stays compatible with
 the formats used by IPD-IMGT/HLA over time.
