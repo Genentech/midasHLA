@@ -23,10 +23,10 @@ test_that("summarize amino acid insertion position", {
 test_that("summarize amino acid position", {
   aa_sum <- summariseAAPosition(MiDAS_tut_HLA, "DRA_2")
   aa_sum_test <- data.frame(
-    `HLA-DRA (2)` = c("*", "K"),
-    `HLA-DRA alleles` = c("*01:02", "*01:01"),
-    count = c(711L, 1289L),
-    frequency = formattable::percent(c(0.3555, 0.6445)),
+    `HLA-DRA (2)` = "K",
+    `HLA-DRA alleles` = "*01:01, *01:02",
+    count = 2000L,
+    frequency = formattable::percent(1),
     stringsAsFactors = FALSE,
     check.names = FALSE
   )
@@ -34,10 +34,10 @@ test_that("summarize amino acid position", {
   
   aa_sum <- summariseAAPosition(MiDAS_tut_HLA, "DRA_-25")
   aa_sum_test <- data.frame(
-    `HLA-DRA (-25)` = c("*", "M"),
-    `HLA-DRA alleles` = c("*01:02", "*01:01"),
-    count = c(711L, 1289L),
-    frequency = formattable::percent(c(0.3555, 0.6445)),
+    `HLA-DRA (-25)` = "M",
+    `HLA-DRA alleles` = "*01:01, *01:02",
+    count = 2000L,
+    frequency = formattable::percent(1),
     stringsAsFactors = FALSE,
     check.names = FALSE
   )

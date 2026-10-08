@@ -247,14 +247,13 @@ readHlaAlignments(file, trim = TRUE)
   distance is not defined between a residue and a gap, thus insertion columns
   are not used.
 
-For example, with alignments from IPD-IMGT/HLA release 3.65.0:
+For example, the insertion of HLA-C\*17 alleles in the alignments shipped
+with MiDAS:
 
-```{r insertion_example, eval = FALSE}
+```{r insertion_example}
+getAlignmentsRelease()
 aln <- readHlaAlignments(gene = "C")
 aln[c("C*01:02:01:01", "C*17:03:01:01"), c("300", paste0("300.", 1:6), "301")]
-#>               300 300.1 300.2 300.3 300.4 300.5 300.6 301
-#> C*01:02:01:01 "L" "."   "."   "."   "."   "."   "."   "G"
-#> C*17:03:01:01 "L" "A"   "V"   "L"   "A"   "V"   "L"   "G"
 ```
 
 ## How the algorithm changed
@@ -324,6 +323,12 @@ Along with it:
   for it;
 - Grantham distance selects positions by name and uses numbered positions
   only;
+- sequences of lower resolution alleles missing from the alignments (e.g.
+  `DQA1*01:04`, inferred as the consensus of `DQA1*01:04:01:01`,
+  `DQA1*01:04:03`, ...) ignore unknown residues of partially sequenced
+  alleles. Previously a single partially sequenced allele made the position
+  unknown for the whole group, which, as IPD-IMGT/HLA adds more such alleles,
+  hid a growing number of residues;
 - position names in `getAllelesForAA()`, `summariseAAPosition()` and
   `runMiDAS()` results accept insertion positions;
 - the alignment pre-parsing script reuses the numbering of
@@ -344,9 +349,6 @@ alignments, e.g. `prepareMiDAS()`, `getAllelesForAA()` or
 `hlaCallsGranthamDistance()`, then use alignments of that release:
 
 ```{r releases, eval = FALSE}
-getAlignmentsRelease()
-#> [1] "3.65.0"
-
 options(midasHLA.alignments_release = "3.44.0")
 midas <- prepareMiDAS(
   hla_calls = hla_calls,
