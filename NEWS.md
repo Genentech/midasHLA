@@ -1,3 +1,7 @@
+# 1.21.8 08/10/26
++ HLA alignments of any IPD-IMGT/HLA release can be used by setting the midasHLA.alignments_release option (or the release argument of readHlaAlignments()); alignments are downloaded, parsed and cached on demand. New getAlignmentsRelease() returns the release of shipped alignments.
++ Fixed parsing of alignments of IPD-IMGT/HLA releases prior to 3.3x.
+
 # 1.21.7 08/10/26
 + The release of the shipped HLA alignments is recorded in inst/extdata/alignments_release.txt.
 + New GitHub workflow checking weekly for new IPD-IMGT/HLA releases and opening a pull request with updated alignments.
