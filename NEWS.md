@@ -1,3 +1,7 @@
+# 1.21.7 08/10/26
++ The release of the shipped HLA alignments is recorded in inst/extdata/alignments_release.txt.
++ New GitHub workflow checking weekly for new IPD-IMGT/HLA releases and opening a pull request with updated alignments.
+
 # 1.21.6 08/10/26
 + readHlaAlignments() numbers alignment positions according to the IPD-IMGT/HLA nomenclature also when the reference allele contains gaps: columns with insertions present in other alleles are named after the preceding position (e.g. 300.1) instead of shifting the following positions, and alleles longer than the reference are kept.
 + Grantham distance selects positions by name and uses numbered positions only.

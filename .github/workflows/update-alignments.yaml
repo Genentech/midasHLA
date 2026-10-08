@@ -1,0 +1,126 @@
+# Checks for new IPD-IMGT/HLA releases and opens a pull request updating the
+# HLA protein alignments shipped with the package (inst/extdata/*_prot.Rdata).
+# The release of the shipped alignments is recorded in
+# inst/extdata/alignments_release.txt.
+
+on:
+  schedule:
+    - cron: '0 6 * * 1' # every Monday at 06:00 UTC
+  workflow_dispatch:
+
+name: update-alignments
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-alignments:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GH_PAT }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check IPD-IMGT/HLA release
+        id: release
+        run: |
+          latest=$(curl -fsSL https://raw.githubusercontent.com/ANHIG/IMGTHLA/Latest/release_version.txt \
+            | grep -o 'IPD-IMGT/HLA [0-9.]*' | head -n 1 | cut -d ' ' -f 2)
+          current=$(cat inst/extdata/alignments_release.txt)
+          if [ -z "$latest" ]; then
+            echo "::error::Could not read the latest IPD-IMGT/HLA release"
+            exit 1
+          fi
+          echo "Shipped release: $current, latest release: $latest"
+          newest=$(printf '%s\n%s\n' "$current" "$latest" | sort -V | tail -n 1)
+          if [ "$latest" != "$current" ] && [ "$newest" = "$latest" ]; then
+            update=true
+          else
+            update=false
+          fi
+          {
+            echo "latest=$latest"
+            echo "current=$current"
+            echo "branch=$(echo "$latest" | tr -d .)"
+            echo "update=$update"
+          } >> "$GITHUB_OUTPUT"
+
+      - uses: r-lib/actions/setup-r@v2
+        if: steps.release.outputs.update == 'true'
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-pandoc@v2
+        if: steps.release.outputs.update == 'true'
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        if: steps.release.outputs.update == 'true'
+        with:
+          extra-packages: any::devtools
+
+      - name: Download and parse alignments
+        if: steps.release.outputs.update == 'true'
+        run: |
+          Rscript inst/scripts/download_extdata.R "${{ steps.release.outputs.branch }}"
+          Rscript inst/scripts/parse_alignments.R
+          mv ./*_prot.Rdata inst/extdata/
+          rm -rf alignments
+          echo "${{ steps.release.outputs.latest }}" > inst/extdata/alignments_release.txt
+
+      - name: Bump version and add NEWS
+        if: steps.release.outputs.update == 'true'
+        env:
+          LATEST: ${{ steps.release.outputs.latest }}
+        shell: Rscript {0}
+        run: |
+          version <- package_version(read.dcf("DESCRIPTION", fields = "Version")[1, 1])
+          new_version <- sprintf("%s.%s.%s", version$major, version$minor, version$patchlevel + 1L)
+          description <- readLines("DESCRIPTION")
+          description <- sub("^Version: .*$", paste("Version:", new_version), description)
+          writeLines(description, "DESCRIPTION")
+          news <- c(
+            sprintf("# %s %s", new_version, format(Sys.Date(), "%d/%m/%y")),
+            sprintf("+ Update HLA protein alignments to IPD-IMGT/HLA release %s.", Sys.getenv("LATEST")),
+            "",
+            readLines("NEWS.md")
+          )
+          writeLines(news, "NEWS.md")
+
+      - name: Run tests
+        id: tests
+        if: steps.release.outputs.update == 'true'
+        continue-on-error: true
+        shell: Rscript {0}
+        run: |
+          results <- as.data.frame(devtools::test(reporter = "summary"))
+          failed <- sum(results$failed) + sum(results$error)
+          if (failed > 0) stop(failed, " tests failed")
+
+      - uses: peter-evans/create-pull-request@v7
+        if: steps.release.outputs.update == 'true'
+        with:
+          token: ${{ secrets.GH_PAT }}
+          branch: update-alignments-${{ steps.release.outputs.branch }}
+          delete-branch: true
+          add-paths: |
+            inst/extdata/*_prot.Rdata
+            inst/extdata/alignments_release.txt
+            DESCRIPTION
+            NEWS.md
+          commit-message: |
+            Update HLA alignments to IPD-IMGT/HLA ${{ steps.release.outputs.latest }}
+          title: Update HLA alignments to IPD-IMGT/HLA ${{ steps.release.outputs.latest }}
+          body: |
+            Automated update of the HLA protein alignments shipped with the package
+            from IPD-IMGT/HLA ${{ steps.release.outputs.current }} to
+            ${{ steps.release.outputs.latest }}, created by the `update-alignments` workflow.
+
+            Alignments were downloaded from the
+            [IMGTHLA repository](https://github.com/ANHIG/IMGTHLA/tree/${{ steps.release.outputs.branch }}/alignments)
+            and parsed with `inst/scripts/parse_alignments.R`.
+
+            Tests: **${{ steps.tests.outcome == 'success' && 'passed' || 'failed, see the workflow run' }}**
+            ([workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})).
+            New alleles and sequence corrections may change test expectations
+            and analysis results; please review before merging.

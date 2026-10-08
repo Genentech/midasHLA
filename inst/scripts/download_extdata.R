@@ -5,9 +5,11 @@
 # The script should be run from the package repository root, files are saved
 # to the 'alignments' directory, which is then used by 'parse_alignments.R'.
 
-# IPD-IMGT/HLA release to download; the repository keeps a branch for each
-# release, eg. "3650" for release 3.65.0, "Latest" points to the newest one
-release <- "3650"
+# IPD-IMGT/HLA release to download, given as the first command line argument;
+# the repository keeps a branch for each release, eg. "3650" for release
+# 3.65.0, "Latest" (default) points to the newest one
+release <- commandArgs(trailingOnly = TRUE)[1]
+if (is.na(release)) release <- "Latest"
 out_dir <- "alignments"
 options(timeout = max(600, getOption("timeout")))
 
