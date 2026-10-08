@@ -1,3 +1,8 @@
+# 1.21.9 08/10/26
++ Update HLA protein alignments to IPD-IMGT/HLA release 3.65.0, parsed with the new parser: positions follow the IPD-IMGT/HLA numbering (correcting shifted C-terminal positions of HLA-B, -C, -DQB1 and MICA in the previous alignments) and insertions are kept as n.k positions.
++ Sequences of inferred lower resolution alleles ignore unknown residues of partially sequenced alleles, so fewer residues are unknown.
++ MiDAS_tut_object regenerated with the new alignments.
+
 # 1.21.8 08/10/26
 + HLA alignments of any IPD-IMGT/HLA release can be used by setting the midasHLA.alignments_release option (or the release argument of readHlaAlignments()); alignments are downloaded, parsed and cached on demand. New getAlignmentsRelease() returns the release of shipped alignments.
 + Fixed parsing of alignments of IPD-IMGT/HLA releases prior to 3.3x.
