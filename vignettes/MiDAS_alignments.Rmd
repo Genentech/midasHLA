@@ -261,7 +261,7 @@ aln[c("C*01:02:01:01", "C*17:03:01:01"), c("300", paste0("300.", 1:6), "301")]
 
 ### Original implementation
 
-The original parser (used up to midasHLA 1.11) followed steps 1, 3, 4 and 6
+The original parser (used up to midasHLA 1.21.5) followed steps 1, 3, 4 and 6
 of the algorithm above, but in step 5 it **numbered every alignment column**:
 columns before the `1` marker received negative numbers and all following
 columns received consecutive numbers. Sequences were also truncated to the
