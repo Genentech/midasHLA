@@ -1,3 +1,6 @@
+# 1.21.2 06/10/26
++ runMiDAS() now warns about missing data: missing HLA calls counted as 0 in counts based experiments (e.g. hla_alleles, hla_aa) and samples with missing values excluded by the model fit.
+
 # 1.11.1 18/01/24
 + Fix bug on hlaToVariable() function that variable would erroneously be named NA.
 
