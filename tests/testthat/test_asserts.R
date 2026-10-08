@@ -92,7 +92,8 @@ test_that("hasTidyMethod", {
 
   expect_error(
     assertthat::assert_that(hasTidyMethod("bar")),
-    "Could not find 'tidy' function for statistical model 'bar'. Please ensure that 'tidy' for selected model is available. See the 'broom' package for more information on 'tidy' function."
+    "Could not find 'tidy' method for statistical model of class 'bar'. Make sure the package providing 'tidy.bar' is installed and loaded (e.g. 'broom.mixed' for many mixed effects models), or define your own 'tidy.bar' method. It should return a data frame with one row per model term, including 'term', 'estimate' and 'p.value' columns, and support the 'conf.int' argument.",
+    fixed = TRUE
   )
 })
 

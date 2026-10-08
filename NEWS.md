@@ -1,3 +1,6 @@
+# 1.21.5 07/10/26
++ Clearer error message when no tidy method is available for the statistical model: it no longer suggests that installing broom fixes the problem.
+
 # 1.11.1 18/01/24
 + Fix bug on hlaToVariable() function that variable would erroneously be named NA.
 
