@@ -505,6 +505,12 @@ runMiDAS <- function(object,
     isTRUEorFALSE(exponentiate)
   )
 
+  runMiDASWarnMissing(
+    midas = object_details$data,
+    experiment = experiment,
+    formula_vars = object_details$formula_vars
+  )
+
   # convert experiment to specifed inheritance model
   if (isExperimentInheritanceModelApplicable(object_details$data[[experiment]])) {
     assert_that(

@@ -215,6 +215,50 @@ test_that("runMiDASGetVarsFreq", {
   expect_equal(freq, freq_test)
 })
 
+test_that("runMiDASWarnMissing", {
+  hla_calls <- MiDAS_tut_HLA[1:20, ]
+  pheno <- MiDAS_tut_pheno[MiDAS_tut_pheno$ID %in% hla_calls$ID, ]
+  pheno$outcome <- 1L
+  midas <- prepareMiDAS(
+    hla_calls = hla_calls,
+    colData = pheno,
+    experiment = c("hla_alleles", "hla_het")
+  )
+  expect_warning(
+    runMiDASWarnMissing(midas, "hla_alleles", c("disease", "term")),
+    NA
+  )
+
+  # missing values in model variables
+  pheno$outcome[pheno$ID == hla_calls$ID[3]] <- NA
+  midas <- prepareMiDAS(
+    hla_calls = hla_calls,
+    colData = pheno,
+    experiment = "hla_alleles"
+  )
+  expect_warning(
+    runMiDASWarnMissing(midas, "hla_alleles", c("disease", "outcome", "term")),
+    "1 sample\\(s\\) have missing values in model variables \\(outcome\\)"
+  )
+
+  # missing HLA calls
+  pheno$outcome <- 1L
+  hla_calls[1:2, "A_1"] <- NA
+  midas <- prepareMiDAS(
+    hla_calls = hla_calls,
+    colData = pheno,
+    experiment = c("hla_alleles", "hla_het")
+  )
+  expect_warning(
+    runMiDASWarnMissing(midas, "hla_alleles", c("disease", "term")),
+    "2 sample\\(s\\) have missing HLA calls \\(genes: A\\). In experiment 'hla_alleles' missing calls are counted as 0"
+  )
+  expect_warning(
+    runMiDASWarnMissing(midas, "hla_het", c("disease", "term")),
+    "2 sample\\(s\\) have missing values in experiment 'hla_het'"
+  )
+})
+
 test_that("distGrantham", {
   aa1 <- c("A", "S", "W")
   aa2 <- c("A", "S", "V")
