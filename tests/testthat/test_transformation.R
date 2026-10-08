@@ -692,6 +692,34 @@ test_that("applyInheritanceModel", {
   se_dominant <- applyInheritanceModel(se, "dominant")
   assay(se) <- ifelse(assay(se) == 0, 0, 1)
   expect_equal(se_dominant, se)
+
+  # population multiplicator is updated for non additive models
+  se <- SummarizedExperiment(
+    assays = list(matrix(c(2, 0, 1, 1, 2, 1, 0, 2, 2), nrow = 3)),
+    metadata = list(pop_mul = 2)
+  )
+  expect_equal(metadata(applyInheritanceModel(se, "additive"))$pop_mul, 2)
+  for (model in c("dominant", "recessive", "overdominant")) {
+    expect_equal(metadata(applyInheritanceModel(se, model))$pop_mul, 1)
+  }
+
+  # frequencies reported by runMiDAS reflect inheritance model
+  midas <- prepareMiDAS(
+    hla_calls = reduceHlaCalls(MiDAS_tut_HLA, 4),
+    colData = MiDAS_tut_pheno,
+    experiment = "hla_alleles"
+  )
+  freq <- function(model) {
+    midas[["hla_alleles"]] <- applyInheritanceModel(midas[["hla_alleles"]], model)
+    freq <- runMiDASGetVarsFreq(midas, "hla_alleles", "disease")
+    freq[freq$term == "DQB1*06:02", ]
+  }
+  dominant <- freq("dominant")
+  expect_equal(dominant$`N(disease=1)`, 129)
+  expect_equal(as.numeric(dominant$`N(disease=1).percent`), 129 / 500)
+  additive <- freq("additive")
+  expect_equal(additive$`N(disease=1)`, 138)
+  expect_equal(as.numeric(additive$`N(disease=1).percent`), 138 / 1000)
 })
 
 test_that("getFrequencyMask", {

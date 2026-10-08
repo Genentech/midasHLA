@@ -26,7 +26,7 @@ applyInheritanceModel(
 
 \item{inheritance_model}{String specifying inheritance model to use.
 Available choices are \code{"dominant"}, \code{"recessive"},
-\code{"additive"}.}
+\code{"additive"}, \code{"overdominant"}.}
 }
 \value{
 \code{experiment} converted to specified inheritance model.

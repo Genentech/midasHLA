@@ -1,3 +1,7 @@
+# 1.21.3 06/10/26
++ Fix frequencies reported by runMiDAS() for dominant, recessive and overdominant inheritance models: they were divided by twice the number of samples, halving the [%] columns. Frequency cutoffs in runMiDAS() were affected the same way and are now applied to carrier (homozygote / heterozygote) frequencies, which may change the set of tested variables.
++ Document the overdominant inheritance model in the inheritance_model argument.
+
 # 1.11.1 18/01/24
 + Fix bug on hlaToVariable() function that variable would erroneously be named NA.
 
