@@ -1,3 +1,6 @@
+# 1.21.1 01/10/26
++ Removed unused files Match_kir_nomenclature_gene.txt and Match_kir_haplotype_gene.txt from inst/extdata.
+
 # 1.11.1 18/01/24
 + Fix bug on hlaToVariable() function that variable would erroneously be named NA.
 
